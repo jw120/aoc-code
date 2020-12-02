@@ -1,5 +1,6 @@
 # Advent of Code 2020 - Day 1
 
+from sys import stdin
 from typing import List
 
 
@@ -20,12 +21,12 @@ def solve_part_two(target: int, xs: List[int]) -> int:
     raise RuntimeError("Failed to find a solution")
 
 
-def read_ints(filename: str) -> List[int]:
-    with open(filename) as handle:
-        return [int(line) for line in handle]
+def read_ints() -> List[int]:
+    """Read a list of ints from stdin, assuming formatted one int per line, from stdin"""
+    return [int(line) for line in stdin]
 
 
 if __name__ == "__main__":
-    nums: List[int] = read_ints("inputs/day01.txt")
+    nums: List[int] = read_ints()
     print(solve_part_one(2020, nums))
     print(solve_part_two(2020, nums))
