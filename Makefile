@@ -1,4 +1,4 @@
-run: day01
+run: day01 day02
 
 day%:
 	@/bin/echo -n "$@: "
