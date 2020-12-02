@@ -2,7 +2,7 @@ run: day01 day02
 
 day%:
 	@/bin/echo -n "$@: "
-	@poetry run python src/$@.py < inputs/$@.txt | diff - good/$@.txt && echo OK
+	@poetry run python src/$@.py < input/$@.txt | diff - good/$@.txt && echo OK
 
 
 check:

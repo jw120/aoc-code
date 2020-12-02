@@ -1,10 +1,11 @@
-# Advent of Code 2020 - Day 1
+"""Advent of Code 2020 - Day 1."""
 
 from sys import stdin
 from typing import List
 
 
 def solve_part_one(target: int, xs: List[int]) -> int:
+    """Solve part one."""
     for i in range(len(xs)):
         for j in range(i + 1, len(xs)):
             if xs[i] + xs[j] == target:
@@ -13,6 +14,7 @@ def solve_part_one(target: int, xs: List[int]) -> int:
 
 
 def solve_part_two(target: int, xs: List[int]) -> int:
+    """Solve part two."""
     for i in range(len(xs)):
         for j in range(i + 1, len(xs)):
             for k in range(j + 1, len(xs)):
@@ -22,7 +24,7 @@ def solve_part_two(target: int, xs: List[int]) -> int:
 
 
 def read_ints() -> List[int]:
-    """Read a list of ints from stdin, assuming formatted one int per line, from stdin"""
+    """Read a list of ints from stdin, assuming one int per line, from stdin."""
     return [int(line) for line in stdin]
 
 
