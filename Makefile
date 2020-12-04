@@ -1,11 +1,14 @@
-run: day01 day02 day03
+run: \
+	python-2020-01 \
+	python-2020-02 \
+	python-2020-03
 
-day%:
+python-%:
 	@/bin/echo -n "$@: "
-	@poetry run python src/$@.py < input/$@.txt | diff - good/$@.txt && echo OK
+	@poetry run python python/$*.py < input/$*.txt | diff - good/$*.txt && echo OK
 
 
 check:
-	poetry run black src/
-	poetry run flake8 src/
-	poetry run mypy src/
+	poetry run black python/
+	poetry run flake8 python
+	poetry run mypy python/
