@@ -1,5 +1,6 @@
 """Advent of Code 2020 - Day 3s."""
 
+from doctest import testmod
 from sys import stdin
 from typing import List
 
@@ -7,8 +8,35 @@ Line = List[bool]  # Horizontal row of trees (true = a tree)
 Grid = List[Line]
 
 
+def parse_line(s: str) -> Line:
+    """Convert a line of string input into a line of trees."""
+    return [ch == "#" for ch in s.strip()]
+
+
+test_grid: Grid = [
+    parse_line(s)
+    for s in [
+        "..##.......",
+        "#...#...#..",
+        ".#....#..#.",
+        "..#.#...#.#",
+        ".#...##..#.",
+        "..#.##.....",
+        "#.#.#....#",
+        ".#........#",
+        "#.##...#...",
+        "#...##....#",
+        ".#..#...#.#",
+    ]
+]
+
+
 def tree_count(grid: Grid, right: int, down: int) -> int:
-    """Count the number of trees moving with specified step."""
+    """Count the number of trees moving with specified step.
+
+    >>> tree_count(test_grid, 3, 1)
+    7
+    """
     height: int = len(grid)
     width: int = len(grid[0])
     col: int = 0
@@ -21,12 +49,8 @@ def tree_count(grid: Grid, right: int, down: int) -> int:
     return count
 
 
-def parse_line(s: str) -> Line:
-    """Convert a line of string input into a line of trees."""
-    return [ch == "#" for ch in s.strip()]
-
-
 if __name__ == "__main__":
+    testmod()
     grid: Grid = [parse_line(s) for s in stdin]
     print(tree_count(grid, 3, 1))
     print(
