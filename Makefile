@@ -5,10 +5,10 @@ run: \
 
 python-%:
 	@/bin/echo -n "$@: "
-	@poetry run python python/$*.py < input/$*.txt | diff - good/$*.txt && echo OK
+	@python python/$*.py < input/$*.txt | diff - good/$*.txt && echo OK
 
 
 check:
-	poetry run black python/
-	poetry run flake8 python
-	poetry run mypy python/
+	black python/
+	flake8 python/
+	mypy python/

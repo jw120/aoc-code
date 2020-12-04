@@ -1,4 +1,3 @@
-.vscode/
+.venv/
 .mypy_cache
 out/
-poetry.lock

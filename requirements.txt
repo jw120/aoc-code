@@ -1,0 +1,10 @@
+
+# All requirements are just for development checking - we don't care about version numbers
+black
+mypy
+flake8
+flake8-docstrings
+flake8-builtins
+flake8-comprehensions
+flake8-use-fstring
+flake8-import-order
