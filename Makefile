@@ -2,7 +2,8 @@ run: \
 	python_2019_01 \
 	python_2020_01 \
 	python_2020_02 \
-	python_2020_03
+	python_2020_03 \
+	python_2020_04
 
 python_%:
 	@/bin/echo -n "$@: "

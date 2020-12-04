@@ -27,6 +27,6 @@ To install development packages into the local environment
 pip install -r requirements.txt
 ```
 
-Editting done with VS Code and pylance
+Editting done with VS Code and its `pylance` extension.s
 
 

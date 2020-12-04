@@ -1,4 +1,4 @@
-"""Advent of Code 2020 - Day 3s."""
+"""Advent of Code 2020 - Day 3."""
 
 from doctest import testmod
 from sys import stdin
