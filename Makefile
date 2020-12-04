@@ -1,11 +1,12 @@
 run: \
-	python-2020-01 \
-	python-2020-02 \
-	python-2020-03
+	python_2019_01 \
+	python_2020_01 \
+	python_2020_02 \
+	python_2020_03
 
-python-%:
+python_%:
 	@/bin/echo -n "$@: "
-	@python python/$*.py < input/$*.txt | diff - good/$*.txt && echo OK
+	@python python/aoc_$*.py < input/$*.txt | diff - good/$*.txt && echo OK
 
 
 check:
