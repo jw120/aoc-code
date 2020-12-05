@@ -3,7 +3,7 @@
 import re
 from doctest import testmod
 from sys import stdin
-from typing import Dict, List, Match, Optional, Pattern
+from typing import Dict, List, Pattern
 
 
 Passport = Dict[str, str]
@@ -59,11 +59,11 @@ tests_two: List[str] = [
     "iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719",
 ]
 
-date_pattern: Pattern[str] = re.compile("^[0-9]{4}$")
-hgt_pattern: Pattern[str] = re.compile("^([0-9]{2,3})(cm|in)$")
-hcl_pattern: Pattern[str] = re.compile("^#[0-9a-f]{6}$")
-ecl_pattern: Pattern[str] = re.compile("^amb|blu|brn|gry|grn|hzl|oth$")
-pid_pattern: Pattern[str] = re.compile("^[0-9]{9}$")
+date_pattern: Pattern[str] = re.compile("[0-9]{4}")
+hgt_pattern: Pattern[str] = re.compile("([0-9]{2,3})(cm|in)")
+hcl_pattern: Pattern[str] = re.compile("#[0-9a-f]{6}")
+ecl_pattern: Pattern[str] = re.compile("amb|blu|brn|gry|grn|hzl|oth")
+pid_pattern: Pattern[str] = re.compile("[0-9]{9}")
 
 
 def valid_date(s: str, min_year: int, max_year: int) -> bool:
@@ -72,7 +72,7 @@ def valid_date(s: str, min_year: int, max_year: int) -> bool:
     >>> [valid_date(d, 2010, 2020) for d in ["Q", "10", "2010", "2015", "2020", "2021"]]
     [False, False, True, True, True, False]
     """
-    if date_pattern.match(s):
+    if date_pattern.fullmatch(s):
         return min_year <= int(s) <= max_year
     return False
 
@@ -83,8 +83,7 @@ def valid_hgt(s: str) -> bool:
     >>> [valid_hgt(s) for s in ["120", "150cm", "194cm", "58in", "60in"]]
     [False, True, False, False, True]
     """
-    m: Optional[Match[str]] = hgt_pattern.match(s)
-    if not m:
+    if not (m := hgt_pattern.fullmatch(s)):
         return False
     elif m.group(2) == "cm":
         return 150 <= int(m.group(1)) <= 193
@@ -104,9 +103,9 @@ def valid_two(p: Passport) -> bool:
         and valid_date(p["iyr"], 2010, 2020)
         and valid_date(p["eyr"], 2020, 2030)
         and valid_hgt(p["hgt"])
-        and bool(hcl_pattern.match(p["hcl"]))
-        and bool(ecl_pattern.match(p["ecl"]))
-        and bool(pid_pattern.match(p["pid"]))
+        and bool(hcl_pattern.fullmatch(p["hcl"]))
+        and bool(ecl_pattern.fullmatch(p["ecl"]))
+        and bool(pid_pattern.fullmatch(p["pid"]))
     )
 
 
