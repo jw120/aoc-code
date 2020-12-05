@@ -9,7 +9,6 @@ Grid = List[Line]
 
 
 def parse_line(s: str) -> Line:
-    """Convert a line of string input into a line of trees."""
     return [ch == "#" for ch in s.strip()]
 
 

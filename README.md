@@ -1,5 +1,9 @@
 Advent of Code
 
+# TODO
+- When mypy supports 3.9, use list[] instead of List as a type
+
+
 # Python setup
 
 Assumes modern python (tested with 3.9) installed as `python3` and `pip3`.

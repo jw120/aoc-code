@@ -8,7 +8,6 @@ import IntCode
 
 
 def run_with_noun_verb(code: List[int], noun: int, verb: int) -> int:
-    """Run the code with given noun and verb."""
     machine: IntCode.Machine = IntCode.Machine(code)
     machine.code[1] = noun
     machine.code[2] = verb
@@ -17,7 +16,6 @@ def run_with_noun_verb(code: List[int], noun: int, verb: int) -> int:
 
 
 def search_noun_verb(code: List[int], target: int) -> int:
-    """Exhaustively search for noun and verb which give target output."""
     for noun in range(0, 100):
         for verb in range(0, 100):
             if run_with_noun_verb(code, noun, verb) == target:

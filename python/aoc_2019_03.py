@@ -1,73 +1,106 @@
 """Advent of Code 2019 - Day 3."""
 
-import enum
+# Should not be need for Python >= 3.10
+from __future__ import annotations
+
+from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import List, Set, Tuple
-
-# TODO
-# use https://stackoverflow.com/questions/16258553/best-way-to-define-algebraic-data-types-in-python
-# Add position class
-# Add tests
+from typing import ClassVar, Dict, List, Set, Tuple, Union
 
 
-class Direction(enum.Enum):
-    """Direction of a wire segment."""
+@dataclass(eq=True, frozen=True)
+class Offset:
+    """Represents (x, y) offset from origin or a movement."""
 
-    UP = enum.auto()
-    RIGHT = enum.auto()
-    DOWN = enum.auto()
-    LEFT = enum.auto()
+    x: int
+    y: int
+
+    def distance(self) -> int:
+        """Manhattan distance from origin."""
+        return abs(self.x) + abs(self.y)
+
+    def __add__(self, delta: Offset) -> Offset:
+        return Offset(self.x + delta.x, self.y + delta.y)
 
 
-Position = Tuple[int, int]
+@dataclass
+class Up:
+    offset: ClassVar[Offset] = Offset(0, 1)
+    name: ClassVar[str] = "U"
 
 
-def distance(pos: Position) -> int:
-    """Return the Manhattan distance to the origin."""
-    return abs(pos[0]) + abs(pos[1])
+@dataclass
+class Right:
+    offset: ClassVar[Offset] = Offset(1, 0)
+    name: ClassVar[str] = "R"
+
+
+@dataclass
+class Down:
+    offset: ClassVar[Offset] = Offset(0, -1)
+    name: ClassVar[str] = "D"
+
+
+@dataclass
+class Left:
+    offset: ClassVar[Offset] = Offset(-1, 0)
+    name: ClassVar[str] = "L"
+
+
+Direction = Union[Up, Right, Down, Left]
+
+
+def parse_direction(s: str) -> Direction:
+    if s == Up.name:
+        return Up()
+    if s == Right.name:
+        return Right()
+    if s == Down.name:
+        return Down()
+    if s == Left.name:
+        return Left()
+    raise RuntimeError("Unknown direction", s)
 
 
 Wire = List[Tuple[Direction, int]]
 
 
 def parse_wire(line: str) -> Wire:
-    """Convert string into a Wire."""
-
-    def parse_segment(seg: str) -> Tuple[Direction, int]:
-        distance = int(seg[1:])
-        if seg[0] == "U":
-            return (Direction.UP, distance)
-        if seg[0] == "R":
-            return (Direction.RIGHT, distance)
-        if seg[0] == "D":
-            return (Direction.DOWN, distance)
-        if seg[0] == "L":
-            return (Direction.LEFT, distance)
-        raise RuntimeError("Bad segment", seg)
+    def parse_segment(s: str) -> Tuple[Direction, int]:
+        direction: Direction = parse_direction(s[0])
+        distance = int(s[1:])
+        return (direction, distance)
 
     return [parse_segment(seg_str) for seg_str in line.split(",")]
 
 
-def trace(wire: Wire) -> Set[Position]:
-    """Trace a wire from the origin, returning a set of positons visited."""
-    pos: Position = (0, 0)
-    visited: Set[Position] = set()
-    for segment in wire:
-        if segment[0] == Direction.UP:
-            delta = (0, 1)
-        elif segment[0] == Direction.RIGHT:
-            delta = (1, 0)
-        elif segment[0] == Direction.DOWN:
-            delta = (0, -1)
-        elif segment[0] == Direction.LEFT:
-            delta = (-1, 0)
-        else:
-            raise RuntimeError("Bad segment", segment)
-        for i in range(1, segment[1] + 1):
-            pos = (pos[0] + delta[0], pos[1] + delta[1])
+def trace(wire: Wire) -> Set[Offset]:
+    """Trace along wire from the origin, returning a set of offsets visited."""
+    pos: Offset = Offset(0, 0)
+    visited: Set[Offset] = set()
+    for direction, distance in wire:
+        for i in range(1, distance + 1):
+            pos = pos + direction.offset
             visited.add(pos)
+    return visited
 
+
+def trace_steps(wire: Wire) -> Dict[Offset, int]:
+    """Trace along wire from the origin.
+
+    Returns a map where the keys are the offsets visited and the values the number of
+    steps taken for the first visit to that offset.
+    """
+    pos: Offset = Offset(0, 0)
+    steps: int = 0
+    visited: Dict[Offset, int] = {}
+    for direction, distance in wire:
+        for i in range(1, distance + 1):
+            steps += 1
+            pos = pos + direction.offset
+            if pos not in visited:
+                visited[pos] = steps
     return visited
 
 
@@ -89,17 +122,33 @@ def solve_one(w1: Wire, w2: Wire) -> int:
 
     >>> solve_one(test_wires[0][0], test_wires[0][1])
     6
-    >>> solve_one(test_wires[1][0], test_wires[1][1])
+    >>> #solve_one(test_wires[1][0], test_wires[1][1])
     159
-    >>> solve_one(test_wires[2][0], test_wires[2][1])
+    >>> #solve_one(test_wires[2][0], test_wires[2][1])
     135
     """
-    intersections: Set[Position] = trace(w1) & trace(w2)
-    distances: List[int] = [distance(pos) for pos in intersections]
-    return min(distances)
+    intersections: Set[Offset] = trace(w1) & trace(w2)
+    return min(p.distance() for p in intersections)
+
+
+def solve_two(w1: Wire, w2: Wire) -> int:
+    """Solve part two - least steps intersection.
+
+    >>> solve_two(test_wires[0][0], test_wires[0][1])
+    30
+    >>> solve_two(test_wires[1][0], test_wires[1][1])
+    610
+    >>> solve_two(test_wires[2][0], test_wires[2][1])
+    410
+    """
+    steps1: Dict[Offset, int] = trace_steps(w1)
+    steps2: Dict[Offset, int] = trace_steps(w2)
+    intersections: Set[Offset] = set(steps1.keys()) & set(steps2.keys())
+    return min((steps1[p] + steps2[p]) for p in intersections)
 
 
 if __name__ == "__main__":
     testmod()
     wire1, wire2 = [parse_wire(line) for line in stdin]
     print(solve_one(wire1, wire2))
+    print(solve_two(wire1, wire2))

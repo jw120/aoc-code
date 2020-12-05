@@ -7,7 +7,6 @@ class Machine:
     """Machine that runs IntCode."""
 
     def __init__(self, code: List[int]) -> None:
-        """Create a new IntCode Machine."""
         self.code: List[int] = code.copy()
         self.ip: int = 0
 

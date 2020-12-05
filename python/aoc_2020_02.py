@@ -10,7 +10,7 @@ Entry = Tuple[int, int, str, str]
 def parse_entry(entry_string: str) -> Entry:
     r"""Convert input string form of an entry.
 
-    >>> parse_entry("1-3 a: abcde\n")
+    >>> parse_entry('1-3 a: abcde\n')
     (1, 3, 'a', 'abcde')
     """
     [range_part, letter_part, password] = entry_string.strip().split(" ")
@@ -32,7 +32,7 @@ def check_one(e: Entry) -> bool:
 
 
 def check_two(e: Entry) -> bool:
-    r"""Test if the password entry valid under the rules of part two.
+    """Test if the password entry valid under the rules of part two.
 
     >>> check_two((1, 3, 'a', 'abcde'))
     True
