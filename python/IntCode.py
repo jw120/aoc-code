@@ -56,7 +56,7 @@ class Machine:
         self.code: List[int] = code.copy()
         self.ip: int = 0
         self.input_val: Optional[int] = input_val
-        self.output_val: Optional[int] = None
+        self.output_vals: List[int] = []
         self.halted = False
 
     def do_add(self, vals: List[int]) -> int:
@@ -70,7 +70,7 @@ class Machine:
         return vals[0] * vals[1]
 
     def do_input(self, vals: List[int]) -> int:
-        if len(vals) != 1:
+        if len(vals) != 0:
             raise RuntimeError("Wrong number of inputs to do_input")
         if self.input_val:
             return self.input_val
@@ -79,7 +79,7 @@ class Machine:
     def do_output(self, vals: List[int]) -> Optional[int]:
         if len(vals) != 1:
             raise RuntimeError("Wrong number of inputs to do_output")
-        self.output_val = vals[0]
+        self.output_vals.append(vals[0])
         return None
 
     def do_halt(self, vals: List[int]) -> Optional[int]:
@@ -104,8 +104,8 @@ class Machine:
     instruction_set: ClassVar[Dict[int, Instruction]] = {
         1: Instruction("add", 2, True),
         2: Instruction("mul", 2, True),
-        3: Instruction("input", 1, False),
-        4: Instruction("output", 0, True),
+        3: Instruction("input", 0, True),
+        4: Instruction("output", 1, False),
         99: Instruction("halt", 0, False),
     }
 
@@ -120,7 +120,9 @@ class Machine:
             opcode, instruction.inputs + instruction.has_output
         )
 
-        input_codes: List[int] = code[self.ip + 1 : self.ip + 1 + instruction.inputs]
+        input_codes: List[int] = self.code[
+            self.ip + 1 : self.ip + 1 + instruction.inputs
+        ]
         inputs: List[int] = [
             self.fetch(mode, val) for (mode, val) in zip(parameter_modes, input_codes)
         ]
@@ -130,11 +132,11 @@ class Machine:
                 raise RuntimeError("None when has_output", opcode)
             if parameter_modes[-1] == Mode.IMMEDIATE:
                 raise RuntimeError("Can't have output with immediate mode")
-            location: int = code[self.ip + 1 + instruction.inputs]
-            code[location] = output
+            location: int = self.code[self.ip + 1 + instruction.inputs]
+            self.code[location] = output
         else:
             if output is not None:
-                raise RuntimeError("Unexpected output present")
+                raise RuntimeError("Unexpected output present", opcode)
         self.ip += 1 + instruction.inputs + instruction.has_output
         return not self.halted
 
