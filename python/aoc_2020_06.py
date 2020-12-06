@@ -6,19 +6,19 @@ from typing import List, Set
 
 
 def part_one(group: List[List[str]]) -> int:
-    def union_of_letters(xs: List[str]) -> int:
+    def union_of_letters(xs: List[str]) -> Set[str]:
         xs_as_sets: List[Set[str]] = [set(x) for x in xs]
-        return len(set.union(*xs_as_sets))
+        return set.union(*xs_as_sets)
 
-    return sum(union_of_letters(g) for g in groups)
+    return sum(len(union_of_letters(g)) for g in groups)
 
 
 def part_two(group: List[List[str]]) -> int:
-    def intersection_of_letters(xs: List[str]) -> int:
+    def intersection_of_letters(xs: List[str]) -> Set[str]:
         xs_as_sets: List[Set[str]] = [set(x) for x in xs]
-        return len(set.intersection(*xs_as_sets))
+        return set.intersection(*xs_as_sets)
 
-    return sum(intersection_of_letters(g) for g in groups)
+    return sum(len(intersection_of_letters(g)) for g in groups)
 
 
 if __name__ == "__main__":
