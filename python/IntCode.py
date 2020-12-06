@@ -88,6 +88,30 @@ class Machine:
         self.halted = True
         return None
 
+    def do_jmp(self, vals: List[int]) -> Optional[int]:
+        if len(vals) != 2:
+            raise RuntimeError("Wrong number of inputs to do_jmp")
+        if vals[0] != 0:
+            self.ip = vals[1]
+        return None
+
+    def do_jmz(self, vals: List[int]) -> Optional[int]:
+        if len(vals) != 2:
+            raise RuntimeError("Wrong number of inputs to do_jmz")
+        if vals[0] == 0:
+            self.ip = vals[1]
+        return None
+
+    def do_les(self, vals: List[int]) -> Optional[int]:
+        if len(vals) != 2:
+            raise RuntimeError("Wrong number of inputs to do_les")
+        return vals[0] < vals[1]
+
+    def do_equ(self, vals: List[int]) -> Optional[int]:
+        if len(vals) != 2:
+            raise RuntimeError("Wrong number of inputs to do_equ")
+        return vals[0] == vals[1]
+
     def do_action(self: Machine, code: int, vals: List[int]) -> Optional[int]:
         if code == 1:
             return self.do_add(vals)
@@ -97,6 +121,15 @@ class Machine:
             return self.do_input(vals)
         if code == 4:
             return self.do_output(vals)
+        if code == 5:
+            return self.do_jmp(vals)
+        if code == 6:
+            return self.do_jmz(vals)
+        if code == 7:
+            return self.do_les(vals)
+        if code == 8:
+            return self.do_equ(vals)
+
         if code == 99:
             return self.do_halt(vals)
         raise RuntimeError("Unknown instruction in do_action", code)
@@ -106,6 +139,10 @@ class Machine:
         2: Instruction("mul", 2, True),
         3: Instruction("input", 0, True),
         4: Instruction("output", 1, False),
+        5: Instruction("jmp", 2, False),
+        6: Instruction("jmz", 2, False),
+        7: Instruction("les", 2, True),
+        8: Instruction("equ", 2, True),
         99: Instruction("halt", 0, False),
     }
 
@@ -119,6 +156,7 @@ class Machine:
         parameter_modes: List[Mode] = parameter_decode(
             opcode, instruction.inputs + instruction.has_output
         )
+        previous_ip: int = self.ip
 
         input_codes: List[int] = self.code[
             self.ip + 1 : self.ip + 1 + instruction.inputs
@@ -137,7 +175,8 @@ class Machine:
         else:
             if output is not None:
                 raise RuntimeError("Unexpected output present", opcode)
-        self.ip += 1 + instruction.inputs + instruction.has_output
+        if self.ip == previous_ip:
+            self.ip += 1 + instruction.inputs + instruction.has_output
         return not self.halted
 
     def run(self) -> None:

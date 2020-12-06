@@ -15,6 +15,13 @@ def part_one(code: List[int]) -> None:
         print(machine.output_vals[-1])
 
 
+def part_two(code: List[int]) -> None:
+    machine: IntCode.Machine = IntCode.Machine(code, 5)
+    machine.run()
+    print(machine.output_vals[-1])
+
+
 if __name__ == "__main__":
     code: List[int] = [int(s) for s in stdin.read().split(",")]
     part_one(code)
+    part_two(code)

@@ -3,6 +3,8 @@ Advent of Code
 # TODO
 - When mypy supports 3.9, use list[] instead of List as a type
 
+- IntCode - tidy and add debug/interactive mode
+
 
 # Python setup
 
