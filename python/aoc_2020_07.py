@@ -85,7 +85,32 @@ def part_one(rules: List[Rule], target: str) -> int:
     return len(visited)
 
 
+def part_two(rules: List[Rule], target: str) -> int:
+    """Return the number of bags inside.
+
+    >>> part_two(test_rules, "shiny gold")
+    32
+    """
+    count_inside: Dict[str, int] = {}  # Cached results from bags_insider
+
+    def bags_inside(bag: str) -> int:
+        if bag not in count_inside:
+            count: int = 0
+            for (inner, num) in has_inside[bag]:
+                count += num * (1 + bags_inside(inner))
+            count_inside[bag] = count
+        return count_inside[bag]
+
+    # Read the rules into a Dict
+    has_inside: Dict[str, List[Tuple[str, int]]] = {}
+    for (outer, inners) in rules:
+        has_inside[outer] = inners
+
+    return bags_inside(target)
+
+
 if __name__ == "__main__":
     testmod()
     rules: List[Rule] = [parse_rule(line) for line in stdin]
     print(part_one(rules, "shiny gold"))
+    print(part_two(rules, "shiny gold"))
