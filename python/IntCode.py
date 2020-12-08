@@ -117,15 +117,15 @@ class Machine:
             )
         print(f"{self.ip:4} {instruction_name + modes:6} {args:20} {comment}")
 
-    def step(self, quiet: bool = True) -> None:
+    def step(self, print_instructions: bool = False) -> None:
         """Run one instruction."""
         try:
-            self._step(quiet)
+            self._step(print_instructions)
         except:
             self._print("Failed")
             raise
 
-    def _step(self, quiet: bool = True) -> None:
+    def _step(self, print_instructions: bool = False) -> None:
         instruction_code: int = self.code[self.ip]
         opcode: int = instruction_code % 100
 
@@ -133,7 +133,7 @@ class Machine:
             if not self.input_vals:
                 raise RuntimeError("No input available")
             self.code[self.code[self.ip + 1]] = self.input_vals[0]
-            if not quiet:
+            if print_instructions:
                 self._print(f"input {self.input_vals[0]}")
             del self.input_vals[:1]
             self.ip += 2
@@ -143,14 +143,14 @@ class Machine:
             mode = Mode.mode(instruction_code)
             arg = self._fetch(mode, self.code[self.ip + 1])
             self.output_vals.append(arg)
-            if not quiet:
+            if print_instructions:
                 self._print(f"output {arg}")
             self.ip += 2
             return
 
         if opcode == self.Halt_opcode:
             self.halted = True
-            if not quiet:
+            if print_instructions:
                 self._print("halted")
             return
 
@@ -160,14 +160,14 @@ class Machine:
 
         if opcode in self.Jump_instructions:
             jump_value: Optional[int] = self.Jump_instructions[opcode](arg1, arg2)
-            if not quiet:
+            if print_instructions:
                 self._print(f"Jump to {jump_value}" if jump_value else "Jump skipped")
             self.ip = self.ip + 3 if jump_value is None else jump_value
             return
 
         if opcode in self.Arithmetic_instructions:
             return_value: int = self.Arithmetic_instructions[opcode](arg1, arg2)
-            if not quiet:
+            if print_instructions:
                 self._print(
                     f"{self.Opcode_names[opcode]} {arg1} {arg2} = {return_value} -> {self.code[self.ip + 3]}"
                 )
@@ -177,10 +177,10 @@ class Machine:
 
         raise RuntimeError("Unknown opcode in step", opcode)
 
-    def run(self, quiet: bool = True) -> None:
+    def run(self, print_instructions: bool = False) -> None:
         """Run until execution stops."""
         while not self.halted:
-            self.step(quiet)
+            self.step(print_instructions)
 
 
 if __name__ == "__main__":
@@ -188,9 +188,9 @@ if __name__ == "__main__":
     print("Day 2 code")
     with open("input/2019_02.txt", "r") as f:
         code: List[int] = [int(s) for s in f.read().split(",")]
-        Machine(code).run(False)
+        Machine(code).run(True)
 
     print("Day 5 code")
     with open("input/2019_05.txt", "r") as f:
         code = [int(s) for s in f.read().split(",")]
-        Machine(code, [1]).run(False)
+        Machine(code, [1]).run(True)
