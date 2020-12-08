@@ -112,7 +112,7 @@ def distance(
     Walk backwards from each node until we find an overlapping node. Distance
     is the sum of the number of steps in each path to reach the overlap
 
-    >>> distance("I", "K", backward2, root_dist2)
+    >>> distance("YOU", "SAN", backward2, root_dist2)
     4
     """
     a_visited: Set[K] = {a}
@@ -120,7 +120,7 @@ def distance(
     a_walk: K = a
     b_walk: K = b
     while (overlap := a_visited & b_visited) == set():
-        print(a_walk, b_walk)
+        #        print(a_walk, b_walk)
         a_back: Optional[K] = backward[a_walk]
         b_back: Optional[K] = backward[b_walk]
         if a_back is None or b_back is None:
@@ -130,11 +130,24 @@ def distance(
         a_visited.add(a_walk)
         b_visited.add(b_walk)
     [intersection] = overlap
-    print("Intersection", intersection)
-    print("Root dists", root_dist[a], root_dist[b], root_dist[intersection])
+    #    print("Intersection", intersection)
+    #    print("Root dists", root_dist[a], root_dist[b], root_dist[intersection])
     return (root_dist[a] - root_dist[intersection]) + (
-        root_dist[b] - root_dist[intersection]
+        root_dist[b] - root_dist[intersection] - 2
     )
+
+
+def trace_route(
+    backward: Dict[str, Optional[str]], label: Dict[str, int], start: str
+) -> None:
+    print("Route from", start)
+    x: Optional[str] = start
+    i: int = 0
+    while x:
+        print(i, label[x], x)
+        x = backward[x]
+        i += 1
+    print("End")
 
 
 if __name__ == "__main__":
@@ -144,3 +157,5 @@ if __name__ == "__main__":
     root_dist: Dict[str, int] = label_root_distance(root, forward)
     print(sum(root_dist.values()))
     print(distance("SAN", "YOU", backward, root_dist))
+    #   trace_route(backward, root_dist, "SAN")
+    # trace_route(backward, root_dist, "YOU")
