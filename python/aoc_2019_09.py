@@ -6,12 +6,14 @@ from typing import List
 import IntCode
 
 
-def part_one(code: List[int]) -> None:
-    machine: IntCode.Machine = IntCode.Machine(code, [1])
-    machine.run(True)
-    print(machine.output_vals)
+def run(code: List[int], x: int) -> int:
+    machine: IntCode.Machine = IntCode.Machine(code, [x])
+    machine.run()
+    [ans] = machine.output_vals
+    return ans
 
 
 if __name__ == "__main__":
     code: List[int] = [int(s) for s in stdin.read().split(",")]
-    part_one(code)
+    print(run(code, 1))
+    print(run(code, 2))
