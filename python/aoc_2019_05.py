@@ -7,7 +7,7 @@ import IntCode
 
 
 def part_one(code: List[int]) -> None:
-    machine: IntCode.Machine = IntCode.Machine(code, 1)
+    machine: IntCode.Machine = IntCode.Machine(code, [1])
     machine.run()
     if any(machine.output_vals[:-1]):
         print(f"Failed tests: {machine.output_vals}")
@@ -16,7 +16,7 @@ def part_one(code: List[int]) -> None:
 
 
 def part_two(code: List[int]) -> None:
-    machine: IntCode.Machine = IntCode.Machine(code, 5)
+    machine: IntCode.Machine = IntCode.Machine(code, [5])
     machine.run()
     print(machine.output_vals[-1])
 

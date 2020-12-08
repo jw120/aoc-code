@@ -76,10 +76,10 @@ class Machine:
         8: lambda x, y: x == y,
     }
 
-    def __init__(self, code: List[int], input_val: Optional[int] = None) -> None:
+    def __init__(self, code: List[int], input_vals: List[int] = []) -> None:
         self.code: List[int] = code.copy()
         self.ip: int = 0
-        self.input_val: Optional[int] = input_val
+        self.input_vals: List[int] = input_vals
         self.output_vals: List[int] = []
         self.halted: bool = False
 
@@ -130,12 +130,12 @@ class Machine:
         opcode: int = instruction_code % 100
 
         if opcode == self.Input_opcode:
-            if self.input_val is None:
+            if not self.input_vals:
                 raise RuntimeError("No input available")
-            self.code[self.code[self.ip + 1]] = self.input_val
+            self.code[self.code[self.ip + 1]] = self.input_vals[0]
             if not quiet:
-                self._print(f"input {self.input_val}")
-            self.input_val = None
+                self._print(f"input {self.input_vals[0]}")
+            del self.input_vals[:1]
             self.ip += 2
             return
 
@@ -193,4 +193,4 @@ if __name__ == "__main__":
     print("Day 5 code")
     with open("input/2019_05.txt", "r") as f:
         code = [int(s) for s in f.read().split(",")]
-        Machine(code, 1).run(False)
+        Machine(code, [1]).run(False)
