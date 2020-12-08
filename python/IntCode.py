@@ -81,6 +81,7 @@ class Machine:
         self.ip: int = 0
         self.input_vals: List[int] = input_vals
         self.output_vals: List[int] = []
+        self.pause_on_output = False
         self.halted: bool = False
 
     def _fetch(self, mode: Mode, x: int) -> int:
@@ -178,9 +179,12 @@ class Machine:
         raise RuntimeError("Unknown opcode in step", opcode)
 
     def run(self, print_instructions: bool = False) -> None:
-        """Run until execution stops."""
-        while not self.halted:
+        """Run until execution stops or a pause from output."""
+        paused: bool = False
+        old_output_vals: List[int] = self.output_vals.copy()
+        while not self.halted and not paused:
             self.step(print_instructions)
+            paused = self.pause_on_output and self.output_vals != old_output_vals
 
 
 if __name__ == "__main__":

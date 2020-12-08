@@ -4,7 +4,7 @@ from doctest import testmod
 from sys import stdin
 from typing import Iterator, List, TypeVar
 
-import IntCode
+from IntCode import Machine
 
 PhaseSettings = List[int]
 
@@ -92,13 +92,105 @@ test_code_3: List[int] = [
     0,
 ]
 
+test_code_4: List[int] = [
+    3,
+    26,
+    1001,
+    26,
+    -4,
+    26,
+    3,
+    27,
+    1002,
+    27,
+    2,
+    27,
+    1,
+    27,
+    26,
+    27,
+    4,
+    27,
+    1001,
+    28,
+    -1,
+    28,
+    1005,
+    28,
+    6,
+    99,
+    0,
+    0,
+    5,
+]
+
+test_code_5: List[int] = [
+    3,
+    52,
+    1001,
+    52,
+    -5,
+    52,
+    3,
+    53,
+    1,
+    52,
+    56,
+    54,
+    1007,
+    54,
+    5,
+    55,
+    1005,
+    55,
+    26,
+    1001,
+    54,
+    -5,
+    54,
+    1105,
+    1,
+    12,
+    1,
+    53,
+    54,
+    53,
+    1008,
+    54,
+    0,
+    55,
+    1001,
+    55,
+    1,
+    55,
+    2,
+    53,
+    55,
+    53,
+    4,
+    53,
+    1001,
+    56,
+    -1,
+    56,
+    1005,
+    56,
+    6,
+    99,
+    0,
+    0,
+    0,
+    0,
+    10,
+]
+
 
 def run_machine(
     code: List[int], phase: int, input_val: int, print_instructions: bool = False
 ) -> int:
     if print_instructions:
         print(f"Running machine with phase setting {phase} and input {input_val}")
-    m: IntCode.Machine = IntCode.Machine(code, [phase, input_val])
+    m: Machine = Machine(code, [phase, input_val])
     m.run(print_instructions)
     [output_value] = m.output_vals
     if print_instructions:
@@ -109,7 +201,7 @@ def run_machine(
 def run_phase_settings(
     code: List[int], phase_settings: PhaseSettings, print_instructions: bool = False
 ) -> int:
-    """Run a series machines from input 0 with given phase settings.
+    """Run a series of machines from input 0 with given phase settings.
 
     >>> run_phase_settings(test_code_1, [4, 3, 2, 1, 0])
     43210
@@ -125,6 +217,34 @@ def run_phase_settings(
         )
         phase_settings = phase_settings[1:]
     return output_val
+
+
+def run_phase_settings_with_feedback(
+    code: List[int], phase_settings: PhaseSettings, print_instructions: bool = False
+) -> int:
+    """Run a series machines with feedback from input 0 with given phase settings.
+
+    >>> run_phase_settings_with_feedback(test_code_4, [9, 8, 7, 6, 5])
+    139629729
+    >>> run_phase_settings_with_feedback(test_code_5, [9, 7, 8, 5, 6])
+    18216
+    """
+    machines: List[Machine] = [Machine(code, [p]) for p in phase_settings]
+    for m in machines:
+        m.pause_on_output = True
+
+    input_val: int = 0
+    machine_index: int = 0
+
+    while True:
+        machines[machine_index].input_vals.append(input_val)
+        machines[machine_index].run()
+        if machines[machine_index].halted and machine_index == len(machines) - 1:
+            return machines[machine_index].output_vals[-1]
+        input_val = machines[machine_index].output_vals[-1]
+        machine_index += 1
+        if machine_index >= len(machines):
+            machine_index = 0
 
 
 X = TypeVar("X")
@@ -147,8 +267,12 @@ def permutations(xs: List[X]) -> Iterator[List[X]]:
 
 
 def part_one(code: List[int]) -> int:
+    return max(run_phase_settings(code, p) for p in permutations([0, 1, 2, 3, 4]))
+
+
+def part_two(code: List[int]) -> int:
     return max(
-        run_phase_settings(code, p, False) for p in permutations([0, 1, 2, 3, 4])
+        run_phase_settings_with_feedback(code, p) for p in permutations([5, 6, 7, 8, 9])
     )
 
 
@@ -156,3 +280,4 @@ if __name__ == "__main__":
     testmod()
     code: List[int] = [int(s) for s in stdin.read().split(",")]
     print(part_one(code))
+    print(part_two(code))
