@@ -44,45 +44,12 @@ def build_tree(
     return (forward, backward, list(roots))
 
 
-test_one: List[List[str]] = [
-    line.split(")")
-    for line in [
-        "COM)B",
-        "B)C",
-        "C)D",
-        "D)E",
-        "E)F",
-        "B)G",
-        "G)H",
-        "D)I",
-        "E)J",
-        "J)K",
-        "K)L",
-    ]
-]
-
-
-def label_root_distance(root: K, forward: Dict[K, Set[K]]) -> Dict[K, int]:
-    """Return labels for each root with their distance from the root."""
-    labels: Dict[K, int] = {}
-    distance: int = 0
-    frontier: Set[K] = {root}
-    while len(frontier) > 0:
-        new_frontier: Set[K] = set()
-        for x in frontier:
-            labels[x] = distance
-            new_frontier |= forward[x]
-        frontier = new_frontier
-        distance += 1
-    return labels
-
-
 def parse_link(s: str) -> Tuple[str, str]:
     [x, y] = s.split(")")
     return (x, y)
 
 
-test2: List[Tuple[str, str]] = [
+test_links: List[Tuple[str, str]] = [
     parse_link(s)
     for s in [
         "COM)B",
@@ -100,8 +67,28 @@ test2: List[Tuple[str, str]] = [
         "I)SAN",
     ]
 ]
-(forward2, backward2, [root2]) = build_tree(test2)
-root_dist2 = label_root_distance(root2, forward2)
+(test_forward, test_backward, [test_root]) = build_tree(test_links)
+
+
+def label_root_distance(root: K, forward: Dict[K, Set[K]]) -> Dict[K, int]:
+    """Return labels for each root with their distance from the root.
+
+    >>> label_root_distance(test_root, test_forward)["COM"]
+    0
+    >>> label_root_distance(test_root, test_forward)["E"]
+    4
+    """
+    labels: Dict[K, int] = {}
+    distance: int = 0
+    frontier: Set[K] = {root}
+    while len(frontier) > 0:
+        new_frontier: Set[K] = set()
+        for x in frontier:
+            labels[x] = distance
+            new_frontier |= forward[x]
+        frontier = new_frontier
+        distance += 1
+    return labels
 
 
 def distance(
@@ -112,7 +99,7 @@ def distance(
     Walk backwards from each node until we find an overlapping node. Distance
     is the sum of the number of steps in each path to reach the overlap
 
-    >>> distance("YOU", "SAN", backward2, root_dist2)
+    >>> distance("YOU", "SAN", test_backward, label_root_distance(test_root, test_forward))
     4
     """
     a_visited: Set[K] = {a}
@@ -120,7 +107,6 @@ def distance(
     a_walk: K = a
     b_walk: K = b
     while (overlap := a_visited & b_visited) == set():
-        #        print(a_walk, b_walk)
         a_back: Optional[K] = backward[a_walk]
         b_back: Optional[K] = backward[b_walk]
         if a_back is None or b_back is None:
@@ -130,24 +116,9 @@ def distance(
         a_visited.add(a_walk)
         b_visited.add(b_walk)
     [intersection] = overlap
-    #    print("Intersection", intersection)
-    #    print("Root dists", root_dist[a], root_dist[b], root_dist[intersection])
-    return (root_dist[a] - root_dist[intersection]) + (
-        root_dist[b] - root_dist[intersection] - 2
+    return (root_dist[a] - root_dist[intersection] - 1) + (
+        root_dist[b] - root_dist[intersection] - 1
     )
-
-
-def trace_route(
-    backward: Dict[str, Optional[str]], label: Dict[str, int], start: str
-) -> None:
-    print("Route from", start)
-    x: Optional[str] = start
-    i: int = 0
-    while x:
-        print(i, label[x], x)
-        x = backward[x]
-        i += 1
-    print("End")
 
 
 if __name__ == "__main__":
@@ -157,5 +128,3 @@ if __name__ == "__main__":
     root_dist: Dict[str, int] = label_root_distance(root, forward)
     print(sum(root_dist.values()))
     print(distance("SAN", "YOU", backward, root_dist))
-    #   trace_route(backward, root_dist, "SAN")
-    # trace_route(backward, root_dist, "YOU")
