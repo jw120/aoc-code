@@ -1,9 +1,9 @@
 """Advent of Code 2019 - Day 10."""
 
 from math import gcd
+from typing import List, Tuple
 
 # from sys import stdin
-from typing import List, Tuple
 
 
 class Grid:

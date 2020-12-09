@@ -2,11 +2,11 @@ all: aoc2019 aoc2020
 
 aoc2019: \
 	python_2019_01 python_2019_02 python_2019_03 python_2019_04 python_2019_05 \
-	python_2019_06 python_2019_07 python_2019_08
+	python_2019_06 python_2019_07 python_2019_08 python_2019_09
 
 aoc2020: \
 	python_2020_01 python_2020_02 python_2020_03 python_2020_04 python_2020_05 \
-	python_2020_06 python_2020_07 python_2020_08
+	python_2020_06 python_2020_07 python_2020_08 python_2020_09
 
 python_%:
 	@/bin/echo -n "$@: "
