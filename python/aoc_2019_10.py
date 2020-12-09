@@ -1,9 +1,9 @@
 """Advent of Code 2019 - Day 10."""
 
+from doctest import testmod
 from math import gcd
+from sys import stdin
 from typing import List, Tuple
-
-# from sys import stdin
 
 
 class Grid:
@@ -67,6 +67,19 @@ class Grid:
             print()
 
     def best(self) -> Tuple[int, int, int]:
+        """Find the asteroid from which the most others are visible.
+
+        >>> test_one.best()
+        (3, 4, 8)
+        >>> test_two.best()
+        (5, 8, 33)
+        >>> test_three.best()
+        (1, 2, 35)
+        >>> test_four.best()
+        (6, 3, 41)
+        >>> test_five.best()
+        (11, 13, 210)
+        """
         best_count = -1
         best_x = -1
         best_y = -1
@@ -88,8 +101,77 @@ test_one: Grid = Grid(
     """
 )
 
+test_two: Grid = Grid(
+    """......#.#.
+    #..#.#....
+    ..#######.
+    .#.#.###..
+    .#..#.....
+    ..#....#.#
+    #..#....#.
+    .##.#..###
+    ##...#..#.
+    .#....####
+    """
+)
+
+test_three: Grid = Grid(
+    """
+    #.#...#.#.
+    .###....#.
+    .#....#...
+    ##.#.#.#.#
+    ....#.#.#.
+    .##..###.#
+    ..#...##..
+    ..##....##
+    ......#...
+    .####.###.
+    """
+)
+
+test_four: Grid = Grid(
+    """
+    .#..#..###
+    ####.###.#
+    ....###.#.
+    ..###.##.#
+    ##.##.#.#.
+    ....###..#
+    ..#.#..#.#
+    #..#.#.###
+    .##...##.#
+    .....#.#..
+    """
+)
+
+test_five: Grid = Grid(
+    """.#..##.###...#######
+    ##.############..##.
+    .#.######.########.#
+    .###.#######.####.#.
+    #####.##.#.##.###.##
+    ..#####..#.#########
+    ####################
+    #.####....###.#.#.##
+    ##.#################
+    #####.##.###..####..
+    ..######..##.#######
+    ####.##.####...##..#
+    .#####..#.######.###
+    ##...#.##########...
+    #.##########.#######
+    .####.#.###.###.#.##
+    ....##.##.###..#####
+    .#.#.###########.###
+    #.#.#.#####.####.###
+    ###.##.####.##.#..##
+    """
+)
+
+
 if __name__ == "__main__":
-    #    grid: Grid = Grid(stdin.read())
-    test_one.show()
-    test_one.show2()
-    print(test_one.best())
+    testmod()
+    grid: Grid = Grid(stdin.read())
+    (_, _, num) = grid.best()
+    print(num)
