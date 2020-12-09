@@ -1,4 +1,4 @@
-"""Advent of Code 2019 - Day 5."""
+"""Advent of Code 2019 - Day 9."""
 
 from sys import stdin
 from typing import List
