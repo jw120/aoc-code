@@ -2,7 +2,7 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import Dict, List, Tuple
+from typing import List, Tuple
 
 test1: List[int] = [16, 10, 15, 5, 1, 11, 7, 19, 6, 12, 4]
 
@@ -42,6 +42,7 @@ test2: List[int] = [
 
 
 def prep_list(xs: List[int]) -> List[int]:
+    """Sort list and add first and last elements."""
     ys: List[int] = [0] + sorted(xs)
     ys.append(ys[-1] + 3)
     return ys
@@ -70,7 +71,7 @@ def count_gaps(xs: List[int]) -> Tuple[int, int]:
     return (count1, count3)
 
 
-def count_ways(xs: List[int], i: int = 0) -> int:
+def count_ways(xs: List[int]) -> int:
     """Count the number of ways the adapters can be connected.
 
     >>> count_ways(prep_list(test1))
@@ -78,25 +79,19 @@ def count_ways(xs: List[int], i: int = 0) -> int:
     >>> count_ways(prep_list(test2))
     19208
     """
+    counts: List[int] = [0 for x in xs]
 
-    memo: Dict[int, int] = {}
+    last_i = len(xs) - 1
+    counts[last_i] = 1
 
-    def go(i: int) -> int:
-        if i in memo:
-            return memo[i]
-
-        if i == len(xs) - 1:
-            return 1
-        possible_next = [x for x in xs[i + 1 : i + 4] if x <= xs[i] + 3]
-        if len(possible_next) == 0:
-            return 0
-        if len(possible_next) == 1:  # x0 -> xs[1] -> xs[2:]
-            return go(i + 1)
-        if len(possible_next) == 2:  # x0 -> xs[1]/xs[2] -> xs[3:]
-            return go(i + 1) + go(i + 2)
-        if len(possible_next) == 3:  # x0 -> xs[1]/xs[2]/xs[3] -> xs[4:]
-            return go(i + 1) + go(i + 2) + go(i + 3)
-        raise RuntimeError("Bad number of possible_next", possible_next, xs[:10])
+    for i in range(last_i - 1, -1, -1):
+        if i + 1 <= last_i and xs[i + 1] <= xs[i] + 3:
+            counts[i] += counts[i + 1]
+        if i + 2 <= last_i and xs[i + 2] <= xs[i] + 3:
+            counts[i] += counts[i + 2]
+        if i + 3 <= last_i and xs[i + 3] <= xs[i] + 3:
+            counts[i] += counts[i + 3]
+    return counts[0]
 
 
 if __name__ == "__main__":
