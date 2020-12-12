@@ -1,9 +1,40 @@
 """Advent of Code 2019 - Day 10."""
 
 from doctest import testmod
-from math import gcd
+from math import atan2, gcd, pi
 from sys import stdin
-from typing import List, Tuple
+from typing import Dict, Iterable, List, Tuple
+
+Vec = Tuple[int, int]
+
+
+def primitive(x: int, y: int) -> Vec:
+    """Return the shortest vector in the given vector's direction.
+
+    >>> primitive(6, 4)
+    (3, 2)
+    >>> primitive(3, 0)
+    (1, 0)
+    """
+    if x == 0 and y == 0:
+        raise RuntimeError("Zero vector in primitive")
+    if x == 0:
+        return (0, 1 if y > 0 else -1)
+    if y == 0:
+        return (1 if x > 0 else -1, 0)
+    return (x // gcd(x, y), y // gcd(x, y))
+
+
+def sort_by_mag(vs: List[Vec]) -> List[Vec]:
+    return sorted(vs, key=lambda v: abs(v[0]) + abs(v[1]))
+
+
+def comparison_angle(x: Tuple[Vec, List[Vec]]) -> float:
+    base_angle = atan2(x[0][0], -x[0][1])
+    if base_angle < 0:
+        return base_angle + 2 * pi
+    else:
+        return base_angle
 
 
 class Grid:
@@ -20,16 +51,7 @@ class Grid:
             return False
         if a == c and b == d:
             return True
-        elif a == c:
-            x_step: int = 0
-            y_step: int = 1 if b > d else -1
-        elif b == d:
-            x_step = 1 if a > c else -1
-            y_step = 0
-        else:
-            x_step = (a - c) // gcd(a - c, b - d)
-            y_step = (b - d) // gcd(a - c, b - d)
-        #       print("Visible?", (a, b), "from", (c, d), "step:", (x_step, y_step))
+        (x_step, y_step) = primitive(a - c, b - d)
         x = c + x_step
         y = d + y_step
         while x != a or y != b:
@@ -90,6 +112,43 @@ class Grid:
                     best_x = x
                     best_y = y
         return (best_x, best_y, best_count)
+
+    def laser(self, lx: int, ly: int) -> Iterable[Vec]:
+        """Fire lasers from asteroid at (lx, ly)."""
+        # Group all the asteroids by their primitive vector from the laser
+        ast_groups: Dict[Vec, List[Vec]] = {}
+        for y in range(0, self.y_num):
+            for x in range(0, self.x_num):
+                if self.m[y][x] and (x != lx or y != ly):
+                    dx, dy = x - lx, y - ly
+                    px, py = primitive(dx, dy)
+                    if (px, py) in ast_groups:
+                        ast_groups[(px, py)].append((dx, dy))
+                    else:
+                        ast_groups[(px, py)] = [(dx, dy)]
+        print(ast_groups)
+
+        # Convert to a list sorted by the angle, with elements as sorted lists
+        ast_list: List[Tuple[Vec, List[Vec]]] = [
+            (k, sort_by_mag(v)) for (k, v) in ast_groups.items()
+        ]
+        ast_list.sort(key=comparison_angle)
+        for (k, v) in ast_list:
+            print(f"{k} {comparison_angle((k, v))} {v}")
+        print(ast_list)
+
+        # Spin the laser
+        count = 0
+        while ast_list:
+            for (v, asts) in ast_list:
+                count += 1
+                print(f"{count} {v} {asts[0]}")
+                yield ((lx + asts[0][0], ly + asts[0][1]))
+                asts.pop(0)
+            # Prune empty entries
+            ast_list = [(v, asts) for (v, asts) in ast_list if asts]
+
+        return 0
 
 
 test_one: Grid = Grid(
@@ -169,9 +228,23 @@ test_five: Grid = Grid(
     """
 )
 
+test_six: Grid = Grid(
+    """.#....#####...#..
+    ##...##.#####..##
+    ##...#...#.#####.
+    ..#.....X...###..
+    ..#.#.....#....##
+    """
+)
 
 if __name__ == "__main__":
     testmod()
     grid: Grid = Grid(stdin.read())
-    (_, _, num) = grid.best()
+    (grid_lx, grid_ly, num) = grid.best()
     print(num)
+    laser6 = list(test_six.laser(8, 3))
+    print(laser6[-1] == (14, 3))
+    laser5 = list(test_five.laser(11, 13))
+    grid_laser = list(grid.laser(grid_lx, grid_ly))
+    winner_x, winner_y = grid_laser[201]
+    print(100 * winner_x + winner_y)
