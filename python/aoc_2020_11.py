@@ -172,9 +172,3 @@ if __name__ == "__main__":
     grid2: Grid = Grid(inputs)
     iterate_until_zero(grid2.iterate_two)
     print(grid2.occupied_seat_count)
-
-#    for i in range(1, 8):
-#        print()
-#        print("iteration", i, test1.iterate_two())
-#        print(test1.occupied_seat_count())
-#        test1.show()

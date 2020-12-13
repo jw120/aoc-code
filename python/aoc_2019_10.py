@@ -1,111 +1,111 @@
 """Advent of Code 2019 - Day 10."""
 
+from __future__ import annotations
+
+from dataclasses import dataclass
 from doctest import testmod
 from math import atan2, gcd, pi
 from sys import stdin
 from typing import Dict, Iterable, List, Tuple
 
-Vec = Tuple[int, int]
 
+@dataclass(frozen=True)
+class Vec:
+    x: int
+    y: int
 
-def primitive(v: Vec) -> Vec:
-    """Return the shortest vector in the given vector's direction.
+    def __add__(self, other: Vec) -> Vec:
+        return Vec(self.x + other.x, self.y + other.y)
 
-    >>> primitive((6, 4))
-    (3, 2)
-    >>> primitive((3, 0))
-    (1, 0)
-    """
-    (x, y) = v
-    if x == 0 and y == 0:
-        raise RuntimeError("Zero vector in primitive")
-    if x == 0:
-        return (0, 1 if y > 0 else -1)
-    if y == 0:
-        return (1 if x > 0 else -1, 0)
-    return (x // gcd(x, y), y // gcd(x, y))
+    def __sub__(self, other: Vec) -> Vec:
+        return Vec(self.x - other.x, self.y - other.y)
+
+    def primitive(self) -> Vec:
+        """Return the shortest vector in the given vector's direction.
+
+        >>> Vec(6, 4).primitive()
+        Vec(x=3, y=2)
+        >>> Vec(3, 0).primitive()
+        Vec(x=1, y=0)
+        """
+        if self.x == 0 and self.y == 0:
+            raise RuntimeError("Zero vector in primitive")
+        if self.x == 0:
+            return Vec(0, 1 if self.y > 0 else -1)
+        if self.y == 0:
+            return Vec(1 if self.x > 0 else -1, 0)
+        return Vec(self.x // gcd(self.x, self.y), self.y // gcd(self.x, self.y))
 
 
 class Grid:
     def __init__(self, s: str) -> None:
-        self.m: List[List[bool]] = [
+        self._m: List[List[bool]] = [
             [s == "#" for s in row.strip()] for row in s.split()
         ]
-        self.x_num: int = len(self.m[0])
-        self.y_num: int = len(self.m)
+        self.x_num: int = len(self._m[0])
+        self.y_num: int = len(self._m)
 
-    def visible(self, a: int, b: int, c: int, d: int) -> bool:
-        """Test if an asteroid is present at (a,b) and can be seen from (c, d)."""
-        if not self.m[b][a]:
+    def all_positions(self) -> Iterable[Vec]:
+        """Provide iteration over all positions, row-wise."""
+        for y in range(0, self.y_num):
+            for x in range(0, self.x_num):
+                yield Vec(x, y)
+
+    def m(self, v: Vec) -> bool:
+        return self._m[v.y][v.x]
+
+    def visible(self, ast: Vec, source: Vec) -> bool:
+        """Test if an asteroid can be seen from the source."""
+        if not self.m(ast):
             return False
-        if a == c and b == d:
+        diff = ast - source
+        if diff == Vec(0, 0):
             return True
-        (x_step, y_step) = primitive((a - c, b - d))
-        x = c + x_step
-        y = d + y_step
-        while x != a or y != b:
-            if self.m[y][x]:
+        step = diff.primitive()
+        v = source + step
+        while v != ast:
+            if self.m(v):
                 return False
-            x += x_step
-            y += y_step
+            v += step
         return True
 
-    def count_visible(self, p: int, q: int) -> int:
+    def count_visible(self, source: Vec) -> int:
         """Return number of other asteroids visible from (p, q)."""
         count = 0
-        for x in range(0, self.x_num):
-            for y in range(0, self.y_num):
-                count += self.visible(x, y, p, q)
-        return count - self.m[q][p]
+        for v in self.all_positions():
+            count += self.visible(v, source)
+        return count - self.m(source)
 
-    def show(self) -> None:
-        for y in range(0, self.y_num):
-            for x in range(0, self.x_num):
-                print("#" if self.m[y][x] else ".", end="")
-            print()
-
-    def show2(self) -> None:
-        for y in range(0, self.y_num):
-            for x in range(0, self.x_num):
-                if self.m[y][x]:
-                    print(f"{self.count_visible(x, y):3} ", end="")
-                else:
-                    print("  . ", end="")
-            print()
-
-    def best(self) -> Tuple[int, int, int]:
+    def best(self) -> Tuple[Vec, int]:
         """Find the asteroid from which the most others are visible.
 
         >>> test_one.best()
-        (3, 4, 8)
+        (Vec(x=3, y=4), 8)
         >>> test_two.best()
-        (5, 8, 33)
+        (Vec(x=5, y=8), 33)
         >>> test_three.best()
-        (1, 2, 35)
+        (Vec(x=1, y=2), 35)
         >>> test_four.best()
-        (6, 3, 41)
+        (Vec(x=6, y=3), 41)
         >>> test_five.best()
-        (11, 13, 210)
+        (Vec(x=11, y=13), 210)
         """
         best_count = -1
-        best_x = -1
-        best_y = -1
-        for y in range(0, self.y_num):
-            for x in range(0, self.x_num):
-                if self.m[y][x] and self.count_visible(x, y) > best_count:
-                    best_count = self.count_visible(x, y)
-                    best_x = x
-                    best_y = y
-        return (best_x, best_y, best_count)
+        best_v = Vec(0, 0)
+        for v in self.all_positions():
+            if self.m(v) and self.count_visible(v) > best_count:
+                best_count = self.count_visible(v)
+                best_v = v
+        return (best_v, best_count)
 
-    def laser(self, lx: int, ly: int) -> Iterable[Vec]:
+    def laser(self, laser: Vec) -> Iterable[Vec]:
         """Fire lasers from asteroid at (lx, ly)."""
 
         def sort_by_mag(vs: List[Vec]) -> List[Vec]:
-            return sorted(vs, key=lambda v: abs(v[0]) + abs(v[1]))
+            return sorted(vs, key=lambda v: abs(v.x) + abs(v.y))
 
         def comparison_angle(x: Tuple[Vec, List[Vec]]) -> float:
-            base_angle = atan2(x[0][0], -x[0][1])
+            base_angle = atan2(x[0].x, -x[0].y)
             if base_angle < 0:
                 return base_angle + 2 * pi
             else:
@@ -113,15 +113,14 @@ class Grid:
 
         # Group all the asteroids by their primitive vector from the laser
         ast_groups: Dict[Vec, List[Vec]] = {}
-        for y in range(0, self.y_num):
-            for x in range(0, self.x_num):
-                if self.m[y][x] and (x != lx or y != ly):
-                    delta = (x - lx, y - ly)
-                    prim_delta = primitive(delta)
-                    if prim_delta in ast_groups:
-                        ast_groups[prim_delta].append(delta)
-                    else:
-                        ast_groups[prim_delta] = [delta]
+        for v in self.all_positions():
+            if self.m(v) and (v != laser):
+                delta = v - laser
+                prim_delta = delta.primitive()
+                if prim_delta in ast_groups:
+                    ast_groups[prim_delta].append(delta)
+                else:
+                    ast_groups[prim_delta] = [delta]
 
         # Convert to a list sorted by the angle, with elements as sorted lists
         ast_list: List[Tuple[Vec, List[Vec]]] = [
@@ -134,7 +133,7 @@ class Grid:
         while ast_list:
             for _, asts in ast_list:
                 count += 1
-                yield ((lx + asts[0][0], ly + asts[0][1]))
+                yield laser + asts[0]
                 asts.pop(0)
             # Prune empty entries
             ast_list = [(v, asts) for (v, asts) in ast_list if asts]
@@ -148,9 +147,9 @@ def part_two(grid: Grid) -> int:
     >>> part_two(test_five)
     802
     """
-    (grid_lx, grid_ly, _) = grid.best()
-    target = list(grid.laser(grid_lx, grid_ly))[199]
-    return target[0] * 100 + target[1]
+    (laser_position, _) = grid.best()
+    target = list(grid.laser(laser_position))[199]
+    return target.x * 100 + target.y
 
 
 test_one: Grid = Grid(
@@ -242,5 +241,5 @@ test_six: Grid = Grid(
 if __name__ == "__main__":
     testmod()
     grid: Grid = Grid(stdin.read())
-    print(grid.best()[2])
+    print(grid.best()[1])
     print(part_two(grid))
