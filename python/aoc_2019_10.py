@@ -8,14 +8,15 @@ from typing import Dict, Iterable, List, Tuple
 Vec = Tuple[int, int]
 
 
-def primitive(x: int, y: int) -> Vec:
+def primitive(v: Vec) -> Vec:
     """Return the shortest vector in the given vector's direction.
 
-    >>> primitive(6, 4)
+    >>> primitive((6, 4))
     (3, 2)
-    >>> primitive(3, 0)
+    >>> primitive((3, 0))
     (1, 0)
     """
+    (x, y) = v
     if x == 0 and y == 0:
         raise RuntimeError("Zero vector in primitive")
     if x == 0:
@@ -23,18 +24,6 @@ def primitive(x: int, y: int) -> Vec:
     if y == 0:
         return (1 if x > 0 else -1, 0)
     return (x // gcd(x, y), y // gcd(x, y))
-
-
-def sort_by_mag(vs: List[Vec]) -> List[Vec]:
-    return sorted(vs, key=lambda v: abs(v[0]) + abs(v[1]))
-
-
-def comparison_angle(x: Tuple[Vec, List[Vec]]) -> float:
-    base_angle = atan2(x[0][0], -x[0][1])
-    if base_angle < 0:
-        return base_angle + 2 * pi
-    else:
-        return base_angle
 
 
 class Grid:
@@ -51,17 +40,14 @@ class Grid:
             return False
         if a == c and b == d:
             return True
-        (x_step, y_step) = primitive(a - c, b - d)
+        (x_step, y_step) = primitive((a - c, b - d))
         x = c + x_step
         y = d + y_step
         while x != a or y != b:
-            #            print("  checking", (x, y))
             if self.m[y][x]:
-                #                print("  blocker found")
                 return False
             x += x_step
             y += y_step
-        #        print("  visible")
         return True
 
     def count_visible(self, p: int, q: int) -> int:
@@ -85,7 +71,6 @@ class Grid:
                     print(f"{self.count_visible(x, y):3} ", end="")
                 else:
                     print("  . ", end="")
-            #                print("#" if self.visible(x, y, 3, 4) else ".", end="")
             print()
 
     def best(self) -> Tuple[int, int, int]:
@@ -115,40 +100,57 @@ class Grid:
 
     def laser(self, lx: int, ly: int) -> Iterable[Vec]:
         """Fire lasers from asteroid at (lx, ly)."""
+
+        def sort_by_mag(vs: List[Vec]) -> List[Vec]:
+            return sorted(vs, key=lambda v: abs(v[0]) + abs(v[1]))
+
+        def comparison_angle(x: Tuple[Vec, List[Vec]]) -> float:
+            base_angle = atan2(x[0][0], -x[0][1])
+            if base_angle < 0:
+                return base_angle + 2 * pi
+            else:
+                return base_angle
+
         # Group all the asteroids by their primitive vector from the laser
         ast_groups: Dict[Vec, List[Vec]] = {}
         for y in range(0, self.y_num):
             for x in range(0, self.x_num):
                 if self.m[y][x] and (x != lx or y != ly):
-                    dx, dy = x - lx, y - ly
-                    px, py = primitive(dx, dy)
-                    if (px, py) in ast_groups:
-                        ast_groups[(px, py)].append((dx, dy))
+                    delta = (x - lx, y - ly)
+                    prim_delta = primitive(delta)
+                    if prim_delta in ast_groups:
+                        ast_groups[prim_delta].append(delta)
                     else:
-                        ast_groups[(px, py)] = [(dx, dy)]
-        print(ast_groups)
+                        ast_groups[prim_delta] = [delta]
 
         # Convert to a list sorted by the angle, with elements as sorted lists
         ast_list: List[Tuple[Vec, List[Vec]]] = [
             (k, sort_by_mag(v)) for (k, v) in ast_groups.items()
         ]
         ast_list.sort(key=comparison_angle)
-        for (k, v) in ast_list:
-            print(f"{k} {comparison_angle((k, v))} {v}")
-        print(ast_list)
 
         # Spin the laser
         count = 0
         while ast_list:
-            for (v, asts) in ast_list:
+            for _, asts in ast_list:
                 count += 1
-                print(f"{count} {v} {asts[0]}")
                 yield ((lx + asts[0][0], ly + asts[0][1]))
                 asts.pop(0)
             # Prune empty entries
             ast_list = [(v, asts) for (v, asts) in ast_list if asts]
 
         return 0
+
+
+def part_two(grid: Grid) -> int:
+    """Solve part two.
+
+    >>> part_two(test_five)
+    802
+    """
+    (grid_lx, grid_ly, _) = grid.best()
+    target = list(grid.laser(grid_lx, grid_ly))[199]
+    return target[0] * 100 + target[1]
 
 
 test_one: Grid = Grid(
@@ -240,11 +242,5 @@ test_six: Grid = Grid(
 if __name__ == "__main__":
     testmod()
     grid: Grid = Grid(stdin.read())
-    (grid_lx, grid_ly, num) = grid.best()
-    print(num)
-    laser6 = list(test_six.laser(8, 3))
-    print(laser6[-1] == (14, 3))
-    laser5 = list(test_five.laser(11, 13))
-    grid_laser = list(grid.laser(grid_lx, grid_ly))
-    winner_x, winner_y = grid_laser[201]
-    print(100 * winner_x + winner_y)
+    print(grid.best()[2])
+    print(part_two(grid))
