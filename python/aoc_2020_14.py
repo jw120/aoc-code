@@ -34,6 +34,19 @@ def parse_command(s: str) -> Command:
     raise RuntimeError("Could not parse command", s)
 
 
+def set_bit(x: int, n: int, val: bool) -> int:
+    """Return a copy of x with the n'th bit set to val.
+
+    >>> [set_bit(5, 1, True), set_bit(5, 1, False), set_bit(5, 2, True), set_bit(5, 2, False)]
+    [7, 5, 5, 1]
+    """
+    target_bit: int = 1 << n
+    if bool(x & target_bit) == val:
+        return x
+    else:
+        return x ^ target_bit
+
+
 def apply_mask1(value: int, mask: str) -> int:
     """Apply version one mask to the given value.
 
@@ -44,14 +57,13 @@ def apply_mask1(value: int, mask: str) -> int:
     >>> apply_mask1(0, 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXX1XXXX0X')
     64
     """
-    all_ones = (1 << 36) - 1
     if len(mask) != 36:
         raise RuntimeError("Bad mask", mask)
     for i in range(0, 36):
         if mask[-i - 1] == "1":
-            value |= 1 << i
+            value = set_bit(value, i, True)
         elif mask[-i - 1] == "0":
-            value &= all_ones ^ (1 << i)
+            value = set_bit(value, i, False)
         elif mask[-i - 1] == "X":
             pass
         else:
@@ -74,7 +86,7 @@ def apply_mask2(address: int, mask: str) -> List[int]:
         raise RuntimeError("Bad mask", mask)
     for i in range(0, 36):
         if mask[-i - 1] == "1":
-            address |= 1 << i
+            address = set_bit(address, i, True)
         elif mask[-i - 1] == "0":
             pass
         elif mask[-i - 1] == "X":
@@ -82,12 +94,9 @@ def apply_mask2(address: int, mask: str) -> List[int]:
         if len(mask) != 36:
             raise RuntimeError("Bad mask", mask)
     results: List[int] = []
-    all_ones = (1 << 36) - 1
     for x in range(0, 2 ** len(free_bits)):
         for j in range(0, len(free_bits)):
-            address &= all_ones ^ (1 << free_bits[-j])
-            if x & (1 << j):
-                address |= 1 << free_bits[-j]
+            address = set_bit(address, free_bits[-j], bool(x & (1 << j)))
         results.append(address)
     return results
 
