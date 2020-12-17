@@ -2,12 +2,13 @@
 
 
 from doctest import testmod
+from functools import reduce
 from re import compile
 from sys import stdin
 from typing import List, Pattern, Set, Tuple
 
 ValidField = Tuple[str, Tuple[int, int], Tuple[int, int]]
-valid_pattern: Pattern[str] = compile(r"([a-z ])+: (\d+)-(\d+) or (\d+)-(\d+)")
+valid_pattern: Pattern[str] = compile(r"([a-z ]+): (\d+)-(\d+) or (\d+)-(\d+)")
 
 
 def parse_input(s: str) -> Tuple[List[ValidField], List[int], List[List[int]]]:
@@ -60,21 +61,15 @@ def run1(valids: List[ValidField], tickets: List[List[int]]) -> int:
     return count
 
 
-test2a: List[ValidField] = [
-    ("class", (0, 1), (4, 19)),
-    ("row", (0, 5), (8, 19)),
-    ("seat", (0, 13), (16, 19)),
-]
-test2b: List[int] = [11, 12, 13]
-test2c: List[List[int]] = [[3, 9, 18], [15, 1, 5], [5, 14, 9], [24, 15, 16]]
-
-
 def run2(valids: List[ValidField], your: List[int], tickets: List[List[int]]) -> int:
-    """Find the six fields on your ticket.
+    """Find the six fields on your ticket."""
 
-    >>> run2(test2a, test2b, test2c)
-    71
-    """
+    def valid_value(f: ValidField, x: int) -> bool:
+        """Is the value valid for the given field."""
+        _, (lo1, hi1), (lo2, hi2) = f
+        val = (lo1 <= x <= hi1) or (lo2 <= x <= hi2)
+        return val
+
     # Eliminate invalid tickets
     valid_set: Set[int] = set()
     for _, (a, b), (c, d) in valids:
@@ -85,11 +80,37 @@ def run2(valids: List[ValidField], your: List[int], tickets: List[List[int]]) ->
     valid_tickets: List[List[int]] = [
         ticket for ticket in tickets if all(num in valid_set for num in ticket)
     ]
-    print(valid_tickets)
-    return 0
+    # For each field see which positions are compatible
+    field_fit: List[Tuple[str, List[int]]] = []
+    for field in valids:
+        valid_positions: List[int] = []
+        for position in range(0, len(tickets[0])):
+            if all(valid_value(field, ticket[position]) for ticket in valid_tickets):
+                valid_positions.append(position)
+
+        field_fit.append((field[0], valid_positions))
+    # Allocate fields with only one possible position until all fields are allocated
+    allocated_fields: List[Tuple[str, int]] = []
+    while field_fit:
+        for field_name, field_positions in field_fit:
+            if not field_positions:
+                raise RuntimeError("No position found for", field_name)
+            if len(field_positions) == 1:
+                found_position: int = field_positions[0]
+                allocated_fields.append((field_name, found_position))
+                field_fit.remove((field_name, field_positions))
+                for other_field_name, other_field_positions in field_fit:
+                    other_field_positions.remove(found_position)
+                break
+    departure_field_positions = [
+        position for name, position in allocated_fields if name.startswith("departure")
+    ]
+    your_values: List[int] = [your[position] for position in departure_field_positions]
+    return reduce(lambda x, y: x * y, your_values, 1)
 
 
 if __name__ == "__main__":
     testmod()
     [valid_fields, your_ticket, nearby_tickets] = parse_input(stdin.read())
     print(run1(valid_fields, nearby_tickets))
+    print(run2(valid_fields, your_ticket, nearby_tickets))
