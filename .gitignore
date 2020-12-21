@@ -1,4 +1,5 @@
-.venv/
+.DS_Store
+.venv
 .mypy_cache
-out/
 __pycache__
+web_pages

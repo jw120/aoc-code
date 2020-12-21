@@ -1,5 +1,5 @@
-
-# All requirements are just for development checking - we don't care about version numbers
+numpy
+# All other requirements are just for development checking - we don't care about version numbers
 black
 mypy
 flake8
