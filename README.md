@@ -5,7 +5,7 @@ Advent of Code
 
 - Add timing
 - Speed up 2020/11
-
+- Avoid duplication (and speeed up 2020/17): Grid[Coord3]?
 
 
 # Python setup
