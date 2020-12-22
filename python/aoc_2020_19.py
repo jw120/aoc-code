@@ -99,8 +99,39 @@ class MessageValidator:
             return s
         assert_never(r)
 
+    def valid_part_two(self, s: str) -> bool:
+        """Match starting with special part two rules.
 
-test1 = MessageValidator(["0: 1 2", '1: "a"', "2: 1 3 | 3 1", '3: "b"'])
+        We have the following new rules:
+
+        0: 8 11
+        8: 42 | 8
+        11: 42 31 | 42 11 31
+
+        So, 8 = 42+ and 11 = 42+31+ (with an equal number of matches), so
+        0 matches 42+31+ with more matches of 42 than 31.
+
+        No other rule refers to 0/8/11 so we can treat this as a special top-level rule and try
+        matching for n 42s followed by upto (n-1) 31s for increasing n
+        """
+        count_42 = 0
+        s_remainder = s
+        while True:
+            remainder_42 = self.valid_remains(s_remainder, self.rules[42])
+            if remainder_42 is None:
+                return False
+            count_42 += 1
+            count_31 = 0
+            s_remainder = remainder_42
+            remainder = remainder_42
+            while count_31 < count_42 - 1:
+                remainder_31 = self.valid_remains(remainder, self.rules[31])
+                if remainder_31 is None:
+                    break
+                if remainder_31 == "":
+                    return True
+                remainder = remainder_31
+                count_31 += 1
 
 
 if __name__ == "__main__":
@@ -108,3 +139,4 @@ if __name__ == "__main__":
     rules, messages = stdin.read().split("\n\n")
     mv = MessageValidator(rules.splitlines())
     print(sum(mv.valid(message) for message in messages.splitlines()))
+    print(sum(mv.valid_part_two(message) for message in messages.splitlines()))
