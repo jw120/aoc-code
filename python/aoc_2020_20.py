@@ -36,12 +36,23 @@ edge pixels (False means that the edge values match directly)
 """
 Connection = Tuple[TileId, Direction, bool]
 
-# Label for a tile within the assemebled grid. Flag for whether its contents have been flipped
-# and the direction is which edge is up on our grid
 """ When each tile is embedded in the final grid we store its orientation. The direction is
 which edge is up and bool whether the tile needs to be flipped (left-to-right) after rotating.
 """
 Orientation = Tuple[TileId, bool, Direction]
+
+
+def right(flipped: bool, rotation: Direction) -> Direction:
+    """Return the edge which is to the right for given tile orientation."""
+    if flipped:
+        return Direction((rotation + 3) % 4)
+    else:
+        return Direction((rotation + 1) % 4)
+
+
+def down(flipped: bool, rotation: Direction) -> Direction:
+    """Return the edge which is down for given tile orientation."""
+    return Direction((rotation + 2) % 4)
 
 
 def flip(e: EdgeValue) -> EdgeValue:
@@ -53,25 +64,16 @@ def flip(e: EdgeValue) -> EdgeValue:
     return EdgeValue(int(format(e, "010b")[::-1], 2))
 
 
-def right(flipped: bool, rotation: Direction) -> Direction:
-    if flipped:
-        return Direction((rotation + 3) % 4)
-    else:
-        return Direction((rotation + 1) % 4)
-
-
-def down(flipped: bool, rotation: Direction) -> Direction:
-    return Direction((rotation + 2) % 4)
-
-
 T = TypeVar("T")
 
 
-def len_skip_none(xs: List[T]) -> int:
+def len_skip_none(xs: List[Optional[T]]) -> int:
+    """Length of a list of optionals exclduing the Nones.
+
+    >>> len_skip_none([1, None, 2])
+    2
+    """
     return len([x for x in xs if x is not None])
-
-
-U = TypeVar("U")
 
 
 def append_cols(xs: List[List[T]], ys: List[List[T]]) -> List[List[T]]:
@@ -117,6 +119,7 @@ def count_trues(xs: List[List[bool]]) -> int:
     return count
 
 
+"""The sea monster we are looking for"""
 monster: List[List[bool]] = [
     [c == "#" for c in line]
     for line in ["                  # ", "#    ##    ##    ###", " #  #  #  #  #  #   "]
@@ -149,15 +152,12 @@ class Tile:
             im = rotate_matrix(im)
         if flip:
             flip_matrix(im)
-        print(f'ID: {self.id} {"Flipped" if flip else "no flip"} Dir: {direction}')
-        for row in im:
-            for col in row:
-                print("#" if col else ".", end="")
-            print()
         return im
 
 
 class Board:
+    """Main class - a collection of tiles which are assembled."""
+
     def _add_to_edge_to_tile(self, e: EdgeValue, c: Connection) -> None:
         if e in self.edge_to_tile:
             self.edge_to_tile[e].append(c)
@@ -168,7 +168,6 @@ class Board:
         # All the tiles by id
         tile_list: List[Tile] = [Tile(s) for s in ss]
         self.tile_size = len(tile_list[0].image)
-        print(f"Number of tiles: {len(tile_list)}")
         self.tiles: Dict[TileId, Tile] = {t.id: t for t in tile_list}
         # Lookup table from edge values to connections
         self.edge_to_tile: Dict[EdgeValue, List[Tuple[TileId, Direction, bool]]] = {}
@@ -192,7 +191,7 @@ class Board:
         self.image: List[List[bool]] = []
 
     def corners(self) -> List[TileId]:
-
+        """Return the corner tile ids."""
         return [
             tile.id
             for tile in self.tiles.values()
@@ -200,15 +199,22 @@ class Board:
         ]
 
     def starting_corner(self) -> TileId:
+        """Return a corner from which we can move right and down."""
         for i in self.tiles.keys():
             connections = self.tile_connections[i]
             if connections[0] is None and connections[3] is None:
                 return i
         raise RuntimeError("No suitable starting corner found")
 
-    def show(self) -> None:
+    def show_connections(self) -> None:
         for tile_id in sorted(self.tiles.keys()):
             print(f"Tile id {tile_id} {self.tile_connections[tile_id]}")
+
+    def show_image(self) -> None:
+        for row in self.image:
+            for col in row:
+                print("#" if col else ".", end="")
+            print()
 
     def next_right(self, cur: Orientation) -> Optional[Orientation]:
         """Return the tile to the right if any."""
@@ -246,29 +252,32 @@ class Board:
         next_flipped = cur_flipped if connection_flipped else (not cur_flipped)
         return (next_id, next_flipped, next_incoming)
 
-    def tile_row(self, start: Orientation) -> List[Orientation]:
-        cur: Optional[Orientation] = start
-        row: List[Orientation] = []
-        while True:
-            if cur is None:
-                return row
-            row.append(cur)
-            cur = self.next_right(cur)
-
-    def tile_col(self, start: Orientation) -> List[Orientation]:
-        cur: Optional[Orientation] = start
-        col: List[Orientation] = []
-        while True:
-            if cur is None:
-                return col
-            col.append(cur)
-            cur = self.next_down(cur)
-
     def tile(self) -> List[List[Orientation]]:
+        """Assemble images into a grid of orientations."""
+
+        def tile_row(start: Orientation) -> List[Orientation]:
+            cur: Optional[Orientation] = start
+            row: List[Orientation] = []
+            while True:
+                if cur is None:
+                    return row
+                row.append(cur)
+                cur = self.next_right(cur)
+
+        def tile_col(start: Orientation) -> List[Orientation]:
+            cur: Optional[Orientation] = start
+            col: List[Orientation] = []
+            while True:
+                if cur is None:
+                    return col
+                col.append(cur)
+                cur = self.next_down(cur)
+
         start: Orientation = (self.starting_corner(), False, Direction(0))
-        return [self.tile_row(t) for t in self.tile_col(start)]
+        return [tile_row(t) for t in tile_col(start)]
 
     def set_image(self) -> None:
+        """Build image from tiles."""
         grid: List[List[Orientation]] = self.tile()
         self.image = []
         for row in grid:
@@ -280,6 +289,8 @@ class Board:
             self.image = self.image + new_rows
 
     def sea_monsters(self) -> int:
+        """Count sea monsters in the image's current orientation."""
+
         def test_monster(i: int, j: int) -> bool:
             for monster_row in range(monster_height):
                 for monster_col in range(monster_width):
@@ -298,38 +309,24 @@ class Board:
         for row_index in range(image_height - monster_height + 1):
             for col_index in range(image_width - monster_width + 1):
                 if test_monster(row_index, col_index):
-                    print("Found at", row_index, col_index)
                     count += 1
         return count
+
+    def max_sea_monsters(self) -> int:
+        """Return the number of sea monsters in the orientation with most monsters."""
+        counts: List[int] = []
+        for d in range(4):
+            counts.append(self.sea_monsters())
+            flip_matrix(self.image)
+            counts.append(self.sea_monsters())
+            flip_matrix(self.image)
+            board.image = rotate_matrix(board.image)
+        return max(counts)
 
 
 if __name__ == "__main__":
     testmod()
     board = Board(block.splitlines() for block in stdin.read().split("\n\n"))
-    #    board.show()
-    #    print(board.corners())
     print(reduce(lambda x, y: x * y, board.corners(), 1))
-    #    grid: List[List[Orientation]] = board.tile()
-    #    for trow in board.tile():
-    #        print(len(trow), ":", trow)
-    print("image")
     board.set_image()
-    for row in board.image:
-        for col in row:
-            print("#" if col else ".", end="")
-        print()
-    #    print("rot and flip")
-    #    final_image = rotate_matrix(rotate_matrix(board.image))
-    #    flip_matrix(final_image)
-    #    for row in final_image:
-    #        for col in row:
-    #            print("#" if col else ".", end="")
-    #        print()
-    for d in range(4):
-        print(f"Rotated by {d}, found {board.sea_monsters()} monsters")
-        board.image = rotate_matrix(board.image)
-    flip_matrix(board.image)
-    for d in range(4):
-        print(f"Rotated by {d} and flipped, found {board.sea_monsters()} monsters")
-        board.image = rotate_matrix(board.image)
-    print(count_trues(board.image) - 21 * count_trues(monster))
+    print(count_trues(board.image) - board.max_sea_monsters() * count_trues(monster))
