@@ -95,7 +95,6 @@ def rotate_matrix(xs: List[List[T]]) -> List[List[T]]:
     >>> rotate_matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
     [[3, 6, 9], [2, 5, 8], [1, 4, 7]]
     """
-    print("rotating", xs)
     width: int = len(xs[0])
     ret: List[List[T]] = [[] for _ in range(width)]
     for i in range(width):
@@ -103,6 +102,25 @@ def rotate_matrix(xs: List[List[T]]) -> List[List[T]]:
             ret[i].append(row[i])
     ret.reverse()
     return ret
+
+
+def count_trues(xs: List[List[bool]]) -> int:
+    """Count the number of true values in a matrix of bools.
+
+    >>> count_trues([[True, False], [False, False]])
+    1
+    """
+    count = 0
+    for row in xs:
+        for col in row:
+            count += col
+    return count
+
+
+monster: List[List[bool]] = [
+    [c == "#" for c in line]
+    for line in ["                  # ", "#    ##    ##    ###", " #  #  #  #  #  #   "]
+]
 
 
 class Tile:
@@ -170,6 +188,8 @@ class Board:
                     self.tile_connections[tile.id].append(None)
                 else:
                     raise RuntimeError("Too many connections")
+        # Space for assembled image
+        self.image: List[List[bool]] = []
 
     def corners(self) -> List[TileId]:
 
@@ -248,38 +268,68 @@ class Board:
         start: Orientation = (self.starting_corner(), False, Direction(0))
         return [self.tile_row(t) for t in self.tile_col(start)]
 
-    def image(self) -> List[List[bool]]:
+    def set_image(self) -> None:
         grid: List[List[Orientation]] = self.tile()
-        image: List[List[bool]] = []
+        self.image = []
         for row in grid:
             new_rows: List[List[bool]] = [[] for _ in range(self.tile_size)]
             for tile_id, flip, direction in row:
                 new_rows = append_cols(
                     new_rows, self.tiles[tile_id].oriented_image(flip, direction)
                 )
-            image = image + new_rows
-        return image
+            self.image = self.image + new_rows
+
+    def sea_monsters(self) -> int:
+        def test_monster(i: int, j: int) -> bool:
+            for monster_row in range(monster_height):
+                for monster_col in range(monster_width):
+                    if (
+                        monster[monster_row][monster_col]
+                        and not self.image[i + monster_row][j + monster_col]
+                    ):
+                        return False
+            return True
+
+        image_height: int = len(self.image)
+        image_width: int = len(self.image[0])
+        monster_height: int = len(monster)
+        monster_width: int = len(monster[0])
+        count = 0
+        for row_index in range(image_height - monster_height + 1):
+            for col_index in range(image_width - monster_width + 1):
+                if test_monster(row_index, col_index):
+                    print("Found at", row_index, col_index)
+                    count += 1
+        return count
 
 
 if __name__ == "__main__":
     testmod()
     board = Board(block.splitlines() for block in stdin.read().split("\n\n"))
-    board.show()
-    print(board.corners())
+    #    board.show()
+    #    print(board.corners())
     print(reduce(lambda x, y: x * y, board.corners(), 1))
-    grid: List[List[Orientation]] = board.tile()
-    for trow in board.tile():
-        print(len(trow), ":", trow)
-    final_image: List[List[bool]] = board.image()
+    #    grid: List[List[Orientation]] = board.tile()
+    #    for trow in board.tile():
+    #        print(len(trow), ":", trow)
     print("image")
-    for row in final_image:
+    board.set_image()
+    for row in board.image:
         for col in row:
             print("#" if col else ".", end="")
         print()
-    print("rot and flip")
-    final_image = rotate_matrix(rotate_matrix(final_image))
-    flip_matrix(final_image)
-    for row in final_image:
-        for col in row:
-            print("#" if col else ".", end="")
-        print()
+    #    print("rot and flip")
+    #    final_image = rotate_matrix(rotate_matrix(board.image))
+    #    flip_matrix(final_image)
+    #    for row in final_image:
+    #        for col in row:
+    #            print("#" if col else ".", end="")
+    #        print()
+    for d in range(4):
+        print(f"Rotated by {d}, found {board.sea_monsters()} monsters")
+        board.image = rotate_matrix(board.image)
+    flip_matrix(board.image)
+    for d in range(4):
+        print(f"Rotated by {d} and flipped, found {board.sea_monsters()} monsters")
+        board.image = rotate_matrix(board.image)
+    print(count_trues(board.image) - 21 * count_trues(monster))
