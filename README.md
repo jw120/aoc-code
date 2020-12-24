@@ -6,6 +6,8 @@ Advent of Code
 - Add timing
 - Speed up 2020/11
 - Avoid duplication (and speeed up 2020/17): Grid[Coord3]?
+- Review use of if key in (and try .setdefault)
+- Try using Counter
 
 
 # Python setup
@@ -35,6 +37,6 @@ To install development packages into the local environment
 pip install -r requirements.txt
 ```
 
-Editting done with VS Code and its `pylance` extension.s
+Editting done with VS Code and its built-in extension
 
 
