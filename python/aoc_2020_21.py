@@ -70,19 +70,16 @@ def part_two(foods: List[Tuple[List[Ingredient], List[Allergen]]]) -> str:
     matched_ingredients: List[Tuple[Ingredient, Allergen]] = []
 
     while possible:
-        new_possible: Dict[Allergen, Set[Ingredient]] = {}
         for allergen, ingredient_set in possible.items():
             # Find an allergen with only one possible ingredient
             if len(ingredient_set) == 1:
                 (ingredient,) = ingredient_set
                 matched_ingredients.append((ingredient, allergen))
                 # Remove the matched allergen and ingredient from the dictionary
-                # (Can't edit the dictionary directly while iterating over it)
+                del possible[allergen]
                 for a, i_set in possible.items():
-                    if a != allergen:
-                        new_possible[a] = possible[a] - {ingredient}
+                    possible[a] = possible[a] - {ingredient}
                 break
-        possible = new_possible
     return ",".join(
         [pair[0] for pair in sorted(matched_ingredients, key=lambda x: x[1])]
     )
