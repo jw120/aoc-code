@@ -13,7 +13,7 @@ aoc2020: \
 
 python_%:
 	@/bin/echo -n "$@: "
-	@python python/aoc_$*.py < input/$*.txt | diff - good/$*.txt && echo OK
+	@python python/aoc_$*.py < ../aoc-data/input/$*.txt | diff - ../aoc-data/good/$*.txt && echo OK
 
 
 check:

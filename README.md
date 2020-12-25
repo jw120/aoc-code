@@ -1,6 +1,11 @@
-Advent of Code
+# Advent of Code
 
-# TODO
+My solutions to advent of code.
+
+Assumes `../aoc-data` (which is a private repo) holds personalized input data and solutions.
+
+
+## TODO
 - When mypy supports 3.9, use list[] instead of List as a type
 
 - Add timing
@@ -10,7 +15,7 @@ Advent of Code
 - Try using Counter
 
 
-# Python setup
+## Python setup
 
 Assumes modern python (tested with 3.9) installed as `python3` and `pip3`.
 
