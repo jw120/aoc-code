@@ -2,70 +2,73 @@
 
 from __future__ import annotations
 
-from copy import copy
 from doctest import testmod
 from sys import stdin
-from typing import List, Tuple
+from typing import Dict, List, Optional
 
 
 class CrabCups:
-    def __init__(self, xs: List[int]) -> None:
-        self.cups = copy(xs)
-        self.current_value = xs[0]
-        self.number_of_cups = len(xs)
+    def __init__(self, xs: List[int], extend: Optional[int] = None) -> None:
+        self.current_value: int = xs[0]
+        self.next: Dict[int, int] = {}
+        for i in range(len(xs) - 1):
+            self.next[xs[i]] = xs[i + 1]
+        if extend is None:
+            self.num_values: int = len(xs)
+            self.next[xs[len(xs) - 1]] = xs[0]
+        else:
+            self.num_values = extend
+            self.next[xs[-1]] = len(xs) + 1
+            for j in range(len(xs) + 1, extend):
+                self.next[j] = j + 1
+            self.next[extend] = xs[0]
 
-    def _print_cups(self) -> None:
+    def print_cups(self) -> None:
         def cup(x: int) -> str:
             if x == self.current_value:
                 return "(" + str(x) + ")"
             else:
                 return " " + str(x) + " "
 
-        print(f'cups: {"".join(cup(i) for i in self.cups)}')
+        print("cups: ", end="")
+        val: int = self.current_value
+        while True:
+            print(cup(val), end="")
+            val = self.next[val]
+            if val == self.current_value:
+                print()
+                break
 
     def move(self, debug: bool = False) -> CrabCups:
         """Perform one crab move."""
+        if debug:
+            self.print_cups()
 
-        def take3() -> Tuple[int, int, int]:
-            """Remove next 3 values from self.cups and return them."""
-            if debug:
-                self._print_cups()
-            index0: int = self.cups.index(self.current_value)
-            index1: int = (index0 + 1) % self.number_of_cups
-            index2: int = (index0 + 2) % self.number_of_cups
-            index3: int = (index0 + 3) % self.number_of_cups
-            value1: int = self.cups[index1]
-            value2: int = self.cups[index2]
-            value3: int = self.cups[index3]
-            if debug:
-                print(f"pick up: {value1}, {value2}, {value3}")
-            # We can't use index2 or index3 for deletions, as earlier deletes may
-            # change the indices
-            del self.cups[self.cups.index(value1)]
-            del self.cups[self.cups.index(value2)]
-            del self.cups[self.cups.index(value3)]
-            return (value1, value2, value3)
+        # Remove the next 3 values
+        next1: int = self.next[self.current_value]
+        next2: int = self.next[next1]
+        next3: int = self.next[next2]
+        self.next[self.current_value] = self.next[next3]
+        if debug:
+            print(f"pick up: {next1} {next2} {next3}")
 
-        def add3(values: Tuple[int, int, int]) -> None:
-            """Insert the three values."""
-            destination_value = self.current_value - 1
-            while destination_value not in self.cups:
-                destination_value -= 1
-                if destination_value < min(self.cups):
-                    destination_value = max(self.cups)
-            destination_index: int = self.cups.index(destination_value)
-            if debug:
-                print(f"destination: {destination_value}")
-            self.cups[destination_index + 1 : destination_index + 1] = values
+        # Find a destination
+        destination: int = (
+            self.current_value - 1 if self.current_value > 1 else self.num_values
+        )
+        while destination in [next1, next2, next3]:
+            destination = destination - 1 if destination > 1 else self.num_values
+        if debug:
+            print(f"destination {destination}")
 
-        def update_current() -> None:
-            """Update current cup value."""
-            current_index: int = self.cups.index(self.current_value)
-            next_index: int = (current_index + 1) % self.number_of_cups
-            self.current_value = self.cups[next_index]
+        # Insert the 3 values after destination
+        after_dest: int = self.next[destination]
+        self.next[destination] = next1
+        self.next[next3] = after_dest
 
-        add3(take3())
-        update_current()
+        # Advance current position
+        self.current_value = self.next[self.current_value]
+
         return self
 
     def run(self, moves: int, debug: bool = False) -> CrabCups:
@@ -76,22 +79,27 @@ class CrabCups:
             self.move(debug)
         if debug:
             print("-- final --")
-            self._print_cups()
+            self.print_cups()
         return self
 
     def order(self) -> str:
-        """Return final order of cups.
+        """Return final order of cups for part one answer.
 
         >>> CrabCups(test1).run(10).order()
         '92658374'
         >>> CrabCups(test1).run(100).order()
         '67384529'
         """
-        index1: int = self.cups.index(1)
-        return "".join(
-            str(self.cups[(index1 + i) % self.number_of_cups])
-            for i in range(1, self.number_of_cups)
-        )
+        output: str = ""
+        val = self.next[1]
+        while val != 1:
+            output += str(val)
+            val = self.next[val]
+        return output
+
+    def stars(self) -> int:
+        """Find stars for part two answer."""
+        return self.next[1] * self.next[self.next[1]]
 
 
 test1: List[int] = [int(x) for x in "389125467"]
@@ -101,3 +109,4 @@ if __name__ == "__main__":
     testmod()
     starting_cups: List[int] = [int(x) for x in stdin.read().strip()]
     print(CrabCups(starting_cups).run(100).order())
+    print(CrabCups(starting_cups, 1_000_000).run(10_000_000).stars())
