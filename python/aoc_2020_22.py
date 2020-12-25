@@ -3,10 +3,22 @@
 from __future__ import annotations
 
 from copy import copy
+from dataclasses import dataclass
 from doctest import testmod
 from enum import Enum, auto
 from sys import stdin
-from typing import ClassVar, List, Tuple, Union
+from typing import ClassVar, List, Set, Tuple, Union
+
+
+@dataclass(frozen=True)
+class History:
+    """Wrapper class with a hash so we can put the card state into a set."""
+
+    p1: List[int]
+    p2: List[int]
+
+    def __hash__(self) -> int:
+        return hash(f"{self.p1} {self.p2}")
 
 
 class Player(Enum):
@@ -99,8 +111,8 @@ class Combat:
         >>> Combat(test1).play_recursive_game().score()
         291
         """
-
         game_num: int = self.next_game()
+        history: Set[History] = set()
 
         if debug:
             print(f"=== Game {game_num} ===")
@@ -122,6 +134,13 @@ class Combat:
             if debug:
                 print(f"Player 1 plays: {top_player_1}")
                 print(f"Player 2 plays: {top_player_2}")
+
+            # Player one wins the game if repeating ourselves
+            new_history: History = History(self.p1, self.p2)
+            if new_history in history:
+                self.p2 = []  # To signal player one has won
+                return self
+            history.add(new_history)
 
             # Round Recursive game if both players have enough cards
             if top_player_1 <= len(self.p1) and top_player_2 <= len(self.p2):
