@@ -3,8 +3,6 @@
 from doctest import testmod
 from sys import stdin
 
-# from typing import List, Set
-
 
 def step(val: int, subject_number: int) -> int:
     """Apply one round of our transformaion."""

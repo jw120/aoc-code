@@ -9,7 +9,7 @@ aoc2020: \
 	python_2020_06 python_2020_07 python_2020_08 python_2020_09 python_2020_10 \
 	python_2020_11 python_2020_12 python_2020_13 python_2020_14 python_2020_15 \
 	python_2020_16 python_2020_17 python_2020_18 python_2020_19 python_2020_20 \
-	python_2020_21 python_2020_22
+	python_2020_21 python_2020_22 python_2020_23 python_2020_24 python_2020_25
 
 python_%:
 	@/bin/echo -n "$@: "
