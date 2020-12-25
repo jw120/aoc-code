@@ -1,16 +1,16 @@
 # Advent of Code
 
-My solutions to advent of code.
+My solutions to advent of code. So far contains:
+
+ * Complete 2020 in Python
+ * Partial 2019 in Python
 
 Assumes `../aoc-data` (which is a private repo) holds personalized input data and solutions.
 
 
-## TODO
-- When mypy supports 3.9, use list[] instead of List as a type
-
-- Add timing
-- Speed up 2020/11
-- Avoid duplication (and speeed up 2020/17): Grid[Coord3]?
+## Python improvement
+- Add timing and speed up slow solutions
+- Avoid duplication in Day 17
 - Review use of if key in (and try .setdefault)
 - Try using Counter
 
