@@ -32,6 +32,9 @@ class HexCoord:
             next_x = self.x + (s[1] == "e")
         return HexCoord(next_x, next_y)
 
+    def adjoining(self) -> Set[HexCoord]:
+        return {self.move(d) for d in ["e", "w", "ne", "se", "nw", "sw"]}
+
 
 def split_moves(s: str) -> List[str]:
     return [m[0] for m in re.finditer("[ns]?[ew]", s)]
@@ -64,10 +67,10 @@ test1: List[List[str]] = [
 ]
 
 
-def walk(path_lists: List[List[str]]) -> int:
+def walk(path_lists: List[List[str]]) -> Set[HexCoord]:
     """Walk along given paths and return number of black tiles.
 
-    >>> walk(test1)
+    >>> len(walk(test1))
     10
     """
     black_tiles: Set[HexCoord] = set()
@@ -79,10 +82,60 @@ def walk(path_lists: List[List[str]]) -> int:
             black_tiles.remove(pos)
         else:
             black_tiles.add(pos)
-    return len(black_tiles)
+    return black_tiles
+
+
+class Floor:
+    def __init__(self, starting_black_tiles: Set[HexCoord]) -> None:
+        self.days: int = 0
+        self.g: List[Set[HexCoord]] = [starting_black_tiles, set()]
+
+    def active(self) -> int:
+        return self.days % 2
+
+    def inactive(self) -> int:
+        return (self.days + 1) % 2
+
+    def count_black_neighbours(self, t: HexCoord) -> int:
+        return len(t.adjoining() & self.g[self.active()])
+
+    def count_black_cells(self) -> int:
+        return len(self.g[self.active()])
+
+    def update(self) -> Floor:
+        self.g[self.inactive()] = set()
+        # Update black cells
+        for black_cell in self.g[self.active()]:
+            n = self.count_black_neighbours(black_cell)
+            if n == 1 or n == 2:
+                self.g[self.inactive()].add(black_cell)
+        # Find all white cells that neighbour a black cell
+        white_cells: Set[HexCoord] = set()
+        for black_cell in self.g[self.active()]:
+            neighbours = black_cell.adjoining() - self.g[self.active()]
+            white_cells = white_cells | neighbours
+        # Activate any eligible white cells
+        for white_cell in white_cells:
+            n = self.count_black_neighbours(white_cell)
+            if n == 2:
+                self.g[self.inactive()].add(white_cell)
+        self.days += 1
+        return self
+
+    def run(self, n: int) -> Floor:
+        """Update the floor for n days.
+
+        >>> Floor(walk(test1)).run(20).count_black_cells()
+        132
+        """
+        for _ in range(n):
+            self.update()
+        return self
 
 
 if __name__ == "__main__":
     testmod()
     paths = [split_moves(line) for line in stdin]
-    print(walk(paths))
+    starting_set = walk(paths)
+    print(len(starting_set))
+    print(Floor(starting_set).run(100).count_black_cells())
