@@ -1,0 +1,104 @@
+name:                aoc-code
+version:             0.1.0.0
+github:              "jw1200/aoc-code"
+license:             GPL-3.0-or-later
+author:              "Joe Watson"
+maintainer:          "joe_watson@mail.com"
+copyright:           "2020 Joe Watson"
+
+source-dirs: haskell
+
+extra-source-files:
+- README.md
+
+description:         Please see the README on GitHub at <https://github.com/jw1200/aoc-code>
+
+dependencies:
+- base >= 4.7 && < 5
+- containers
+- array
+- attoparsec
+- bytestring
+- doctest
+- text
+
+
+executables:
+ aoc_2018_01:
+   main: aoc_2018_01.hs
+   ghc-options: -main-is AOC_2018_01
+ aoc_2018_02:
+   main: aoc_2018_02.hs
+   ghc-options: -main-is AOC_2018_02
+ aoc_2018_03:
+   main: aoc_2018_03.hs
+   ghc-options: -main-is AOC_2018_03
+ aoc_2018_04:
+   main: aoc_2018_04.hs
+   ghc-options: -main-is AOC_2018_04
+ aoc_2018_05:
+   main: aoc_2018_05.hs
+   ghc-options: -main-is AOC_2018_05
+
+
+
+
+  # day06:
+  #   main: day06.hs
+  #   ghc-options: -main-is Day06
+  # day07:
+  #   main: day07.hs
+  #   ghc-options: -main-is Day07
+  # day08:
+  #   main: day08.hs
+  #   ghc-options: -main-is Day08
+    # day09:
+  #   main: day09.hs
+  #   ghc-options: -main-is Day09
+  # day10:
+  #   main: day10.hs
+  #   ghc-options: -main-is Day10
+  # day11:
+  #   main: day11.hs
+  #   ghc-options: -main-is Day11
+  # day12:
+  #   main: day12.hs
+  #   ghc-options: -main-is Day12
+  # day13:
+  #   main: day13.hs
+  #   ghc-options: -main-is Day13
+  #day14:
+  #  main: day14.hs
+  #  ghc-options: -main-is Day14
+  # day15:
+  #   main: day15.hs
+  #   ghc-options: -main-is Day15
+  #day16:
+  #  main: day16.hs
+  #  ghc-options: -main-is Day16
+  #day18:
+  #   main: day18.hs
+  #   ghc-options: -main-is Day18
+  #day19:
+  #  main: day19.hs
+  #  ghc-options: -main-is Day19
+  # day20:
+  #   main: day20.hs
+  #   ghc-options: -main-is Day20
+  # day22:
+  #  main: day22.hs
+  #  ghc-options: -main-is Day22
+###  day23:
+###   main: day23.hs
+###    ghc-options: -main-is Day23
+  #day24:
+  #  main: day24.hs
+  #  ghc-options: -main-is Day24
+  #day25:
+  #  main: day25.hs
+  #  ghc-options: -main-is Day25
+
+
+tests:
+  doctest:
+    main:               doctest.hs

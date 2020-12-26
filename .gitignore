@@ -4,3 +4,7 @@
 __pycache__
 web_pages
 out/
+.stack-work
+aoc-code.cabal
+stack.yaml
+stack.yaml.lock

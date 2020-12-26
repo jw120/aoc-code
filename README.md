@@ -2,16 +2,23 @@
 
 My solutions to advent of code. So far contains:
 
- * Complete 2020 in Python
- * Partial 2019 in Python
+ * Complete 2020 in Python (done in 2020 advent season)
+ * Partial 2019 in Python (started in 2020 advent season)
+ * Partial 2018 in Haskell (started in 2018 advent season)
 
 Assumes `../aoc-data` (which is a private repo) holds personalized input data and solutions.
 
 
-## TODO - Python 2020 improvements
+## TODO
 
-- Speed up slow solutions
-- Avoid duplication in Day 17
+- Haskell 2018 - update VS Code environment
+- Haskell 2018 - get doctest to work
+- Haskell 2018 - get all existing code working
+- Haskell 2018 - fill in missing
+- Haskell 2018 - linting
+- Python 2020 - Speed up slow solutions
+- Python 2020 - Avoid duplication in Day 17
+- R etc (add from aoc folder)
 
 
 ## Python setup

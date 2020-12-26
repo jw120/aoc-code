@@ -1,6 +1,5 @@
 """Advent of Code 2019 - Day 3."""
 
-# Should not be need for Python >= 3.10
 from __future__ import annotations
 
 from dataclasses import dataclass
