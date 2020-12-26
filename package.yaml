@@ -39,25 +39,23 @@ executables:
  aoc_2018_05:
    main: aoc_2018_05.hs
    ghc-options: -main-is AOC_2018_05
+ aoc_2018_06:
+   main: aoc_2018_06.hs
+   ghc-options: -main-is AOC_2018_06
+ aoc_2018_07:
+   main: aoc_2018_07.hs
+   ghc-options: -main-is AOC_2018_07
+ aoc_2018_08:
+   main: aoc_2018_08.hs
+   ghc-options: -main-is AOC_2018_08
+ aoc_2018_09:
+   main: aoc_2018_09.hs
+   ghc-options: -main-is AOC_2018_09
+ aoc_2018_10:
+   main: aoc_2018_10.hs
+   ghc-options: -main-is AOC_2018_10
 
 
-
-
-  # day06:
-  #   main: day06.hs
-  #   ghc-options: -main-is Day06
-  # day07:
-  #   main: day07.hs
-  #   ghc-options: -main-is Day07
-  # day08:
-  #   main: day08.hs
-  #   ghc-options: -main-is Day08
-    # day09:
-  #   main: day09.hs
-  #   ghc-options: -main-is Day09
-  # day10:
-  #   main: day10.hs
-  #   ghc-options: -main-is Day10
   # day11:
   #   main: day11.hs
   #   ghc-options: -main-is Day11

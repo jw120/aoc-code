@@ -1,11 +1,12 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Day09 where
+module AOC_2018_09 where
 
-import qualified Data.Map as M
 import Data.Map (Map)
+import qualified Data.Map as M
 
 newtype MarbleIndex = MarbleIndex Int deriving (Eq, Ord)
+
 newtype Player = Player Int deriving (Eq, Ord)
 
 next :: MarbleIndex -> MarbleIndex
@@ -18,9 +19,9 @@ instance Show Player where
   show (Player p) = show p
 
 data Marble = Marble
-  { left :: MarbleIndex
-  , right :: MarbleIndex
-  , value :: Int
+  { left :: MarbleIndex,
+    right :: MarbleIndex,
+    value :: Int
   }
 
 hopLeft :: Map MarbleIndex Marble -> MarbleIndex -> MarbleIndex
@@ -30,11 +31,11 @@ hopRight :: Map MarbleIndex Marble -> MarbleIndex -> MarbleIndex
 hopRight m i = right (m M.! i)
 
 data GameState = GameState
-  { numPlayers :: Int
-  , scores :: Map Player Int -- Players and their scores
-  , marbles :: Map MarbleIndex Marble -- Indices and Marbles
-  , currentMarbleIndex :: MarbleIndex -- zero-based index into the marbles list
-  , nextMarbleValue :: Int
+  { numPlayers :: Int,
+    scores :: Map Player Int, -- Players and their scores
+    marbles :: Map MarbleIndex Marble, -- Indices and Marbles
+    currentMarbleIndex :: MarbleIndex, -- zero-based index into the marbles list
+    nextMarbleValue :: Int
   }
 
 -- For debugging
@@ -53,23 +54,26 @@ showMarbleMap c m = go lowestIndex
 
 instance Show GameState where
   show g =
-    show (numPlayers g) ++ ": " ++
-    showMarbleMap (currentMarbleIndex g) (marbles g) ++ " " ++
-    show (M.toList (scores g))
+    show (numPlayers g) ++ ": "
+      ++ showMarbleMap (currentMarbleIndex g) (marbles g)
+      ++ " "
+      ++ show (M.toList (scores g))
 
 -- | Create a new game state
 --
 -- >>> newGame 3
 -- 3: (0) []
 newGame :: Int -> GameState
-newGame n = GameState
-  { numPlayers = n
-  , scores = M.empty
-  , marbles = M.singleton z (Marble { left = z, right = z, value = 0})
-  , currentMarbleIndex = z
-  , nextMarbleValue = 1
-  }
-  where z = MarbleIndex 0
+newGame n =
+  GameState
+    { numPlayers = n,
+      scores = M.empty,
+      marbles = M.singleton z (Marble {left = z, right = z, value = 0}),
+      currentMarbleIndex = z,
+      nextMarbleValue = 1
+    }
+  where
+    z = MarbleIndex 0
 
 testGame :: [GameState]
 testGame = iterate advance $ newGame 9
@@ -97,11 +101,12 @@ testGame = iterate advance $ newGame 9
 advance :: GameState -> GameState
 advance g
   | nextMarbleValue g `mod` 23 == 0 = specialAdvance g
-  | otherwise = g
-  { marbles = newMarbles
-  , currentMarbleIndex = c
-  , nextMarbleValue = 1 + nextMarbleValue g
-  }
+  | otherwise =
+    g
+      { marbles = newMarbles,
+        currentMarbleIndex = c,
+        nextMarbleValue = 1 + nextMarbleValue g
+      }
   where
     -- current marble
     i :: MarbleIndex = currentMarbleIndex g
@@ -114,20 +119,21 @@ advance g
     -- new Marble
     c :: MarbleIndex = next . fst $ M.findMax (marbles g)
     newMarbles =
-      M.insert r (marble_r { right = c }) .
-      M.insert c (Marble { left = r, right = rr, value = nextMarbleValue g}) .
-      M.insert rr (marble_rr { left = c }) $
-      marbles g
+      M.insert r (marble_r {right = c})
+        . M.insert c (Marble {left = r, right = rr, value = nextMarbleValue g})
+        . M.insert rr (marble_rr {left = c})
+        $ marbles g
 
 -- Handle divisible by 23 case
 specialAdvance :: GameState -> GameState
-specialAdvance g = g
-   { scores = newScores
-   , marbles = newMarbles
-   , currentMarbleIndex = l6
-   , nextMarbleValue = 1 + nextMarbleValue g
-   }
-   where
+specialAdvance g =
+  g
+    { scores = newScores,
+      marbles = newMarbles,
+      currentMarbleIndex = l6,
+      nextMarbleValue = 1 + nextMarbleValue g
+    }
+  where
     -- current marble
     i :: MarbleIndex = currentMarbleIndex g
     marble_i :: Marble = marbles g M.! i
@@ -140,11 +146,11 @@ specialAdvance g = g
     marble_l7 :: Marble = marbles g M.! l7
     -- eight marbles to the left
     l8 :: MarbleIndex = h l7
-    marble_l8:: Marble = marbles g M.! l8
+    marble_l8 :: Marble = marbles g M.! l8
     newMarbles =
-      M.insert l8 (marble_l8 { right = l6 }) .
-      M.insert l6 (marble_l6 { left = l8 }) $
-      marbles g
+      M.insert l8 (marble_l8 {right = l6})
+        . M.insert l6 (marble_l6 {left = l8})
+        $ marbles g
     currentPlayer = Player $ (nextMarbleValue g - 1) `mod` numPlayers g + 1
     currentScoreIncrement = nextMarbleValue g + value marble_l7
     newScores = M.insertWith (+) currentPlayer currentScoreIncrement (scores g)
@@ -170,5 +176,5 @@ highScore players lastMarble = maximum . M.elems $ scores finalState
 
 main :: IO ()
 main = do
-  putStrLn $ "day 09 part a: " ++ show (highScore 431 70950)
-  putStrLn $ "day 09 part b: " ++ show (highScore 431 7095000)
+  print $ highScore 431 70950
+  print $ highScore 431 7095000

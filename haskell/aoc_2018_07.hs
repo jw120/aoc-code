@@ -1,15 +1,17 @@
-{-# LANGUAGE OverloadedStrings, ScopedTypeVariables, TupleSections #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TupleSections #-}
 
-module Day07 where
+module AOC_2018_07 where
 
 import qualified Data.Attoparsec.ByteString.Char8 as AC
+import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as BC
-import Data.ByteString (ByteString)
 import qualified Data.Char as C
 import Data.List (foldl', nub, sort)
-import qualified Data.Map as M
 import Data.Map (Map)
+import qualified Data.Map as M
 
 -- | Read a rule
 --
@@ -32,15 +34,17 @@ readRule = either error id . AC.parseOnly rule
 -- >>> testRules
 -- [('C','A'),('C','F'),('A','B'),('A','D'),('B','E'),('D','E'),('F','E')]
 testRules :: [(Char, Char)]
-testRules = map readRule
-  [ "Step C must be finished before step A can begin."
-  , "Step C must be finished before step F can begin."
-  , "Step A must be finished before step B can begin."
-  , "Step A must be finished before step D can begin."
-  , "Step B must be finished before step E can begin."
-  , "Step D must be finished before step E can begin."
-  , "Step F must be finished before step E can begin."
-  ]
+testRules =
+  map
+    readRule
+    [ "Step C must be finished before step A can begin.",
+      "Step C must be finished before step F can begin.",
+      "Step A must be finished before step B can begin.",
+      "Step A must be finished before step D can begin.",
+      "Step B must be finished before step E can begin.",
+      "Step D must be finished before step E can begin.",
+      "Step F must be finished before step E can begin."
+    ]
 
 -- | Convert a list of rules into a map from chars to their direct prequisites
 --
@@ -56,7 +60,7 @@ toPrereqMap rules = foldl' addRule allEmpty rules
     allSteps :: String
     allSteps = nub (map fst rules ++ map snd rules)
     allEmpty :: Map Char String
-    allEmpty = M.fromList $ map (, "") allSteps
+    allEmpty = M.fromList $ map (,"") allSteps
 
 -- | What is the next step to be performed for given preqmap and already completed steps
 --
@@ -88,13 +92,13 @@ allSteps rules = allSteps' ""
     prereqMap :: Map Char String = toPrereqMap rules
     allSteps' :: String -> String
     allSteps' done = case nextStep prereqMap done of
-      Just c -> allSteps' (done  ++ [c])
+      Just c -> allSteps' (done ++ [c])
       Nothing -> done
 
 data ParallelState
   = Working [(Char, Int)] Int String
   | Finished
-  deriving Show
+  deriving (Show)
 
 -- | Advance one tick of parallel working
 --
@@ -113,18 +117,18 @@ parallelStep n baseTime prereqs (Working working tick done)
   | otherwise = Working newWorking (tick + 1) nowDone
   where
     -- First finish the workers due to end this tick
-    nowDone :: String = (done ++) . map fst $ filter ((== tick). snd) working
+    nowDone :: String = (done ++) . map fst $ filter ((== tick) . snd) working
     nowIncomplete :: String = filter (`notElem` nowDone) $ M.keys prereqs
     nowWorking :: [(Char, Int)] = filter ((> tick) . snd) working
     -- Now start new workers
     nowAvailable :: String = sort . filter prereqsDone $ filter notInProgress nowIncomplete
     newStarts :: String = take (n - length nowWorking) nowAvailable
-    newWorking :: [(Char, Int)]= nowWorking ++ map (addFinishTick tick) newStarts
+    newWorking :: [(Char, Int)] = nowWorking ++ map (addFinishTick tick) newStarts
     -- Helpers
     prereqsDone :: Char -> Bool
     prereqsDone step = all (`elem` nowDone) $ prereqs M.! step
     addFinishTick :: Int -> Char -> (Char, Int)
-    addFinishTick t c = (c, C.ord(C.toLower c) - C.ord 'a' +  baseTime + 1 + t)
+    addFinishTick t c = (c, C.ord (C.toLower c) - C.ord 'a' + baseTime + 1 + t)
     notInProgress :: Char -> Bool
     notInProgress = (`notElem` map fst nowWorking)
 
@@ -134,16 +138,16 @@ parallelStep n baseTime prereqs (Working working tick done)
 -- 15
 allParallelSteps :: [(Char, Char)] -> Int -> Int -> Int
 allParallelSteps rules n baseTime = go (Working [] 0 "")
-    where
-      prereqMap :: Map Char String = toPrereqMap rules
-      go :: ParallelState -> Int
-      go s@(Working _ tick _) = case parallelStep n baseTime prereqMap s of
-        s'@Working{} -> go s'
-        Finished -> tick
+  where
+    prereqMap :: Map Char String = toPrereqMap rules
+    go :: ParallelState -> Int
+    go s@(Working _ tick _) = case parallelStep n baseTime prereqMap s of
+      s'@Working {} -> go s'
+      Finished -> tick
 
 main :: IO ()
 main = do
-  input <- B.readFile "input/day07.txt"
-  let rules = map readRule $ BC.lines input
-  putStrLn $ "day 07 part a: " ++ allSteps rules
-  putStrLn $ "day 07 part b: " ++ show (allParallelSteps rules 5 60)
+  input_lines <- BC.lines <$> B.getContents
+  let rules = map readRule input_lines
+  putStrLn $ allSteps rules
+  print $ allParallelSteps rules 5 60

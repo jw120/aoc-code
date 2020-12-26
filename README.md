@@ -11,14 +11,19 @@ Assumes `../aoc-data` (which is a private repo) holds personalized input data an
 
 ## TODO
 
-- Haskell 2018 - update VS Code environment
 - Haskell 2018 - get doctest to work
 - Haskell 2018 - get all existing code working
 - Haskell 2018 - fill in missing
-- Haskell 2018 - linting
+- Haskell 2018 - linting and warnings
 - Python 2020 - Speed up slow solutions
 - Python 2020 - Avoid duplication in Day 17
 - R etc (add from aoc folder)
+
+## Haskell setup
+
+Uses stack
+
+Built with the "Haskell" VS Code extenstion that uses the Haskell Language Server
 
 
 ## Python setup

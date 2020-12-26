@@ -1,11 +1,11 @@
-module Day08 where
+module AOC_2018_08 where
 
 import Control.Monad (unless)
 
 testData :: [Int]
 testData = map read $ words "2 3 0 3 10 11 12 1 1 0 1 99 2 1 1 2"
 
-data Node = Node [Node] [Int] deriving Show
+data Node = Node [Node] [Int] deriving (Show)
 
 -- | Simple parser for a node (no errors caught)
 --
@@ -23,16 +23,16 @@ rep 0 _ xs = ([], xs)
 rep n p xs
   | n < 0 = error "negative in rep"
   | otherwise = (a1 : aN, restN)
-    where
-      (a1, rest1) = p xs
-      (aN, restN) = rep (n - 1) p rest1
+  where
+    (a1, rest1) = p xs
+    (aN, restN) = rep (n - 1) p rest1
 
 -- | Part a answer - sum of meta data in a node
 --
 -- >>> sumMetadata . fst $ node testData
 -- 138
 sumMetadata :: Node -> Int
-sumMetadata (Node cs ms)= sum ms + sum (map sumMetadata cs)
+sumMetadata (Node cs ms) = sum ms + sum (map sumMetadata cs)
 
 -- | Part b answer - value of a node
 --
@@ -50,8 +50,8 @@ value (Node cs ms) = sum $ map refer ms
 
 main :: IO ()
 main = do
-  input <- readFile "input/day08.txt"
-  let (inputNode, rest) = node . map read $ words input
+  input_words <- words <$> getContents
+  let (inputNode, rest) = node $ map read input_words
   unless (null rest) (print ("Parse failed with leftovers: " ++ show rest))
-  putStrLn $ "day 08 part a: " ++ show (sumMetadata inputNode)
-  putStrLn $ "day 08 part b: " ++ show (value inputNode)
+  print $ sumMetadata inputNode
+  print $ value inputNode
