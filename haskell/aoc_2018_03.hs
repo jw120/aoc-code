@@ -57,8 +57,7 @@ parseClaim s = case parseOnly claimParser s of
       skipSpace
       w <- decimal
       char 'x'
-      h <- decimal
-      return $ Claim id x y w h
+      Claim id x y w <$> decimal
 
 -- Main function for part (a) - number of overlapping squares on the fabric
 overlaps :: Fabric -> Int

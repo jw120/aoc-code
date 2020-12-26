@@ -1,13 +1,13 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Day13 where
+module AOC_2018_13 where
 
+import Control.Monad (when)
+import Control.Monad.Loops (iterateUntilM)
 import Data.Array (Array)
 import qualified Data.Array as A
 import Data.List (foldl', sortBy, tails)
 import Data.Maybe (catMaybes)
-import Control.Monad (when)
-import Control.Monad.Loops (iterateUntilM)
 
 --
 -- Segments of the track
@@ -17,10 +17,10 @@ data Segment
   = Horizontal -- '-'
   | Vertical -- '|'
   | LeftDown -- '\'
-  | RightUp-- '/'
+  | RightUp -- '/'
   | Intersection -- '+'
   | Empty -- ' '
-  deriving Show
+  deriving (Show)
 
 toChar :: Segment -> Char
 toChar Horizontal = '-'
@@ -46,27 +46,28 @@ fromChar _ = error "Unknown segment char"
 newtype Network = Network (Array (Int, Int) Segment)
 
 instance Show Network where
-  show (Network n) = init $ unlines [ row y | y <- [0..ymax]]
+  show (Network n) = init $ unlines [row y | y <- [0 .. ymax]]
     where
       ((0, 0), (xmax, ymax)) = A.bounds n
       row :: Int -> String
-      row j = [ toChar (n A.! (x, j)) | x <- [0..xmax]]
+      row j = [toChar (n A.! (x, j)) | x <- [0 .. xmax]]
 
 --
 -- State for each cart
 --
 
 data Cart = Cart
-  { x :: Int
-  , y :: Int
-  , heading :: Direction
-  , next :: Choice
-}
+  { x :: Int,
+    y :: Int,
+    heading :: Direction,
+    next :: Choice
+  }
+
 instance Show Cart where
   show c = "(" ++ show (x c) ++ ", " ++ show (y c) ++ ") " ++ [head (show (heading c))] ++ show (next c)
 
 -- Cart's current direction
-data Direction = North | East | South | West deriving Show
+data Direction = North | East | South | West deriving (Show)
 
 -- Cart's choice at each intersection follows a sequence
 data Choice = TurnLeft | GoStraight | TurnRight
@@ -86,30 +87,32 @@ iterateChoice TurnRight = TurnLeft
 --
 
 data State = State
-  { network :: Network
-  , carts :: [Cart]
-  } deriving Show
+  { network :: Network,
+    carts :: [Cart]
+  }
+  deriving (Show)
 
 testNetworkStr :: [String]
 testNetworkStr =
-  [ "/->-\\        "
-  , "|   |  /----\\"
-  , "| /-+--+-\\  |"
-  , "| | |  | v  |"
-  , "\\-+-/  \\-+--/"
-  , "  \\------/   "
+  [ "/->-\\        ",
+    "|   |  /----\\",
+    "| /-+--+-\\  |",
+    "| | |  | v  |",
+    "\\-+-/  \\-+--/",
+    "  \\------/   "
   ]
 
 testNetwork2 :: State
-testNetwork2 = readNetwork
-  [ "/>-<\\  "
-  , "|   |  "
-  , "| /<+-\\"
-  , "| | | v"
-  , "\\>+</ |"
-  , "  |   ^"
-  , "  \\<->/"
-  ]
+testNetwork2 =
+  readNetwork
+    [ "/>-<\\  ",
+      "|   |  ",
+      "| /<+-\\",
+      "| | | v",
+      "\\>+</ |",
+      "  |   ^",
+      "  \\<->/"
+    ]
 
 -- | Read the initial state
 --
@@ -123,15 +126,16 @@ testNetwork2 = readNetwork
 -- \-+-/  \-+--/
 --   \------/
 readNetwork :: [String] -> State
-readNetwork xs = State
-  { network = Network $ A.array ((0, 0), (xmax, ymax)) trackData
-  , carts = map mkCart cartData
-  }
+readNetwork xs =
+  State
+    { network = Network $ A.array ((0, 0), (xmax, ymax)) trackData,
+      carts = map mkCart cartData
+    }
   where
     xmax = length (head xs) - 1
     ymax = length xs - 1
     rowData :: [(Int, ([(Int, Segment)], [(Int, Direction)]))]
-    rowData = zip [0..] $ map readRow xs
+    rowData = zip [0 ..] $ map readRow xs
     trackData :: [((Int, Int), Segment)]
     trackData = concatMap unpackTrackRow rowData
     unpackTrackRow :: (Int, ([(Int, Segment)], a)) -> [((Int, Int), Segment)]
@@ -141,7 +145,7 @@ readNetwork xs = State
     unpackCartRow :: (Int, (b, [(Int, Direction)])) -> [(Int, Int, Direction)]
     unpackCartRow (y, (_, xs)) = map (\(x, d) -> (x, y, d)) xs
     mkCart :: (Int, Int, Direction) -> Cart
-    mkCart (x, y, d) = Cart { x = x, y = y, heading = d, next = TurnLeft }
+    mkCart (x, y, d) = Cart {x = x, y = y, heading = d, next = TurnLeft}
 
 -- | Read one row
 --
@@ -160,7 +164,7 @@ readNetwork xs = State
 -- >>> snd . readRow $ "| | |  | v  |"
 -- [(9,South)]
 readRow :: String -> ([(Int, Segment)], [(Int, Direction)])
-readRow s = (zip [0..] (map readTrack s), cartIndices s)
+readRow s = (zip [0 ..] (map readTrack s), cartIndices s)
   where
     readTrack :: Char -> Segment
     readTrack '>' = Horizontal
@@ -169,7 +173,7 @@ readRow s = (zip [0..] (map readTrack s), cartIndices s)
     readTrack 'v' = Vertical
     readTrack c = fromChar c
     cartIndices :: String -> [(Int, Direction)]
-    cartIndices = catMaybes . zipWith readCart [0..]
+    cartIndices = catMaybes . zipWith readCart [0 ..]
     readCart :: Int -> Char -> Maybe (Int, Direction)
     readCart i '>' = Just (i, East)
     readCart i 'v' = Just (i, South)
@@ -194,17 +198,17 @@ runLog :: State -> IO ()
 runLog state = do
   showState 0 state
   go 0 state
-    where
-      go i s = case tick s of
-        Left pos -> print pos
-        Right s' -> do
-          showState (i + 1) s'
-          go (i + 1) s'
-      showState i t = putStrLn $ show i ++ ": " ++ show (map (\c -> (x c, y c)) (sortCarts (carts t)))
+  where
+    go i s = case tick s of
+      Left pos -> print pos
+      Right s' -> do
+        showState (i + 1) s'
+        go (i + 1) s'
+    showState i t = putStrLn $ show i ++ ": " ++ show (map (\c -> (x c, y c)) (sortCarts (carts t)))
 
 -- Run system new state or coordinate of first collision
 tick :: State -> Either (Int, Int) State
-tick s = fmap (\cs -> s { carts = cs }) newCarts
+tick s = fmap (\cs -> s {carts = cs}) newCarts
   where
     n :: Network = network s
     sortedCarts :: [Cart] = sortCarts $ carts s
@@ -234,7 +238,7 @@ runToLastCart log s = do
   where
     n :: Network = network s
     moveCart :: ([Cart], [Cart]) -> IO ([Cart], [Cart])
-    moveCart (movedCarts, unmovedCarts@(c:rest)) = do
+    moveCart (movedCarts, unmovedCarts@(c : rest)) = do
       when log $ print (movedCarts, unmovedCarts)
       return (movedCarts', rest')
       where
@@ -260,7 +264,8 @@ sortCarts = sortBy cmpCarts
 -- Does the cart have same (x, y) as any of the carts in the list
 collides :: Cart -> [Cart] -> Bool
 collides c = any (sameCoord c)
-  where sameCoord c1 c2 = x c1 == x c2 && y c1 == y c2
+  where
+    sameCoord c1 c2 = x c1 == x c2 && y c1 == y c2
 
 -- | Update position of cart with one move
 --
@@ -285,34 +290,48 @@ updateCart (Network n) c = case (n A.! (x c, y c), heading c) of
   (RightUp, West) -> c_south
   (RightUp, South) -> c_west
   -- Intersection
-  (Intersection, East) -> (case next c of
-    TurnLeft -> c_north
-    TurnRight -> c_south
-    _ -> c_east) { next = iterateChoice (next c) }
-  (Intersection, West) -> (case next c of
-    TurnLeft -> c_south
-    TurnRight -> c_north
-    _ -> c_west) { next = iterateChoice (next c) }
-  (Intersection, North) -> (case next c of
-    TurnLeft -> c_west
-    TurnRight -> c_east
-    _ -> c_north) { next = iterateChoice (next c) }
-  (Intersection, South) -> (case next c of
-    TurnLeft -> c_east
-    TurnRight -> c_west
-    _ -> c_south) { next = iterateChoice (next c) }
+  (Intersection, East) ->
+    ( case next c of
+        TurnLeft -> c_north
+        TurnRight -> c_south
+        _ -> c_east
+    )
+      { next = iterateChoice (next c)
+      }
+  (Intersection, West) ->
+    ( case next c of
+        TurnLeft -> c_south
+        TurnRight -> c_north
+        _ -> c_west
+    )
+      { next = iterateChoice (next c)
+      }
+  (Intersection, North) ->
+    ( case next c of
+        TurnLeft -> c_west
+        TurnRight -> c_east
+        _ -> c_north
+    )
+      { next = iterateChoice (next c)
+      }
+  (Intersection, South) ->
+    ( case next c of
+        TurnLeft -> c_east
+        TurnRight -> c_west
+        _ -> c_south
+    )
+      { next = iterateChoice (next c)
+      }
   (s, d) -> error $ "Bad update" ++ show s ++ " " ++ show d
   where
-    c_north = c { y = y c - 1, heading = North }
-    c_south = c { y = y c + 1, heading = South }
-    c_west = c { x = x c - 1, heading = West }
-    c_east = c { x = x c + 1, heading = East }
+    c_north = c {y = y c - 1, heading = North}
+    c_south = c {y = y c + 1, heading = South}
+    c_west = c {x = x c - 1, heading = West}
+    c_east = c {x = x c + 1, heading = East}
 
 main :: IO ()
 main = do
-  input <- readFile "input/day13.txt"
-  let initialState = readNetwork $ lines input
-  putStrLn $ "day 13 part a: " ++ show (runToCollision initialState)
-  putStr "day 13 part b: "
+  initialState <- readNetwork . lines <$> getContents
+  print $ runToCollision initialState
   lastCoords <- runToLastCart False initialState
   print lastCoords

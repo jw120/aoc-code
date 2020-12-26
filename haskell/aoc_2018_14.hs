@@ -1,22 +1,26 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, ScopedTypeVariables #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
-module Day14 where
+module AOC_2018_14 where
 
-import qualified Data.Map.Strict as M
+import Data.Char (digitToInt, isDigit)
 import Data.Map.Strict (Map)
+import qualified Data.Map.Strict as M
 import Data.Maybe (fromJust)
 
 newtype Index = Index Int deriving (Enum, Eq, Num, Ord, Show)
+
 newtype Score = Score Int deriving (Eq, Num, Ord, Show)
 
 scoreToIndex :: Score -> Index
 scoreToIndex (Score x) = Index x
 
 data State = State
-  { a :: Index -- first elf
-  , b :: Index -- second elf
-  , recipes :: Map Index Score
+  { a :: Index, -- first elf
+    b :: Index, -- second elf
+    recipes :: Map Index Score
   }
+
 instance Show State where
   show s = xs ++ " " ++ show ia ++ " " ++ show ib
     where
@@ -26,7 +30,7 @@ instance Show State where
       Index ib = b s
 
 initialState :: State
-initialState = State { a = Index 0, b = Index 1, recipes = M.fromList [(Index 0, Score 3), (Index 1, Score 7)] }
+initialState = State {a = Index 0, b = Index 1, recipes = M.fromList [(Index 0, Score 3), (Index 1, Score 7)]}
 
 -- | Iterate state
 --
@@ -35,7 +39,7 @@ initialState = State { a = Index 0, b = Index 1, recipes = M.fromList [(Index 0,
 -- >>> next $ next initialState
 -- [3,7,1,0,1,0] 4 3
 next :: State -> State
-next s = s { a = a', b = b', recipes = recipes' }
+next s = s {a = a', b = b', recipes = recipes'}
   where
     newScore = recipes s M.! a s + recipes s M.! b s
     (newScoreTens, newScoreUnits) = splitScore newScore
@@ -56,7 +60,8 @@ next s = s { a = a', b = b', recipes = recipes' }
 -- ["5158916779","0124515891","9251071085","5941429882"]
 runA :: Int -> String
 runA n = map (\(Score s) -> head (show s)) [r M.! Index i | i <- [n .. n + 9]]
-    where r = recipes $ iterate next initialState !! (n + 8)
+  where
+    r = recipes $ iterate next initialState !! (n + 8)
 
 -- | Part b, iterate until last recipes map given sequence, return number of receipes before sequence
 --
@@ -77,19 +82,21 @@ runB target = adjustIndex . lastKey . dropLastRecipeIfNotMatched $ until matchTa
     matchTarget :: State -> Bool
     matchTarget s = target' == tail (lastRecipes s) || target' == init (lastRecipes s)
     lastRecipes :: State -> [Score]
-    lastRecipes s = [recipes s M.! i  | i <- [lastKey s - n  .. lastKey s], i > 0]
+    lastRecipes s = [recipes s M.! i | i <- [lastKey s - n .. lastKey s], i > 0]
     lastKey :: State -> Index
     lastKey s = fst . fromJust . M.lookupMax $ recipes s
     adjustIndex :: Index -> Int
     adjustIndex (Index i) = i - length target + 1
-    dropLastRecipeIfNotMatched:: State -> State
+    dropLastRecipeIfNotMatched :: State -> State
     dropLastRecipeIfNotMatched s
       | tail (lastRecipes s) == target' = s
-      | init (lastRecipes s) == target' = s { recipes = M.deleteMax (recipes s) }
+      | init (lastRecipes s) == target' = s {recipes = M.deleteMax (recipes s)}
       | otherwise = error "Not a match"
-      where ls = lastRecipes s
+      where
+        ls = lastRecipes s
 
 main :: IO ()
 main = do
-  putStrLn $ "day 14 part a: " ++ runA 157901
-  putStrLn $ "day 14 part b: " ++ show (runB [1,5,7,9,0,1])
+  input :: String <- getContents
+  putStrLn . runA $ read input
+  print . runB . map digitToInt $ filter isDigit input

@@ -1,23 +1,26 @@
-{-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
-module Day12 where
+module AOC_2018_12 where
 
 import Control.Applicative (many, (<|>))
 import qualified Data.Attoparsec.ByteString.Char8 as AC
+import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as BC
-import Data.ByteString (ByteString)
 import Data.Functor (($>))
 
-newtype State = State [(Int, Bool)] deriving Eq
-data Rule = Rule Bool Bool Bool Bool Bool deriving Show
+newtype State = State [(Int, Bool)] deriving (Eq)
+
+data Rule = Rule Bool Bool Bool Bool Bool deriving (Show)
+
 data Chunk = Chunk Int Bool Bool Bool Bool Bool
 
 instance Show Chunk where
   show (Chunk i a b c d e) = show i ++ ": " ++ map (\b -> if b then '#' else '.') [a, b, c, d, e]
 
 instance Show State where
-    show (State s) = show (fst (head s)) ++ ": " ++ map ((\b -> if b then '#' else '.') . snd) s
+  show (State s) = show (fst (head s)) ++ ": " ++ map ((\b -> if b then '#' else '.') . snd) s
 
 -- | Read the initial state
 --
@@ -27,8 +30,7 @@ readInitial :: ByteString -> State
 readInitial = either error id . AC.parseOnly initial
   where
     initial :: AC.Parser State
-    initial = State . zip [0..] <$> (AC.string "initial state: " *> many plant)
-
+    initial = State . zip [0 ..] <$> (AC.string "initial state: " *> many plant)
 
 -- Parse a plant character
 plant :: AC.Parser Bool
@@ -51,22 +53,24 @@ testInitialState :: State
 testInitialState = readInitial $ BC.pack "initial state: #..#.#..##......###...###"
 
 testRules :: [Rule]
-testRules = map readRule
-  [ "...## => #"
-  , "..#.. => #"
-  , ".#... => #"
-  , ".#.#. => #"
-  , ".#.## => #"
-  , ".##.. => #"
-  , ".#### => #"
-  , "#.#.# => #"
-  , "#.### => #"
-  , "##.#. => #"
-  , "##.## => #"
-  , "###.. => #"
-  , "###.# => #"
-  , "####. => #"
-  ]
+testRules =
+  map
+    readRule
+    [ "...## => #",
+      "..#.. => #",
+      ".#... => #",
+      ".#.#. => #",
+      ".#.## => #",
+      ".##.. => #",
+      ".#### => #",
+      "#.#.# => #",
+      "#.### => #",
+      "##.#. => #",
+      "##.## => #",
+      "###.. => #",
+      "###.# => #",
+      "####. => #"
+    ]
 
 -- | Iterate rules once
 --
@@ -78,8 +82,8 @@ apply rules s = State . trimEnds . map anyRuleMatches $ byChunk s
     anyRuleMatches :: Chunk -> (Int, Bool)
     anyRuleMatches c@(Chunk i _ _ _ _ _) = (i, any (`ruleMatches` c) rules)
     ruleMatches :: Rule -> Chunk -> Bool
-    ruleMatches (Rule a b c d e) (Chunk _ p q r s t)
-      = a == p && b == q && c == r && d == s && e == t
+    ruleMatches (Rule a b c d e) (Chunk _ p q r s t) =
+      a == p && b == q && c == r && d == s && e == t
 
 -- | Remove False's from front and back of a list
 --
@@ -95,12 +99,14 @@ trimEnds = dropWhile (not . snd) . reverse . dropWhile (not . snd) . reverse
 byChunk :: State -> [Chunk]
 byChunk (State s) = go (frontPadding ++ s ++ backPadding)
   where
-    go (s1:s2:s3:s4:s5:rest) = toChunk [s1, s2, s3, s4, s5] : go (s2:s3:s4:s5:rest)
+    go (s1 : s2 : s3 : s4 : s5 : rest) = toChunk [s1, s2, s3, s4, s5] : go (s2 : s3 : s4 : s5 : rest)
     go _ = []
-    frontPadding = zip [frontIndex..] [False, False, False, False]
-      where frontIndex = fst (head s) - 4
-    backPadding = zip [backIndex..] [False, False, False, False]
-      where backIndex = fst (last s) + 1
+    frontPadding = zip [frontIndex ..] [False, False, False, False]
+      where
+        frontIndex = fst (head s) - 4
+    backPadding = zip [backIndex ..] [False, False, False, False]
+      where
+        backIndex = fst (last s) + 1
     toChunk [(_, a), (_, b), (i, c), (_, d), (_, e)] = Chunk i a b c d e
     toChunk xs = error $ "Bad chunk" ++ show xs
 
@@ -127,7 +133,6 @@ sumState :: State -> Int
 sumState (State s) = sum . map fst $ filter snd s
 
 -- | Iterate until a state's plants repeats (irrespective of numbering)
---
 untilRepeat :: [Rule] -> State -> (State, Int, Int)
 untilRepeat rules s = go 1 s (apply rules s)
   where
@@ -137,10 +142,9 @@ untilRepeat rules s = go 1 s (apply rules s)
 
 main :: IO ()
 main = do
-  input <- B.readFile "input/day12.txt"
-  let (header : rest) = BC.lines input
+  (header : rest) <- BC.lines <$> B.getContents
   let initialState = readInitial header
   let rules = map readRule . filter ((== '#') . BC.last) $ filter (not . BC.null) rest
-  putStrLn $ "day 12 part a: " ++ show (sumState (run 20 rules initialState))
+  print . sumState $ run 20 rules initialState
   let (rep, n, delta) = untilRepeat rules initialState
-  putStrLn $ "day 12 part b: " ++ show (sumState rep) ++ " " ++ show (n, delta)
+  putStrLn $ show (sumState rep) ++ " " ++ show (n, delta)

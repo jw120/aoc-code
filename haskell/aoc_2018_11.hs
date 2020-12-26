@@ -1,6 +1,6 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Day11 where
+module AOC_2018_11 where
 
 import Data.Array (Array, array, assocs, (!))
 import Data.Function (on)
@@ -44,40 +44,44 @@ highestSquare :: Int -> ((Int, Int), Int)
 highestSquare serial = maximumBy (compare `on` snd) boxScores
   where
     g :: Array (Int, Int) Int =
-      array ((1, 1), (n, n)) [((x, y), powerLevel serial x y) | x <- [1..n], y <- [1..n]]
+      array ((1, 1), (n, n)) [((x, y), powerLevel serial x y) | x <- [1 .. n], y <- [1 .. n]]
     boxScores :: [((Int, Int), Int)] =
-      [((x, y), box x y) | x <- [1..n-2], y <- [1..n-2]]
+      [((x, y), box x y) | x <- [1 .. n -2], y <- [1 .. n -2]]
     box :: Int -> Int -> Int
-    box x y = sum [g ! (x + i, y + j) | i <- [0..2], j <- [0..2]]
+    box x y = sum [g ! (x + i, y + j) | i <- [0 .. 2], j <- [0 .. 2]]
 
 -- | Part b, Return the top-left coordinates and size of square with the highest powerLevel
 highestSquareOfAnySize :: Int -> ((Int, Int, Int), Int)
 highestSquareOfAnySize serial = maximumBy (compare `on` snd) . filterJusts $ assocs boxScores
-    where
-      -- Scores of single squares
-      g :: Array (Int, Int) Int =
-        array ((1, 1), (n, n)) [((x, y), powerLevel serial x y) | x <- [1..n], y <- [1..n]]
-      -- Scores of squares of given size (constructed lazilly), nothing when size is out of bounds
-      boxScores :: Array (Int, Int, Int) (Maybe Int) = array ((1, 1, 1), (n, n, n))
+  where
+    -- Scores of single squares
+    g :: Array (Int, Int) Int =
+      array ((1, 1), (n, n)) [((x, y), powerLevel serial x y) | x <- [1 .. n], y <- [1 .. n]]
+    -- Scores of squares of given size (constructed lazilly), nothing when size is out of bounds
+    boxScores :: Array (Int, Int, Int) (Maybe Int) =
+      array
+        ((1, 1, 1), (n, n, n))
         [((x, y, s), box s x y) | s <- [1 .. n], x <- [1 .. n], y <- [1 .. n]]
-      box :: Int -> Int -> Int -> Maybe Int
-      box s x y
-        | s == 1 = Just (g ! (x, y))
-        | x + s > n || y + s > n = Nothing
-        | otherwise = Just $
-            fromJust (boxScores ! (x, y, s - 1)) +
-            sum [g ! (i, y + s - 1) | i <- [x .. x + s - 1]] +
-            sum [g ! (x + s - 1, j) | j <- [y .. y + s - 1]] -
-            g ! (x + s - 1, y + s - 1)
-      filterJusts :: [((Int, Int, Int), Maybe Int)] -> [((Int, Int, Int), Int)]
-      filterJusts = map removeJust . filter hasJust
-        where
-          hasJust (_, Just _) = True
-          hasJust (_, Nothing) = False
-          removeJust (c, Just x) = (c, x)
-          removeJust (_, Nothing) = error "Unexpected removeJust"
+    box :: Int -> Int -> Int -> Maybe Int
+    box s x y
+      | s == 1 = Just (g ! (x, y))
+      | x + s > n || y + s > n = Nothing
+      | otherwise =
+        Just $
+          fromJust (boxScores ! (x, y, s - 1))
+            + sum [g ! (i, y + s - 1) | i <- [x .. x + s - 1]]
+            + sum [g ! (x + s - 1, j) | j <- [y .. y + s - 1]]
+            - g ! (x + s - 1, y + s - 1)
+    filterJusts :: [((Int, Int, Int), Maybe Int)] -> [((Int, Int, Int), Int)]
+    filterJusts = map removeJust . filter hasJust
+      where
+        hasJust (_, Just _) = True
+        hasJust (_, Nothing) = False
+        removeJust (c, Just x) = (c, x)
+        removeJust (_, Nothing) = error "Unexpected removeJust"
 
 main :: IO ()
 main = do
-  putStrLn $ "day 11 part a: " ++ show (fst (highestSquare 9445))
-  putStrLn $ "day 11 part b: " ++ show (fst (highestSquareOfAnySize 9445))
+  serial :: Int <- read <$> getContents
+  print . fst $ highestSquare serial
+  print . fst $ highestSquareOfAnySize serial

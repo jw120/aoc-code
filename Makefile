@@ -2,8 +2,8 @@ all: aoc_2018 aoc_2019 aoc_2020
 
 aoc_2018: \
 	haskell_2018_01 haskell_2018_02 haskell_2018_03 haskell_2018_04 haskell_2018_05 \
-	haskell_2018_06 haskell_2018_07 haskell_2018_08 haskell_2018_09 haskell_2018_10
-
+	haskell_2018_06 haskell_2018_07 haskell_2018_08 haskell_2018_09 haskell_2018_10 \
+	haskell_2018_11 haskell_2018_12 haskell_2018_13 haskell_2018_14 haskell_2018_15
 
 aoc_2019: \
 	python_2019_01 python_2019_02 python_2019_03 python_2019_04 python_2019_05 \

@@ -21,6 +21,7 @@ dependencies:
 - bytestring
 - doctest
 - text
+- monad-loops
 
 
 executables:
@@ -54,7 +55,21 @@ executables:
  aoc_2018_10:
    main: aoc_2018_10.hs
    ghc-options: -main-is AOC_2018_10
-
+ aoc_2018_11:
+   main: aoc_2018_11.hs
+   ghc-options: -main-is AOC_2018_11
+ aoc_2018_12:
+   main: aoc_2018_12.hs
+   ghc-options: -main-is AOC_2018_12
+ aoc_2018_13:
+   main: aoc_2018_13.hs
+   ghc-options: -main-is AOC_2018_13
+ aoc_2018_14:
+   main: aoc_2018_14.hs
+   ghc-options: -main-is AOC_2018_14
+ aoc_2018_15:
+   main: aoc_2018_15.hs
+   ghc-options: -main-is AOC_2018_15
 
   # day11:
   #   main: day11.hs
