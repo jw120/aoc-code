@@ -2,6 +2,7 @@
 
 from doctest import testmod
 from sys import stdin
+from typing import Tuple
 
 
 def step(val: int, subject_number: int) -> int:
@@ -27,22 +28,32 @@ def find_loop_size(subject_number: int, output: int) -> int:
     return loop_count
 
 
-def part_one(public_key_1: int, public_key_2: int) -> int:
+def find2_loop_size(
+    subject_number: int, output1: int, output2: int
+) -> Tuple[int, bool]:
+    """Look for two loop sizes in parallel."""
+    val: int = 1
+    loop_count: int = 0
+    while True:
+        val = step(val, subject_number)
+        loop_count += 1
+        if val == output1:
+            return (loop_count, True)
+        if val == output2:
+            return (loop_count, False)
+
+
+def solve(public_key_1: int, public_key_2: int) -> int:
     """Find encryption key given two public keys.
 
-    >>> part_one(5764801, 17807724)
+    >>> solve(5764801, 17807724)
     14897079
     """
-    secret_1: int = find_loop_size(7, public_key_1)
-    secret_2: int = find_loop_size(7, public_key_2)
-    encryption_key_v1: int = transform(public_key_1, secret_2)
-    encryption_key_v2: int = transform(public_key_2, secret_1)
-    if encryption_key_v1 != encryption_key_v2:
-        raise RuntimeError("Inconsistent keys")
-    return encryption_key_v1
+    (secret, found_1) = find2_loop_size(7, public_key_1, public_key_2)
+    return transform(public_key_2 if found_1 else public_key_1, secret)
 
 
 if __name__ == "__main__":
     testmod()
     public_key_1, public_key_2 = [int(line) for line in stdin.readlines()]
-    print(part_one(public_key_1, public_key_2))
+    print(solve(public_key_1, public_key_2))
