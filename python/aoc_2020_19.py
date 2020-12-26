@@ -68,10 +68,9 @@ def parse_ints(s: str) -> List[int]:
 
 class MessageValidator:
     def __init__(self, rules: Iterable[str]) -> None:
-        self.rules: Dict[int, Rule] = {}
-        for rule_str in rules:
-            i, rule = parse_rule(rule_str)
-            self.rules[i] = rule
+        self.rules: Dict[int, Rule] = {
+            i: rule for (i, rule) in [parse_rule(r) for r in rules]
+        }
 
     def show(self) -> None:
         for i, r in self.rules.items():

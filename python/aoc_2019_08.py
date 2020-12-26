@@ -1,7 +1,7 @@
 """Advent of Code 2019 - Day 8."""
 
 from sys import stdin
-from typing import Dict, List
+from typing import Counter, List
 
 
 class Image:
@@ -19,13 +19,13 @@ class Image:
 
 
 def part_one(i: Image) -> int:
-    layer_counts: List[Dict[str, int]] = []
+    layer_counts: List[Counter[str]] = []
     for layer in range(0, i.layers):
-        layer_counts.append({})
+        layer_counts.append(Counter())
         for row in range(0, i.rows):
             for col in range(0, i.cols):
                 p: str = i.pixel(layer, row, col)
-                layer_counts[layer][p] = layer_counts[layer].get(p, 0) + 1
+                layer_counts[layer][p] += 1
     min_layer = min(layer_counts, key=lambda x: x["0"])
     return min_layer["1"] * min_layer["2"]
 

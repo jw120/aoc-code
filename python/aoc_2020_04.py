@@ -15,12 +15,7 @@ def parse_passport(block: str) -> Passport:
     >>> parse_passport("eyr:2023 ecl:amb\niyr:2020")
     {'eyr': '2023', 'ecl': 'amb', 'iyr': '2020'}
     """
-    passport: Passport = {}
-    items: List[str] = block.split()
-    for item in items:
-        [key, value] = item.split(":")
-        passport[key] = value
-    return passport
+    return {k: v for (k, v) in [item.split(":") for item in block.split()]}
 
 
 tests_one: List[str] = [

@@ -12,8 +12,6 @@ Assumes `../aoc-data` (which is a private repo) holds personalized input data an
 
 - Speed up slow solutions
 - Avoid duplication in Day 17
-- Review use of if key in (and try .setdefault)
-- Try using Counter
 
 
 ## Python setup

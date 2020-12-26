@@ -69,9 +69,7 @@ def part_one(rules: List[Rule], target: str) -> int:
     can_be_inside: Dict[str, Set[str]] = {}
     for (outer, contents) in rules:
         for (inner, _) in contents:
-            if inner not in can_be_inside:
-                can_be_inside[inner] = set()
-            can_be_inside[inner].add(outer)
+            can_be_inside.setdefault(inner, set()).add(outer)
     # Walk backwards from the target bag
     visited: Set[str] = set()
     frontier: Set[str] = can_be_inside[target]

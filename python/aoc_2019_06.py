@@ -28,14 +28,11 @@ def build_tree(
     k_from: K
     k_to: K
     for (k_from, k_to) in links:
-        if k_from not in forward:
-            forward[k_from] = set()
-        if k_to not in forward:
-            forward[k_to] = set()
+        forward.setdefault(k_from, set())
+        forward.setdefault(k_to, set())
         if k_to in backward and backward[k_to] is not None:
             raise RuntimeError("Duplicate back-link", (k_from, k_to))
-        if k_from not in backward:
-            backward[k_from] = None
+        backward.setdefault(k_from, None)
         forward[k_from].add(k_to)
         backward[k_to] = k_from
     forward_out_nodes: Set[K] = set(forward.keys())

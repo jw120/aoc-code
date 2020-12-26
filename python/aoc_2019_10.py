@@ -117,10 +117,7 @@ class Grid:
             if self.m(v) and (v != laser):
                 delta = v - laser
                 prim_delta = delta.primitive()
-                if prim_delta in ast_groups:
-                    ast_groups[prim_delta].append(delta)
-                else:
-                    ast_groups[prim_delta] = [delta]
+                ast_groups.setdefault(prim_delta, []).append(delta)
 
         # Convert to a list sorted by the angle, with elements as sorted lists
         ast_list: List[Tuple[Vec, List[Vec]]] = [
