@@ -11,12 +11,17 @@ aoc2020: \
 	python_2020_16 python_2020_17 python_2020_18 python_2020_19 python_2020_20 \
 	python_2020_21 python_2020_22 python_2020_23 python_2020_24 python_2020_25
 
+# Run and show the runtime in seconds
 python_%:
 	@/bin/echo -n "$@: "
-	@python python/aoc_$*.py < ../aoc-data/input/$*.txt | diff - ../aoc-data/good/$*.txt && echo OK
-
+	@/usr/bin/time -p python python/aoc_$*.py < ../aoc-data/input/$*.txt > out/python_$*.txt 2> out/python_time_$*.txt
+	@head -1 out/python_time_$*.txt | cut -c 14-
+	@diff out/python_$*.txt ../aoc-data/good/$*.txt
 
 check:
 	black --quiet python/
 	flake8 python/
 	mypy python/
+
+clean:
+	-rm -f out/*

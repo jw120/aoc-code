@@ -8,8 +8,9 @@ My solutions to advent of code. So far contains:
 Assumes `../aoc-data` (which is a private repo) holds personalized input data and solutions.
 
 
-## Python improvement
-- Add timing and speed up slow solutions
+## TODO - Python 2020 improvements
+
+- Speed up slow solutions
 - Avoid duplication in Day 17
 - Review use of if key in (and try .setdefault)
 - Try using Counter
