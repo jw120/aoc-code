@@ -1,13 +1,12 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Day18 where
+module AOC_2018_18 where
 
-import Data.Array.IArray (Array, (//), (!))
+import Data.Array.IArray (Array, (!), (//))
 import qualified Data.Array.IArray as A
 import Data.List (foldl')
-import qualified Data.Map as M
 import Data.Map (Map)
-
+import qualified Data.Map as M
 
 --
 -- Site holds on site which can be open ground, trees or a lumberyard
@@ -37,7 +36,7 @@ instance Show Site where
 newtype Area = Area (Array (Int, Int) Site) deriving (Eq)
 
 instance Show Area where
-  show (Area a) = init $ unlines [ row y | y <- [0 .. yMax]]
+  show (Area a) = init $ unlines [row y | y <- [0 .. yMax]]
     where
       ((0, 0), (xMax, yMax)) = A.bounds a
       row :: Int -> String
@@ -53,15 +52,15 @@ readArea :: String -> Area
 readArea s
   | all hasValidLength stringRows = Area $ A.array ((0, 0), (size - 1, size - 1)) siteData
   | otherwise = error "Invalid size for Area"
-    where
-      stringRows :: [String] = lines s
-      size = length stringRows
-      hasValidLength :: String -> Bool
-      hasValidLength = (== size) . length
-      toData :: Int -> String -> [((Int, Int), Site)]
-      toData y rowStr = zip [(x, y) | x <- [0.. size -1]] $ map readSite rowStr
-      siteData :: [((Int, Int), Site)]
-      siteData = concat $ zipWith toData [0 .. size - 1] stringRows
+  where
+    stringRows :: [String] = lines s
+    size = length stringRows
+    hasValidLength :: String -> Bool
+    hasValidLength = (== size) . length
+    toData :: Int -> String -> [((Int, Int), Site)]
+    toData y rowStr = zip [(x, y) | x <- [0 .. size -1]] $ map readSite rowStr
+    siteData :: [((Int, Int), Site)]
+    siteData = concat $ zipWith toData [0 .. size - 1] stringRows
 
 -- | Return list with the contents of the sites adjacent to the site whose coordinates are given
 --
@@ -72,10 +71,10 @@ readArea s
 -- >>> concatMap show $ adjacentSites (9, 3) test0
 -- "#..#|"
 adjacentSites :: (Int, Int) -> Area -> [Site]
-adjacentSites (x, y) (Area a) = [ a ! (i, j) | j <- [y - 1 .. y + 1], i <- [x - 1 .. x + 1], valid (i, j)]
+adjacentSites (x, y) (Area a) = [a ! (i, j) | j <- [y - 1 .. y + 1], i <- [x - 1 .. x + 1], valid (i, j)]
   where
     ((0, 0), (xMax, yMax)) = A.bounds a
-    valid (c, r) = (c /= x || r /= y) && c >= 0 && c <= xMax && r >=0 && r <= yMax
+    valid (c, r) = (c /= x || r /= y) && c >= 0 && c <= xMax && r >= 0 && r <= yMax
 
 --
 -- Update logic
@@ -115,59 +114,62 @@ resources (Area a) = trees * lumberYards
     lumberYards = length . filter (== LumberYard) $ A.elems a
 
 test0 :: Area
-test0 = readArea $
-  ".#.#...|#.\n" ++
-  ".....#|##|\n" ++
-  ".|..|...#.\n" ++
-  "..|#.....#\n" ++
-  "#.#|||#|#|\n" ++
-  "...#.||...\n" ++
-  ".|....|...\n" ++
-  "||...#|.#|\n" ++
-  "|.||||..|.\n" ++
-  "...#.|..|.\n"
+test0 =
+  readArea $
+    ".#.#...|#.\n"
+      ++ ".....#|##|\n"
+      ++ ".|..|...#.\n"
+      ++ "..|#.....#\n"
+      ++ "#.#|||#|#|\n"
+      ++ "...#.||...\n"
+      ++ ".|....|...\n"
+      ++ "||...#|.#|\n"
+      ++ "|.||||..|.\n"
+      ++ "...#.|..|.\n"
 
 test1 :: Area
-test1 = readArea . unlines $
-  [ ".......##."
-  , "......|###"
-  , ".|..|...#."
-  , "..|#||...#"
-  , "..##||.|#|"
-  , "...#||||.."
-  , "||...|||.."
-  , "|||||.||.|"
-  , "||||||||||"
-  , "....||..|."
-  ]
+test1 =
+  readArea . unlines $
+    [ ".......##.",
+      "......|###",
+      ".|..|...#.",
+      "..|#||...#",
+      "..##||.|#|",
+      "...#||||..",
+      "||...|||..",
+      "|||||.||.|",
+      "||||||||||",
+      "....||..|."
+    ]
 
 test10 :: Area
-test10 = readArea . unlines $
-  [ ".||##....."
-  , "||###....."
-  , "||##......"
-  , "|##.....##"
-  , "|##.....##"
-  , "|##....##|"
-  , "||##.####|"
-  , "||#####|||"
-  , "||||#|||||"
-  , "||||||||||"
-  ]
+test10 =
+  readArea . unlines $
+    [ ".||##.....",
+      "||###.....",
+      "||##......",
+      "|##.....##",
+      "|##.....##",
+      "|##....##|",
+      "||##.####|",
+      "||#####|||",
+      "||||#|||||",
+      "||||||||||"
+    ]
 
 main :: IO ()
 main = do
-  input <- readFile "input/day18.txt"
-  let initialArea = readArea input
+  initialArea <- readArea <$> getContents
   let areaList = iterate update initialArea
   let updatedArea = areaList !! 10
-  putStrLn $ "day 18 part a: " ++ show (resources updatedArea)
+  print $ resources updatedArea
   -- Rather than look for a loop in the areas, instead look at resources
   -- But need to skip initial values to allow sequence to converge
   let skip = 450 -- obtained manually by looking at the generated sequence
   let resourceList = map resources areaList
   let loop = findLoop $ drop skip resourceList
-  putStrLn $ "day 18 part b: " ++ show (lookupLoop loop (1000000000 - skip))
+  print $ lookupLoop loop (1000000000 - skip)
+
 --   showSeq 0 initialArea
 
 -- -- Used to explore loop
@@ -187,7 +189,7 @@ findLoop xs = (subseq, first)
     subseq = take (firstRep - first) $ drop first xs
     (first, firstRep) = go M.empty 0 xs
     go :: Ord b => Map b Int -> Int -> [b] -> (Int, Int)
-    go m i (x: xs) = case M.lookup x m of
+    go m i (x : xs) = case M.lookup x m of
       Just n -> (n, i)
       Nothing -> go (M.insert x i m) (i + 1) xs
     go _ _ [] = error "Unexpected empty list in findLoop"

@@ -1,24 +1,26 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Day20 where
+module AOC_2018_20 where
 
-import           Data.List (foldl')
-import           Data.Maybe (isJust, fromJust)
-import           Data.Set (Set)
+import Data.List (foldl')
+import Data.Maybe (fromJust, isJust)
+import Data.Set (Set)
 import qualified Data.Set as S
 
 type Position = (Int, Int)
+
 origin :: Position
 origin = (0, 0)
 
 data Direction = North | East | South | West deriving (Eq, Ord)
+
 instance Show Direction where
   show North = "N"
   show South = "S"
   show East = "E"
   show West = "W"
 
-step :: Direction -> Position ->Position
+step :: Direction -> Position -> Position
 North `step` (x, y) = (x, y + 1)
 South `step` (x, y) = (x, y - 1)
 East `step` (x, y) = (x + 1, y)
@@ -51,18 +53,18 @@ readPath s = openDoors
     go state ('E' : rest) = go (walkStep state East) rest
     go state ('W' : rest) = go (walkStep state West) rest
     go state@(visitedRooms, openDoors, pos) ('(' : rest) = (visitedRooms'', openDoors'', pos')
-        where
-          (firstBranch : otherBranches, postBranch) = splitBranches rest
-          (visitedRooms', openDoors', pos') = go state (firstBranch ++ postBranch)
-          (visitedRooms'', openDoors'') = foldl' backtrack (visitedRooms', openDoors') otherBranches
-            where
-              backtrack :: (Set Position, Set Position) -> String -> (Set Position, Set Position)
-              backtrack (rooms, doors) s
-                | p' `S.member` rooms = (rooms', doors') -- skip postBranch if we end up in an existing room
-                | otherwise = (rooms'', doors'')
-                  where
-                    (rooms', doors', p') = go (rooms, doors, pos) s
-                    (rooms'', doors'', _) = go (rooms', doors', p') postBranch
+      where
+        (firstBranch : otherBranches, postBranch) = splitBranches rest
+        (visitedRooms', openDoors', pos') = go state (firstBranch ++ postBranch)
+        (visitedRooms'', openDoors'') = foldl' backtrack (visitedRooms', openDoors') otherBranches
+          where
+            backtrack :: (Set Position, Set Position) -> String -> (Set Position, Set Position)
+            backtrack (rooms, doors) s
+              | p' `S.member` rooms = (rooms', doors') -- skip postBranch if we end up in an existing room
+              | otherwise = (rooms'', doors'')
+              where
+                (rooms', doors', p') = go (rooms, doors, pos) s
+                (rooms'', doors'', _) = go (rooms', doors', p') postBranch
     go _ (c : rest) = error $ "Unexpected character at '" ++ (c : rest) ++ "'"
     go state "" = state
 
@@ -85,7 +87,6 @@ splitBranches s = fst $ go 0 (([], ""), s)
     go n ((acc, current), c : rest) = go n ((acc, current ++ [c]), rest)
 
 -- | Walk through door in a given direction from current position updating visited sets
---
 walkStep :: (Set Position, Set Position, Position) -> Direction -> (Set Position, Set Position, Position)
 walkStep (visitedRooms, openDoors, p) d = (visitedRooms', openDoors', p2)
   where
@@ -196,7 +197,6 @@ parseRegex s
 
 main :: IO ()
 main = do
-  input <- readFile "input/day20.txt"
-  let doors = readPath . tail . init $ init input -- trimming trailing newline and $..^
-  putStrLn $ "day 20 part a: " ++ show (flood doors)
-  putStrLn $ "day 20 part b: " ++ show (remaining 1000 doors)
+  doors <- readPath . tail . init . init <$> getContents -- trimming trailing newline and $..^
+  print $ flood doors
+  print $ remaining 1000 doors

@@ -1,31 +1,46 @@
+{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Day16 where
+module AOC_2018_16 where
 
-import Data.Array.IArray (Array, (//), (!))
+import Data.Array.IArray (Array, (!), (//))
 import qualified Data.Array.IArray as A
-import Data.Bits
+import Data.Bits (Bits ((.&.), (.|.)))
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Char8 as BC
 import Data.List (foldl', stripPrefix)
 import Data.Map (Map)
 import qualified Data.Map as M
 import Data.Maybe (fromJust)
 
 type Instruction = Array Int Int
+
 type Registers = Array Int Int
 
 data Operation
-  = Addr | Addi | Mulr | Muli
-  | Seti | Setr
-  | Banr | Bani | Borr | Bori
-  | Gtir | Gtri | Gtrr
-  | Eqir | Eqri | Eqrr
+  = Addr
+  | Addi
+  | Mulr
+  | Muli
+  | Seti
+  | Setr
+  | Banr
+  | Bani
+  | Borr
+  | Bori
+  | Gtir
+  | Gtri
+  | Gtrr
+  | Eqir
+  | Eqri
+  | Eqrr
   deriving (Enum, Eq, Show)
 
 allOperations :: [Operation]
 allOperations = [Addr .. Eqrr]
 
 -- Result of applying the given opcode with the interpreted as the given operation
-applyAs ::  Operation -> Instruction -> Registers -> Registers
+applyAs :: Operation -> Instruction -> Registers -> Registers
 applyAs op i r = r // [(c, newVal)]
   where
     (a, b, c) = (i ! 1, i ! 2, i ! 3)
@@ -60,14 +75,14 @@ possOps (r, i, r') = filter poss allOperations
 -- Assign possible operations to each opcode
 assignOpcodes :: [(Registers, Instruction, Registers)] -> Map Int [Operation]
 assignOpcodes = foldl' assign M.empty
-    where
-      assign :: Map Int [Operation] -> (Registers, Instruction, Registers) -> Map Int [Operation]
-      assign m (r, i, r') = case M.lookup code m of
-        Just p -> M.insert code (filter (`elem` p') p) m
-        Nothing -> M.insert code p' m
-        where
-          code = i ! 0
-          p' = possOps (r, i, r')
+  where
+    assign :: Map Int [Operation] -> (Registers, Instruction, Registers) -> Map Int [Operation]
+    assign m (r, i, r') = case M.lookup code m of
+      Just p -> M.insert code (filter (`elem` p') p) m
+      Nothing -> M.insert code p' m
+      where
+        code = i ! 0
+        p' = possOps (r, i, r')
 
 -- Allocate opcodes to each instruction
 deduceOpcodes :: Map Int [Operation] -> Map Int Operation
@@ -95,12 +110,12 @@ run m = foldl' f zeros
 --
 -- >>> readSample ("Before: [1, 0, 2, 1]", "2 3 2 0", "After:  [1, 0, 2, 4]", "")
 -- (array (0,3) [(0,1),(1,0),(2,2),(3,1)],array (0,3) [(0,2),(1,3),(2,2),(3,0)],array (0,3) [(0,1),(1,0),(2,2),(3,4)])
-readSample :: (String, String, String, String) -> (Registers, Instruction, Registers)
-readSample (a, b, c, _) = (A.listArray (0, 3) a', A.listArray (0,3) b', A.listArray (0, 3) c')
-    where
-      a' :: [Int] = read . fromJust $ stripPrefix "Before: " a
-      b' :: [Int] = map read $ words b
-      c' :: [Int] = read . fromJust $ stripPrefix "After:  " c
+readSample :: (ByteString, ByteString, ByteString, ByteString) -> (Registers, Instruction, Registers)
+readSample (a, b, c, _) = (A.listArray (0, 3) a', A.listArray (0, 3) b', A.listArray (0, 3) c')
+  where
+    a' :: [Int] = read . BC.unpack . fromJust $ BC.stripPrefix "Before: " a
+    b' :: [Int] = map (read . BC.unpack) $ BC.words b
+    c' :: [Int] = read . BC.unpack . fromJust $ BC.stripPrefix "After:  " c
 
 -- | Read an instruction
 --
@@ -112,23 +127,24 @@ readInstruction = A.listArray (0, 3) . map read . words
 -- Helper function to convert a length-4 list to an array
 ar :: [Int] -> Array Int Int
 ar xs
-    | length xs == 4 = A.listArray (0, 3) xs
-    | otherwise = error "Bad list length in ar"
+  | length xs == 4 = A.listArray (0, 3) xs
+  | otherwise = error "Bad list length in ar"
 
 -- Bunch a list into a list of 4-tuples
 bunch :: [x] -> [(x, x, x, x)]
 bunch [] = []
-bunch (a:b:c:d:rest) = (a,b,c,d) : bunch rest
+bunch (a : b : c : d : rest) = (a, b, c, d) : bunch rest
 bunch _ = error "List length not a multiple of 4 in bunch"
 
 main :: IO ()
 main = do
-  inputA <- readFile "input/day16a.txt"
-  let samples = map readSample . bunch $ lines inputA
-  putStrLn $ "day 16 part a: " ++ show (length (filter ((>= 3) . length) (map possOps samples)))
-  let opcodeAssignments= assignOpcodes samples
+  whole_input <- BC.getContents
+  let (inputA, rest) = BC.breakSubstring "\n\n\n\n" whole_input
+  let samples = map readSample . bunch . BC.lines $ BC.snoc (BC.snoc inputA '\n') '\n'
+  print $ length (filter ((>= 3) . length) (map possOps samples))
+  let opcodeAssignments = assignOpcodes samples
   let opcodeDeductions = deduceOpcodes opcodeAssignments
-  inputB <- readFile "input/day16b.txt"
-  let program = map readInstruction $ lines inputB
+  let inputB = BC.drop 4 rest
+  let program = map (readInstruction . BC.unpack) $ BC.lines inputB
   let output = run opcodeDeductions program
-  putStrLn $ "day 16 part b: " ++ show (output ! 0)
+  print $ output ! 0

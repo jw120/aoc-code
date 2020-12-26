@@ -57,7 +57,7 @@ highestSquareOfAnySize serial = maximumBy (compare `on` snd) . filterJusts $ ass
     -- Scores of single squares
     g :: Array (Int, Int) Int =
       array ((1, 1), (n, n)) [((x, y), powerLevel serial x y) | x <- [1 .. n], y <- [1 .. n]]
-    -- Scores of squares of given size (constructed lazilly), nothing when size is out of bounds
+    -- Scores of squares of given size (constructed lazily), nothing when size is out of bounds
     boxScores :: Array (Int, Int, Int) (Maybe Int) =
       array
         ((1, 1, 1), (n, n, n))

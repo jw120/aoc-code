@@ -1,20 +1,22 @@
-{-# LANGUAGE OverloadedStrings, ScopedTypeVariables #-}
+{-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
-module Day23 where
+module AOC_2018_23 where
 
 import qualified Data.Attoparsec.ByteString.Char8 as AC
+import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
-import           Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as BC
-import           Data.Foldable (maximumBy)
-import           Data.Ord (comparing)
+import Data.Foldable (maximumBy)
+import Data.Ord (comparing)
 
-data Bot = Bot {
-  x :: Int
-, y :: Int
-, z :: Int
-, r :: Int
-}
+data Bot = Bot
+  { x :: Int,
+    y :: Int,
+    z :: Int,
+    r :: Int
+  }
+
 instance Show Bot where
   show b = "pos=<" ++ show (x b) ++ "," ++ show (y b) ++ "," ++ show (z b) ++ ">, r=" ++ show (r b)
 
@@ -43,7 +45,7 @@ readBot s = either (error . withInput) id . AC.parseOnly bot $ s
       z <- AC.signed AC.decimal
       AC.string ">, r="
       r <- AC.decimal
-      return Bot { x = x, y = y, z = z, r = r}
+      return Bot {x = x, y = y, z = z, r = r}
 
 -- | Solve part A, number of bots in range of the strongest bot
 --
@@ -56,14 +58,15 @@ partA bots = length $ filter (<= r strongestBot) distances
     distances :: [Int] = map (botDistance strongestBot) bots
 
 -- Octree region of space bounded by x0 <= x <= x1 etc
-data Oct= Oct
-  { x0 :: Int
-  , x1 :: Int
-  , y0 :: Int
-  , y1 :: Int
-  , z0 :: Int
-  , z1 :: Int
-} deriving Show
+data Oct = Oct
+  { x0 :: Int,
+    x1 :: Int,
+    y0 :: Int,
+    y1 :: Int,
+    z0 :: Int,
+    z1 :: Int
+  }
+  deriving (Show)
 
 corners :: Oct -> [(Int, Int, Int)]
 corners o = [(x, y, z) | x <- [x0 o, x1 o], y <- [y0 o, y1 o], z <- [z0 o, z1 o]]
@@ -71,8 +74,9 @@ corners o = [(x, y, z) | x <- [x0 o, x1 o], y <- [y0 o, y1 o], z <- [z0 o, z1 o]
 unitSize :: Oct -> Bool
 unitSize o = x0 o == x1 o && y0 o == y1 o && z0 o == z1 o
 
+{-
+
 -- | Solve part B
---
 partB :: [Bot] -> Int
 partB = closestOrigin . mostInRange
 
@@ -93,30 +97,30 @@ closestOrigin o = closest (x0 o) (x1 o) + closest (y0 o) (y1 o) + closest (z0 o)
 -- >>> fullRegion testA
 -- Oct {x0 = 0, x1 = 4, y0 = 0, y1 = 5, z0 = 0, z1 = 3}
 fullRegion :: [Bot] -> Oct
-fullRegion bots = Oct
-    { x0 = minimum xs
-    , x1 = maximum xs
-    , y0 = minimum ys
-    , y1 = maximum ys
-    , z0 = minimum zs
-    , z1 = maximum zs
+fullRegion bots =
+  Oct
+    { x0 = minimum xs,
+      x1 = maximum xs,
+      y0 = minimum ys,
+      y1 = maximum ys,
+      z0 = minimum zs,
+      z1 = maximum zs
     }
-    where
-      xs = map x bots
-      ys = map y bots
-      zs = map z bots
+  where
+    xs = map x bots
+    ys = map y bots
+    zs = map z bots
 
 -- | Return octtree that is in range of the most points
---
 mostInRange :: [Bot] -> Int
 mostInRange bots = go $ fullRegion bots
-    where
-      go :: Oct -> Int
-      go oct
-        | unitSize oct = length fullyInside + length overlapping
-        | otherwise = undefined
-        where
-          (fullyInside, fullyOutside, overlapping) = splitOnOct oct bots
+  where
+    go :: Oct -> Int
+    go oct
+      | unitSize oct = length fullyInside + length overlapping
+      | otherwise = undefined
+      where
+        (fullyInside, fullyOutside, overlapping) = splitOnOct oct bots
 
 -- | Divide
 splitOnOct :: Oct -> [Bot] -> ([Bot], [Bot], [Bot])
@@ -128,16 +132,20 @@ splitOnOct o bots = (filter (isFullyInside o) bots, filter (isFullyOutside o) bo
 -- | Is the bot centre within the Octtree
 isInside :: Oct -> Bot -> Bool
 isInside o b =
-  x0 o <= x b && x b <= x1 o &&
-  y0 o <= y b && y b <= y1 o &&
-  z0 o <= z b && z b <= z1 o
+  x0 o <= x b && x b <= x1 o
+    && y0 o <= y b
+    && y b <= y1 o
+    && z0 o <= z b
+    && z b <= z1 o
 
 -- | Is the full range of the bot contained within the Octtree
 isFullyInside :: Oct -> Bot -> Bool
 isFullyInside o b =
-  x0 o <= x b - r b && x b + r b <= x1 o &&
-  y0 o <= y b - r b && y b + r b <= y1 o &&
-  z0 o <= z b - r b && z b + r b <= z1 o
+  x0 o <= x b - r b && x b + r b <= x1 o
+    && y0 o <= y b - r b
+    && y b + r b <= y1 o
+    && z0 o <= z b - r b
+    && z b + r b <= z1 o
 
 -- | Is no part of the range of the bot overlapping the Octtree
 isFullyOutside :: Oct -> Bot -> Bool
@@ -145,23 +153,24 @@ isFullyOutside o b = not (isInside o b) && farAway
   where
     farAway = all ((> r b) . distance (x b, y b, z b)) $ corners o
 
+-}
+
 main = do
-  input <- B.readFile "input/day23.txt"
-  let bots :: [Bot] = map readBot $ BC.lines input
-  putStrLn $ "day 23 part a: " ++ show (partA bots)
-  putStrLn $ "day 23 part b: " ++ "NYI"
+  bots :: [Bot] <- map readBot . BC.lines <$> B.getContents
+  print $ partA bots
+  print "NYI"
 
 testA :: [Bot]
-testA = map readBot
-  [ "pos=<0,0,0>, r=4"
-  , "pos=<1,0,0>, r=1"
-  , "pos=<4,0,0>, r=3"
-  , "pos=<0,2,0>, r=1"
-  , "pos=<0,5,0>, r=3"
-  , "pos=<0,0,3>, r=1"
-  , "pos=<1,1,1>, r=1"
-  , "pos=<1,1,2>, r=1"
-  , "pos=<1,3,1>, r=1"
-  ]
-
-
+testA =
+  map
+    readBot
+    [ "pos=<0,0,0>, r=4",
+      "pos=<1,0,0>, r=1",
+      "pos=<4,0,0>, r=3",
+      "pos=<0,2,0>, r=1",
+      "pos=<0,5,0>, r=3",
+      "pos=<0,0,3>, r=1",
+      "pos=<1,1,1>, r=1",
+      "pos=<1,1,2>, r=1",
+      "pos=<1,3,1>, r=1"
+    ]

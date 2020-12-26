@@ -25,7 +25,7 @@ instance Show State where
   show s = xs ++ " " ++ show ia ++ " " ++ show ib
     where
       n = M.size (recipes s)
-      xs = show $ map (\(Score s) -> s) [recipes s M.! Index i | i <- [0 .. n - 1]]
+      xs = show $ [(\(Score s) -> s) (recipes s M.! Index i) | i <- [0 .. n - 1]]
       Index ia = a s
       Index ib = b s
 
@@ -59,7 +59,7 @@ next s = s {a = a', b = b', recipes = recipes'}
 -- >>> map runA [9, 5, 18, 2018]
 -- ["5158916779","0124515891","9251071085","5941429882"]
 runA :: Int -> String
-runA n = map (\(Score s) -> head (show s)) [r M.! Index i | i <- [n .. n + 9]]
+runA n = [(\(Score s) -> head (show s)) (r M.! Index i) | i <- [n .. n + 9]]
   where
     r = recipes $ iterate next initialState !! (n + 8)
 

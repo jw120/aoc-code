@@ -70,46 +70,36 @@ executables:
  aoc_2018_15:
    main: aoc_2018_15.hs
    ghc-options: -main-is AOC_2018_15
-
-  # day11:
-  #   main: day11.hs
-  #   ghc-options: -main-is Day11
-  # day12:
-  #   main: day12.hs
-  #   ghc-options: -main-is Day12
-  # day13:
-  #   main: day13.hs
-  #   ghc-options: -main-is Day13
-  #day14:
-  #  main: day14.hs
-  #  ghc-options: -main-is Day14
-  # day15:
-  #   main: day15.hs
-  #   ghc-options: -main-is Day15
-  #day16:
-  #  main: day16.hs
-  #  ghc-options: -main-is Day16
-  #day18:
-  #   main: day18.hs
-  #   ghc-options: -main-is Day18
-  #day19:
-  #  main: day19.hs
-  #  ghc-options: -main-is Day19
-  # day20:
-  #   main: day20.hs
-  #   ghc-options: -main-is Day20
-  # day22:
-  #  main: day22.hs
-  #  ghc-options: -main-is Day22
-###  day23:
-###   main: day23.hs
-###    ghc-options: -main-is Day23
-  #day24:
-  #  main: day24.hs
-  #  ghc-options: -main-is Day24
-  #day25:
-  #  main: day25.hs
-  #  ghc-options: -main-is Day25
+ aoc_2018_16:
+   main: aoc_2018_16.hs
+   ghc-options: -main-is AOC_2018_16
+# aoc_2018_17:
+#   main: aoc_2018_17.hs
+#   ghc-options: -main-is AOC_2018_17
+ aoc_2018_18:
+   main: aoc_2018_18.hs
+   ghc-options: -main-is AOC_2018_18
+ aoc_2018_19:
+   main: aoc_2018_19.hs
+   ghc-options: -main-is AOC_2018_19
+ aoc_2018_20:
+   main: aoc_2018_20.hs
+   ghc-options: -main-is AOC_2018_20
+# aoc_2018_21:
+#   main: aoc_2018_21.hs
+#   ghc-options: -main-is AOC_2018_21
+ aoc_2018_22:
+   main: aoc_2018_22.hs
+   ghc-options: -main-is AOC_2018_22
+ aoc_2018_23:
+   main: aoc_2018_23.hs
+   ghc-options: -main-is AOC_2018_23
+ aoc_2018_24:
+   main: aoc_2018_24.hs
+   ghc-options: -main-is AOC_2018_24
+ aoc_2018_25:
+   main: aoc_2018_25.hs
+   ghc-options: -main-is AOC_2018_25
 
 
 tests:

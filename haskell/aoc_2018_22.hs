@@ -1,8 +1,8 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Day22 where
+module AOC_2018_22 where
 
-import           Data.Array (Array, (!))
+import Data.Array (Array, (!))
 import qualified Data.Array as A
 import qualified Data.Ix as Ix
 
@@ -25,7 +25,7 @@ geologicIndices depth (xMax, yMax) = arr
     arr = A.array xyRange [(c, g c) | c <- Ix.range xyRange]
     xyRange = ((0, 0), (xMax, yMax))
     g :: (Int, Int) -> Int
-    g (0, 0)  = 0
+    g (0, 0) = 0
     g (x, 0) = x * 16807
     g (0, y) = y * 48271
     g (x, y)
@@ -39,13 +39,12 @@ geologicIndices depth (xMax, yMax) = arr
 riskLevel :: Int -> (Int, Int) -> Int
 riskLevel depth (xMax, yMax) = sum regionTypes
   where
-    regionTypes = map (regionType . erosionLevel depth ) . A.elems $ geologicIndices depth (xMax, yMax)
+    regionTypes = map (regionType . erosionLevel depth) . A.elems $ geologicIndices depth (xMax, yMax)
 
 main :: IO ()
 main = do
-  input <- readFile "input/day22.txt"
-  let [line0, line1] = lines input
+  [line0, line1] <- lines <$> getContents
   let depth = read $ drop (length "depth: ") line0
   let target = read $ "(" ++ drop (length "target: ") line1 ++ ")"
-  putStrLn $ "day 22 part a: " ++ show (riskLevel depth target)
-  putStrLn $ "day 22 part b: " ++ "NYI"
+  print $ riskLevel depth target
+  print "NYI"

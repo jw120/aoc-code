@@ -6,13 +6,16 @@ My solutions to advent of code. So far contains:
  * Partial 2019 in Python (started in 2020 advent season)
  * Partial 2018 in Haskell (started in 2018 advent season)
 
+ In addition the `others` folder contains a few other attempts
+ * 2017 in R
+ * 2018 in racket
+
 Assumes `../aoc-data` (which is a private repo) holds personalized input data and solutions.
 
 
 ## TODO
 
 - Haskell 2018 - get doctest to work
-- Haskell 2018 - get all existing code working
 - Haskell 2018 - fill in missing
 - Haskell 2018 - linting and warnings
 - Python 2020 - Speed up slow solutions

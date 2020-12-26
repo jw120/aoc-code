@@ -1,53 +1,66 @@
 {-# LANGUAGE ScopedTypeVariables #-}
 
-module Day19 where
+module AOC_2018_19 where
 
-import Data.Array.IArray (Array, (//), (!))
+import Data.Array.IArray (Array, (!), (//))
 import qualified Data.Array.IArray as A
 import Data.Bits
-import Data.Char (toUpper, toLower)
+import Data.Char (toLower, toUpper)
 import Data.List (foldl')
 
 type Registers = Array Int Int -- alwats size 6
 
 data State = State
-  { ipBinding :: Int
-  , ipValue :: Int
-  , registers :: Registers
+  { ipBinding :: Int,
+    ipValue :: Int,
+    registers :: Registers
   }
 
 instance Show State where
   show s = show (ipValue s) ++ ":" ++ show (A.elems (registers s))
 
 initialState :: Int -> State
-initialState ipAssignment = State
-  { ipBinding = ipAssignment
-  , ipValue = 0
-  , registers = A.listArray (0, 5) [0, 0, 0, 0, 0 ,0]
-  }
+initialState ipAssignment =
+  State
+    { ipBinding = ipAssignment,
+      ipValue = 0,
+      registers = A.listArray (0, 5) [0, 0, 0, 0, 0, 0]
+    }
 
-data OpCode =
-   Addr | Addi | Mulr | Muli
-  | Seti | Setr
-  | Banr | Bani | Borr | Bori
-  | Gtir | Gtri | Gtrr
-  | Eqir | Eqri | Eqrr
+data OpCode
+  = Addr
+  | Addi
+  | Mulr
+  | Muli
+  | Seti
+  | Setr
+  | Banr
+  | Bani
+  | Borr
+  | Bori
+  | Gtir
+  | Gtri
+  | Gtrr
+  | Eqir
+  | Eqri
+  | Eqrr
   deriving (Enum, Eq, Read, Show)
 
 data Instruction = Instruction
-  { opCode :: OpCode
-  , insA :: Int
-  , insB :: Int
-  , insC :: Int
+  { opCode :: OpCode,
+    insA :: Int,
+    insB :: Int,
+    insC :: Int
   }
 
 instance Show Instruction where
-  show i = unwords
-    [ show (opCode i)
-    , show (insA i)
-    , show (insB i)
-    , show (insC i)
-    ]
+  show i =
+    unwords
+      [ show (opCode i),
+        show (insA i),
+        show (insB i),
+        show (insC i)
+      ]
 
 type Program = Array Int Instruction
 
@@ -56,12 +69,13 @@ type Program = Array Int Instruction
 -- >>> readInstruction "seti 6 0 2"
 -- Seti 6 0 2
 readInstruction :: String -> Instruction
-readInstruction s = Instruction
-  { opCode = read $ capitalizeFirst opStr
-  , insA = read aStr
-  , insB = read bStr
-  , insC = read cStr
-  }
+readInstruction s =
+  Instruction
+    { opCode = read $ capitalizeFirst opStr,
+      insA = read aStr,
+      insB = read bStr,
+      insC = read cStr
+    }
   where
     [opStr, aStr, bStr, cStr] = words s
     capitalizeFirst (first : rest) = toUpper first : map toLower rest
@@ -93,7 +107,7 @@ readIP s = read ipStr
 -- >>> step (step (step (step (step (initialState 0) testProgram) testProgram) testProgram) testProgram) testProgram
 -- 7:[6,5,6,0,0,9]
 step :: State -> Program -> State
-step s p = s { registers = r', ipValue = ipValue' }
+step s p = s {registers = r', ipValue = ipValue'}
   where
     instruction = p ! ipValue s
     r = registers s // [(ipBinding s, ipValue s)]
@@ -131,24 +145,24 @@ run p = go
       | otherwise = s
 
 testProgram :: Program
-testProgram = readProgram
-  [ "seti 5 0 1"
-  , "seti 6 0 2"
-  , "addi 0 1 0"
-  , "addr 1 2 3"
-  , "setr 1 0 0"
-  , "seti 8 0 4"
-  , "seti 9 0 5"
-  ]
+testProgram =
+  readProgram
+    [ "seti 5 0 1",
+      "seti 6 0 2",
+      "addi 0 1 0",
+      "addr 1 2 3",
+      "setr 1 0 0",
+      "seti 8 0 4",
+      "seti 9 0 5"
+    ]
 
 main :: IO ()
 main = do
-  input <- readFile "input/day19.txt"
-  let (ipStr : progStr) = lines input
+  (ipStr : progStr) <- lines <$> getContents
   let startState :: State = initialState (readIP ipStr)
   let prog :: Program = readProgram progStr
   let finalState :: State = run prog startState
-  putStrLn $ "day 19 part a: " ++ show (registers finalState ! 0)
-  let startState' = startState { registers = registers startState // [(0, 1)]}
+  print $ registers finalState ! 0
+  let startState' = startState {registers = registers startState // [(0, 1)]}
   let finalState' :: State = run prog startState'
-  putStrLn $ "day 19 part b: " ++ show (registers finalState' ! 0)
+  print $ registers finalState' ! 0
