@@ -52,18 +52,18 @@ readPath s = openDoors
     go state ('S' : rest) = go (walkStep state South) rest
     go state ('E' : rest) = go (walkStep state East) rest
     go state ('W' : rest) = go (walkStep state West) rest
-    go state@(visitedRooms, openDoors, pos) ('(' : rest) = (visitedRooms'', openDoors'', pos')
+    go state@(_visitedRooms, _openDoors, pos) ('(' : rest) = (visitedRooms'', openDoors'', pos')
       where
         (firstBranch : otherBranches, postBranch) = splitBranches rest
         (visitedRooms', openDoors', pos') = go state (firstBranch ++ postBranch)
         (visitedRooms'', openDoors'') = foldl' backtrack (visitedRooms', openDoors') otherBranches
           where
             backtrack :: (Set Position, Set Position) -> String -> (Set Position, Set Position)
-            backtrack (rooms, doors) s
+            backtrack (rooms, doors) st
               | p' `S.member` rooms = (rooms', doors') -- skip postBranch if we end up in an existing room
               | otherwise = (rooms'', doors'')
               where
-                (rooms', doors', p') = go (rooms, doors, pos) s
+                (rooms', doors', p') = go (rooms, doors, pos) st
                 (rooms'', doors'', _) = go (rooms', doors', p') postBranch
     go _ (c : rest) = error $ "Unexpected character at '" ++ (c : rest) ++ "'"
     go state "" = state
@@ -85,6 +85,7 @@ splitBranches s = fst $ go 0 (([], ""), s)
     go n ((acc, current), ')' : rest) = go (n - 1) ((acc, current ++ ")"), rest)
     go n ((acc, current), '(' : rest) = go (n + 1) ((acc, current ++ "("), rest)
     go n ((acc, current), c : rest) = go n ((acc, current ++ [c]), rest)
+    go _ _ = error "Unexpected branch"
 
 -- | Walk through door in a given direction from current position updating visited sets
 walkStep :: (Set Position, Set Position, Position) -> Direction -> (Set Position, Set Position, Position)

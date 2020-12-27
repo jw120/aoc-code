@@ -7,8 +7,6 @@ import qualified Data.Attoparsec.ByteString.Char8 as AC
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as BC
-import Data.Map (Map)
-import qualified Data.Map as M
 
 data Point = Point
   { position :: (Int, Int),
@@ -25,19 +23,19 @@ readPoint = either error id . AC.parseOnly point
   where
     point :: AC.Parser Point
     point = do
-      AC.string "position=<"
+      _ <- AC.string "position=<"
       AC.skipSpace
       x <- AC.signed AC.decimal
-      AC.string ","
+      _ <- AC.string ","
       AC.skipSpace
       y <- AC.signed AC.decimal
-      AC.string "> velocity=<"
+      _ <- AC.string "> velocity=<"
       AC.skipSpace
       vx <- AC.signed AC.decimal
-      AC.string ","
+      _ <- AC.string ","
       AC.skipSpace
       vy <- AC.signed AC.decimal
-      AC.string ">"
+      _ <- AC.string ">"
       return Point {position = (x, y), velocity = (vx, vy)}
 
 testData :: [Point]
@@ -128,7 +126,7 @@ run points = putStr . unlines $ show minIndex : showPoints minBoard
 -- >>> firstLocalMin [(3, 'A'),(2, 'B'),(1, 'C'),(2, 'D'),(0, 'E')]
 -- 'C'
 firstLocalMin :: Ord x => [(x, y)] -> y
-firstLocalMin ((x1, y1) : (x2, y2) : (x3, y3) : rest)
+firstLocalMin ((x1, _y1) : (x2, y2) : (x3, y3) : rest)
   | x1 > x2 && x2 < x3 = y2
   | otherwise = firstLocalMin ((x2, y2) : (x3, y3) : rest)
 firstLocalMin _ = error "Cannot find local minimum"

@@ -4,9 +4,8 @@ module AOC_2018_19 where
 
 import Data.Array.IArray (Array, (!), (//))
 import qualified Data.Array.IArray as A
-import Data.Bits
+import Data.Bits (Bits ((.&.), (.|.)))
 import Data.Char (toLower, toUpper)
-import Data.List (foldl')
 
 type Registers = Array Int Int -- alwats size 6
 
@@ -79,6 +78,7 @@ readInstruction s =
   where
     [opStr, aStr, bStr, cStr] = words s
     capitalizeFirst (first : rest) = toUpper first : map toLower rest
+    capitalizeFirst [] = error "No first to capitalize"
 
 readProgram :: [String] -> Program
 readProgram ss = A.listArray (0, length ixs - 1) ixs

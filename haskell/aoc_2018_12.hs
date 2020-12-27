@@ -17,7 +17,7 @@ data Rule = Rule Bool Bool Bool Bool Bool deriving (Show)
 data Chunk = Chunk Int Bool Bool Bool Bool Bool
 
 instance Show Chunk where
-  show (Chunk i a b c d e) = show i ++ ": " ++ map (\b -> if b then '#' else '.') [a, b, c, d, e]
+  show (Chunk i a b c d e) = show i ++ ": " ++ map (\x -> if x then '#' else '.') [a, b, c, d, e]
 
 instance Show State where
   show (State s) = show (fst (head s)) ++ ": " ++ map ((\b -> if b then '#' else '.') . snd) s
@@ -77,7 +77,7 @@ testRules =
 -- >>> apply testRules testInitialState
 -- 0: #...#....#.....#..#..#..#
 apply :: [Rule] -> State -> State
-apply rules s = State . trimEnds . map anyRuleMatches $ byChunk s
+apply rules st = State . trimEnds . map anyRuleMatches $ byChunk st
   where
     anyRuleMatches :: Chunk -> (Int, Bool)
     anyRuleMatches c@(Chunk i _ _ _ _ _) = (i, any (`ruleMatches` c) rules)
@@ -121,7 +121,7 @@ run :: Int -> [Rule] -> State -> State
 run n rules s
   | n > 0 = run (n - 1) rules (apply rules s)
   | n == 0 = s
-  | n < 0 = error "bad run"
+  | otherwise = error "bad run"
 
 -- | Sum of number of trues in a State
 --

@@ -5,7 +5,7 @@ module AOC_2018_15 where
 import Control.Monad (foldM, when)
 import Data.Array.IArray (Array)
 import qualified Data.Array.IArray as A
-import Data.List (foldl', nub, partition, sort, sortBy)
+import Data.List (nub, partition)
 import Data.Map (Map)
 import qualified Data.Map as M
 import Data.Maybe (fromJust, mapMaybe)
@@ -25,13 +25,13 @@ data State = State
   deriving (Eq)
 
 instance Show State where
-  show s = init $ unlines [row y | y <- [0 .. y cMax]]
+  show s = init $ unlines [row y | y <- [0 .. coordY cMax]]
     where
-      (Coord {x = 0, y = 0}, cMax) = A.bounds (cavern s)
+      (Coord {coordX = 0, coordY = 0}, cMax) = A.bounds (cavern s)
       row :: Int -> String
-      row j = [toChar (isWall x) (hasMob x) | x <- [0 .. x cMax]]
+      row j = [toChar (isWall x) (hasMob x) | x <- [0 .. coordX cMax]]
         where
-          c x = Coord {x = x, y = j}
+          c x = Coord {coordX = x, coordY = j}
           isWall x = cavern s A.! c x
           hasMob x = c x `M.lookup` mobs s
       toChar :: Bool -> Maybe Mob -> Char
@@ -40,19 +40,19 @@ instance Show State where
       toChar True Nothing = '.'
 
 -- Coord has Ord instance to give "reading order"
-data Coord = Coord {x :: Int, y :: Int} deriving (Eq, A.Ix)
+data Coord = Coord {coordX :: Int, coordY :: Int} deriving (Eq, A.Ix)
 
 cZero :: Coord
-cZero = Coord {x = 0, y = 0}
+cZero = Coord {coordX = 0, coordY = 0}
 
 instance Ord Coord where
-  compare c1 c2 = case compare (y c1) (y c2) of
+  compare c1 c2 = case compare (coordY c1) (coordY c2) of
     LT -> LT
     GT -> GT
-    EQ -> compare (x c1) (x c2)
+    EQ -> compare (coordX c1) (coordX c2)
 
 instance Show Coord where
-  show c = "(" ++ show (x c) ++ "," ++ show (y c) ++ ")"
+  show c = "(" ++ show (coordX c) ++ "," ++ show (coordY c) ++ ")"
 
 data Side = Elf | Goblin deriving (Eq, Show)
 
@@ -62,6 +62,7 @@ data Mob = Mob
   }
   deriving (Eq, Show)
 
+initialHealth :: Int
 initialHealth :: Int = 200
 
 --
@@ -70,20 +71,19 @@ initialHealth :: Int = 200
 
 -- | Update the given mob
 update :: Bool -> State -> Coord -> IO State
-update log s c = case M.lookup c (mobs s) of
+update logging s c = case M.lookup c (mobs s) of
   -- Catch the case where a mob is killed before it has a chance to move
   Nothing -> do
-    when log $ putStrLn ("No mob to move at " ++ show c)
+    when logging $ putStrLn ("No mob to move at " ++ show c)
     return s
-  Just mob -> do
-    when log $ putStrLn ("update on " ++ show c)
-    let mob = fromJust $ M.lookup c (mobs s)
-    when log $ print s
+  Just _mob -> do
+    when logging $ putStrLn ("update on " ++ show c)
+    when logging $ print s
     -- Move phase: move if no enemies adjacent
     let enemyNeigbours = adjacentEnemies s c
     (s', c') <-
       if null enemyNeigbours
-        then move log s c
+        then move logging s c
         else return (s, c)
     -- Attack phase
     let enemyNeighbours' = adjacentEnemies s' c'
@@ -91,35 +91,35 @@ update log s c = case M.lookup c (mobs s) of
       then return s'
       else do
         let target = leastHP s enemyNeighbours'
-        when log $ putStrLn ("Attacking with " ++ show c' ++ " to " ++ show target)
+        when logging $ putStrLn ("Attacking with " ++ show c' ++ " to " ++ show target)
         return $ attack s' target
 
 -- | Move the mob at given coordinates
 move :: Bool -> State -> Coord -> IO (State, Coord)
-move log s c = do
+move logging s c = do
   let mob = fromJust $ M.lookup c (mobs s)
-  when log $ putStrLn ("Moving " ++ show (side mob) ++ " from " ++ show c)
+  when logging $ putStrLn ("Moving " ++ show (side mob) ++ " from " ++ show c)
   let enemyPositions = map fst . M.toList . M.filter ((/= side mob) . side) $ mobs s
   if null enemyPositions
     then return (s {finished = True}, c)
     else do
-      when log $ putStrLn ("Enemies: " ++ show enemyPositions)
+      when logging $ putStrLn ("Enemies: " ++ show enemyPositions)
       let openPositions = nub . filter (isOpen s) $ concatMap adjacent enemyPositions
-      when log $ putStrLn ("Open positions: " ++ show openPositions)
+      when logging $ putStrLn ("Open positions: " ++ show openPositions)
       if null openPositions
         then return (s, c)
         else do
           let closestPositions = findClosest s c openPositions
-          when log $ putStrLn ("Closest positions: " ++ show closestPositions)
+          when logging $ putStrLn ("Closest positions: " ++ show closestPositions)
           if null closestPositions -- no reachable position
             then return (s, c)
             else do
               let destination = minimum closestPositions
-              when log $ putStrLn ("Chosen position: " ++ show destination)
+              when logging $ putStrLn ("Chosen position: " ++ show destination)
               let closestFirstSteps = findClosest s destination . filter (isOpen s) $ adjacent c
-              when log $ putStrLn ("First steps closest to destination: " ++ show closestFirstSteps)
+              when logging $ putStrLn ("First steps closest to destination: " ++ show closestFirstSteps)
               let firstStep = minimum closestFirstSteps
-              when log $ putStrLn ("First step: " ++ show firstStep)
+              when logging $ putStrLn ("First step: " ++ show firstStep)
               return (s {mobs = M.insert firstStep mob (M.delete c (mobs s))}, firstStep)
 
 -- | Make an attack against the mob at given coordinates
@@ -134,18 +134,18 @@ attack s c
 
 -- | Update every unit n times
 updateAll :: Bool -> Int -> State -> IO State
-updateAll log n = go 0
+updateAll logging n = go 0
   where
     go :: Int -> State -> IO State
     go i s
       | i >= n = return s
       | otherwise = do
-        s' <- foldM (update log) s (M.keys (mobs s))
+        s' <- foldM (update logging) s (M.keys (mobs s))
         go (i + 1) s'
 
 -- | Part (a) Update to steady state. Return number of rounds, elves health, goblins health
 runToSteadyState :: Bool -> State -> IO (Int, [Int], [Int])
-runToSteadyState log state = toScore <$> go (0, state)
+runToSteadyState logging state = toScore <$> go (0, state)
   where
     toScore :: (Int, State) -> (Int, [Int], [Int])
     toScore (i, s) = (i - 1, map health es, map health gs)
@@ -155,36 +155,36 @@ runToSteadyState log state = toScore <$> go (0, state)
     go (i, s)
       | finished s = return (i, s)
       | otherwise = do
-        s' <- foldM (update log) s (M.keys (mobs s))
+        s' <- foldM (update logging) s (M.keys (mobs s))
         go (i + 1, s')
 
 -- | Part (b) Increase elf attack power until no elves die
 rampElfPower :: Bool -> State -> IO (Int, [Int])
-rampElfPower log s = go 3
+rampElfPower logging s = go 3
   where
     allElves :: [Int] = map health . filter ((== Elf) . side) . M.elems $ mobs s
     go :: Int -> IO (Int, [Int])
     go p = do
-      (n, elves, _) <- runToSteadyState log (s {elfPower = p})
+      (n, elves, _) <- runToSteadyState logging (s {elfPower = p})
       if length elves == length allElves
         then return (n, elves)
         else go (p + 1)
 
 -- | Return all adjacent coordinates
 --
--- >>> sort . adjacent $ Coord { x = 2, y = 1 }
+-- >>> sort . adjacent $ Coord { coordX = 2, coordY = 1 }
 -- [(2,0),(1,1),(3,1),(2,2)]
 adjacent :: Coord -> [Coord]
 adjacent c =
-  [ c {y = y c - 1},
-    c {x = x c + 1},
-    c {x = x c - 1},
-    c {y = y c + 1}
+  [ c {coordY = coordY c - 1},
+    c {coordX = coordX c + 1},
+    c {coordX = coordX c - 1},
+    c {coordY = coordY c + 1}
   ]
 
 -- | Return set of point adjacents to the given set
 --
--- >>> sort . S.toList . adjacentSet $ S.fromList [Coord { x = 3, y = 3 }, Coord { x = 3, y = 4 }]
+-- >>> sort . S.toList . adjacentSet $ S.fromList [Coord { coordX = 3, coordY = 3 }, Coord { coordX = 3, coordY = 4 }]
 -- [(3,2),(2,3),(4,3),(2,4),(4,4),(3,5)]
 adjacentSet :: Set Coord -> Set Coord
 adjacentSet s = S.difference neighbours s
@@ -237,14 +237,14 @@ isOpen s c = cavern s A.! c && M.notMember c (mobs s)
 readState :: [String] -> State
 readState xs =
   State
-    { cavern = A.array (cZero, Coord {x = xMax, y = yMax}) cavernData,
+    { cavern = A.array (cZero, Coord {coordX = xMax, coordY = yMax}) cavernData,
       mobs = M.fromList mobsData,
       finished = False,
       elfPower = 3
     }
   where
     (xMax, yMax) = (length (head xs) - 1, length xs - 1)
-    tiles :: [(Coord, Char)] = zip [Coord {x = x, y = y} | y <- [0 .. yMax], x <- [0 .. xMax]] (concat xs)
+    tiles :: [(Coord, Char)] = zip [Coord {coordX = x, coordY = y} | y <- [0 .. yMax], x <- [0 .. xMax]] (concat xs)
     cavernData :: [(Coord, Bool)] = map (\(c, x) -> (c, x `elem` ".GE")) tiles
     mobsData :: [(Coord, Mob)] = mapMaybe toMob tiles
     toMob :: (Coord, Char) -> Maybe (Coord, Mob)

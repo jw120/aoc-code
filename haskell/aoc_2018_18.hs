@@ -2,9 +2,8 @@
 
 module AOC_2018_18 where
 
-import Data.Array.IArray (Array, (!), (//))
+import Data.Array.IArray (Array, (!))
 import qualified Data.Array.IArray as A
-import Data.List (foldl')
 import Data.Map (Map)
 import qualified Data.Map as M
 
@@ -184,10 +183,10 @@ main = do
 -- >>> findLoop [0,1,2,3,4,5,3,4,5,3,4,5]
 -- ([3,4,5],3)
 findLoop :: Ord a => [a] -> ([a], Int)
-findLoop xs = (subseq, first)
+findLoop zs = (subseq, first)
   where
-    subseq = take (firstRep - first) $ drop first xs
-    (first, firstRep) = go M.empty 0 xs
+    subseq = take (firstRep - first) $ drop first zs
+    (first, firstRep) = go M.empty 0 zs
     go :: Ord b => Map b Int -> Int -> [b] -> (Int, Int)
     go m i (x : xs) = case M.lookup x m of
       Just n -> (n, i)

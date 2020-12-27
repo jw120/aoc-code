@@ -11,17 +11,17 @@ import Data.Foldable (maximumBy)
 import Data.Ord (comparing)
 
 data Bot = Bot
-  { x :: Int,
-    y :: Int,
-    z :: Int,
-    r :: Int
+  { botX :: Int,
+    botY :: Int,
+    botZ :: Int,
+    botR :: Int
   }
 
 instance Show Bot where
-  show b = "pos=<" ++ show (x b) ++ "," ++ show (y b) ++ "," ++ show (z b) ++ ">, r=" ++ show (r b)
+  show b = "pos=<" ++ show (botX b) ++ "," ++ show (botY b) ++ "," ++ show (botZ b) ++ ">, r=" ++ show (botR b)
 
 botDistance :: Bot -> Bot -> Int
-botDistance b1 b2 = distance (x b1, y b1, z b1) (x b2, y b2, z b2)
+botDistance b1 b2 = distance (botX b1, botY b1, botZ b1) (botX b2, botY b2, botZ b2)
 
 distance :: (Int, Int, Int) -> (Int, Int, Int) -> Int
 distance (a, b, c) (d, e, f) = abs (a - d) + abs (b - e) + abs (c - f)
@@ -37,24 +37,24 @@ readBot s = either (error . withInput) id . AC.parseOnly bot $ s
     withInput msg = concat [msg, " (reading ", BC.unpack s, ")"]
     bot :: AC.Parser Bot
     bot = do
-      AC.string "pos=<"
+      _ <- AC.string "pos=<"
       x <- AC.signed AC.decimal
-      AC.char ','
+      _ <- AC.char ','
       y <- AC.signed AC.decimal
-      AC.char ','
+      _ <- AC.char ','
       z <- AC.signed AC.decimal
-      AC.string ">, r="
+      _ <- AC.string ">, r="
       r <- AC.decimal
-      return Bot {x = x, y = y, z = z, r = r}
+      return Bot {botX = x, botY = y, botZ = z, botR = r}
 
 -- | Solve part A, number of bots in range of the strongest bot
 --
 -- >>> partA testA
 -- 7
 partA :: [Bot] -> Int
-partA bots = length $ filter (<= r strongestBot) distances
+partA bots = length $ filter (<= botR strongestBot) distances
   where
-    strongestBot :: Bot = maximumBy (comparing r) bots
+    strongestBot :: Bot = maximumBy (comparing botR) bots
     distances :: [Int] = map (botDistance strongestBot) bots
 
 -- Octree region of space bounded by x0 <= x <= x1 etc
@@ -155,10 +155,11 @@ isFullyOutside o b = not (isInside o b) && farAway
 
 -}
 
+main :: IO ()
 main = do
   bots :: [Bot] <- map readBot . BC.lines <$> B.getContents
   print $ partA bots
-  print "NYI"
+  print ("NYI" :: String)
 
 testA :: [Bot]
 testA =

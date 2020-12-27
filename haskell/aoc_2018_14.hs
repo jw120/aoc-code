@@ -25,7 +25,7 @@ instance Show State where
   show s = xs ++ " " ++ show ia ++ " " ++ show ib
     where
       n = M.size (recipes s)
-      xs = show $ [(\(Score s) -> s) (recipes s M.! Index i) | i <- [0 .. n - 1]]
+      xs = show $ [(\(Score z) -> z) (recipes s M.! Index i) | i <- [0 .. n - 1]]
       Index ia = a s
       Index ib = b s
 
@@ -50,7 +50,7 @@ next s = s {a = a', b = b', recipes = recipes'}
     a' = wrapIndex (M.size recipes') $ a s + 1 + scoreToIndex (recipes s M.! a s)
     b' = wrapIndex (M.size recipes') $ b s + 1 + scoreToIndex (recipes s M.! b s)
     splitScore :: Score -> (Score, Score)
-    splitScore (Score s) = (Score (s `div` 10), Score (s `mod` 10))
+    splitScore (Score z) = (Score (z `div` 10), Score (z `mod` 10))
     wrapIndex :: Int -> Index -> Index
     wrapIndex n (Index i) = Index (i `mod` n)
 
@@ -92,8 +92,6 @@ runB target = adjustIndex . lastKey . dropLastRecipeIfNotMatched $ until matchTa
       | tail (lastRecipes s) == target' = s
       | init (lastRecipes s) == target' = s {recipes = M.deleteMax (recipes s)}
       | otherwise = error "Not a match"
-      where
-        ls = lastRecipes s
 
 main :: IO ()
 main = do

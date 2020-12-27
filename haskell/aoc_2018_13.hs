@@ -57,14 +57,14 @@ instance Show Network where
 --
 
 data Cart = Cart
-  { x :: Int,
-    y :: Int,
+  { cartX :: Int,
+    cartY :: Int,
     heading :: Direction,
     next :: Choice
   }
 
 instance Show Cart where
-  show c = "(" ++ show (x c) ++ ", " ++ show (y c) ++ ") " ++ [head (show (heading c))] ++ show (next c)
+  show c = "(" ++ show (cartX c) ++ ", " ++ show (cartY c) ++ ") " ++ [head (show (heading c))] ++ show (next c)
 
 -- Cart's current direction
 data Direction = North | East | South | West deriving (Show)
@@ -139,13 +139,13 @@ readNetwork xs =
     trackData :: [((Int, Int), Segment)]
     trackData = concatMap unpackTrackRow rowData
     unpackTrackRow :: (Int, ([(Int, Segment)], a)) -> [((Int, Int), Segment)]
-    unpackTrackRow (y, (xs, _)) = map (\(x, s) -> ((x, y), s)) xs
+    unpackTrackRow (y, (zs, _)) = map (\(x, s) -> ((x, y), s)) zs
     cartData :: [(Int, Int, Direction)]
     cartData = concatMap unpackCartRow rowData
     unpackCartRow :: (Int, (b, [(Int, Direction)])) -> [(Int, Int, Direction)]
-    unpackCartRow (y, (_, xs)) = map (\(x, d) -> (x, y, d)) xs
+    unpackCartRow (y, (_, zs)) = map (\(x, d) -> (x, y, d)) zs
     mkCart :: (Int, Int, Direction) -> Cart
-    mkCart (x, y, d) = Cart {x = x, y = y, heading = d, next = TurnLeft}
+    mkCart (x, y, d) = Cart {cartX = x, cartY = y, heading = d, next = TurnLeft}
 
 -- | Read one row
 --
@@ -196,15 +196,15 @@ runToCollision s = case tick s of
 
 runLog :: State -> IO ()
 runLog state = do
-  showState 0 state
-  go 0 state
+  showState (0 :: Int) state
+  go (0 :: Int) state
   where
     go i s = case tick s of
       Left pos -> print pos
       Right s' -> do
         showState (i + 1) s'
         go (i + 1) s'
-    showState i t = putStrLn $ show i ++ ": " ++ show (map (\c -> (x c, y c)) (sortCarts (carts t)))
+    showState i t = putStrLn $ show i ++ ": " ++ show (map (\c -> (cartX c, cartY c)) (sortCarts (carts t)))
 
 -- Run system new state or coordinate of first collision
 tick :: State -> Either (Int, Int) State
@@ -217,7 +217,7 @@ tick s = fmap (\cs -> s {carts = cs}) newCarts
     f (Left pos) _ = Left pos
     f (Right movedCarts) [] = Right movedCarts
     f (Right movedCarts) (c : unmovedCarts)
-      | collides c' (movedCarts ++ unmovedCarts) = Left (x c', y c')
+      | collides c' (movedCarts ++ unmovedCarts) = Left (cartX c', cartY c')
       | otherwise = Right (c' : movedCarts)
       where
         c' = updateCart n c
@@ -231,15 +231,15 @@ tick s = fmap (\cs -> s {carts = cs}) newCarts
 -- >>> runToLastCart False testNetwork2
 -- (6,4)
 runToLastCart :: Bool -> State -> IO (Int, Int)
-runToLastCart log s = do
+runToLastCart logging s = do
   (lastCartsMoved, lastCartsUnmoved) <- iterateUntilM oneCart moveCart ([], sortCarts (carts s))
   let lastCart = head (lastCartsMoved ++ map (updateCart n) lastCartsUnmoved) -- Finish tick
-  return (x lastCart, y lastCart)
+  return (cartX lastCart, cartY lastCart)
   where
     n :: Network = network s
     moveCart :: ([Cart], [Cart]) -> IO ([Cart], [Cart])
     moveCart (movedCarts, unmovedCarts@(c : rest)) = do
-      when log $ print (movedCarts, unmovedCarts)
+      when logging $ print (movedCarts, unmovedCarts)
       return (movedCarts', rest')
       where
         c' = updateCart n c
@@ -247,32 +247,31 @@ runToLastCart log s = do
           | collides c' (movedCarts ++ rest) = filter (differentPosition c') movedCarts
           | otherwise = c' : filter (differentPosition c') movedCarts
         rest' = filter (differentPosition c') rest
-        numCarts' = length movedCarts' + length rest'
     moveCart (movedCarts, []) = moveCart ([], sortCarts movedCarts)
     oneCart (movedCarts, unmovedCarts) = (length movedCarts + length unmovedCarts) <= 1
-    differentPosition a b = x a /= x b || y a /= y b
+    differentPosition a b = cartX a /= cartX b || cartY a /= cartY b
 
 sortCarts :: [Cart] -> [Cart]
 sortCarts = sortBy cmpCarts
   where
     cmpCarts :: Cart -> Cart -> Ordering
-    cmpCarts c1 c2 = case compare (y c1) (y c2) of
+    cmpCarts c1 c2 = case compare (cartY c1) (cartY c2) of
       LT -> LT
       GT -> GT
-      EQ -> compare (x c1) (x c2)
+      EQ -> compare (cartX c1) (cartX c2)
 
 -- Does the cart have same (x, y) as any of the carts in the list
 collides :: Cart -> [Cart] -> Bool
 collides c = any (sameCoord c)
   where
-    sameCoord c1 c2 = x c1 == x c2 && y c1 == y c2
+    sameCoord c1 c2 = cartX c1 == cartX c2 && cartY c1 == cartY c2
 
 -- | Update position of cart with one move
 --
 -- >>> take 8 $ iterate (updateCart (network (readNetwork testNetworkStr))) (Cart { x = 2, y = 0, heading = East, next = TurnLeft })
 -- [(2, 0) EL,(3, 0) EL,(4, 0) EL,(4, 1) SL,(4, 2) SL,(5, 2) E-,(6, 2) E-,(7, 2) E-]
 updateCart :: Network -> Cart -> Cart
-updateCart (Network n) c = case (n A.! (x c, y c), heading c) of
+updateCart (Network n) c = case (n A.! (cartX c, cartY c), heading c) of
   -- Horizontal
   (Horizontal, East) -> c_east
   (Horizontal, West) -> c_west
@@ -324,10 +323,10 @@ updateCart (Network n) c = case (n A.! (x c, y c), heading c) of
       }
   (s, d) -> error $ "Bad update" ++ show s ++ " " ++ show d
   where
-    c_north = c {y = y c - 1, heading = North}
-    c_south = c {y = y c + 1, heading = South}
-    c_west = c {x = x c - 1, heading = West}
-    c_east = c {x = x c + 1, heading = East}
+    c_north = c {cartY = cartY c - 1, heading = North}
+    c_south = c {cartY = cartY c + 1, heading = South}
+    c_west = c {cartX = cartX c - 1, heading = West}
+    c_east = c {cartX = cartX c + 1, heading = East}
 
 main :: IO ()
 main = do

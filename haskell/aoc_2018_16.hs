@@ -8,7 +8,7 @@ import qualified Data.Array.IArray as A
 import Data.Bits (Bits ((.&.), (.|.)))
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as BC
-import Data.List (foldl', stripPrefix)
+import Data.List (foldl')
 import Data.Map (Map)
 import qualified Data.Map as M
 import Data.Maybe (fromJust)
@@ -86,7 +86,7 @@ assignOpcodes = foldl' assign M.empty
 
 -- Allocate opcodes to each instruction
 deduceOpcodes :: Map Int [Operation] -> Map Int Operation
-deduceOpcodes m = snd $ go (m, M.empty)
+deduceOpcodes mp = snd $ go (mp, M.empty)
   where
     go :: (Map Int [Operation], Map Int Operation) -> (Map Int [Operation], Map Int Operation)
     go (m, assigned)

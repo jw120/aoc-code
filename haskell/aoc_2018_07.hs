@@ -22,11 +22,11 @@ readRule = either error id . AC.parseOnly rule
   where
     rule :: AC.Parser (Char, Char)
     rule = do
-      AC.string "Step "
+      _ <- AC.string "Step "
       x <- AC.letter_ascii
-      AC.string " must be finished before step "
+      _ <- AC.string " must be finished before step "
       y <- AC.letter_ascii
-      AC.string " can begin."
+      _ <- AC.string " can begin."
       return (x, y)
 
 -- | Example rules from problem statement, ised for doctests
@@ -57,10 +57,8 @@ toPrereqMap rules = foldl' addRule allEmpty rules
     addRule m (prereq, step) = M.insertWith addSorted step [prereq] m
     addSorted :: String -> String -> String
     addSorted s1 s2 = sort (s1 ++ s2)
-    allSteps :: String
-    allSteps = nub (map fst rules ++ map snd rules)
     allEmpty :: Map Char String
-    allEmpty = M.fromList $ map (,"") allSteps
+    allEmpty = M.fromList . map (,"") $ nub (map fst rules ++ map snd rules)
 
 -- | What is the next step to be performed for given preqmap and already completed steps
 --
@@ -144,6 +142,7 @@ allParallelSteps rules n baseTime = go (Working [] 0 "")
     go s@(Working _ tick _) = case parallelStep n baseTime prereqMap s of
       s'@Working {} -> go s'
       Finished -> tick
+    go Finished = error "Unexpected Finished state in allParallelSteps"
 
 main :: IO ()
 main = do

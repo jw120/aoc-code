@@ -3,7 +3,7 @@
 
 module AOC_2018_24 where
 
-import Control.Applicative ((<*), (<|>))
+import Control.Applicative ((<|>))
 import Control.Monad (foldM, when)
 import Data.Attoparsec.ByteString.Char8
   ( Parser,
@@ -12,21 +12,17 @@ import Data.Attoparsec.ByteString.Char8
     decimal,
     many',
     parseOnly,
-    parseTest,
     sepBy1,
     skipSpace,
     skipWhile,
-    string,
   )
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
-import Data.ByteString.Char8 (pack)
 import Data.Foldable (maximumBy)
 import Data.Functor (($>))
 import Data.List (foldl', sortBy)
 import Data.Map (Map, (!))
 import qualified Data.Map as M
-import Data.Ord (comparing)
 
 newtype GroupIndex = GroupIndex Int deriving (Eq, Ord)
 
@@ -86,23 +82,23 @@ readState = either error id . parseOnly state
 
 -- | Parse group
 group :: Side -> Parser Group
-group side = do
-  n <- decimal
-  hp <- " units each with " *> decimal
-  (weak, immune) <- " hit points " *> weaknesses
-  atk <- skipSpace *> "with an attack that does " *> decimal
+group s = do
+  pN <- decimal
+  pHP <- " units each with " *> decimal
+  (pWeak, pImmune) <- " hit points " *> weaknesses
+  pAtk <- skipSpace *> "with an attack that does " *> decimal
   t <- skipSpace *> attackType
-  initiative <- " damage at initiative " *> decimal
+  pInitiative <- " damage at initiative " *> decimal
   return
     Group
-      { n = n,
-        hp = hp,
-        atk = atk,
+      { n = pN,
+        hp = pHP,
+        atk = pAtk,
         atkType = t,
-        initiative = initiative,
-        weak = weak,
-        immune = immune,
-        side = side
+        initiative = pInitiative,
+        weak = pWeak,
+        immune = pImmune,
+        side = s
       }
 
 -- | Parse possible list of weaknesses and immgroupies
@@ -148,15 +144,15 @@ attackType =
 
 -- | Run one battle round with optional commentary
 runOne :: Bool -> State -> IO State
-runOne log s = do
-  when log $ putStrLn "Running"
+runOne logging s = do
+  when logging $ putStrLn "Running"
   let allGroupsByPower :: [GroupIndex] = indicesByEffPower s
-  when log $ putStrLn ("Selection order: " ++ show allGroupsByPower)
+  when logging $ putStrLn ("Selection order: " ++ show allGroupsByPower)
   let targetAssignments :: [(GroupIndex, GroupIndex)] = foldl' (assignTarget s) [] allGroupsByPower
-  when log $ putStrLn ("Targets: " ++ show targetAssignments)
+  when logging $ putStrLn ("Targets: " ++ show targetAssignments)
   let sortedAssignments :: [(GroupIndex, GroupIndex)] = sortBy attackerInitiative targetAssignments
-  when log $ putStrLn ("Sorted targets: " ++ show sortedAssignments)
-  s' <- foldM (resolveAttack log) s sortedAssignments
+  when logging $ putStrLn ("Sorted targets: " ++ show sortedAssignments)
+  s' <- foldM (resolveAttack logging) s sortedAssignments
   return $ M.filter ((> 0) . n) s'
   where
     attackerInitiative :: (GroupIndex, GroupIndex) -> (GroupIndex, GroupIndex) -> Ordering
@@ -189,8 +185,8 @@ assignTarget s assigned i
 
 -- | Update state for give attack
 resolveAttack :: Bool -> State -> (GroupIndex, GroupIndex) -> IO State
-resolveAttack log s (a, d) = do
-  when log $
+resolveAttack logging s (a, d) = do
+  when logging $
     putStrLn
       ( show a ++ " attacks " ++ show d ++ ": "
           ++ show damage
@@ -219,9 +215,9 @@ potentialDamage :: Group -> Group -> Int
 potentialDamage gAtk gDef = typeFactor (n gAtk * atk gAtk) (atkType gAtk) (weak gDef) (immune gDef)
   where
     typeFactor :: Int -> AtkType -> [AtkType] -> [AtkType] -> Int
-    typeFactor d a weak immune
-      | a `elem` weak = d * 2
-      | a `elem` immune = 0
+    typeFactor d a isWeak isImmune
+      | a `elem` isWeak = d * 2
+      | a `elem` isImmune = 0
       | otherwise = d
 
 -- | Return the group indicies sorted in descending order of attack power (with tiebreakers)
@@ -241,21 +237,21 @@ indicesByEffPower s = sortBy (flip comparePower) $ M.keys s
 
 -- | Apply runOne until only one side remains or stalemate
 runAll :: Bool -> State -> IO State
-runAll log s
+runAll logging s
   | numSideGroups ImmuneSystem s == 0 || numSideGroups Infection s == 0 = return s
   | otherwise = do
-    s' <- runOne log s
+    s' <- runOne logging s
     if numUnits s' == numUnits s
       then return s
-      else runAll log s'
+      else runAll logging s'
 
 -- | Boost until immune wins
 boostUntilWin :: (Bool, Bool) -> State -> IO (Int, State)
-boostUntilWin (log, subLog) s = go 0
+boostUntilWin (logging, subLog) s = go 0
   where
     go :: Int -> IO (Int, State)
     go x = do
-      when log $ putStrLn ("Boost: " ++ show x)
+      when logging $ putStrLn ("Boost: " ++ show x)
       s' <- runAll subLog (boost x s)
       if numSideGroups ImmuneSystem s' > 0 && numSideGroups Infection s' == 0
         then return (x, s')

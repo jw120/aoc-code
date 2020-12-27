@@ -7,16 +7,12 @@ import Data.Array.Unboxed
     (//),
   )
 import Data.Attoparsec.ByteString.Char8
-  ( Parser,
-    char,
+  ( char,
     decimal,
-    endOfLine,
-    maybeResult,
     parseOnly,
     skipSpace,
   )
 import Data.ByteString (ByteString)
-import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as BC
 import Data.Foldable (foldl')
 
@@ -45,19 +41,19 @@ parseClaim s = case parseOnly claimParser s of
   Right claim -> claim
   where
     claimParser = do
-      char '#'
-      id <- decimal
+      _ <- char '#'
+      c_id <- decimal
       skipSpace
-      char '@'
+      _ <- char '@'
       skipSpace
-      x <- decimal
-      char ','
-      y <- decimal
-      char ':'
+      c_x <- decimal
+      _ <- char ','
+      c_y <- decimal
+      _ <- char ':'
       skipSpace
-      w <- decimal
-      char 'x'
-      Claim id x y w <$> decimal
+      c_w <- decimal
+      _ <- char 'x'
+      Claim c_id c_x c_y c_w <$> decimal
 
 -- Main function for part (a) - number of overlapping squares on the fabric
 overlaps :: Fabric -> Int
@@ -69,17 +65,17 @@ overlaps f =
     ]
   where
     isOverlap :: Int -> Int
-    isOverlap x = if x > 1 then 1 else 0
+    isOverlap i = if i > 1 then 1 else 0
 
 emptyFabric :: Fabric
 emptyFabric = listArray ((0, 0), (fabricSize - 1, fabricSize - 1)) (repeat 0)
 
 addClaim :: Fabric -> Claim -> Fabric
-addClaim a (Claim _ x y w h) =
+addClaim a (Claim _ c_x c_y c_w c_h) =
   a
     // [ ((i, j), a ! (i, j) + 1)
-         | i <- [x .. x + w - 1],
-           j <- [y .. y + h - 1]
+         | i <- [c_x .. c_x + c_w - 1],
+           j <- [c_y .. c_y + c_h - 1]
        ]
 
 -- Main function for part (b) - return the claim that has no overlappes
@@ -87,9 +83,9 @@ findUnoverlapped :: Fabric -> [Claim] -> Int
 findUnoverlapped fabric = idCode . head . filter isUnoverlapped
   where
     isUnoverlapped :: Claim -> Bool
-    isUnoverlapped (Claim _ x y w h) = all (== 1) patch
+    isUnoverlapped (Claim _ c_x c_y c_w c_h) = all (== 1) patch
       where
-        patch = [fabric ! (i, j) | i <- [x .. x + w - 1], j <- [y .. y + h - 1]]
+        patch = [fabric ! (i, j) | i <- [c_x .. c_x + c_w - 1], j <- [c_y .. c_y + c_h - 1]]
 
 main :: IO ()
 main = do

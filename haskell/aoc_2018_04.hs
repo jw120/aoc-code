@@ -4,10 +4,15 @@
 module AOC_2018_04 where
 
 import Control.Monad (when)
-import Data.Attoparsec.ByteString.Char8
-  ( Parser,
-  )
 import Data.Attoparsec.ByteString.Char8 as A
+  ( Parser,
+    char,
+    choice,
+    decimal,
+    parseOnly,
+    skipSpace,
+    string,
+  )
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as BC
@@ -80,25 +85,25 @@ parseObs s = case A.parseOnly obsParser s of
   where
     obsParser :: Parser ObsRecord
     obsParser = do
-      A.char '['
-      A.decimal -- ignore the year
-      A.char '-'
+      _ <- A.char '['
+      _ :: Int <- A.decimal -- ignore the year
+      _ <- A.char '-'
       month <- Month <$> A.decimal
-      A.char '-'
+      _ <- A.char '-'
       day <- Day <$> A.decimal
       A.skipSpace
-      hour <- A.decimal
-      A.char ':'
+      hour :: Int <- A.decimal
+      _ <- A.char ':'
       minute <- Minute <$> A.decimal
-      A.char ']'
+      _ <- A.char ']'
       A.skipSpace
       A.choice
         [ A.string "wakes up" $> ObsRecord month day (ObsWake minute),
           A.string "falls asleep" $> ObsRecord month day (ObsSleep minute),
           do
-            A.string "Guard #"
+            _ <- A.string "Guard #"
             guard <- Guard <$> A.decimal
-            A.string " begins shift"
+            _ <- A.string " begins shift"
             if hour == 0
               then
                 return
@@ -108,7 +113,7 @@ parseObs s = case A.parseOnly obsParser s of
 
 -- Replace guard changes before midnight with midnight changes the day of the following record
 moveEndDayGuards :: [ObsRecord] -> [ObsRecord]
-moveEndDayGuards (r1@(ObsRecord _ _ (ObsEndDayGuardChange g)) : r2@(ObsRecord m2 d2 _) : rest) =
+moveEndDayGuards ((ObsRecord _ _ (ObsEndDayGuardChange g)) : r2@(ObsRecord m2 d2 _) : rest) =
   ObsRecord m2 d2 (ObsInPeriodGuardChange g (Minute 0)) :
   moveEndDayGuards (r2 : rest)
 moveEndDayGuards (r1 : r2 : rest) = r1 : moveEndDayGuards (r2 : rest)
@@ -123,7 +128,7 @@ data Action
 
 groupByDays :: [ObsRecord] -> [[Action]]
 groupByDays [] = []
-groupByDays observations@(first : rest) =
+groupByDays (first : rest) =
   map toDayAction (first : otherFirstDayObs) : groupByDays otherDays
   where
     (otherFirstDayObs, otherDays) = span (sameDay first) rest
@@ -132,8 +137,8 @@ groupByDays observations@(first : rest) =
     toDayAction :: ObsRecord -> Action
     toDayAction (ObsRecord _ _ (ObsWake t)) = Wake t
     toDayAction (ObsRecord _ _ (ObsSleep t)) = Sleep t
-    toDayAction (ObsRecord _ _ (ObsInPeriodGuardChange g t)) = GuardStart g
-    toDayAction (ObsRecord _ _ (ObsEndDayGuardChange g)) =
+    toDayAction (ObsRecord _ _ (ObsInPeriodGuardChange g _)) = GuardStart g
+    toDayAction (ObsRecord _ _ (ObsEndDayGuardChange _)) =
       error "Not expecting end-day"
 
 -- process the actions to give sleep interavls

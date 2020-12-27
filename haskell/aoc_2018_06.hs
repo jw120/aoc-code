@@ -12,16 +12,14 @@ import Data.Attoparsec.ByteString.Char8 as AC
     skipSpace,
   )
 import Data.ByteString (ByteString)
-import qualified Data.ByteString as B
 import qualified Data.ByteString.Char8 as BC
-import Data.Either (either)
 import Data.Function (on)
 import Data.List (foldl', maximumBy, minimumBy, nub)
 import Data.Map (Map)
 import qualified Data.Map as M
 import Data.Maybe (mapMaybe)
 
-data Point = Point {x :: Int, y :: Int} deriving (Show, Eq, Ord, Ix)
+data Point = Point {pointX :: Int, pointY :: Int} deriving (Show, Eq, Ord, Ix)
 
 -- | Read a point from a string
 --
@@ -33,7 +31,7 @@ readPoint = either error id . AC.parseOnly point
     point :: AC.Parser Point
     point = do
       x <- AC.decimal
-      AC.char ','
+      _ <- AC.char ','
       AC.skipSpace
       Point x <$> AC.decimal
 
@@ -48,8 +46,8 @@ testPoints = map (uncurry Point) [(1, 1), (1, 6), (8, 3), (3, 4), (5, 5), (8, 9)
 boundingBox :: [Point] -> (Point, Point)
 boundingBox ps = (Point (minimum xs) (minimum ys), Point (maximum xs) (maximum ys))
   where
-    xs = map x ps
-    ys = map y ps
+    xs = map pointX ps
+    ys = map pointY ps
 
 -- | Part a: What is the size of the largest closest-area of the points with finite area
 --
@@ -62,7 +60,7 @@ largestArea points = maxArea
     edgePointNearest :: [Point] = nub . mapMaybe (closestArray A.!) $ edgePoints points
     allPointsAndCounts :: [(Point, Int)] = M.toList . counts $ closest points
     interiorPointsAndCounts :: [(Point, Int)] = filter ((`notElem` edgePointNearest) . fst) allPointsAndCounts
-    (maxPoint, maxArea) = maximumBy (compare `on` snd) interiorPointsAndCounts
+    (_maxPoint, maxArea) = maximumBy (compare `on` snd) interiorPointsAndCounts
 
 closest :: [Point] -> Array Point (Maybe Point)
 closest points = A.array pointRange [(p, closestPoint p points) | p <- A.range pointRange]
@@ -85,7 +83,7 @@ counts = foldl' f M.empty . A.elems
 -- >>> interiorPoints testPoints
 -- [Point {x = 3, y = 4},Point {x = 5, y = 5}]
 interiorPoints :: [Point] -> [Point]
-interiorPoints points = filter (\p -> x p /= x p1 && x p /= x p2 && y p /= y p1 && y p /= y p1) points
+interiorPoints points = filter (\p -> pointX p /= pointX p1 && pointX p /= pointX p2 && pointY p /= pointY p1 && pointY p /= pointY p1) points
   where
     (p1, p2) = boundingBox points
 
@@ -114,11 +112,11 @@ distance (Point x1 y1) (Point x2 y2) = abs (x1 - x2) + abs (y1 - y2)
 -- Nothing
 closestPoint :: Point -> [Point] -> Maybe Point
 closestPoint p points
-  | length allClosest == 1 = Just closestPoint
+  | length allClosest == 1 = Just closestPt
   | otherwise = Nothing
   where
     allClosest = filter (\(_, d) -> d == closestDistance) pointsAndDistances
-    (closestPoint, closestDistance) = minimumBy (compare `on` snd) pointsAndDistances
+    (closestPt, closestDistance) = minimumBy (compare `on` snd) pointsAndDistances
     pointsAndDistances = map (\q -> (q, distance p q)) points
 
 pointsWithTotalDistWithin :: Int -> [Point] -> Int

@@ -136,7 +136,6 @@ specialAdvance g =
   where
     -- current marble
     i :: MarbleIndex = currentMarbleIndex g
-    marble_i :: Marble = marbles g M.! i
     -- six marbles to the left
     h = hopLeft (marbles g)
     l6 :: MarbleIndex = h . h . h . h . h $ h i

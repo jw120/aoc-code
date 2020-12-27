@@ -16,6 +16,7 @@ node (numChildren : numMetadata : afterHeader) = (Node cs ms, afterMetadata)
   where
     (cs, afterChildren) = rep numChildren node afterHeader
     (ms, afterMetadata) = splitAt numMetadata afterChildren
+node _ = error "Bad node"
 
 -- turn a parser into a parer for a list of n entries
 rep :: Int -> ([Int] -> (a, [Int])) -> ([Int] -> ([a], [Int]))

@@ -41,7 +41,7 @@ pairWithOneDiff ids = commonElements
   where
     commonElements = map fst . filter (uncurry (==)) $ zip id1 id2
     (True, id1, id2) = head $ filter (\(d, _, _) -> d) labelledPairs
-    labelledPairs = map (\(id1, id2) -> (hasOneDiff id1 id2, id1, id2)) pairs
+    labelledPairs = map (\(id_1, id_2) -> (hasOneDiff id_1 id_2, id_1, id_2)) pairs
     pairs = allPairs ids
 
 -- | Generate all unordered pairs of elements from a list

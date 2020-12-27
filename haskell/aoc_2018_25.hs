@@ -56,7 +56,7 @@ main :: IO ()
 main = do
   points <- map readPoint . T.lines <$> TIO.getContents
   print . length $ allocatePoints points
-  print "NYI"
+  print ("NYI" :: String)
 
 test1 :: [Point]
 test1 =

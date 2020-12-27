@@ -7,7 +7,6 @@ import Control.Monad (forM_)
 import Data.Array.IArray (Array, (!), (//))
 import qualified Data.Array.IArray as A
 import Data.Char (isDigit)
-import Data.Either (fromRight)
 import Data.List (foldl')
 import Data.Text (Text)
 import qualified Data.Text as T
@@ -109,7 +108,7 @@ run n r (x, y)
       let r' = run (n - 1) (fillBack WetSand) (xLeft, y - 1)
        in run (n - 1) r' (xRight, y - 1)
   where
-    ((xMin, yMin), (xMax, yMax)) = A.bounds r
+    ((_xMin, _yMin), (_xMax, yMax)) = A.bounds r
     currentSquare = r ! (x, y)
     (solidLeft, xLeft) = spread r False (x, y - 1)
     (solidRight, xRight) = spread r True (x, y - 1)
@@ -129,7 +128,8 @@ spread r toRight (xS, yS)
     next = (xS + xInc, yS)
     nextBelow = (xS + xInc, yS + 1)
 
-test1 :: [Text] =
+test1 :: [Text]
+test1 =
   [ "x=495, y=2..7",
     "y=7, x=495..501",
     "x=501, y=3..7",
