@@ -22,6 +22,26 @@ showTile WetSand = '|'
 showTile Water = '~'
 showTile Clay = '#'
 
+isPorous :: Tile -> Bool
+isPorous DrySand = True
+isPorous WetSand = True
+isPorous _ = False
+
+isSolid :: Tile -> Bool
+isSolid = not . isPorous
+
+isWet :: Tile -> Bool
+isWet WetSand = True
+isWet Water = True
+isWet _ = False
+
+-- Location below the spring
+xStart :: Int
+xStart = 500
+
+yStart :: Int
+yStart = 1
+
 type Reservoir = Array (Int, Int) Tile
 
 data InputRecord = Horizontal (Int, Int) Int | Vertical Int (Int, Int) deriving (Show)
@@ -49,8 +69,8 @@ parseInputRecord input
 parseReservoir :: [InputRecord] -> Reservoir
 parseReservoir recs = foldl' addRecord emptyReservoir recs
   where
-    (xMin, xMax) = foldl' joinRanges (500, 500) $ map xRange recs
-    (yMin, yMax) = foldl' joinRanges (1, 1) $ map yRange recs
+    (xMin, xMax) = foldl' joinRanges (xStart, xStart) $ map xRange recs
+    (yMin, yMax) = foldl' joinRanges (yStart, yStart) $ map yRange recs
     n = (xMax - xMin + 3) * (yMax - yMin + 1)
     joinRanges :: (Int, Int) -> (Int, Int) -> (Int, Int)
     joinRanges (m0, m1) (n0, n1) = (min m0 n0, max m1 n1)
@@ -67,10 +87,47 @@ printReservoir r = forM_ [yMin .. yMax] printLine
     printLine y = putStrLn [showTile (r ! (x, y)) | x <- [xMin .. xMax]]
 
 countWet :: Reservoir -> Int
-countWet = undefined
+countWet = length . filter isWet . A.elems
 
-run :: Reservoir -> Reservoir
-run = undefined
+run :: Int -> Reservoir -> (Int, Int) -> Reservoir
+run n r (x, y)
+  | n == 0 = r
+  -- Stop if flowed off the bottom
+  | y > yMax = r
+  -- If this is square is porous, wet it and continue
+  | isPorous currentSquare = run (n - 1) (r // [((x, y), WetSand)]) (x, y + 1)
+  -- If this square is non-porous, look at one level up
+  | otherwise = case (solidLeft, solidRight) of
+    -- If solid to both sides, fill between the walls and start at the top
+    (True, True) -> run (n - 1) (fillBack Water) (x, y - 2)
+    -- If solid to the left, fill and continue down right side
+    (True, False) -> run (n - 1) (fillBack WetSand) (xRight, y - 1)
+    -- If solid to the right, fill and continue down left side
+    (False, True) -> run (n - 1) (fillBack WetSand) (xLeft, y - 1)
+    -- If not solid either side flow down left and then down right
+    (False, False) ->
+      let r' = run (n - 1) (fillBack WetSand) (xLeft, y - 1)
+       in run (n - 1) r' (xRight, y - 1)
+  where
+    ((xMin, yMin), (xMax, yMax)) = A.bounds r
+    currentSquare = r ! (x, y)
+    (solidLeft, xLeft) = spread r False (x, y - 1)
+    (solidRight, xRight) = spread r True (x, y - 1)
+    fillBack :: Tile -> Reservoir
+    fillBack t = r // [((i, y - 1), t) | i <- [xLeft .. xRight]]
+
+-- | Given a position above a non-porous location, look left or right (depending on
+--   toRight) until find either a wall (return True and the x-value) or find a location
+--   that does not have a non-porous location below (return False and the x-value)
+spread :: Reservoir -> Bool -> (Int, Int) -> (Bool, Int)
+spread r toRight (xS, yS)
+  | isSolid (r ! next) = (True, xS)
+  | isSolid (r ! nextBelow) = spread r toRight next
+  | otherwise = (False, fst next)
+  where
+    xInc = if toRight then 1 else -1
+    next = (xS + xInc, yS)
+    nextBelow = (xS + xInc, yS + 1)
 
 test1 :: [Text] =
   [ "x=495, y=2..7",
@@ -85,13 +142,13 @@ test1 :: [Text] =
 
 main :: IO ()
 main = do
-  --  inputRecords <- map parseInputRecord . T.lines <$> TIO.getContents
-  let inputRecords = map parseInputRecord test1
-  print inputRecords
+  inputRecords <- map parseInputRecord . T.lines <$> TIO.getContents
+  --  let inputRecords = map parseInputRecord test1
+  -- print $ take 5 inputRecords
   let start = parseReservoir inputRecords
-  print $ A.bounds start
+  --  printReservoir start
+  let final = run (-1) start (xStart, yStart)
+  -- putStrLn "\n\n\n"
+  printReservoir final
 
-  printReservoir start
-
---  let final = run start
--- print $ countWet final
+  print $ countWet final

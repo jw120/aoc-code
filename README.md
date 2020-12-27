@@ -28,6 +28,10 @@ Uses stack
 
 Built with the "Haskell" VS Code extenstion that uses the Haskell Language Server
 
+stack build aoc-code:aoc_2018_12
+stack exec aoc_2018_17 <../aoc-data/input/2018_17.txt
+stack ghci aoc-code:aoc_2018_17
+stack runhaskell haskell/aoc_2018_17.hs <../aoc-data/input/2018_17.txt
 
 ## Python setup
 
