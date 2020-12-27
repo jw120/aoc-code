@@ -73,9 +73,9 @@ executables:
  aoc_2018_16:
    main: aoc_2018_16.hs
    ghc-options: -main-is AOC_2018_16
-# aoc_2018_17:
-#   main: aoc_2018_17.hs
-#   ghc-options: -main-is AOC_2018_17
+ aoc_2018_17:
+   main: aoc_2018_17.hs
+   ghc-options: -main-is AOC_2018_17
  aoc_2018_18:
    main: aoc_2018_18.hs
    ghc-options: -main-is AOC_2018_18
