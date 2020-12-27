@@ -3,10 +3,10 @@
 
 module AOC_2018_17 where
 
-import Control.Monad (forM_, unless, when)
+import Control.Monad (forM_, when)
 import qualified Data.Array.IO as A
 import Data.Char (isDigit)
-import Data.List (foldl')
+import Data.List (foldl1')
 import Data.Text (Text)
 import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
@@ -61,14 +61,14 @@ parseInputRecord input
       where
         Right (i, _) = TR.decimal t
 
-parseReservoir :: [InputRecord] -> IO Reservoir
+parseReservoir :: [InputRecord] -> IO (Reservoir, Int)
 parseReservoir recs = do
   r <- A.newListArray ((xMin - 1, yMin), (xMax + 1, yMax)) $ replicate n DrySand
   forM_ recs (addRecord r)
-  return r
+  return (r, yMin)
   where
-    (xMin, xMax) = foldl' joinRanges (xStart, xStart) $ map xRange recs
-    (yMin, yMax) = foldl' joinRanges (yStart, yStart) $ map yRange recs
+    (xMin, xMax) = foldl1' joinRanges $ map xRange recs
+    (yMin, yMax) = foldl1' joinRanges $ map yRange recs
     n = (xMax - xMin + 3) * (yMax - yMin + 1)
     joinRanges :: (Int, Int) -> (Int, Int) -> (Int, Int)
     joinRanges (m0, m1) (n0, n1) = (min m0 n0, max m1 n1)
@@ -88,6 +88,9 @@ printReservoir r = do
 
 countWet :: Reservoir -> IO Int
 countWet r = length . filter isWet <$> A.getElems r
+
+countWater :: Reservoir -> IO Int
+countWater r = length . filter (== Water) <$> A.getElems r
 
 run :: Bool -> Reservoir -> (Int, Int) -> IO Reservoir
 run logging r loc = do
@@ -115,8 +118,6 @@ run logging r loc = do
                 (True, True) -> do
                   when logging $ print $ "Backfilling " ++ show x ++ ", " ++ show (y - 1)
                   fillBack Water (xLeft, xRight)
-                  back <- A.readArray r (x, y - 2)
-                  unless (isPorous back) $ print ("Back track failed " ++ show x ++ ", " ++ show (y - 1) ++ " " ++ show back)
                   go yMax (x, y - 2)
                 -- If solid to the left, fill and continue down right side
                 (True, False) -> do
@@ -156,6 +157,8 @@ spread r toRight (xS, yS) = do
     nextLoc = (xS + xInc, yS)
     nextBelowLoc = (xS + xInc, yS + 1)
 
+{-
+
 test1 :: [Text]
 test1 =
   [ "x=495, y=2..7",
@@ -168,15 +171,14 @@ test1 =
     "y=13, x=498..504"
   ]
 
+-}
+
 main :: IO ()
 main = do
-  -- inputRecords <- map parseInputRecord . T.lines <$> TIO.getContents
-  let inputRecords = map parseInputRecord test1
-  start <- parseReservoir inputRecords
-  --  printReservoir start
-  final <- run True start (xStart, yStart)
-  -- putStrLn "\n\n\n"
-  -- printReservoir final
-
-  n <- countWet final
-  print n
+  inputRecords <- map parseInputRecord . T.lines <$> TIO.getContents
+  (initial, yMin) <- parseReservoir inputRecords
+  final <- run False initial (xStart, yMin)
+  wet <- countWet final
+  print wet
+  water <- countWater final
+  print water

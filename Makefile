@@ -4,7 +4,7 @@ aoc_2018: \
 	haskell_2018_01 haskell_2018_02 haskell_2018_03 haskell_2018_04 haskell_2018_05 \
 	haskell_2018_06 haskell_2018_07 haskell_2018_08 haskell_2018_09 haskell_2018_10 \
 	haskell_2018_11                 haskell_2018_13 haskell_2018_14 haskell_2018_15 \
-	haskell_2018_16                 haskell_2018_18                 haskell_2018_20 \
+	haskell_2018_16 haskell_2018_17 haskell_2018_18                 haskell_2018_20 \
 	                                                haskell_2018_24
 
 aoc_2019: \
