@@ -4,8 +4,7 @@
 module AOC_2018_17 where
 
 import Control.Monad (forM_)
-import Data.Array.IArray (Array, (!), (//))
-import qualified Data.Array.IArray as A
+import qualified Data.Array.IO as A
 import Data.Char (isDigit)
 import Data.List (foldl')
 import Data.Text (Text)
@@ -41,7 +40,7 @@ xStart = 500
 yStart :: Int
 yStart = 1
 
-type Reservoir = Array (Int, Int) Tile
+type Reservoir = A.IOUArray (Int, Int) Tile
 
 data InputRecord = Horizontal (Int, Int) Int | Vertical Int (Int, Int) deriving (Show)
 
@@ -65,68 +64,91 @@ parseInputRecord input
       where
         Right (i, _) = TR.decimal t
 
-parseReservoir :: [InputRecord] -> Reservoir
-parseReservoir recs = foldl' addRecord emptyReservoir recs
+parseReservoir :: [InputRecord] -> IO Reservoir
+parseReservoir recs = do
+  r <- A.newListArray ((xMin - 1, yMin), (xMax + 1, yMax)) $ replicate n DrySand
+  forM_ recs (addRecord r)
+  return r
   where
     (xMin, xMax) = foldl' joinRanges (xStart, xStart) $ map xRange recs
     (yMin, yMax) = foldl' joinRanges (yStart, yStart) $ map yRange recs
     n = (xMax - xMin + 3) * (yMax - yMin + 1)
     joinRanges :: (Int, Int) -> (Int, Int) -> (Int, Int)
     joinRanges (m0, m1) (n0, n1) = (min m0 n0, max m1 n1)
-    emptyReservoir = A.listArray ((xMin - 1, yMin), (xMax + 1, yMax)) $ replicate n DrySand
-    addRecord :: Reservoir -> InputRecord -> Reservoir
-    addRecord r (Horizontal (x0, x1) y) = r // [((x, y), Clay) | x <- [x0 .. x1]]
-    addRecord r (Vertical x (y0, y1)) = r // [((x, y), Clay) | y <- [y0 .. y1]]
+    addRecord :: Reservoir -> InputRecord -> IO ()
+    addRecord r (Horizontal (x0, x1) y) = forM_ [(x, y) | x <- [x0 .. x1]] (\i -> A.writeArray r i Clay)
+    addRecord r (Vertical x (y0, y1)) = forM_ [(x, y) | y <- [y0 .. y1]] (\i -> A.writeArray r i Clay)
 
 printReservoir :: Reservoir -> IO ()
 printReservoir r = forM_ [yMin .. yMax] printLine
   where
-    ((xMin, yMin), (xMax, yMax)) = A.bounds r
+    ((xMin, yMin), (xMax, yMax)) = A.getBounds r
     printLine :: Int -> IO ()
-    printLine y = putStrLn [showTile (r ! (x, y)) | x <- [xMin .. xMax]]
+    printLine y = do
+      row <- mapM (A.readArray r) [(x, y) | x <- [xMin .. xMax]]
+      putStrLn $ map showTile row
 
-countWet :: Reservoir -> Int
-countWet = length . filter isWet . A.elems
+countWet :: Reservoir -> IO Int
+countWet r = length . filter isWet <$> A.getElems r
 
-run :: Int -> Reservoir -> (Int, Int) -> Reservoir
-run n r (x, y)
-  | n == 0 = r
-  -- Stop if flowed off the bottom
-  | y > yMax = r
-  -- If this is square is porous, wet it and continue
-  | isPorous currentSquare = run (n - 1) (r // [((x, y), WetSand)]) (x, y + 1)
-  -- If this square is non-porous, look at one level up
-  | otherwise = case (solidLeft, solidRight) of
-    -- If solid to both sides, fill between the walls and start at the top
-    (True, True) -> run (n - 1) (fillBack Water) (x, y - 2)
-    -- If solid to the left, fill and continue down right side
-    (True, False) -> run (n - 1) (fillBack WetSand) (xRight, y - 1)
-    -- If solid to the right, fill and continue down left side
-    (False, True) -> run (n - 1) (fillBack WetSand) (xLeft, y - 1)
-    -- If not solid either side flow down left and then down right
-    (False, False) ->
-      let r' = run (n - 1) (fillBack WetSand) (xLeft, y - 1)
-       in run (n - 1) r' (xRight, y - 1)
+run :: Reservoir -> (Int, Int) -> IO Reservoir
+run r loc = do
+  ((_xMin, _yMin), (_xMax, yMax)) <- A.getBounds r
+  go yMax loc
   where
-    ((_xMin, _yMin), (_xMax, yMax)) = A.bounds r
-    currentSquare = r ! (x, y)
-    (solidLeft, xLeft) = spread r False (x, y - 1)
-    (solidRight, xRight) = spread r True (x, y - 1)
-    fillBack :: Tile -> Reservoir
-    fillBack t = r // [((i, y - 1), t) | i <- [xLeft .. xRight]]
+    go :: Int -> (Int, Int) -> IO Reservoir
+    go yMax (x, y) = do
+      if y > yMax -- Stop if flowed off the bottom
+        then return r
+        else do
+          currentSquare <- A.readArray r (x, y)
+          if isPorous currentSquare --If this is square is porous, wet it and continue
+            then do
+              A.writeArray r (x, y) WetSand
+              go yMax (x, y + 1)
+            else do
+              -- If this square is non-porous, look at one level up
+              (solidLeft, xLeft) <- spread r False (x, y - 1)
+              (solidRight, xRight) <- spread r True (x, y - 1)
+              case (solidLeft, solidRight) of
+                -- If solid to both sides, fill between the walls and start at the top
+                (True, True) -> do
+                  fillBack Water (xLeft, xRight)
+                  go yMax (x, y - 2)
+                -- If solid to the left, fill and continue down right side
+                (True, False) -> do
+                  fillBack WetSand (xLeft, xRight)
+                  go yMax (xRight, y - 1)
+                -- If solid to the right, fill and continue down left side
+                (False, True) -> do
+                  fillBack WetSand (xLeft, xRight)
+                  go yMax (xLeft, y - 1)
+                -- If not solid either side flow down left and then down right
+                (False, False) -> do
+                  fillBack WetSand (xLeft, xRight)
+                  _ <- go yMax (xLeft, y - 1)
+                  go yMax (xRight, y - 1)
+      where
+        fillBack :: Tile -> (Int, Int) -> IO ()
+        fillBack t (x0, x1) = forM_ [(i, y - 1) | i <- [x0 .. x1]] (\i -> A.writeArray r i t)
 
 -- | Given a position above a non-porous location, look left or right (depending on
 --   toRight) until find either a wall (return True and the x-value) or find a location
 --   that does not have a non-porous location below (return False and the x-value)
-spread :: Reservoir -> Bool -> (Int, Int) -> (Bool, Int)
-spread r toRight (xS, yS)
-  | isSolid (r ! next) = (True, xS)
-  | isSolid (r ! nextBelow) = spread r toRight next
-  | otherwise = (False, fst next)
+spread :: Reservoir -> Bool -> (Int, Int) -> IO (Bool, Int)
+spread r toRight (xS, yS) = do
+  next <- A.readArray r nextLoc
+  if isSolid next
+    then return (True, xS)
+    else do
+      nextBelow <- A.readArray r nextBelowLoc
+      if isSolid nextBelow
+        then spread r toRight nextLoc
+        else return (False, fst nextLoc)
   where
     xInc = if toRight then 1 else -1
-    next = (xS + xInc, yS)
-    nextBelow = (xS + xInc, yS + 1)
+    nextLoc = (xS + xInc, yS)
+    nextBelowLoc = (xS + xInc, yS + 1)
 
 test1 :: [Text]
 test1 =
@@ -145,9 +167,9 @@ main = do
   inputRecords <- map parseInputRecord . T.lines <$> TIO.getContents
   --  let inputRecords = map parseInputRecord test1
   -- print $ take 5 inputRecords
-  let start = parseReservoir inputRecords
+  start <- parseReservoir inputRecords
   --  printReservoir start
-  let final = run (-1) start (xStart, yStart)
+  final <- run start (xStart, yStart)
   -- putStrLn "\n\n\n"
   printReservoir final
 
