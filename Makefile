@@ -32,10 +32,14 @@ haskell_%:
 	@head -1 out/haskell_time_$*.txt | cut -c 14-
 	@diff out/haskell_$*.txt ../aoc-data/good/$*.txt
 
-check:
+check: python-check haskell-check
+
+python-check:
 	black --quiet python/
 	flake8 python/
 	mypy python/
+
+haskell-check:
 	hlint haskell/
 
 clean:
