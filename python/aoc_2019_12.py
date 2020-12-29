@@ -5,8 +5,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 from doctest import testmod
-
-# from sys import stdin
+from sys import stdin
 from typing import List, Pattern
 
 
@@ -29,11 +28,18 @@ class Vector:
     def sign(self) -> Vector:
         return Vector(sign(self.x), sign(self.y), sign(self.z))
 
+    def l1_norm(self) -> int:
+        return abs(self.x) + abs(self.y) + abs(self.z)
+
 
 @dataclass(eq=True)
 class Moon:
     r: Vector
     v: Vector
+
+    @property
+    def energy(self) -> int:
+        return self.r.l1_norm() * self.v.l1_norm()
 
 
 vector_pattern: Pattern[str] = re.compile(r"<x=(-?\d+), y=(-?\d+), z=(-?\d+)>")
@@ -45,18 +51,28 @@ def parse_vector(s: str) -> Vector:
     >>> parse_vector("<x=-14, y=-10, z=9>")
     Vector(x=-14, y=-10, z=9)
     """
-    if m := re.fullmatch(vector_pattern, s):
+    if m := re.fullmatch(vector_pattern, s.strip()):
         return Vector(int(m.group(1)), int(m.group(2)), int(m.group(3)))
     raise RuntimeError("Cannot parse vector:", s)
 
 
 class Jupiter:
+    """Implements a system of four moons.
+
+    >>> Jupiter(test1).run(10).energy
+    179
+    >>> Jupiter(test2).run(100).energy
+    1940
+    """
+
     def __init__(self, moon_positions: List[Vector]) -> None:
         self.moons: List[Moon] = [Moon(r, Vector(0, 0, 0)) for r in moon_positions]
-        self.steps: int = 0
+
+    @property
+    def energy(self) -> int:
+        return sum(m.energy for m in self.moons)
 
     def show(self) -> Jupiter:
-        print(f"After {self.steps} step{'s' if self.steps != 1 else ''}")
         for moon in self.moons:
             print(
                 f"pos=<x={moon.r.x}, y={moon.r.y}, z={moon.r.z}>,",
@@ -73,24 +89,35 @@ class Jupiter:
         for m in self.moons:
             m.r += m.v
 
-        self.steps += 1
+        return self
+
+    def run(self, n: int) -> Jupiter:
+        for _ in range(n):
+            self.step()
         return self
 
 
-test1: List[str] = [
-    "<x=-1, y=0, z=2>",
-    "<x=2, y=-10, z=-7>",
-    "<x=4, y=-8, z=8>",
-    "<x=3, y=5, z=-1>",
+test1: List[Vector] = [
+    parse_vector(line)
+    for line in [
+        "<x=-1, y=0, z=2>",
+        "<x=2, y=-10, z=-7>",
+        "<x=4, y=-8, z=8>",
+        "<x=3, y=5, z=-1>",
+    ]
+]
+
+test2: List[Vector] = [
+    parse_vector(line)
+    for line in [
+        "<x=-8, y=-10, z=0>",
+        "<x=5, y=5, z=10>",
+        "<x=2, y=-7, z=3>",
+        "<x=9, y=-8, z=-3>",
+    ]
 ]
 
 if __name__ == "__main__":
     testmod()
-    moon_positions: List[Vector] = [
-        parse_vector(line) for line in test1
-    ]  # stdin.readlines()]
-    j = Jupiter(moon_positions)
-    for _ in range(11):
-        j.show()
-        print()
-        j.step()
+    moon_positions: List[Vector] = [parse_vector(line) for line in stdin.readlines()]
+    print(Jupiter(moon_positions).run(1000).energy)
