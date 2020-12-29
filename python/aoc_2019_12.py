@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import List, Pattern
+from typing import List, Pattern, Set, Tuple
 
 
 def sign(a: int) -> int:
@@ -31,6 +31,9 @@ class Vector:
     def l1_norm(self) -> int:
         return abs(self.x) + abs(self.y) + abs(self.z)
 
+    def __hash__(self) -> int:
+        return hash((self.x, self.y, self.z))
+
 
 @dataclass(eq=True)
 class Moon:
@@ -40,6 +43,9 @@ class Moon:
     @property
     def energy(self) -> int:
         return self.r.l1_norm() * self.v.l1_norm()
+
+    def __hash__(self) -> int:
+        return hash((self.r, self.v))
 
 
 vector_pattern: Pattern[str] = re.compile(r"<x=(-?\d+), y=(-?\d+), z=(-?\d+)>")
@@ -96,6 +102,24 @@ class Jupiter:
             self.step()
         return self
 
+    def run_until_repeat(self) -> int:
+        """Simulate until configuration repeats.
+
+        >>> Jupiter(test1).run_until_repeat()
+        2772
+        """
+        history: Set[Jupiter] = set()
+        steps: int = 0
+        while True:
+            if self in history:
+                return steps
+            history.add(self)
+            self.step()
+            steps += 1
+
+    def __hash__(self) -> int:
+        return hash(tuple(self.moons))
+
 
 test1: List[Vector] = [
     parse_vector(line)
@@ -121,3 +145,4 @@ if __name__ == "__main__":
     testmod()
     moon_positions: List[Vector] = [parse_vector(line) for line in stdin.readlines()]
     print(Jupiter(moon_positions).run(1000).energy)
+    print(Jupiter(test2).run_until_repeat())
