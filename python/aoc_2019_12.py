@@ -84,6 +84,15 @@ class Jupiter:
                 f"pos=<x={moon.r.x}, y={moon.r.y}, z={moon.r.z}>,",
                 f"vel=<x={moon.v.x}, y={moon.v.y}, z={moon.v.z}>",
             )
+        #        for i, j in [(1, 0), (2, 0), (3, 0)]:
+        #            print(i, j)
+        #            print(self.moons[i].r - self.moons[j].r, self.moons[i].v - self.moons[j].v)
+        print(
+            "R=", self.moons[0].r + self.moons[1].r + self.moons[2].r + self.moons[3].r
+        )
+        print(
+            "V=", self.moons[0].v + self.moons[1].v + self.moons[2].v + self.moons[3].v
+        )
         return self
 
     def step(self) -> Jupiter:
@@ -142,7 +151,12 @@ test2: List[Vector] = [
 ]
 
 if __name__ == "__main__":
-    testmod()
-    moon_positions: List[Vector] = [parse_vector(line) for line in stdin.readlines()]
-    print(Jupiter(moon_positions).run(1000).energy)
-    print(Jupiter(test2).run_until_repeat())
+    #    testmod()
+    #    moon_positions: List[Vector] = [parse_vector(line) for line in stdin.readlines()]
+    #    print(Jupiter(moon_positions).run(1000).energy)
+    #    print(Jupiter(test2).run_until_repeat())
+    Jupiter(test1).show().step().show().step().show()
+    print(Jupiter(test1).energy)
+    print(Jupiter(test1).step().energy)
+    print(Jupiter(test1).step().step().energy)
+    print(Jupiter(test1).step().step().step().energy)
