@@ -23,7 +23,7 @@ def count_blocks(xs: List[int]) -> Tuple[int, Optional[int]]:
 
 def tile(i: int) -> str:
     if i == 0:
-        return "."  # Space
+        return " "  # Space
     if i == 1:
         return "#"  # Wall
     if i == 2:
@@ -48,7 +48,10 @@ class Player:
     def _run(self, stdscr: Any) -> None:
 
         if self.animate:
+            if curses.can_change_color():
+                curses.init_color(0, 0, 0, 0)  # Set background (coloru 0) to rgb black
             stdscr.clear()
+            curses.curs_set(0)  # Hide the cursor
 
         while True:
             self.m.run()
@@ -73,7 +76,8 @@ class Player:
                         self.ball_position = x
                         if self.animate:
                             stdscr.refresh()
-                            stdscr.getkey()
+                            curses.napms(50)
+                            # stdscr.getkey()
                     elif tile_id == 3:
                         self.paddle_position = x
             else:  # Wait for more output
