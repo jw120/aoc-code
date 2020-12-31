@@ -155,13 +155,14 @@ class Machine:
             )
         print(f"{self.ip:4} {instruction_name + modes:8} {args:20} {comment}")
 
-    def step(self, print_instructions: bool = False) -> None:
+    def step(self, print_instructions: bool = False) -> Machine:
         """Run one instruction."""
         try:
             self._step(print_instructions)
         except:
             self._print("Failed")
             raise
+        return self
 
     def _step(self, print_instructions: bool = False) -> None:
         instruction_code: int = self._code(self.ip)
@@ -227,13 +228,14 @@ class Machine:
 
         raise RuntimeError("Unknown opcode in step", opcode)
 
-    def run(self, print_instructions: bool = False) -> None:
+    def run(self, print_instructions: bool = False) -> Machine:
         """Run until execution stops or a pause from output."""
         paused: bool = False
         old_output_vals: List[int] = self.output_vals.copy()
         while not self.halted and not paused:
             self.step(print_instructions)
             paused = self.pause_on_output and self.output_vals != old_output_vals
+        return self
 
 
 if __name__ == "__main__":
