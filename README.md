@@ -13,6 +13,25 @@ My solutions to advent of code. So far contains:
 Assumes `../aoc-data` (which is a private repo) holds personalized input data and solutions.
 
 
+## Comments
+
+* 2020 my first time completing. No major problems.
+
+    + Done without hints except looking up the Chinese Remainder Theorem (Day 13),
+    + Day 20 was the most work - lot of fiddly proessing to fit the images together, but the sea monster is a nice pay off
+    + Briefly stuck finding a fast method for day 23 (crab cups), saw on reddit the hint to use another data structure
+    + Lots of Life
+
+* 2019
+
+    + Stuck on day 12 (fast method for simulating four body problem)
+    + Day 13 (IntCode pong game) was fun
+
+* 2018
+
+    + Going back to these in Haskell in 2020/21 after doing 2019/20 in Python - clear that Python is a better fit for smaller programs were iterative improvement works, Haskell takes more effort to do easy things
+    + Day 17 (water pouring) not finished in 2018, solved in 2020 after briefly looking at reddit discussion and seeing I had the wrong definition of the extent of the map for couting the final score.
+
 ## TODO
 
 - Haskell 2018 - get doctest to work

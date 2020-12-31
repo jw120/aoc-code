@@ -63,7 +63,7 @@ class Robot:
         self.pos: Coord = Coord.origin()
         self.direction: Direction = Direction.UP
         self.machine = Machine(prog)
-        self.machine.pause_on_output = True
+        self.machine.pause_after_output = True
 
     def paint(self, colour: Colour) -> Robot:
         self.painted.add(self.pos)

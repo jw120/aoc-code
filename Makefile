@@ -9,7 +9,8 @@ aoc_2018: \
 
 aoc_2019: \
 	python_2019_01 python_2019_02 python_2019_03 python_2019_04 python_2019_05 \
-	python_2019_06 python_2019_07 python_2019_08 python_2019_09 python_2019_10
+	python_2019_06 python_2019_07 python_2019_08 python_2019_09 python_2019_10 \
+	python_2019_11                python_2019_13
 
 aoc_2020: \
 	python_2020_01 python_2020_02 python_2020_03 python_2020_04 python_2020_05 \
@@ -18,19 +19,24 @@ aoc_2020: \
 	python_2020_16 python_2020_17 python_2020_18 python_2020_19 python_2020_20 \
 	python_2020_21 python_2020_22 python_2020_23 python_2020_24 python_2020_25
 
+OUT_DIR = out
+
 # Python: run and show the runtime in seconds
-python_%:
+python_%: | $(OUT_DIR)
 	@/bin/echo -n "$@: "
-	@/usr/bin/time -p python python/aoc_$*.py < ../aoc-data/input/$*.txt > out/python_$*.txt 2> out/python_time_$*.txt
-	@head -1 out/python_time_$*.txt | cut -c 14-
-	@diff out/python_$*.txt ../aoc-data/good/$*.txt
+	@/usr/bin/time -p python python/aoc_$*.py < ../aoc-data/input/$*.txt > $(OUT_DIR)/python_$*.txt 2> $(OUT_DIR)/python_time_$*.txt
+	@head -1 $(OUT_DIR)/python_time_$*.txt | cut -c 14-
+	@diff $(OUT_DIR)/python_$*.txt ../aoc-data/good/$*.txt
 
 # Haskell: run and show the runtime in seconds (assumes stack build has already been run)
-haskell_%:
+haskell_%: | $(OUT_DIR)
 	@/bin/echo -n "$@: "
-	@/usr/bin/time -p stack run aoc_$* < ../aoc-data/input/$*.txt > out/haskell_$*.txt 2> out/haskell_time_$*.txt
-	@head -1 out/haskell_time_$*.txt | cut -c 14-
-	@diff out/haskell_$*.txt ../aoc-data/good/$*.txt
+	@/usr/bin/time -p stack run aoc_$* < ../aoc-data/input/$*.txt > $(OUT_DIR)/haskell_$*.txt 2> $(OUT_DIR)/haskell_time_$*.txt
+	@head -1 $(OUT_DIR)/haskell_time_$*.txt | cut -c 14-
+	@diff $(OUT_DIR)/haskell_$*.txt ../aoc-data/good/$*.txt
+
+$(OUT_DIR):
+	mkdir -p $(OUT_DIR)
 
 check: python-check haskell-check
 

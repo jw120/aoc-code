@@ -4,9 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from doctest import testmod
-from sys import stdin
-from typing import List, Pattern, Set, Tuple
+from typing import List, Pattern, Set
 
 
 def sign(a: int) -> int:

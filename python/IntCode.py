@@ -93,7 +93,9 @@ class Machine:
         self.relative_base: int = 0
         self.input_vals: List[int] = input_vals
         self.output_vals: List[int] = []
-        self.pause_on_output = False
+        self.pause_after_output = False
+        self.pause_before_input = False
+        self.paused = False
         self.halted: bool = False
 
     def _address(self, mode: Mode, x: int) -> int:
@@ -169,6 +171,9 @@ class Machine:
         opcode: int = instruction_code % 100
 
         if opcode == self.Input_opcode:
+            if self.pause_before_input and not self.input_vals:
+                self.paused = True
+                return
             mode = Mode.mode(instruction_code)
             if not self.input_vals:
                 raise RuntimeError("No input available")
@@ -187,6 +192,8 @@ class Machine:
             if print_instructions:
                 self._print(f"output {arg}")
             self.ip += 2
+            if self.pause_after_output:
+                self.paused = True
             return
 
         if opcode == self.RelBaseOffset_opcode:
@@ -230,11 +237,9 @@ class Machine:
 
     def run(self, print_instructions: bool = False) -> Machine:
         """Run until execution stops or a pause from output."""
-        paused: bool = False
-        old_output_vals: List[int] = self.output_vals.copy()
-        while not self.halted and not paused:
+        self.paused = False
+        while not self.halted and not self.paused:
             self.step(print_instructions)
-            paused = self.pause_on_output and self.output_vals != old_output_vals
         return self
 
 

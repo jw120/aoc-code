@@ -231,7 +231,7 @@ def run_phase_settings_with_feedback(
     """
     machines: List[Machine] = [Machine(code, [p]) for p in phase_settings]
     for m in machines:
-        m.pause_on_output = True
+        m.pause_after_output = True
 
     input_val: int = 0
     machine_index: int = 0
