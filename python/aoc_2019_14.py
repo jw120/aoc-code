@@ -2,21 +2,12 @@
 
 Examples from the problem
 
->>> NanoFactory(test1).ore_required("FUEL")
-31
->>> NanoFactory(test2).ore_required("FUEL")
-165
->>> NanoFactory(test3).ore_required("FUEL")
-13312
->>> NanoFactory(test4).ore_required("FUEL")
-180697
->>> NanoFactory(test5).ore_required("FUEL")
-2210736
->>> NanoFactory(test3).possible("FUEL", 1_000_000_000)
+
+>>> NanoFactory(test3).possible("FUEL", 1_000_000_000_000)
 82892753
->>> #NanoFactory(test4).possible("FUEL", 1_000_000_000)
+>>> #NanoFactory(test4).possible("FUEL", 1_000_000_000_000)
 5586022
->>> #NanoFactory(test5).possible("FUEL", 1_000_000_000)
+>>> #NanoFactory(test5).possible("FUEL", 1_000_000_000_000)
 460664
 """
 
@@ -24,6 +15,8 @@ from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
+from doctest import testmod
+from sys import stdin
 from typing import (
     Counter as Counter_t,
     Dict,
@@ -35,9 +28,6 @@ from typing import (
     TypeVar,
     Union,
 )
-
-# from doctest import testmod
-from sys import stdin
 
 
 # Counter_t is a workaround as mypy does not support python 3.9
@@ -86,9 +76,9 @@ def all_zero(d: Mapping[X, int]) -> bool:
 
     >>> all_zero(Counter())
     True
-    >>> all_zero(Counter({{'red': 4, 'blue': 2}))
+    >>> all_zero(Counter({'red': 4, 'blue': 2}))
     False
-    >>> all_zero(Counter({{'red': , 'blue': 0}))
+    >>> all_zero(Counter({'red': 0, 'blue': 0}))
     True
     """
     for v in d.values():
@@ -122,13 +112,6 @@ class NanoFactory:
         required: Counter_t[str] = Counter()
         # Loop until we need nothing else
         while True:
-            # print(
-            #     "Composites needed:", [f"{k}: {v}" for k, v in needed.items() if v > 0]
-            # )
-            # print(
-            #     "Basics required:", [f"{k}: {v}" for k, v in required.items() if v > 0]
-            # )
-            # print("On hand:", [f"{k}: {v}" for k, v in on_hand.items() if v > 0])
             if all_zero(needed):
                 break
             new_needed: Counter_t[str] = Counter()
@@ -164,24 +147,44 @@ class NanoFactory:
         return (total, excess)
 
     def ore_required(self, target: str, number: int) -> int:
-        """Return the amount of ore needed to make one of the given composite chemical."""
+        """Return the amount of ore needed to make the given composite chemical.
+
+        >>> NanoFactory(test1).ore_required("FUEL", 1)
+        31
+        >>> NanoFactory(test2).ore_required("FUEL", 1)
+        165
+        >>> NanoFactory(test3).ore_required("FUEL", 1)
+        13312
+        >>> NanoFactory(test4).ore_required("FUEL", 1)
+        180697
+        >>> NanoFactory(test5).ore_required("FUEL", 1)
+        2210736
+        """
         basic_inputs, _excess1 = self.required(target, number)
         ore, _excess2 = self._ore_needed(basic_inputs)
         return ore
 
     def possible(self, target: str, available_ore: int) -> int:
         """Return the amount of the target chemical that can be made from the given amount of ore."""
-        fuel_produced = 0
-        on_hand: Counter_t[str] = Counter()
-        while True:
-            basic_inputs, on_hand = self.required(target, 1, on_hand)
-            ore_needed, excess = self._ore_needed(basic_inputs)
-            if ore_needed > available_ore:
-                break
-            on_hand += excess
-            available_ore -= ore_needed
-            fuel_produced += 1
-        return fuel_produced
+
+        def can_be_made(x: int) -> bool:
+            """Can we make the given number of target chemicals with availble ore."""
+            return self.ore_required(target, x) <= available_ore
+
+        # Find a range that brackets the maximum amount
+        upper_bound: int = 1
+        while can_be_made(upper_bound):
+            upper_bound *= 2
+        lower_bound: int = upper_bound // 2
+
+        # Apply binary search
+        while (upper_bound - lower_bound) > 1:
+            mid_point = (upper_bound + lower_bound) // 2
+            if can_be_made(mid_point):
+                lower_bound = mid_point
+            else:
+                upper_bound = mid_point
+        return lower_bound
 
 
 def parse_recipe(s: str) -> Tuple[str, Recipe]:
@@ -243,25 +246,6 @@ test3: List[
     "\n"
 )
 
-"""
-
-1 fuel made from
-Composites: 44 XJWVT, 5 KHKGT, 1 QDVJ,
-Basics:  29 NZVS, 9 GPVTF, 48 HKGWZ
-
-Other Composites (all made purely from basics)
-3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT
-12 HKGWZ, 1 GPVTF, 8 PSHF => 9 QDVJ
-7 DCFZ, 7 PSHF => 2 XJWVT
-
-Basics
-165 ORE => 6 DCFZ
-165 ORE => 2 GPVTF
-177 ORE => 5 HKGWZ
-157 ORE => 5 NZVS
-179 ORE => 7 PSHF
-"""
-
 
 test4: List[
     str
@@ -303,25 +287,7 @@ test5: List[
 )
 
 if __name__ == "__main__":
-    #    testmod()
-    # nano = NanoFactory(stdin.readlines())
-    nano = NanoFactory(test3)
-    #     i = 0
-    #     excess: Counter_t[str] = Counter()
-    #     basics: Counter_t[str] = Counter()
-    #     while True:
-    #         print("\nRun", i)
-    #         new_basics, excess = nano.required("FUEL", 1, excess)
-    #         i += 1
-    #         basics += new_basics
-    #         if all_zero(excess):
-    #             break
-    #     print(i, basics)
-    #     print(nano._ore_needed(basics))
-    # #    print(nano.ore_required("FUEL"))
-    # #    print(nano.possible("FUEL", 1_000_000_000_000))
+    testmod()
+    nano = NanoFactory(stdin.readlines())
     print(nano.ore_required("FUEL", 1))
-    print(nano.ore_required("FUEL", 100))
-    print(nano.ore_required("FUEL", 1000))
-    print(nano.ore_required("FUEL", 82892753))
-    print(nano.ore_required("FUEL", 82892754))
+    print(nano.possible("FUEL", 1_000_000_000_000))
