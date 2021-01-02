@@ -32,7 +32,7 @@ python_%: | $(OUT_DIR)
 haskell_%: | $(OUT_DIR)
 	@/bin/echo -n "$@: "
 	@/usr/bin/time -p stack run aoc_$* < ../aoc-data/input/$*.txt > $(OUT_DIR)/haskell_$*.txt 2> $(OUT_DIR)/haskell_time_$*.txt
-	@head -1 $(OUT_DIR)/haskell_time_$*.txt | cut -c 14-
+	@grep real $(OUT_DIR)/haskell_time_$*.txt | cut -c 14-
 	@diff $(OUT_DIR)/haskell_$*.txt ../aoc-data/good/$*.txt
 
 $(OUT_DIR):
