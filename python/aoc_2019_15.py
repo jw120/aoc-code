@@ -75,7 +75,7 @@ class Response(Enum):
 
 
 class Controller:
-    def __init__(self, code: List[int]) -> None:
+    def __init__(self, code: List[int], debug: bool = False) -> None:
         self.m = Machine(code)
         self.m.pause_after_output = True
         self.m.pause_before_input = True
@@ -83,6 +83,7 @@ class Controller:
         self.walls: Set[Coord] = set()  # Locations we know are walls
         self.open: Set[Coord] = {self.loc}  # Locations we know are space
         self.oxygen: Optional[Coord] = None  # Location of oxygen if known
+        self.debug: bool = debug
 
     def try_move(self, d: Direction) -> Response:
         """Try and move to an adjacent cell following the given direction."""
@@ -99,7 +100,8 @@ class Controller:
 
     def _path_to(self, target: Coord) -> List[Coord]:
         """Generate a path to the given cell through open cells."""
-        print("Routing from", self.loc, "to", target)
+        if self.debug:
+            print("Routing from", self.loc, "to", target)
         # Flood fill with backlinks
         frontier: Dict[Coord, Coord] = {self.loc: self.loc}
         visited: Dict[Coord, Coord] = {}
@@ -121,14 +123,16 @@ class Controller:
                 x = frontier[x]
             else:
                 x = visited[x]
-        print("Path", path)
+        if self.debug:
+            print("Path", path)
         return path
 
     def route_to(self, target: Coord) -> Response:
         """Try and move to a given cell going through known open cells."""
         path = self._path_to(target)
         for x in reversed(path[1:]):
-            print("Move to", x)
+            if self.debug:
+                print("Move to", x)
             response = self.try_move_to_adj(x)
             if response == Response.WALL:
                 raise RuntimeError("Ran into wall during route")
@@ -137,11 +141,27 @@ class Controller:
         return self.try_move_to_adj(target)
 
     def steps_to_oxygen(self) -> int:
-        """Number of steps from the origin to oxygen."""
+        """Find the number of steps from the origin to oxygen."""
         self.loc = Coord.origin()
         if self.oxygen is None:
             raise RuntimeError("No oxygen found")
         return len(self._path_to(self.oxygen))
+
+    def oxygen_fill(self) -> int:
+        """Find the number of minutes to fill all locations with oxygen."""
+        if self.oxygen is None:
+            raise RuntimeError("No oxygen found to fill from")
+        filled: Set[Coord] = {self.oxygen}
+        minutes: int = 0
+        while self.open - filled:
+            additional: Set[Coord] = set()
+            for f in filled:
+                for n in f.neighbours():
+                    if n in self.open and n not in filled:
+                        additional.add(n)
+            filled |= additional
+            minutes += 1
+        return minutes
 
     def explore(self) -> Controller:
         """Explore the grid, completing the controllers knowledge of it."""
@@ -149,17 +169,21 @@ class Controller:
         frontier: Set[Coord] = self.loc.neighbours()
 
         while frontier:
-            print("Loc:", self.loc)
-            print("Fr:", "  ".join([f"{c.x},{c.y}" for c in frontier]))
+            if self.debug:
+                print("Loc:", self.loc)
+                print("Fr:", "  ".join([f"{c.x},{c.y}" for c in frontier]))
             target = self.loc.closest(frontier)
             frontier.discard(target)
-            print("Going to", target)
+            if self.debug:
+                print("Going to", target)
             response = self.route_to(target)
             if response == Response.WALL:
-                print("Wall at", target)
+                if self.debug:
+                    print("Wall at", target)
                 self.walls.add(target)
             else:
-                print("Open at", target)
+                if self.debug:
+                    print("Open at", target)
                 self.loc = target
                 self.open.add(target)
                 frontier |= target.neighbours() - (self.open | self.walls)
@@ -193,4 +217,9 @@ class Controller:
 
 if __name__ == "__main__":
     code = [int(x) for x in stdin.read().split(",")]
-    print(Controller(code).explore().show().steps_to_oxygen())
+    debug = False
+    controller = Controller(code, debug).explore()
+    if debug:
+        controller.show()
+    print(controller.steps_to_oxygen())
+    print(controller.oxygen_fill())

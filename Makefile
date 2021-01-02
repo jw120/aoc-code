@@ -10,7 +10,7 @@ aoc_2018: \
 aoc_2019: \
 	python_2019_01 python_2019_02 python_2019_03 python_2019_04 python_2019_05 \
 	python_2019_06 python_2019_07 python_2019_08 python_2019_09 python_2019_10 \
-	python_2019_11                python_2019_13 python_2019_14
+	python_2019_11                python_2019_13 python_2019_14 python_2019_15
 
 aoc_2020: \
 	python_2020_01 python_2020_02 python_2020_03 python_2020_04 python_2020_05 \
