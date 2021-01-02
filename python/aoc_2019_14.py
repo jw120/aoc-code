@@ -12,15 +12,33 @@ Examples from the problem
 180697
 >>> NanoFactory(test5).ore_required("FUEL")
 2210736
+>>> NanoFactory(test3).possible("FUEL", 1_000_000_000)
+82892753
+>>> #NanoFactory(test4).possible("FUEL", 1_000_000_000)
+5586022
+>>> #NanoFactory(test5).possible("FUEL", 1_000_000_000)
+460664
 """
 
 from __future__ import annotations
 
 from collections import Counter
 from dataclasses import dataclass
-from doctest import testmod
+from typing import (
+    Counter as Counter_t,
+    Dict,
+    Iterable,
+    List,
+    Mapping,
+    NoReturn,
+    Tuple,
+    TypeVar,
+    Union,
+)
+
+# from doctest import testmod
 from sys import stdin
-from typing import Counter as Counter_t, Dict, Iterable, List, NoReturn, Tuple, Union
+
 
 # Counter_t is a workaround as mypy does not support python 3.9
 
@@ -60,6 +78,25 @@ def round_up(x: int, y: int) -> int:
     return d + bool(m != 0)
 
 
+X = TypeVar("X")
+
+
+def all_zero(d: Mapping[X, int]) -> bool:
+    """Are all elements zero.
+
+    >>> all_zero(Counter())
+    True
+    >>> all_zero(Counter({{'red': 4, 'blue': 2}))
+    False
+    >>> all_zero(Counter({{'red': , 'blue': 0}))
+    True
+    """
+    for v in d.values():
+        if v != 0:
+            return False
+    return True
+
+
 class NanoFactory:
     def __init__(self, inputs: Iterable[str]) -> None:
         self.composite_recipes: Dict[str, CompositeRecipe] = {}
@@ -72,25 +109,40 @@ class NanoFactory:
             else:
                 raise RuntimeError("Bad parse type")
 
-    def required(self, target: str) -> Counter_t[str]:
-        """Return the number of basic chemcials required to make the given composite chemical.
+    def required(
+        self, target: str, number: int, on_hand: Counter_t[str] = Counter()
+    ) -> Tuple[Counter_t[str], Counter_t[str]]:
+        """Return the number of basic chemcials required to make one of the given composite chemical.
 
-        Keeps track of extra composites made by reactions - these can be used in reactions but are not required.
+        Returns the required basic chemicals and the leftovers
         """
         # What we need to reduce to basics
-        needed: Counter_t[str] = Counter({target: 1})
-        # Excess we make but don't need
-        on_hand: Counter_t[str] = Counter()
+        needed: Counter_t[str] = Counter({target: number})
         # Build up the list of basic chemicals
         required: Counter_t[str] = Counter()
         # Loop until we need nothing else
-        while needed:
+        while True:
+            # print(
+            #     "Composites needed:", [f"{k}: {v}" for k, v in needed.items() if v > 0]
+            # )
+            # print(
+            #     "Basics required:", [f"{k}: {v}" for k, v in required.items() if v > 0]
+            # )
+            # print("On hand:", [f"{k}: {v}" for k, v in on_hand.items() if v > 0])
+            if all_zero(needed):
+                break
             new_needed: Counter_t[str] = Counter()
             for composite, composite_needed in needed.items():
+                # print("Making", composite_needed, "units of", composite)
                 recipe: CompositeRecipe = self.composite_recipes[composite]
                 reactions: int = max(
                     0, round_up(composite_needed - on_hand[composite], recipe.produced)
                 )
+                # print("Reactions needed", reactions)
+                # print(
+                #     "Components needed",
+                #     [f"{k}: {v * reactions}" for k, v in recipe.components.items()],
+                # )
                 for component, quantity in recipe.components.items():
                     if component in self.basic_recipes:
                         required[component] += reactions * quantity
@@ -98,20 +150,38 @@ class NanoFactory:
                         new_needed[component] += reactions * quantity
                 on_hand[composite] += recipe.produced * reactions - composite_needed
             needed = new_needed
-        return required
+        return (required, on_hand)
 
-    def ore_needed(self, targets: Counter_t[str]) -> int:
+    def _ore_needed(self, targets: Counter_t[str]) -> Tuple[int, Counter_t[str]]:
         """Return the amount of ore needed to make these basic chemicals."""
         total: int = 0
+        excess: Counter_t[str] = Counter()
         for target, needed in targets.items():
             recipe: BasicRecipe = self.basic_recipes[target]
             reactions: int = round_up(needed, recipe.produced)
             total += reactions * recipe.ore
-        return total
+            excess[target] = reactions * recipe.produced - needed
+        return (total, excess)
 
-    def ore_required(self, target: str) -> int:
-        """Return the amount of ore needed to make the given composite chemical."""
-        return self.ore_needed(self.required(target))
+    def ore_required(self, target: str, number: int) -> int:
+        """Return the amount of ore needed to make one of the given composite chemical."""
+        basic_inputs, _excess1 = self.required(target, number)
+        ore, _excess2 = self._ore_needed(basic_inputs)
+        return ore
+
+    def possible(self, target: str, available_ore: int) -> int:
+        """Return the amount of the target chemical that can be made from the given amount of ore."""
+        fuel_produced = 0
+        on_hand: Counter_t[str] = Counter()
+        while True:
+            basic_inputs, on_hand = self.required(target, 1, on_hand)
+            ore_needed, excess = self._ore_needed(basic_inputs)
+            if ore_needed > available_ore:
+                break
+            on_hand += excess
+            available_ore -= ore_needed
+            fuel_produced += 1
+        return fuel_produced
 
 
 def parse_recipe(s: str) -> Tuple[str, Recipe]:
@@ -173,6 +243,25 @@ test3: List[
     "\n"
 )
 
+"""
+
+1 fuel made from
+Composites: 44 XJWVT, 5 KHKGT, 1 QDVJ,
+Basics:  29 NZVS, 9 GPVTF, 48 HKGWZ
+
+Other Composites (all made purely from basics)
+3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT
+12 HKGWZ, 1 GPVTF, 8 PSHF => 9 QDVJ
+7 DCFZ, 7 PSHF => 2 XJWVT
+
+Basics
+165 ORE => 6 DCFZ
+165 ORE => 2 GPVTF
+177 ORE => 5 HKGWZ
+157 ORE => 5 NZVS
+179 ORE => 7 PSHF
+"""
+
 
 test4: List[
     str
@@ -214,6 +303,25 @@ test5: List[
 )
 
 if __name__ == "__main__":
-    testmod()
-    nano = NanoFactory(stdin.readlines())
-    print(nano.ore_required("FUEL"))
+    #    testmod()
+    # nano = NanoFactory(stdin.readlines())
+    nano = NanoFactory(test3)
+    #     i = 0
+    #     excess: Counter_t[str] = Counter()
+    #     basics: Counter_t[str] = Counter()
+    #     while True:
+    #         print("\nRun", i)
+    #         new_basics, excess = nano.required("FUEL", 1, excess)
+    #         i += 1
+    #         basics += new_basics
+    #         if all_zero(excess):
+    #             break
+    #     print(i, basics)
+    #     print(nano._ore_needed(basics))
+    # #    print(nano.ore_required("FUEL"))
+    # #    print(nano.possible("FUEL", 1_000_000_000_000))
+    print(nano.ore_required("FUEL", 1))
+    print(nano.ore_required("FUEL", 100))
+    print(nano.ore_required("FUEL", 1000))
+    print(nano.ore_required("FUEL", 82892753))
+    print(nano.ore_required("FUEL", 82892754))
