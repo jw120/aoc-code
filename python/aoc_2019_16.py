@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from doctest import testmod
 from itertools import islice
+from sys import stdin
 from typing import Iterable, List
 
 
@@ -19,40 +20,67 @@ def combine(xs: Iterable[int], ys: Iterable[int]) -> int:
     return abs(total) % 10
 
 
-def fft(xs: List[int]) -> List[int]:
-    """Performance an FFT
+def fft(xs: List[int], reps: int) -> List[int]:
+    """Perform an FFT the given number of times.
 
-    >>> fft([1,2,3,4,5,6,7,8])
+    >>> fft([1,2,3,4,5,6,7,8], 1)
     [4, 8, 2, 2, 6, 1, 5, 8]
+    >>> fft([1,2,3,4,5,6,7,8], 4)
+    [0, 1, 0, 2, 9, 4, 9, 8]
     """
-    output: List[int] = []
-    for i in range(1, len(xs) + 1):
-        output.append(combine(xs, pattern(i)))
-    return output
+    n: int = len(xs)
+    patterns: List[List[int]] = [pattern(i, n) for i in range(1, n + 1)]
+    for j in range(reps):
+        xs = [combine(xs, p) for p in patterns]
+    return xs
 
 
-def pattern(n: int) -> Iterable[int]:
-    """Generate a pattern of 0s, 1s and -1s for use in FFT.
+def pattern(i: int, n: int) -> List[int]:
+    """Generate a list of length n with a i-pattern of 0s, 1s and -1s for use in FFT.
 
-    >>> list(islice(pattern(1), 10))
+    >>> pattern(1, 10)
     [1, 0, -1, 0, 1, 0, -1, 0, 1, 0]
-    >>> list(islice(pattern(2), 10))
+    >>> pattern(2, 10)
     [0, 1, 1, 0, 0, -1, -1, 0, 0, 1]
-    >>> list(islice(pattern(3), 10))
+    >>> pattern(3, 10)
     [0, 0, 1, 1, 1, 0, 0, 0, -1, -1]
     """
-    seq_index: int = 0  # Which sequence: 0..3 for 0/1/0/-1
-    pos_index: int = 1  # Position in the sequence
-    if n == 1:  # Special case for n = 1, start at beginning of 2nd sequence
-        seq_index = 1
-        pos_index = 0
-    while True:
-        yield [0, 1, 0, -1][seq_index]
-        pos_index += 1
-        if pos_index >= n:
+
+    def pattern_gen(seq_len: int) -> Iterable[int]:
+        seq_index: int = 0  # Which sequence: 0..3 for 0/1/0/-1
+        pos_index: int = 1  # Position in the sequence
+        if seq_len == 1:  # Special case for n = 1, start at beginning of 2nd sequence
+            seq_index = 1
             pos_index = 0
-            seq_index = (seq_index + 1) % 4
+        while True:
+            yield [0, 1, 0, -1][seq_index]
+            pos_index += 1
+            if pos_index >= seq_len:
+                pos_index = 0
+                seq_index = (seq_index + 1) % 4
+
+    return list(islice(pattern_gen(i), n))
+
+
+def digits_to_ints(s: str) -> List[int]:
+    """Convert a string of digits to a list of ints.
+
+    >>> digits_to_ints("1234")
+    [1, 2, 3, 4]
+    """
+    return [int(x) for x in s]
+
+
+def ints_to_digits(xs: List[int]) -> str:
+    """Convert a list of ints to a string.
+
+    >>> ints_to_digits([1, 2, 3, 4, 5])
+    '12345'
+    """
+    return "".join(str(x) for x in xs)
 
 
 if __name__ == "__main__":
     testmod()
+    signal: List[int] = digits_to_ints(stdin.read().strip())
+    print(ints_to_digits(fft(signal, 100))[:8])
