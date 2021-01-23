@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from sys import stdin
-from typing import List, NoReturn, Optional, Set
+from typing import NoReturn, Optional
 
 from IntCode import Machine
 
@@ -56,10 +56,10 @@ class Direction(Enum):
 
 
 class Scaffolding:
-    def __init__(self, code: List[int]) -> None:
+    def __init__(self, code: list[int]) -> None:
         self.m = Machine(code)
-        self.scaffold: Set[Coord] = set()
-        self.intersections: Set[Coord] = set()
+        self.scaffold: set[Coord] = set()
+        self.intersections: set[Coord] = set()
         self.robot_loc: Coord
         self.robot_dir: Direction
         self.max: Coord = Coord.origin()

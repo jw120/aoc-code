@@ -1,10 +1,11 @@
 """Advent of Code 2020 - Day 20."""
 
+from collections.abc import Iterable
 from copy import deepcopy
 from doctest import testmod
 from functools import reduce
 from sys import stdin
-from typing import Dict, Iterable, List, NewType, Optional, Tuple, TypeVar
+from typing import NewType, Optional, TypeVar
 
 
 # Ids for tiles (as assigned in the problem)
@@ -34,12 +35,12 @@ Direction = NewType("Direction", int)
 the edge of the connected tile and whether or not a flip is needed to match the
 edge pixels (False means that the edge values match directly)
 """
-Connection = Tuple[TileId, Direction, bool]
+Connection = tuple[TileId, Direction, bool]
 
 """ When each tile is embedded in the final grid we store its orientation. The direction is
 which edge is up and bool whether the tile needs to be flipped (left-to-right) after rotating.
 """
-Orientation = Tuple[TileId, bool, Direction]
+Orientation = tuple[TileId, bool, Direction]
 
 
 def right(flipped: bool, rotation: Direction) -> Direction:
@@ -67,7 +68,7 @@ def flip(e: EdgeValue) -> EdgeValue:
 T = TypeVar("T")
 
 
-def len_skip_none(xs: List[Optional[T]]) -> int:
+def len_skip_none(xs: list[Optional[T]]) -> int:
     """Length of a list of optionals exclduing the Nones.
 
     >>> len_skip_none([1, None, 2])
@@ -76,7 +77,7 @@ def len_skip_none(xs: List[Optional[T]]) -> int:
     return len([x for x in xs if x is not None])
 
 
-def append_cols(xs: List[List[T]], ys: List[List[T]]) -> List[List[T]]:
+def append_cols(xs: list[list[T]], ys: list[list[T]]) -> list[list[T]]:
     """Append columns to a 2-d array.
 
     >>> append_cols([[1, 2],[11, 12], [21, 22]], [[3, 4], [5, 6], [7, 8]])
@@ -85,20 +86,20 @@ def append_cols(xs: List[List[T]], ys: List[List[T]]) -> List[List[T]]:
     return [x + y for x, y in zip(xs, ys)]
 
 
-def flip_matrix(xs: List[List[T]]) -> None:
+def flip_matrix(xs: list[list[T]]) -> None:
     """Mutate the 2-d array to be a left/right flipped version."""
     for x in xs:
         x.reverse()
 
 
-def rotate_matrix(xs: List[List[T]]) -> List[List[T]]:
+def rotate_matrix(xs: list[list[T]]) -> list[list[T]]:
     """Return an matrix that is 90 degrees rotated anti-clockwise.
 
     >>> rotate_matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
     [[3, 6, 9], [2, 5, 8], [1, 4, 7]]
     """
     width: int = len(xs[0])
-    ret: List[List[T]] = [[] for _ in range(width)]
+    ret: list[list[T]] = [[] for _ in range(width)]
     for i in range(width):
         for row in xs:
             ret[i].append(row[i])
@@ -106,7 +107,7 @@ def rotate_matrix(xs: List[List[T]]) -> List[List[T]]:
     return ret
 
 
-def count_trues(xs: List[List[bool]]) -> int:
+def count_trues(xs: list[list[bool]]) -> int:
     """Count the number of true values in a matrix of bools.
 
     >>> count_trues([[True, False], [False, False]])
@@ -120,33 +121,33 @@ def count_trues(xs: List[List[bool]]) -> int:
 
 
 """The sea monster we are looking for"""
-monster: List[List[bool]] = [
+monster: list[list[bool]] = [
     [c == "#" for c in line]
     for line in ["                  # ", "#    ##    ##    ###", " #  #  #  #  #  #   "]
 ]
 
 
 class Tile:
-    def __init__(self, lines: List[str]) -> None:
+    def __init__(self, lines: list[str]) -> None:
         def str_to_edge(s: str) -> EdgeValue:
             return EdgeValue(int(s.replace(".", "0").replace("#", "1"), 2))
 
         self.id: TileId = TileId(int(lines[0][5:9]))
-        self.edges: List[EdgeValue] = [
+        self.edges: list[EdgeValue] = [
             str_to_edge(lines[1]),
             str_to_edge("".join([line[-1] for line in lines[1:]])),
             str_to_edge(lines[-1][::-1]),
             str_to_edge("".join([line[0] for line in lines[-1:0:-1]])),
         ]
-        image_strings: List[str] = [line[1:-1] for line in lines[2:-1]]
-        self.image: List[List[bool]] = [
+        image_strings: list[str] = [line[1:-1] for line in lines[2:-1]]
+        self.image: list[list[bool]] = [
             [c == "#" for c in row] for row in image_strings
         ]
 
     def __str__(self) -> str:
         return f"{self.id}: {self.edges}"
 
-    def oriented_image(self, flip: bool, direction: Direction) -> List[List[bool]]:
+    def oriented_image(self, flip: bool, direction: Direction) -> list[list[bool]]:
         im = deepcopy(self.image)
         for _ in range(direction):
             im = rotate_matrix(im)
@@ -164,19 +165,19 @@ class Board:
         else:
             self.edge_to_tile[e] = [c]
 
-    def __init__(self, ss: Iterable[List[str]]) -> None:
+    def __init__(self, ss: Iterable[list[str]]) -> None:
         # All the tiles by id
-        tile_list: List[Tile] = [Tile(s) for s in ss]
+        tile_list: list[Tile] = [Tile(s) for s in ss]
         self.tile_size = len(tile_list[0].image)
-        self.tiles: Dict[TileId, Tile] = {t.id: t for t in tile_list}
+        self.tiles: dict[TileId, Tile] = {t.id: t for t in tile_list}
         # Lookup table from edge values to connections
-        self.edge_to_tile: Dict[EdgeValue, List[Tuple[TileId, Direction, bool]]] = {}
+        self.edge_to_tile: dict[EdgeValue, list[tuple[TileId, Direction, bool]]] = {}
         for tile in self.tiles.values():
             for i, edge in enumerate(tile.edges):
                 self._add_to_edge_to_tile(edge, (tile.id, Direction(i), False))
                 self._add_to_edge_to_tile(flip(edge), (tile.id, Direction(i), True))
         # For each tile its connections
-        self.tile_connections: Dict[TileId, List[Optional[Connection]]] = {}
+        self.tile_connections: dict[TileId, list[Optional[Connection]]] = {}
         for tile in self.tiles.values():
             self.tile_connections[tile.id] = []
             for edge in tile.edges:
@@ -188,9 +189,9 @@ class Board:
                 else:
                     raise RuntimeError("Too many connections")
         # Space for assembled image
-        self.image: List[List[bool]] = []
+        self.image: list[list[bool]] = []
 
-    def corners(self) -> List[TileId]:
+    def corners(self) -> list[TileId]:
         """Return the corner tile ids."""
         return [
             tile.id
@@ -252,21 +253,21 @@ class Board:
         next_flipped = cur_flipped if connection_flipped else (not cur_flipped)
         return (next_id, next_flipped, next_incoming)
 
-    def tile(self) -> List[List[Orientation]]:
+    def tile(self) -> list[list[Orientation]]:
         """Assemble images into a grid of orientations."""
 
-        def tile_row(start: Orientation) -> List[Orientation]:
+        def tile_row(start: Orientation) -> list[Orientation]:
             cur: Optional[Orientation] = start
-            row: List[Orientation] = []
+            row: list[Orientation] = []
             while True:
                 if cur is None:
                     return row
                 row.append(cur)
                 cur = self.next_right(cur)
 
-        def tile_col(start: Orientation) -> List[Orientation]:
+        def tile_col(start: Orientation) -> list[Orientation]:
             cur: Optional[Orientation] = start
-            col: List[Orientation] = []
+            col: list[Orientation] = []
             while True:
                 if cur is None:
                     return col
@@ -278,10 +279,10 @@ class Board:
 
     def set_image(self) -> None:
         """Build image from tiles."""
-        grid: List[List[Orientation]] = self.tile()
+        grid: list[list[Orientation]] = self.tile()
         self.image = []
         for row in grid:
-            new_rows: List[List[bool]] = [[] for _ in range(self.tile_size)]
+            new_rows: list[list[bool]] = [[] for _ in range(self.tile_size)]
             for tile_id, flip, direction in row:
                 new_rows = append_cols(
                     new_rows, self.tiles[tile_id].oriented_image(flip, direction)
@@ -314,7 +315,7 @@ class Board:
 
     def max_sea_monsters(self) -> int:
         """Return the number of sea monsters in the orientation with most monsters."""
-        counts: List[int] = []
+        counts: list[int] = []
         for d in range(4):
             counts.append(self.sea_monsters())
             flip_matrix(self.image)

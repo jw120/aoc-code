@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from doctest import testmod
 from itertools import islice
 from sys import stdin
-from typing import Iterable, List
 
 
 def combine(xs: Iterable[int], ys: Iterable[int]) -> int:
@@ -20,7 +20,7 @@ def combine(xs: Iterable[int], ys: Iterable[int]) -> int:
     return abs(total) % 10
 
 
-def fft(xs: List[int], reps: int) -> List[int]:
+def fft(xs: list[int], reps: int) -> list[int]:
     """Perform an FFT the given number of times.
 
     >>> fft([1,2,3,4,5,6,7,8], 1)
@@ -29,13 +29,13 @@ def fft(xs: List[int], reps: int) -> List[int]:
     [0, 1, 0, 2, 9, 4, 9, 8]
     """
     n: int = len(xs)
-    patterns: List[List[int]] = [pattern(i, n) for i in range(1, n + 1)]
+    patterns: list[list[int]] = [pattern(i, n) for i in range(1, n + 1)]
     for j in range(reps):
         xs = [combine(xs, p) for p in patterns]
     return xs
 
 
-def pattern(i: int, n: int) -> List[int]:
+def pattern(i: int, n: int) -> list[int]:
     """Generate a list of length n with a i-pattern of 0s, 1s and -1s for use in FFT.
 
     >>> pattern(1, 10)
@@ -62,7 +62,7 @@ def pattern(i: int, n: int) -> List[int]:
     return list(islice(pattern_gen(i), n))
 
 
-def digits_to_ints(s: str) -> List[int]:
+def digits_to_ints(s: str) -> list[int]:
     """Convert a string of digits to a list of ints.
 
     >>> digits_to_ints("1234")
@@ -71,7 +71,7 @@ def digits_to_ints(s: str) -> List[int]:
     return [int(x) for x in s]
 
 
-def ints_to_digits(xs: List[int]) -> str:
+def ints_to_digits(xs: list[int]) -> str:
     """Convert a list of ints to a string.
 
     >>> ints_to_digits([1, 2, 3, 4, 5])
@@ -82,5 +82,5 @@ def ints_to_digits(xs: List[int]) -> str:
 
 if __name__ == "__main__":
     testmod()
-    signal: List[int] = digits_to_ints(stdin.read().strip())
+    signal: list[int] = digits_to_ints(stdin.read().strip())
     print(ints_to_digits(fft(signal, 100))[:8])

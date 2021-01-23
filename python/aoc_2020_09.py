@@ -2,10 +2,9 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import List
 
 
-test_one: List[int] = [
+test_one: list[int] = [
     35,
     20,
     15,
@@ -29,7 +28,7 @@ test_one: List[int] = [
 ]
 
 
-def can_be_sum(xs: List[int], y: int) -> bool:
+def can_be_sum(xs: list[int], y: int) -> bool:
     """Test if y be written as the sum of two distinct values in xs."""
     for i1 in range(0, len(xs)):
         for i2 in range(i1 + 1, len(xs)):
@@ -38,7 +37,7 @@ def can_be_sum(xs: List[int], y: int) -> bool:
     return False
 
 
-def test_sequence(xs: List[int], window: int) -> int:
+def test_sequence(xs: list[int], window: int) -> int:
     """Find the first value which cannot be formed as a sum.
 
     >>> test_sequence(test_one, 5)
@@ -50,7 +49,7 @@ def test_sequence(xs: List[int], window: int) -> int:
     raise RuntimeError("No mismatch found")
 
 
-def find_contig_sum(xs: List[int], target: int) -> int:
+def find_contig_sum(xs: list[int], target: int) -> int:
     """Find contiguous subsequence which sums to target.
 
     Returns smallest and largest values in the subsequence.
@@ -72,7 +71,7 @@ def find_contig_sum(xs: List[int], target: int) -> int:
 
 if __name__ == "__main__":
     testmod()
-    nums: List[int] = [int(line) for line in stdin]
+    nums: list[int] = [int(line) for line in stdin]
     target = test_sequence(nums, 25)
     print(target)
     print(find_contig_sum(nums, target))

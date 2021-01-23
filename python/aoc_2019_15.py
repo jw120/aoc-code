@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
 from random import randrange
 from sys import stdin
-from typing import Dict, Iterable, List, NoReturn, Optional, Set
+from typing import NoReturn, Optional
 
 from IntCode import Machine
 
@@ -36,7 +37,7 @@ class Coord:
         else:
             assert_never(d)
 
-    def neighbours(self) -> Set[Coord]:
+    def neighbours(self) -> set[Coord]:
         """Return the four neighbours."""
         return {self.move(d) for d in Direction}
 
@@ -75,13 +76,13 @@ class Response(Enum):
 
 
 class Controller:
-    def __init__(self, code: List[int], debug: bool = False) -> None:
+    def __init__(self, code: list[int], debug: bool = False) -> None:
         self.m = Machine(code)
         self.m.pause_after_output = True
         self.m.pause_before_input = True
         self.loc: Coord = Coord.origin()
-        self.walls: Set[Coord] = set()  # Locations we know are walls
-        self.open: Set[Coord] = {self.loc}  # Locations we know are space
+        self.walls: set[Coord] = set()  # Locations we know are walls
+        self.open: set[Coord] = {self.loc}  # Locations we know are space
         self.oxygen: Optional[Coord] = None  # Location of oxygen if known
         self.debug: bool = debug
 
@@ -98,16 +99,16 @@ class Controller:
                 return self.try_move(d)
         raise RuntimeError("Adjacent move not found", self.loc, c)
 
-    def _path_to(self, target: Coord) -> List[Coord]:
+    def _path_to(self, target: Coord) -> list[Coord]:
         """Generate a path to the given cell through open cells."""
         if self.debug:
             print("Routing from", self.loc, "to", target)
         # Flood fill with backlinks
-        frontier: Dict[Coord, Coord] = {self.loc: self.loc}
-        visited: Dict[Coord, Coord] = {}
+        frontier: dict[Coord, Coord] = {self.loc: self.loc}
+        visited: dict[Coord, Coord] = {}
         while target not in frontier:
             visited.update(frontier)
-            new_frontier: Dict[Coord, Coord] = {}
+            new_frontier: dict[Coord, Coord] = {}
             for f in frontier.keys():
                 for n in f.neighbours():
                     if n == target or (n in self.open and n not in visited):
@@ -116,7 +117,7 @@ class Controller:
 
         # Build back tracking path
         x = target
-        path: List[Coord] = []
+        path: list[Coord] = []
         while x != self.loc:
             path.append(x)
             if x in frontier:
@@ -151,10 +152,10 @@ class Controller:
         """Find the number of minutes to fill all locations with oxygen."""
         if self.oxygen is None:
             raise RuntimeError("No oxygen found to fill from")
-        filled: Set[Coord] = {self.oxygen}
+        filled: set[Coord] = {self.oxygen}
         minutes: int = 0
         while self.open - filled:
-            additional: Set[Coord] = set()
+            additional: set[Coord] = set()
             for f in filled:
                 for n in f.neighbours():
                     if n in self.open and n not in filled:
@@ -166,7 +167,7 @@ class Controller:
     def explore(self) -> Controller:
         """Explore the grid, completing the controllers knowledge of it."""
         # Frontier is all unknown locations adjacent to places we have visited
-        frontier: Set[Coord] = self.loc.neighbours()
+        frontier: set[Coord] = self.loc.neighbours()
 
         while frontier:
             if self.debug:

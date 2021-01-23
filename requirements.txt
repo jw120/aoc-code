@@ -1,7 +1,7 @@
-numpy
-# All other requirements are just for development checking - we don't care about version numbers
+# These are all just for development
 black
-mypy
+# We
+mypy >= 0.800
 flake8
 flake8-docstrings
 flake8-builtins

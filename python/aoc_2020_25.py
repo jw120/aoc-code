@@ -2,7 +2,6 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import Tuple
 
 
 def step(val: int, subject_number: int) -> int:
@@ -30,7 +29,7 @@ def find_loop_size(subject_number: int, output: int) -> int:
 
 def find2_loop_size(
     subject_number: int, output1: int, output2: int
-) -> Tuple[int, bool]:
+) -> tuple[int, bool]:
     """Look for two loop sizes in parallel."""
     val: int = 1
     loop_count: int = 0

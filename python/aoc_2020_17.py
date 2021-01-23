@@ -1,7 +1,8 @@
 """Advent of Code 2020 - Day 17."""
 
+from collections.abc import Iterable
 from sys import stdin
-from typing import Iterable, List, Set, Tuple
+from typing import Tuple
 
 Coord3 = Tuple[int, int, int]
 
@@ -34,7 +35,7 @@ class Grid3d:
 
     def __init__(self, lines: Iterable[str]) -> None:
         self.time: int = -1
-        self.g: List[Set[Coord3]] = [set(), set()]
+        self.g: list[set[Coord3]] = [set(), set()]
         for y, line in enumerate(lines):
             for x, ch in enumerate(line):
                 if ch == "#":
@@ -115,7 +116,7 @@ class Grid4d:
 
     def __init__(self, lines: Iterable[str]) -> None:
         self.time: int = -1
-        self.g: List[Set[Coord4]] = [set(), set()]
+        self.g: list[set[Coord4]] = [set(), set()]
         for y, line in enumerate(lines):
             for x, ch in enumerate(line):
                 if ch == "#":

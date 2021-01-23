@@ -4,14 +4,14 @@ from __future__ import annotations
 
 import curses
 from sys import stdin
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Optional
 
 from IntCode import Machine
 
 
-def count_blocks(xs: List[int]) -> Tuple[int, Optional[int]]:
+def count_blocks(xs: list[int]) -> tuple[int, Optional[int]]:
     """Count the remaining blocks and extract any score from machine output."""
-    screen: Dict[Tuple[int, int], int] = {}
+    screen: dict[tuple[int, int], int] = {}
     score: Optional[int] = None
     for x, y, tile_id in [xs[i : i + 3] for i in range(0, len(xs), 3)]:
         if (x, y) == (-1, 0):
@@ -36,7 +36,7 @@ def tile(i: int) -> str:
 
 
 class Player:
-    def __init__(self, code: List[int]) -> None:
+    def __init__(self, code: list[int]) -> None:
         self.m = Machine(code)
         self.m.pause_after_output = True
         self.m.pause_before_input = True
@@ -101,7 +101,7 @@ if __name__ == "__main__":
     show_animation: bool = False
     if show_animation:
         with open("../aoc-data/input/2019_13.txt") as f:
-            code: List[int] = [int(x) for x in f.read().split(",")]
+            code: list[int] = [int(x) for x in f.read().split(",")]
     else:
         code = [int(x) for x in stdin.read().split(",")]
     blocks, _score = count_blocks(Machine(code).run().output_vals)

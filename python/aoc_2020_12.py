@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from doctest import testmod
 from sys import stdin
-from typing import Iterable, List, Tuple
 
 
 def rotate(s: str, rotation: int) -> str:
@@ -19,7 +19,7 @@ def rotate(s: str, rotation: int) -> str:
     return "NESW"[(i + (rotation // 90)) % 4]
 
 
-def parse_command(s: str) -> Tuple[str, int]:
+def parse_command(s: str) -> tuple[str, int]:
     return (s[0], int(s[1:]))
 
 
@@ -59,7 +59,7 @@ class Ship:
         #        print(com, param, self.x, self.y, self.facing)
         return self
 
-    def actions(self, commands: Iterable[Tuple[str, int]]) -> Ship:
+    def actions(self, commands: Iterable[tuple[str, int]]) -> Ship:
         """Run the series of actions.
 
         >>> Ship().actions(test1).manhattan
@@ -116,6 +116,6 @@ class ShipWithWaypoint(Ship):
 
 if __name__ == "__main__":
     testmod()
-    commands: List[Tuple[str, int]] = [(line[0], int(line[1:])) for line in stdin]
+    commands: list[tuple[str, int]] = [(line[0], int(line[1:])) for line in stdin]
     print(Ship().actions(commands).manhattan)
     print(ShipWithWaypoint().actions(commands).manhattan)

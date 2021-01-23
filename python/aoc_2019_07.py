@@ -1,14 +1,15 @@
 """Advent of Code 2019 - Day 7."""
 
+from collections.abc import Iterator
 from doctest import testmod
 from sys import stdin
-from typing import Iterator, List, TypeVar
+from typing import TypeVar
 
 from IntCode import Machine
 
-PhaseSettings = List[int]
+PhaseSettings = list[int]
 
-test_code_1: List[int] = [
+test_code_1: list[int] = [
     3,
     15,
     3,
@@ -27,7 +28,7 @@ test_code_1: List[int] = [
     0,
     0,
 ]
-test_code_2: List[int] = [
+test_code_2: list[int] = [
     3,
     23,
     3,
@@ -55,7 +56,7 @@ test_code_2: List[int] = [
     0,
 ]
 
-test_code_3: List[int] = [
+test_code_3: list[int] = [
     3,
     31,
     3,
@@ -92,7 +93,7 @@ test_code_3: List[int] = [
     0,
 ]
 
-test_code_4: List[int] = [
+test_code_4: list[int] = [
     3,
     26,
     1001,
@@ -124,7 +125,7 @@ test_code_4: List[int] = [
     5,
 ]
 
-test_code_5: List[int] = [
+test_code_5: list[int] = [
     3,
     52,
     1001,
@@ -186,7 +187,7 @@ test_code_5: List[int] = [
 
 
 def run_machine(
-    code: List[int], phase: int, input_val: int, print_instructions: bool = False
+    code: list[int], phase: int, input_val: int, print_instructions: bool = False
 ) -> int:
     if print_instructions:
         print(f"Running machine with phase setting {phase} and input {input_val}")
@@ -199,7 +200,7 @@ def run_machine(
 
 
 def run_phase_settings(
-    code: List[int], phase_settings: PhaseSettings, print_instructions: bool = False
+    code: list[int], phase_settings: PhaseSettings, print_instructions: bool = False
 ) -> int:
     """Run a series of machines from input 0 with given phase settings.
 
@@ -220,7 +221,7 @@ def run_phase_settings(
 
 
 def run_phase_settings_with_feedback(
-    code: List[int], phase_settings: PhaseSettings, print_instructions: bool = False
+    code: list[int], phase_settings: PhaseSettings, print_instructions: bool = False
 ) -> int:
     """Run a series machines with feedback from input 0 with given phase settings.
 
@@ -229,7 +230,7 @@ def run_phase_settings_with_feedback(
     >>> run_phase_settings_with_feedback(test_code_5, [9, 7, 8, 5, 6])
     18216
     """
-    machines: List[Machine] = [Machine(code, [p]) for p in phase_settings]
+    machines: list[Machine] = [Machine(code, [p]) for p in phase_settings]
     for m in machines:
         m.pause_after_output = True
 
@@ -250,7 +251,7 @@ def run_phase_settings_with_feedback(
 X = TypeVar("X")
 
 
-def permutations(xs: List[X]) -> Iterator[List[X]]:
+def permutations(xs: list[X]) -> Iterator[list[X]]:
     """Return all permutations of the list.
 
     >>> [p for p in permutations([1,2,3])]
@@ -261,16 +262,16 @@ def permutations(xs: List[X]) -> Iterator[List[X]]:
     else:
         for i in range(0, len(xs)):
             first_val: X = xs[i]
-            other_vals: List[X] = xs[:i] + xs[i + 1 :]
+            other_vals: list[X] = xs[:i] + xs[i + 1 :]
             for p in permutations(other_vals):
                 yield [first_val] + p
 
 
-def part_one(code: List[int]) -> int:
+def part_one(code: list[int]) -> int:
     return max(run_phase_settings(code, p) for p in permutations([0, 1, 2, 3, 4]))
 
 
-def part_two(code: List[int]) -> int:
+def part_two(code: list[int]) -> int:
     return max(
         run_phase_settings_with_feedback(code, p) for p in permutations([5, 6, 7, 8, 9])
     )
@@ -278,6 +279,6 @@ def part_two(code: List[int]) -> int:
 
 if __name__ == "__main__":
     testmod()
-    code: List[int] = [int(s) for s in stdin.read().split(",")]
+    code: list[int] = [int(s) for s in stdin.read().split(",")]
     print(part_one(code))
     print(part_two(code))

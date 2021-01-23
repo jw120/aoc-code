@@ -2,15 +2,15 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import Dict, List, Optional, Set, Tuple, TypeVar
+from typing import Optional, TypeVar
 
 
 K = TypeVar("K")
 
 
 def build_tree(
-    links: List[Tuple[K, K]]
-) -> Tuple[Dict[K, Set[K]], Dict[K, Optional[K]], List[K]]:
+    links: list[tuple[K, K]]
+) -> tuple[dict[K, set[K]], dict[K, Optional[K]], list[K]]:
     """Build a representation of a tree.
 
     Given a list of key->key links, construct dicts of all forward (one->many)
@@ -23,8 +23,8 @@ def build_tree(
     >>> build_tree([(1, 2), (1, 3), (2, 4),(5, 6)])[2]
     [1, 5]
     """
-    forward: Dict[K, Set[K]] = {}
-    backward: Dict[K, Optional[K]] = {}
+    forward: dict[K, set[K]] = {}
+    backward: dict[K, Optional[K]] = {}
     k_from: K
     k_to: K
     for (k_from, k_to) in links:
@@ -35,18 +35,18 @@ def build_tree(
         backward.setdefault(k_from, None)
         forward[k_from].add(k_to)
         backward[k_to] = k_from
-    forward_out_nodes: Set[K] = set(forward.keys())
-    forward_in_nodes: Set[K] = set.union(*forward.values())
+    forward_out_nodes: set[K] = set(forward.keys())
+    forward_in_nodes: set[K] = set.union(*forward.values())
     roots = forward_out_nodes - forward_in_nodes
     return (forward, backward, list(roots))
 
 
-def parse_link(s: str) -> Tuple[str, str]:
+def parse_link(s: str) -> tuple[str, str]:
     [x, y] = s.split(")")
     return (x, y)
 
 
-test_links: List[Tuple[str, str]] = [
+test_links: list[tuple[str, str]] = [
     parse_link(s)
     for s in [
         "COM)B",
@@ -67,7 +67,7 @@ test_links: List[Tuple[str, str]] = [
 (test_forward, test_backward, [test_root]) = build_tree(test_links)
 
 
-def label_root_distance(root: K, forward: Dict[K, Set[K]]) -> Dict[K, int]:
+def label_root_distance(root: K, forward: dict[K, set[K]]) -> dict[K, int]:
     """Return labels for each root with their distance from the root.
 
     >>> label_root_distance(test_root, test_forward)["COM"]
@@ -75,11 +75,11 @@ def label_root_distance(root: K, forward: Dict[K, Set[K]]) -> Dict[K, int]:
     >>> label_root_distance(test_root, test_forward)["E"]
     4
     """
-    labels: Dict[K, int] = {}
+    labels: dict[K, int] = {}
     distance: int = 0
-    frontier: Set[K] = {root}
+    frontier: set[K] = {root}
     while len(frontier) > 0:
-        new_frontier: Set[K] = set()
+        new_frontier: set[K] = set()
         for x in frontier:
             labels[x] = distance
             new_frontier |= forward[x]
@@ -89,7 +89,7 @@ def label_root_distance(root: K, forward: Dict[K, Set[K]]) -> Dict[K, int]:
 
 
 def distance(
-    a: K, b: K, backward: Dict[K, Optional[K]], root_dist: Dict[K, int]
+    a: K, b: K, backward: dict[K, Optional[K]], root_dist: dict[K, int]
 ) -> int:
     """Return distance between two nodes along the tree.
 
@@ -99,8 +99,8 @@ def distance(
     >>> distance("YOU", "SAN", test_backward, label_root_distance(test_root, test_forward))
     4
     """
-    a_visited: Set[K] = {a}
-    b_visited: Set[K] = {b}
+    a_visited: set[K] = {a}
+    b_visited: set[K] = {b}
     a_walk: K = a
     b_walk: K = b
     while (overlap := a_visited & b_visited) == set():
@@ -120,8 +120,8 @@ def distance(
 
 if __name__ == "__main__":
     testmod()
-    orbits: List[Tuple[str, str]] = [parse_link(line.strip()) for line in stdin]
+    orbits: list[tuple[str, str]] = [parse_link(line.strip()) for line in stdin]
     (forward, backward, [root]) = build_tree(orbits)
-    root_dist: Dict[str, int] = label_root_distance(root, forward)
+    root_dist: dict[str, int] = label_root_distance(root, forward)
     print(sum(root_dist.values()))
     print(distance("SAN", "YOU", backward, root_dist))

@@ -2,21 +2,21 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import Dict, List, NewType, Set, Tuple
+from typing import NewType
 
 
 Ingredient = NewType("Ingredient", str)
 Allergen = NewType("Allergen", str)
 
 
-def parse_food(s: str) -> Tuple[List[Ingredient], List[Allergen]]:
+def parse_food(s: str) -> tuple[list[Ingredient], list[Allergen]]:
     before, after = s.strip()[:-1].split(" (contains ")
     ingredients = [Ingredient(i) for i in before.split()]
     allergens = [Allergen(a) for a in after.split(", ")]
     return (ingredients, allergens)
 
 
-test1: List[Tuple[List[Ingredient], List[Allergen]]] = [
+test1: list[tuple[list[Ingredient], list[Allergen]]] = [
     parse_food(s)
     for s in [
         "mxmxvkd kfcds sqjhc nhms (contains dairy, fish)",
@@ -28,10 +28,10 @@ test1: List[Tuple[List[Ingredient], List[Allergen]]] = [
 
 
 def possible_ingredients(
-    foods: List[Tuple[List[Ingredient], List[Allergen]]]
-) -> Dict[Allergen, Set[Ingredient]]:
+    foods: list[tuple[list[Ingredient], list[Allergen]]]
+) -> dict[Allergen, set[Ingredient]]:
     """Find which possible ingredients each allergen might be in."""
-    possible: Dict[Allergen, Set[Ingredient]] = {}
+    possible: dict[Allergen, set[Ingredient]] = {}
     for ingredients, allergens in foods:
         for a in allergens:
             if a in possible:
@@ -41,15 +41,15 @@ def possible_ingredients(
     return possible
 
 
-def part_one(foods: List[Tuple[List[Ingredient], List[Allergen]]]) -> int:
+def part_one(foods: list[tuple[list[Ingredient], list[Allergen]]]) -> int:
     """Find number of times non-suspect ingredients are mentioned.
 
     >>> part_one(test1)
     5
     """
-    possible: Dict[Allergen, Set[Ingredient]] = possible_ingredients(foods)
+    possible: dict[Allergen, set[Ingredient]] = possible_ingredients(foods)
     # Combine these together to find list of ingredients that could contain allergens
-    suspect_ingredients: Set[Ingredient] = set.union(*possible.values())
+    suspect_ingredients: set[Ingredient] = set.union(*possible.values())
     # Count non-suspect ingredients in all the food lists
     count = 0
     for ingredients, _ in foods:
@@ -59,15 +59,15 @@ def part_one(foods: List[Tuple[List[Ingredient], List[Allergen]]]) -> int:
     return count
 
 
-def part_two(foods: List[Tuple[List[Ingredient], List[Allergen]]]) -> str:
+def part_two(foods: list[tuple[list[Ingredient], list[Allergen]]]) -> str:
     """Return assigned allergens sorted by corresponding ingredient.
 
     >>> part_two(test1)
     'mxmxvkd,sqjhc,fvjkl'
     """
-    possible: Dict[Allergen, Set[Ingredient]] = possible_ingredients(foods)
+    possible: dict[Allergen, set[Ingredient]] = possible_ingredients(foods)
 
-    matched_ingredients: List[Tuple[Ingredient, Allergen]] = []
+    matched_ingredients: list[tuple[Ingredient, Allergen]] = []
 
     while possible:
         for allergen, ingredient_set in possible.items():

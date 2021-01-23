@@ -6,7 +6,6 @@ import re
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import List, Set
 
 
 @dataclass(eq=True, frozen=True)
@@ -32,15 +31,15 @@ class HexCoord:
             next_x = self.x + (s[1] == "e")
         return HexCoord(next_x, next_y)
 
-    def adjoining(self) -> Set[HexCoord]:
+    def adjoining(self) -> set[HexCoord]:
         return {self.move(d) for d in ["e", "w", "ne", "se", "nw", "sw"]}
 
 
-def split_moves(s: str) -> List[str]:
+def split_moves(s: str) -> list[str]:
     return [m[0] for m in re.finditer("[ns]?[ew]", s)]
 
 
-test1: List[List[str]] = [
+test1: list[list[str]] = [
     split_moves(s)
     for s in [
         "sesenwnenenewseeswwswswwnenewsewsw",
@@ -67,13 +66,13 @@ test1: List[List[str]] = [
 ]
 
 
-def walk(path_lists: List[List[str]]) -> Set[HexCoord]:
+def walk(path_lists: list[list[str]]) -> set[HexCoord]:
     """Walk along given paths and return number of black tiles.
 
     >>> len(walk(test1))
     10
     """
-    black_tiles: Set[HexCoord] = set()
+    black_tiles: set[HexCoord] = set()
     for path in path_lists:
         pos = HexCoord(0, 0)
         for m in path:
@@ -86,9 +85,9 @@ def walk(path_lists: List[List[str]]) -> Set[HexCoord]:
 
 
 class Floor:
-    def __init__(self, starting_black_tiles: Set[HexCoord]) -> None:
+    def __init__(self, starting_black_tiles: set[HexCoord]) -> None:
         self.days: int = 0
-        self.g: List[Set[HexCoord]] = [starting_black_tiles, set()]
+        self.g: list[set[HexCoord]] = [starting_black_tiles, set()]
 
     def active(self) -> int:
         return self.days % 2
@@ -110,7 +109,7 @@ class Floor:
             if n == 1 or n == 2:
                 self.g[self.inactive()].add(black_cell)
         # Find all white cells that neighbour a black cell
-        white_cells: Set[HexCoord] = set()
+        white_cells: set[HexCoord] = set()
         for black_cell in self.g[self.active()]:
             neighbours = black_cell.adjoining() - self.g[self.active()]
             white_cells = white_cells | neighbours

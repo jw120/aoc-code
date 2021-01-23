@@ -4,13 +4,13 @@ from __future__ import annotations
 
 from doctest import testmod
 from sys import stdin
-from typing import Dict, List, Optional
+from typing import Optional
 
 
 class CrabCups:
-    def __init__(self, xs: List[int], extend: Optional[int] = None) -> None:
+    def __init__(self, xs: list[int], extend: Optional[int] = None) -> None:
         self.current_value: int = xs[0]
-        self.next: Dict[int, int] = {}
+        self.next: dict[int, int] = {}
         for i in range(len(xs) - 1):
             self.next[xs[i]] = xs[i + 1]
         if extend is None:
@@ -102,11 +102,11 @@ class CrabCups:
         return self.next[1] * self.next[self.next[1]]
 
 
-test1: List[int] = [int(x) for x in "389125467"]
+test1: list[int] = [int(x) for x in "389125467"]
 
 
 if __name__ == "__main__":
     testmod()
-    starting_cups: List[int] = [int(x) for x in stdin.read().strip()]
+    starting_cups: list[int] = [int(x) for x in stdin.read().strip()]
     print(CrabCups(starting_cups).run(100).order())
     print(CrabCups(starting_cups, 1_000_000).run(10_000_000).stars())

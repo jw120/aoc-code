@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from sys import stdin
-from typing import List, NoReturn, Set
+from typing import NoReturn
 
 from IntCode import Machine
 
@@ -57,9 +57,9 @@ class Direction(Enum):
 
 
 class Robot:
-    def __init__(self, prog: List[int]) -> None:
-        self.painted: Set[Coord] = set()
-        self.white: Set[Coord] = set()
+    def __init__(self, prog: list[int]) -> None:
+        self.painted: set[Coord] = set()
+        self.white: set[Coord] = set()
         self.pos: Coord = Coord.origin()
         self.direction: Direction = Direction.UP
         self.machine = Machine(prog)
@@ -109,6 +109,6 @@ class Robot:
 
 if __name__ == "__main__":
     #    testmod()
-    program: List[int] = [int(s) for s in stdin.read().split(",")]
+    program: list[int] = [int(s) for s in stdin.read().split(",")]
     print(len(Robot(program).run().painted))
     Robot(program).paint(Colour.WHITE).run().show()

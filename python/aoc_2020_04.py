@@ -2,8 +2,9 @@
 
 import re
 from doctest import testmod
+from re import Pattern
 from sys import stdin
-from typing import Dict, List, Pattern
+from typing import Dict
 
 
 Passport = Dict[str, str]
@@ -18,7 +19,7 @@ def parse_passport(block: str) -> Passport:
     return {k: v for (k, v) in [item.split(":") for item in block.split()]}
 
 
-tests_one: List[str] = [
+tests_one: list[str] = [
     "ecl:gry pid:860033327 eyr:2020 hcl:#fffffd byr:1937 iyr:2017 cid:147 hgt:183cm",
     "iyr:2013 ecl:amb cid:350 eyr:2023 pid:028048884 hcl:#cfa07d byr:1929",
     "hcl:#ae17e1 iyr:2013 eyr:2024 ecl:brn pid:760753108 byr:1931 hgt:179cm",
@@ -43,7 +44,7 @@ def valid_one(p: Passport) -> bool:
     )  # Note "cid" is not required
 
 
-tests_two: List[str] = [
+tests_two: list[str] = [
     "eyr:1972 cid:100 hcl:#18171d ecl:amb hgt:170 pid:186cm iyr:2018 byr:1926",
     "iyr:2019 hcl:#602927 eyr:1967 hgt:170cm ecl:grn pid:012533040 byr:1946",
     "hcl:dab227 iyr:2012 ecl:brn hgt:182cm pid:021572410 eyr:2020 byr:1992 cid:277",
@@ -106,7 +107,7 @@ def valid_two(p: Passport) -> bool:
 
 if __name__ == "__main__":
     testmod()
-    passports: List[Passport] = [
+    passports: list[Passport] = [
         parse_passport(block) for block in stdin.read().split("\n\n")
     ]
     print(sum(valid_one(p) for p in passports))

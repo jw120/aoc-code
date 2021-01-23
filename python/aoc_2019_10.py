@@ -2,11 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from doctest import testmod
 from math import atan2, gcd, pi
 from sys import stdin
-from typing import Dict, Iterable, List, Tuple
 
 
 @dataclass(frozen=True)
@@ -39,7 +39,7 @@ class Vec:
 
 class Grid:
     def __init__(self, s: str) -> None:
-        self._m: List[List[bool]] = [
+        self._m: list[list[bool]] = [
             [s == "#" for s in row.strip()] for row in s.split()
         ]
         self.x_num: int = len(self._m[0])
@@ -76,7 +76,7 @@ class Grid:
             count += self.visible(v, source)
         return count - self.m(source)
 
-    def best(self) -> Tuple[Vec, int]:
+    def best(self) -> tuple[Vec, int]:
         """Find the asteroid from which the most others are visible.
 
         >>> test_one.best()
@@ -101,10 +101,10 @@ class Grid:
     def laser(self, laser: Vec) -> Iterable[Vec]:
         """Fire lasers from asteroid at (lx, ly)."""
 
-        def sort_by_mag(vs: List[Vec]) -> List[Vec]:
+        def sort_by_mag(vs: list[Vec]) -> list[Vec]:
             return sorted(vs, key=lambda v: abs(v.x) + abs(v.y))
 
-        def comparison_angle(x: Tuple[Vec, List[Vec]]) -> float:
+        def comparison_angle(x: tuple[Vec, list[Vec]]) -> float:
             base_angle = atan2(x[0].x, -x[0].y)
             if base_angle < 0:
                 return base_angle + 2 * pi
@@ -112,7 +112,7 @@ class Grid:
                 return base_angle
 
         # Group all the asteroids by their primitive vector from the laser
-        ast_groups: Dict[Vec, List[Vec]] = {}
+        ast_groups: dict[Vec, list[Vec]] = {}
         for v in self.all_positions():
             if self.m(v) and (v != laser):
                 delta = v - laser
@@ -120,7 +120,7 @@ class Grid:
                 ast_groups.setdefault(prim_delta, []).append(delta)
 
         # Convert to a list sorted by the angle, with elements as sorted lists
-        ast_list: List[Tuple[Vec, List[Vec]]] = [
+        ast_list: list[tuple[Vec, list[Vec]]] = [
             (k, sort_by_mag(v)) for (k, v) in ast_groups.items()
         ]
         ast_list.sort(key=comparison_angle)

@@ -7,15 +7,15 @@ from dataclasses import dataclass
 from doctest import testmod
 from enum import Enum, auto
 from sys import stdin
-from typing import ClassVar, List, Set, Tuple, Union
+from typing import ClassVar, Union
 
 
 @dataclass(frozen=True)
 class History:
     """Wrapper class with a hash so we can put the card state into a set."""
 
-    p1: List[int]
-    p2: List[int]
+    p1: list[int]
+    p2: list[int]
 
     def __hash__(self) -> int:
         return hash(f"{self.p1} {self.p2}")
@@ -34,16 +34,16 @@ class Combat:
     _last_game: ClassVar[int] = 0
 
     @staticmethod
-    def _parse_player(s: str, header: str) -> List[int]:
+    def _parse_player(s: str, header: str) -> list[int]:
         """Read one player's part of the input."""
-        lines: List[str] = s.strip().split("\n")
+        lines: list[str] = s.strip().split("\n")
         if lines[0] != header:
             raise RuntimeError("Can't find", header, "in", lines[0])
         return [int(x) for x in lines[1:]]
 
-    def __init__(self, s: Union[str, Tuple[List[int], List[int]]]) -> None:
-        self.p1: List[int]
-        self.p2: List[int]
+    def __init__(self, s: Union[str, tuple[list[int], list[int]]]) -> None:
+        self.p1: list[int]
+        self.p2: list[int]
         if isinstance(s, str):
             player_1_part, player_2_part = s.split("\n\n")
             self.p1 = self._parse_player(player_1_part, "Player 1:")
@@ -62,7 +62,7 @@ class Combat:
 
     def score(self) -> int:
         """Return the score based on the winner's hand."""
-        winner_deck: List[int] = self.p1 if self.winner() == Player.One else self.p2
+        winner_deck: list[int] = self.p1 if self.winner() == Player.One else self.p2
         return sum(x * y for x, y in enumerate(reversed(winner_deck), start=1))
 
     @classmethod
@@ -98,7 +98,7 @@ class Combat:
         return self
 
     @staticmethod
-    def _show_deck(xs: List[int]) -> str:
+    def _show_deck(xs: list[int]) -> str:
         """Return list as a comma-separated string with a leading-space if non-empty."""
         if xs:
             return " " + ", ".join([str(x) for x in xs])
@@ -112,7 +112,7 @@ class Combat:
         291
         """
         game_num: int = self.next_game()
-        history: Set[History] = set()
+        history: set[History] = set()
 
         if debug:
             print(f"=== Game {game_num} ===")

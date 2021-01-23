@@ -3,7 +3,7 @@
 from doctest import testmod
 from enum import Enum, auto
 from sys import stdin
-from typing import List, Optional, Set, Tuple
+from typing import Optional, Tuple
 
 
 class Operation(Enum):
@@ -31,8 +31,8 @@ def parse_instruction(s: str) -> Instruction:
 
 
 class Machine:
-    def __init__(self, code: List[Instruction]) -> None:
-        self.code: List[Instruction] = code.copy()
+    def __init__(self, code: list[Instruction]) -> None:
+        self.code: list[Instruction] = code.copy()
         self.acc: int = 0
         self.ip: int = 0
 
@@ -69,14 +69,14 @@ test_code_v2 = test_code.copy()
 test_code_v2[7] = (Operation.NOP, -4)
 
 
-def run_until_loop(code: List[Instruction]) -> int:
+def run_until_loop(code: list[Instruction]) -> int:
     """Run the machine until an instruction is about to repeated.
 
     >>> run_until_loop(test_code)
     5
     """
     m: Machine = Machine(code)
-    visited: Set[int] = set()
+    visited: set[int] = set()
     while True:
         if m.ip in visited:
             return m.acc
@@ -84,7 +84,7 @@ def run_until_loop(code: List[Instruction]) -> int:
         m.step()
 
 
-def run_until_loop_or_end(code: List[Instruction]) -> Optional[int]:
+def run_until_loop_or_end(code: list[Instruction]) -> Optional[int]:
     """Run the machine until a loop is found or the program ends.
 
     Returns the value of the if the programs ends normally.
@@ -97,7 +97,7 @@ def run_until_loop_or_end(code: List[Instruction]) -> Optional[int]:
     8
     """
     m: Machine = Machine(code)
-    visited: Set[int] = set()
+    visited: set[int] = set()
     while True:
         if m.ip == len(m.code):
             return m.acc
@@ -107,14 +107,14 @@ def run_until_loop_or_end(code: List[Instruction]) -> Optional[int]:
         m.step()
 
 
-def mutate_until_end(original_code: List[Instruction]) -> int:
+def mutate_until_end(original_code: list[Instruction]) -> int:
     """Mutate each instruction in turn until finding one that makes the code terminate.
 
     >>> mutate_until_end(test_code)
     8
     """
     for mutate_index in range(1, len(original_code)):
-        code: List[Instruction] = original_code.copy()
+        code: list[Instruction] = original_code.copy()
         (operation, argument) = code[mutate_index]
         if operation == Operation.JMP:
             operation = Operation.NOP
@@ -128,6 +128,6 @@ def mutate_until_end(original_code: List[Instruction]) -> int:
 
 if __name__ == "__main__":
     testmod()
-    code: List[Instruction] = [parse_instruction(line) for line in stdin]
+    code: list[Instruction] = [parse_instruction(line) for line in stdin]
     print(run_until_loop(code))
     print(mutate_until_end(code))

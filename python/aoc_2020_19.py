@@ -1,10 +1,11 @@
 """Advent of Code 2020 - Day 19."""
 
 import re
+from collections.abc import Iterable
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import Dict, Iterable, List, NoReturn, Optional, Tuple, Union
+from typing import NoReturn, Optional, Union
 
 
 def assert_never(value: NoReturn) -> NoReturn:
@@ -21,7 +22,7 @@ class Terminal:
 
 @dataclass(frozen=True)
 class Series:
-    rule_indices: List[int]
+    rule_indices: list[int]
 
     def __str__(self) -> str:
         return " ".join(str(r) for r in self.rule_indices)
@@ -39,7 +40,7 @@ class Alternate:
 Rule = Union[Terminal, Series, Alternate]
 
 
-def parse_rule(s: str) -> Tuple[int, Rule]:
+def parse_rule(s: str) -> tuple[int, Rule]:
     """Convert a string into a rule with index.
 
     >>> parse_rule("1: 2 3")
@@ -57,7 +58,7 @@ def parse_rule(s: str) -> Tuple[int, Rule]:
     return (index, Series(parse_ints(rule_str)))
 
 
-def parse_ints(s: str) -> List[int]:
+def parse_ints(s: str) -> list[int]:
     """Convert a string of space-separated integers into a list.
 
     >>> parse_ints("1 2 3")
@@ -68,7 +69,7 @@ def parse_ints(s: str) -> List[int]:
 
 class MessageValidator:
     def __init__(self, rules: Iterable[str]) -> None:
-        self.rules: Dict[int, Rule] = {
+        self.rules: dict[int, Rule] = {
             i: rule for (i, rule) in [parse_rule(r) for r in rules]
         }
 

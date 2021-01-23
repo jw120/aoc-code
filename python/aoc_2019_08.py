@@ -1,7 +1,7 @@
 """Advent of Code 2019 - Day 8."""
 
+from collections import Counter
 from sys import stdin
-from typing import Counter, List
 
 
 class Image:
@@ -19,7 +19,7 @@ class Image:
 
 
 def part_one(i: Image) -> int:
-    layer_counts: List[Counter[str]] = []
+    layer_counts: list[Counter[str]] = []
     for layer in range(0, i.layers):
         layer_counts.append(Counter())
         for row in range(0, i.rows):

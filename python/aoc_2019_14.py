@@ -3,17 +3,14 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
 from typing import (
     Any,
     Counter as Counter_t,
-    Dict,
-    Iterable,
-    Mapping,
     NoReturn,
-    Tuple,
     Union,
 )
 
@@ -74,8 +71,8 @@ def all_zero(d: Mapping[Any, int]) -> bool:
 
 class NanoFactory:
     def __init__(self, inputs: Iterable[str]) -> None:
-        self.composite_recipes: Dict[str, CompositeRecipe] = {}
-        self.basic_recipes: Dict[str, BasicRecipe] = {}
+        self.composite_recipes: dict[str, CompositeRecipe] = {}
+        self.basic_recipes: dict[str, BasicRecipe] = {}
         for chemical, recipe in [parse_recipe(s.strip()) for s in inputs]:
             if isinstance(recipe, BasicRecipe):
                 self.basic_recipes[chemical] = recipe
@@ -168,7 +165,7 @@ class NanoFactory:
         return lower_bound
 
 
-def parse_recipe(s: str) -> Tuple[str, Recipe]:
+def parse_recipe(s: str) -> tuple[str, Recipe]:
     """Parse a recipe.
 
     >>> parse_recipe("5 B, 7 C => 1 BC")

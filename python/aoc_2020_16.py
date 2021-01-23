@@ -3,15 +3,14 @@
 
 from doctest import testmod
 from functools import reduce
-from re import compile
+from re import Pattern, compile
 from sys import stdin
-from typing import List, Pattern, Set, Tuple
 
-ValidField = Tuple[str, Tuple[int, int], Tuple[int, int]]
+ValidField = tuple[str, tuple[int, int], tuple[int, int]]
 valid_pattern: Pattern[str] = compile(r"([a-z ]+): (\d+)-(\d+) or (\d+)-(\d+)")
 
 
-def parse_input(s: str) -> Tuple[List[ValidField], List[int], List[List[int]]]:
+def parse_input(s: str) -> tuple[list[ValidField], list[int], list[list[int]]]:
     def parse_valid(line: str) -> ValidField:
         if m := valid_pattern.fullmatch(line):
             return (
@@ -21,7 +20,7 @@ def parse_input(s: str) -> Tuple[List[ValidField], List[int], List[List[int]]]:
             )
         raise RuntimeError("Failed to parse valid line", line)
 
-    def parse_nearby(line: str) -> List[int]:
+    def parse_nearby(line: str) -> list[int]:
         return [int(x) for x in line.split(",")]
 
     [v_str, your_str, nearby_str] = s.split("\n\n")
@@ -32,21 +31,21 @@ def parse_input(s: str) -> Tuple[List[ValidField], List[int], List[List[int]]]:
     )
 
 
-test1a: List[ValidField] = [
+test1a: list[ValidField] = [
     ("class", (1, 3), (5, 7)),
     ("row", (6, 11), (33, 44)),
     ("seat", (13, 40), (45, 50)),
 ]
-test1b: List[List[int]] = [[7, 3, 47], [40, 4, 50], [55, 2, 20], [38, 6, 12]]
+test1b: list[list[int]] = [[7, 3, 47], [40, 4, 50], [55, 2, 20], [38, 6, 12]]
 
 
-def run1(valids: List[ValidField], tickets: List[List[int]]) -> int:
+def run1(valids: list[ValidField], tickets: list[list[int]]) -> int:
     """Return the error rate of nearby tickets.
 
     >>> run1(test1a, test1b)
     71
     """
-    valid_set: Set[int] = set()
+    valid_set: set[int] = set()
     count: int = 0
     for _, (a, b), (c, d) in valids:
         for i in range(a, b + 1):
@@ -61,7 +60,7 @@ def run1(valids: List[ValidField], tickets: List[List[int]]) -> int:
     return count
 
 
-def run2(valids: List[ValidField], your: List[int], tickets: List[List[int]]) -> int:
+def run2(valids: list[ValidField], your: list[int], tickets: list[list[int]]) -> int:
     """Find the six fields on your ticket."""
 
     def valid_value(f: ValidField, x: int) -> bool:
@@ -71,26 +70,26 @@ def run2(valids: List[ValidField], your: List[int], tickets: List[List[int]]) ->
         return val
 
     # Eliminate invalid tickets
-    valid_set: Set[int] = set()
+    valid_set: set[int] = set()
     for _, (a, b), (c, d) in valids:
         for i in range(a, b + 1):
             valid_set.add(i)
         for i in range(c, d + 1):
             valid_set.add(i)
-    valid_tickets: List[List[int]] = [
+    valid_tickets: list[list[int]] = [
         ticket for ticket in tickets if all(num in valid_set for num in ticket)
     ]
     # For each field see which positions are compatible
-    field_fit: List[Tuple[str, List[int]]] = []
+    field_fit: list[tuple[str, list[int]]] = []
     for field in valids:
-        valid_positions: List[int] = []
+        valid_positions: list[int] = []
         for position in range(0, len(tickets[0])):
             if all(valid_value(field, ticket[position]) for ticket in valid_tickets):
                 valid_positions.append(position)
 
         field_fit.append((field[0], valid_positions))
     # Allocate fields with only one possible position until all fields are allocated
-    allocated_fields: List[Tuple[str, int]] = []
+    allocated_fields: list[tuple[str, int]] = []
     while field_fit:
         for field_name, field_positions in field_fit:
             if not field_positions:
@@ -105,7 +104,7 @@ def run2(valids: List[ValidField], your: List[int], tickets: List[List[int]]) ->
     departure_field_positions = [
         position for name, position in allocated_fields if name.startswith("departure")
     ]
-    your_values: List[int] = [your[position] for position in departure_field_positions]
+    your_values: list[int] = [your[position] for position in departure_field_positions]
     return reduce(lambda x, y: x * y, your_values, 1)
 
 

@@ -2,10 +2,9 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import List
 
 
-def solve_part_one(target: int, xs: List[int]) -> int:
+def solve_part_one(target: int, xs: list[int]) -> int:
     """Solve part one.
 
     >>> solve_part_one(2020, [1721, 979, 366, 299, 675, 1456])
@@ -18,7 +17,7 @@ def solve_part_one(target: int, xs: List[int]) -> int:
     raise RuntimeError("Failed to find a solution")
 
 
-def solve_part_two(target: int, xs: List[int]) -> int:
+def solve_part_two(target: int, xs: list[int]) -> int:
     """Solve part two.
 
     >>> solve_part_two(2020, [1721, 979, 366, 299, 675, 1456])
@@ -34,6 +33,6 @@ def solve_part_two(target: int, xs: List[int]) -> int:
 
 if __name__ == "__main__":
     testmod()
-    nums: List[int] = [int(line) for line in stdin]
+    nums: list[int] = [int(line) for line in stdin]
     print(solve_part_one(2020, nums))
     print(solve_part_two(2020, nums))

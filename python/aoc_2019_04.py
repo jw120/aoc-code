@@ -1,7 +1,7 @@
 """Advent of Code 2019 - Day 4."""
 
+from collections.abc import Callable
 from sys import stdin
-from typing import Callable
 
 
 def valid_one(

@@ -2,14 +2,15 @@
 
 import re
 from doctest import testmod
+from re import Match, Pattern
 from sys import stdin
-from typing import Dict, List, Match, Optional, Pattern, Set, Tuple
+from typing import Optional
 
 
 rule_divider: Pattern[str] = re.compile(" bags?[,\\.] ?")
 bag_match: Pattern[str] = re.compile("([0-9]+) (.+)")
 
-Rule = Tuple[str, List[Tuple[str, int]]]
+Rule = tuple[str, list[tuple[str, int]]]
 
 
 def parse_rule(s: str) -> Rule:
@@ -29,7 +30,7 @@ def parse_rule(s: str) -> Rule:
     return (outer_bag, [parse_content(b) for b in inner_bags[:-1]])
 
 
-def parse_content(s: str) -> Tuple[str, int]:
+def parse_content(s: str) -> tuple[str, int]:
     """Parse a bag from the contents part of a rule.
 
     >>> parse_content('2 plaid gold')
@@ -41,7 +42,7 @@ def parse_content(s: str) -> Tuple[str, int]:
     return (m.group(2), int(m.group(1)))
 
 
-test_rules: List[Rule] = [
+test_rules: list[Rule] = [
     parse_rule(r)
     for r in [
         "light red bags contain 1 bright white bag, 2 muted yellow bags.",
@@ -57,7 +58,7 @@ test_rules: List[Rule] = [
 ]
 
 
-def part_one(rules: List[Rule], target: str) -> int:
+def part_one(rules: list[Rule], target: str) -> int:
     """Return how many different bags can include the target bag.
 
     >>> part_one(test_rules, "shiny gold")
@@ -66,15 +67,15 @@ def part_one(rules: List[Rule], target: str) -> int:
     # Read all the rules into a dict showing what a bag can be insider
     # can_be_inside[x] = {a, b, c}
     # means bag colour can be insider bags of colours a, b or c
-    can_be_inside: Dict[str, Set[str]] = {}
+    can_be_inside: dict[str, set[str]] = {}
     for (outer, contents) in rules:
         for (inner, _) in contents:
             can_be_inside.setdefault(inner, set()).add(outer)
     # Walk backwards from the target bag
-    visited: Set[str] = set()
-    frontier: Set[str] = can_be_inside[target]
+    visited: set[str] = set()
+    frontier: set[str] = can_be_inside[target]
     while frontier:
-        new_frontier: Set[str] = set()
+        new_frontier: set[str] = set()
         for bag in frontier:
             visited.add(bag)
             if bag in can_be_inside:
@@ -83,13 +84,13 @@ def part_one(rules: List[Rule], target: str) -> int:
     return len(visited)
 
 
-def part_two(rules: List[Rule], target: str) -> int:
+def part_two(rules: list[Rule], target: str) -> int:
     """Return the number of bags inside.
 
     >>> part_two(test_rules, "shiny gold")
     32
     """
-    count_inside: Dict[str, int] = {}  # Cached results from bags_insider
+    count_inside: dict[str, int] = {}  # Cached results from bags_insider
 
     def bags_inside(bag: str) -> int:
         if bag not in count_inside:
@@ -100,7 +101,7 @@ def part_two(rules: List[Rule], target: str) -> int:
         return count_inside[bag]
 
     # Read the rules into a Dict
-    has_inside: Dict[str, List[Tuple[str, int]]] = {}
+    has_inside: dict[str, list[tuple[str, int]]] = {}
     for (outer, inners) in rules:
         has_inside[outer] = inners
 
@@ -109,6 +110,6 @@ def part_two(rules: List[Rule], target: str) -> int:
 
 if __name__ == "__main__":
     testmod()
-    rules: List[Rule] = [parse_rule(line) for line in stdin]
+    rules: list[Rule] = [parse_rule(line) for line in stdin]
     print(part_one(rules, "shiny gold"))
     print(part_two(rules, "shiny gold"))

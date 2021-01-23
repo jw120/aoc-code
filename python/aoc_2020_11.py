@@ -1,7 +1,7 @@
 """Advent of Code 2020 - Day 11."""
 
+from collections.abc import Callable, Iterable
 from sys import stdin
-from typing import Callable, Iterable, List
 
 
 class Grid:
@@ -13,7 +13,7 @@ class Grid:
 
     def __init__(self, lines: Iterable[str]) -> None:
         self.time: int = 0
-        self.g: List[List[str]] = [[], []]
+        self.g: list[list[str]] = [[], []]
         for line in lines:
             self.g[0].append(line.strip())
             self.g[1].append(line.strip())
@@ -165,7 +165,7 @@ test1: Grid = Grid(
 
 
 if __name__ == "__main__":
-    inputs: List[str] = list(stdin)
+    inputs: list[str] = list(stdin)
     grid1: Grid = Grid(inputs)
     iterate_until_zero(grid1.iterate_one)
     print(grid1.occupied_seat_count)

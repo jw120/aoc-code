@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import List, Pattern, Set
+from re import Pattern
 
 
 def sign(a: int) -> int:
@@ -69,8 +69,8 @@ class Jupiter:
     1940
     """
 
-    def __init__(self, moon_positions: List[Vector]) -> None:
-        self.moons: List[Moon] = [Moon(r, Vector(0, 0, 0)) for r in moon_positions]
+    def __init__(self, moon_positions: list[Vector]) -> None:
+        self.moons: list[Moon] = [Moon(r, Vector(0, 0, 0)) for r in moon_positions]
 
     @property
     def energy(self) -> int:
@@ -115,7 +115,7 @@ class Jupiter:
         >>> Jupiter(test1).run_until_repeat()
         2772
         """
-        history: Set[Jupiter] = set()
+        history: set[Jupiter] = set()
         steps: int = 0
         while True:
             if self in history:
@@ -128,7 +128,7 @@ class Jupiter:
         return hash(tuple(self.moons))
 
 
-test1: List[Vector] = [
+test1: list[Vector] = [
     parse_vector(line)
     for line in [
         "<x=-1, y=0, z=2>",
@@ -138,7 +138,7 @@ test1: List[Vector] = [
     ]
 ]
 
-test2: List[Vector] = [
+test2: list[Vector] = [
     parse_vector(line)
     for line in [
         "<x=-8, y=-10, z=0>",

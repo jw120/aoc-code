@@ -2,7 +2,6 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import List
 
 
 def fuel_one(mass: int) -> int:
@@ -34,6 +33,6 @@ def fuel_two(mass: int) -> int:
 
 if __name__ == "__main__":
     testmod()
-    masses: List[int] = [int(line) for line in stdin]
+    masses: list[int] = [int(line) for line in stdin]
     print(sum(fuel_one(mass) for mass in masses))
     print(sum(fuel_two(mass) for mass in masses))

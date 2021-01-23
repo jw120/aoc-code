@@ -1,21 +1,20 @@
 """Advent of Code 2020 - Day 15."""
 
-
+from collections.abc import Iterator
 from doctest import testmod
 from itertools import islice
 from sys import stdin
-from typing import Dict, Iterator, List
 
 
-def run1(nums: List[int]) -> Iterator[int]:
+def run1(nums: list[int]) -> Iterator[int]:
     """Generate part one sequence.
 
     >>> list(islice(run1([0, 3, 6]), 10))
     [0, 3, 6, 0, 3, 3, 1, 0, 4, 0]
     """
     turn = 1
-    last_spoken: Dict[int, int] = {}
-    prev_spoken: Dict[int, int] = {}
+    last_spoken: dict[int, int] = {}
+    prev_spoken: dict[int, int] = {}
     for n in nums:
         last_spoken[n] = turn
         yield n
@@ -36,6 +35,6 @@ def run1(nums: List[int]) -> Iterator[int]:
 
 if __name__ == "__main__":
     testmod()
-    numbers: List[int] = [int(x) for x in stdin.readline().split(",")]
+    numbers: list[int] = [int(x) for x in stdin.readline().split(",")]
     print(list(islice(run1(numbers), 2019, 2020))[0])
     print(list(islice(run1(numbers), 30000000 - 1, 30000000))[0])

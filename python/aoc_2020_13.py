@@ -2,10 +2,10 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import List, Optional, Tuple
+from typing import Optional
 
 
-def part_one(buses: List[int], start: int) -> int:
+def part_one(buses: list[int], start: int) -> int:
     """Solve part one - earliest bus.
 
     >>> part_one([7, 13, 59, 31, 19], 939)
@@ -19,7 +19,7 @@ def part_one(buses: List[int], start: int) -> int:
     return earliest * waiting_time(earliest)
 
 
-def chinese_remainder_theorem(requirements: List[Tuple[int, int]]) -> int:
+def chinese_remainder_theorem(requirements: list[tuple[int, int]]) -> int:
     """Solve simultaneous modulo equations.
 
     Chinese Remainder Theorem (Wikipedia)
@@ -43,13 +43,13 @@ def chinese_remainder_theorem(requirements: List[Tuple[int, int]]) -> int:
     return x
 
 
-def part_two(buses: List[Optional[int]]) -> int:
+def part_two(buses: list[Optional[int]]) -> int:
     """Solve part two - find time that meets constraints.
 
     >>> part_two([7,13,None,None,59,None,31,19])
     1068781
     """
-    requirements: List[Tuple[int, int]] = [
+    requirements: list[tuple[int, int]] = [
         ((x - i) % x, x) for (i, x) in enumerate(buses) if x is not None
     ]
     return chinese_remainder_theorem(requirements)
@@ -58,8 +58,8 @@ def part_two(buses: List[Optional[int]]) -> int:
 if __name__ == "__main__":
     testmod()
     start_time: int = int(stdin.readline())
-    buses: List[str] = next(stdin).split(",")
-    running_buses: List[int] = [int(x) for x in buses if x != "x"]
+    buses: list[str] = next(stdin).split(",")
+    running_buses: list[int] = [int(x) for x in buses if x != "x"]
     print(part_one(running_buses, start_time))
-    bus_constraints: List[Optional[int]] = [None if x == "x" else int(x) for x in buses]
+    bus_constraints: list[Optional[int]] = [None if x == "x" else int(x) for x in buses]
     print(part_two(bus_constraints))

@@ -2,7 +2,7 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import List, Tuple
+from typing import Tuple
 
 Entry = Tuple[int, int, str, str]
 
@@ -45,6 +45,6 @@ def check_two(e: Entry) -> bool:
 
 if __name__ == "__main__":
     testmod()
-    entries: List[Entry] = [parse_entry(line) for line in stdin]
+    entries: list[Entry] = [parse_entry(line) for line in stdin]
     print(sum(check_one(e) for e in entries))
     print(sum(check_two(e) for e in entries))

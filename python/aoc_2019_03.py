@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import ClassVar, Dict, List, Set, Tuple, Union
+from typing import ClassVar, Union
 
 
 @dataclass(eq=True, frozen=True)
@@ -62,11 +62,11 @@ def parse_direction(s: str) -> Direction:
     raise RuntimeError("Unknown direction", s)
 
 
-Wire = List[Tuple[Direction, int]]
+Wire = list[tuple[Direction, int]]
 
 
 def parse_wire(line: str) -> Wire:
-    def parse_segment(s: str) -> Tuple[Direction, int]:
+    def parse_segment(s: str) -> tuple[Direction, int]:
         direction: Direction = parse_direction(s[0])
         distance = int(s[1:])
         return (direction, distance)
@@ -74,10 +74,10 @@ def parse_wire(line: str) -> Wire:
     return [parse_segment(seg_str) for seg_str in line.split(",")]
 
 
-def trace(wire: Wire) -> Set[Offset]:
+def trace(wire: Wire) -> set[Offset]:
     """Trace along wire from the origin, returning a set of offsets visited."""
     pos: Offset = Offset(0, 0)
-    visited: Set[Offset] = set()
+    visited: set[Offset] = set()
     for direction, distance in wire:
         for i in range(1, distance + 1):
             pos = pos + direction.offset
@@ -85,7 +85,7 @@ def trace(wire: Wire) -> Set[Offset]:
     return visited
 
 
-def trace_steps(wire: Wire) -> Dict[Offset, int]:
+def trace_steps(wire: Wire) -> dict[Offset, int]:
     """Trace along wire from the origin.
 
     Returns a map where the keys are the offsets visited and the values the number of
@@ -93,7 +93,7 @@ def trace_steps(wire: Wire) -> Dict[Offset, int]:
     """
     pos: Offset = Offset(0, 0)
     steps: int = 0
-    visited: Dict[Offset, int] = {}
+    visited: dict[Offset, int] = {}
     for direction, distance in wire:
         for i in range(1, distance + 1):
             steps += 1
@@ -103,7 +103,7 @@ def trace_steps(wire: Wire) -> Dict[Offset, int]:
     return visited
 
 
-test_wires: List[Tuple[Wire, Wire]] = [
+test_wires: list[tuple[Wire, Wire]] = [
     (parse_wire("R8,U5,L5,D3"), parse_wire("U7,R6,D4,L4")),
     (
         parse_wire("R75,D30,R83,U83,L12,D49,R71,U7,L72"),
@@ -126,7 +126,7 @@ def solve_one(w1: Wire, w2: Wire) -> int:
     >>> #solve_one(test_wires[2][0], test_wires[2][1])
     135
     """
-    intersections: Set[Offset] = trace(w1) & trace(w2)
+    intersections: set[Offset] = trace(w1) & trace(w2)
     return min(p.distance() for p in intersections)
 
 
@@ -140,9 +140,9 @@ def solve_two(w1: Wire, w2: Wire) -> int:
     >>> solve_two(test_wires[2][0], test_wires[2][1])
     410
     """
-    steps1: Dict[Offset, int] = trace_steps(w1)
-    steps2: Dict[Offset, int] = trace_steps(w2)
-    intersections: Set[Offset] = set(steps1.keys()) & set(steps2.keys())
+    steps1: dict[Offset, int] = trace_steps(w1)
+    steps2: dict[Offset, int] = trace_steps(w2)
+    intersections: set[Offset] = set(steps1.keys()) & set(steps2.keys())
     return min((steps1[p] + steps2[p]) for p in intersections)
 
 

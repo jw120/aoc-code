@@ -2,11 +2,10 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import List, Tuple
 
-test1: List[int] = [16, 10, 15, 5, 1, 11, 7, 19, 6, 12, 4]
+test1: list[int] = [16, 10, 15, 5, 1, 11, 7, 19, 6, 12, 4]
 
-test2: List[int] = [
+test2: list[int] = [
     28,
     33,
     18,
@@ -41,14 +40,14 @@ test2: List[int] = [
 ]
 
 
-def prep_list(xs: List[int]) -> List[int]:
+def prep_list(xs: list[int]) -> list[int]:
     """Sort list and add first and last elements."""
-    ys: List[int] = [0] + sorted(xs)
+    ys: list[int] = [0] + sorted(xs)
     ys.append(ys[-1] + 3)
     return ys
 
 
-def count_gaps(xs: List[int]) -> Tuple[int, int]:
+def count_gaps(xs: list[int]) -> tuple[int, int]:
     """Count the numbers of 1-gaps and 3-gaps in a list of adapters.
 
     >>> count_gaps(prep_list(test1))
@@ -71,7 +70,7 @@ def count_gaps(xs: List[int]) -> Tuple[int, int]:
     return (count1, count3)
 
 
-def count_ways(xs: List[int]) -> int:
+def count_ways(xs: list[int]) -> int:
     """Count the number of ways the adapters can be connected.
 
     >>> count_ways(prep_list(test1))
@@ -79,7 +78,7 @@ def count_ways(xs: List[int]) -> int:
     >>> count_ways(prep_list(test2))
     19208
     """
-    counts: List[int] = [0 for x in xs]
+    counts: list[int] = [0 for x in xs]
 
     last_i = len(xs) - 1
     counts[last_i] = 1
@@ -96,7 +95,7 @@ def count_ways(xs: List[int]) -> int:
 
 if __name__ == "__main__":
     testmod()
-    adapters: List[int] = prep_list([int(line) for line in stdin])
+    adapters: list[int] = prep_list([int(line) for line in stdin])
     (num1, num3) = count_gaps(adapters)
     print(num1 * num3)
     print(count_ways(adapters))

@@ -3,9 +3,9 @@
 
 from dataclasses import dataclass
 from doctest import testmod
-from re import compile
+from re import Pattern, compile
 from sys import stdin
-from typing import Dict, List, Pattern, Union
+from typing import Union
 
 
 @dataclass(frozen=True)
@@ -72,7 +72,7 @@ def apply_mask1(value: int, mask: str) -> int:
     return value
 
 
-def apply_mask2(address: int, mask: str) -> List[int]:
+def apply_mask2(address: int, mask: str) -> list[int]:
     """Apply version two mask to the given value.
 
     Returns a list of addresses.
@@ -81,7 +81,7 @@ def apply_mask2(address: int, mask: str) -> List[int]:
     >>> sorted(apply_mask2(26, '00000000000000000000000000000000X0XX'))
     [16, 17, 18, 19, 24, 25, 26, 27]
     """
-    free_bits: List[int] = []
+    free_bits: list[int] = []
     if len(mask) != 36:
         raise RuntimeError("Bad mask", mask)
     for i in range(0, 36):
@@ -93,7 +93,7 @@ def apply_mask2(address: int, mask: str) -> List[int]:
             free_bits.append(i)
         if len(mask) != 36:
             raise RuntimeError("Bad mask", mask)
-    results: List[int] = []
+    results: list[int] = []
     for x in range(0, 2 ** len(free_bits)):
         for j in range(0, len(free_bits)):
             address = set_bit(address, free_bits[-j], bool(x & (1 << j)))
@@ -101,8 +101,8 @@ def apply_mask2(address: int, mask: str) -> List[int]:
     return results
 
 
-def run1(commands: List[Command]) -> int:
-    memory: Dict[int, int] = {}
+def run1(commands: list[Command]) -> int:
+    memory: dict[int, int] = {}
     mask: str = "X" * 36
     for cmd in commands:
         if isinstance(cmd, UpdateBitmaskCommand):
@@ -115,7 +115,7 @@ def run1(commands: List[Command]) -> int:
     return sum(memory.values())
 
 
-test2: List[Command] = [
+test2: list[Command] = [
     parse_command(s)
     for s in [
         "mask = 000000000000000000000000000000X1001X",
@@ -126,13 +126,13 @@ test2: List[Command] = [
 ]
 
 
-def run2(commands: List[Command]) -> int:
+def run2(commands: list[Command]) -> int:
     """Run using version 2.
 
     >>> run2(test2)
     208
     """
-    memory: Dict[int, int] = {}
+    memory: dict[int, int] = {}
     mask: str = ""
     for cmd in commands:
         if isinstance(cmd, UpdateBitmaskCommand):
@@ -148,6 +148,6 @@ def run2(commands: List[Command]) -> int:
 
 if __name__ == "__main__":
     testmod()
-    commands: List[Command] = [parse_command(line) for line in stdin]
+    commands: list[Command] = [parse_command(line) for line in stdin]
     print(run1(commands))
     print(run2(commands))

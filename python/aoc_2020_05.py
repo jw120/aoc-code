@@ -2,7 +2,6 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import List
 
 
 def seat_id(code: str) -> int:
@@ -23,8 +22,8 @@ def seat_id(code: str) -> int:
     return int(swapped, 2)
 
 
-def empty_seat(seats: List[int]) -> int:
-    sorted_seats: List[int] = sorted(ids)
+def empty_seat(seats: list[int]) -> int:
+    sorted_seats: list[int] = sorted(ids)
     prev_seat: int = sorted_seats[0]
     for seat in sorted_seats[1:]:
         if seat != prev_seat + 1:
@@ -35,6 +34,6 @@ def empty_seat(seats: List[int]) -> int:
 
 if __name__ == "__main__":
     testmod()
-    ids: List[int] = [seat_id(code) for code in stdin]
+    ids: list[int] = [seat_id(code) for code in stdin]
     print(max(ids))
     print(empty_seat(ids))
