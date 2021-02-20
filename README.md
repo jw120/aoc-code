@@ -1,6 +1,6 @@
 # Advent of Code
 
-My solutions to advent of code. So far contains:
+My solutions to advent of code.  So far contains:
 
  * Complete 2020 in Python (done in 2020 advent season)
  * Partial 2019 in Python (started in 2020 advent season)
