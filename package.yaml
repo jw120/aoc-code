@@ -15,90 +15,154 @@ description:         Please see the README on GitHub at <https://github.com/jw12
 
 dependencies:
 - base >= 4.7 && < 5
-- containers
-- array
-- attoparsec
-- bytestring
+#- containers
+#- array
+#- attoparsec
+#- bytestring
 - doctest
-- text
-- monad-loops
+#- text
+#- monad-loops
+
+ghc-options:
+- -Wall
+- -Wcompat
+- -Widentities
+- -Wincomplete-record-updates
+- -Wincomplete-uni-patterns
+- -Wpartial-fields
+- -Wredundant-constraints
+- -Wmissing-home-modules
+- -fwarn-tabs
+- -haddock
+
+# Extensions are those earmarked for GHC2021 (except FieldSelectors which is new in GHC 9.2) plusOverloadedStrings
+default-extensions:
+  OverloadedStrings
+  BangPatterns
+  BinaryLiterals
+  ConstrainedClassMethods
+  ConstraintKinds
+  DeriveDataTypeable
+  DeriveFoldable
+  DeriveFunctor
+  DeriveGeneric
+  DeriveLift
+  DeriveTraversable
+  DoAndIfThenElse
+  EmptyCase
+  EmptyDataDecls
+  EmptyDataDeriving
+  ExistentialQuantification
+  ExplicitForAll
+  FlexibleContexts
+  FlexibleInstances
+  ForeignFunctionInterface
+  GADTSyntax
+  GeneralisedNewtypeDeriving
+  HexFloatLiterals
+  ImplicitPrelude
+  ImportQualifiedPost
+  InstanceSigs
+  KindSignatures
+  MonomorphismRestriction
+  MultiParamTypeClasses
+  NamedFieldPuns
+  NamedWildCards
+  NumericUnderscores
+  PatternGuards
+  PolyKinds
+  PostfixOperators
+  RankNTypes
+  RelaxedPolyRec
+  ScopedTypeVariables
+  StandaloneDeriving
+  StandaloneKindSignatures
+  StarIsType
+  TraditionalRecordSyntax
+  TupleSections
+  TypeApplications
+  TypeOperators
+  TypeSynonymInstances
 
 executables:
- aoc_2018_01:
-   main: aoc_2018_01.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_01
- aoc_2018_02:
-   main: aoc_2018_02.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_02
- aoc_2018_03:
-   main: aoc_2018_03.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_03
- aoc_2018_04:
-   main: aoc_2018_04.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_04
- aoc_2018_05:
-   main: aoc_2018_05.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_05
- aoc_2018_06:
-   main: aoc_2018_06.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_06
- aoc_2018_07:
-   main: aoc_2018_07.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_07
- aoc_2018_08:
-   main: aoc_2018_08.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_08
- aoc_2018_09:
-   main: aoc_2018_09.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_09
- aoc_2018_10:
-   main: aoc_2018_10.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_10
- aoc_2018_11:
-   main: aoc_2018_11.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_11
- aoc_2018_12:
-   main: aoc_2018_12.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_12
- aoc_2018_13:
-   main: aoc_2018_13.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_13
- aoc_2018_14:
-   main: aoc_2018_14.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_14
- aoc_2018_15:
-   main: aoc_2018_15.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_15
- aoc_2018_16:
-   main: aoc_2018_16.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_16
- aoc_2018_17:
-   main: aoc_2018_17.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_17
- aoc_2018_18:
-   main: aoc_2018_18.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_18
- aoc_2018_19:
-   main: aoc_2018_19.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_19
- aoc_2018_20:
-   main: aoc_2018_20.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_20
-# aoc_2018_21:
-#   main: aoc_2018_21.hs
-#   ghc-options: -Wall -O2 -main-is AOC_2018_21
- aoc_2018_22:
-   main: aoc_2018_22.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_22
- aoc_2018_23:
-   main: aoc_2018_23.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_23
- aoc_2018_24:
-   main: aoc_2018_24.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_24
- aoc_2018_25:
-   main: aoc_2018_25.hs
-   ghc-options: -Wall -O2 -main-is AOC_2018_25
+ aoc_2015_01:
+   main: aoc_2015_01.hs
+   ghc-options: -main-is AOC_2015_01
+#  aoc_2018_01:
+#    main: aoc_2018_01.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_01
+#  aoc_2018_02:
+#    main: aoc_2018_02.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_02
+#  aoc_2018_03:
+#    main: aoc_2018_03.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_03
+#  aoc_2018_04:
+#    main: aoc_2018_04.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_04
+#  aoc_2018_05:
+#    main: aoc_2018_05.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_05
+#  aoc_2018_06:
+#    main: aoc_2018_06.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_06
+#  aoc_2018_07:
+#    main: aoc_2018_07.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_07
+#  aoc_2018_08:
+#    main: aoc_2018_08.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_08
+#  aoc_2018_09:
+#    main: aoc_2018_09.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_09
+#  aoc_2018_10:
+#    main: aoc_2018_10.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_10
+#  aoc_2018_11:
+#    main: aoc_2018_11.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_11
+#  aoc_2018_12:
+#    main: aoc_2018_12.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_12
+#  aoc_2018_13:
+#    main: aoc_2018_13.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_13
+#  aoc_2018_14:
+#    main: aoc_2018_14.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_14
+#  aoc_2018_15:
+#    main: aoc_2018_15.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_15
+#  aoc_2018_16:
+#    main: aoc_2018_16.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_16
+#  aoc_2018_17:
+#    main: aoc_2018_17.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_17
+#  aoc_2018_18:
+#    main: aoc_2018_18.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_18
+#  aoc_2018_19:
+#    main: aoc_2018_19.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_19
+#  aoc_2018_20:
+#    main: aoc_2018_20.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_20
+# # aoc_2018_21:
+# #   main: aoc_2018_21.hs
+# #   ghc-options: -Wall -O2 -main-is AOC_2018_21
+#  aoc_2018_22:
+#    main: aoc_2018_22.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_22
+#  aoc_2018_23:
+#    main: aoc_2018_23.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_23
+#  aoc_2018_24:
+#    main: aoc_2018_24.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_24
+#  aoc_2018_25:
+#    main: aoc_2018_25.hs
+#    ghc-options: -Wall -O2 -main-is AOC_2018_25
 
 
 tests:
