@@ -16,12 +16,13 @@ description:         Please see the README on GitHub at <https://github.com/jw12
 
 dependencies:
 - base >= 4.7 && < 5
+- text
+- megaparsec
 #- containers
 #- array
 #- attoparsec
 #- bytestring
-- doctest
-#- text
+# - doctest
 #- monad-loops
 
 ghc-options:
@@ -93,9 +94,14 @@ executables:
   - aoc-code
 
 tests:
-  doctest:
-    main:               doctest.hs
-    source-dirs:        hs-test
+  test:
+    main:               "Driver.hs"
+    source-dirs:        "hs-test"
+    dependencies:
+    - aoc-code
+    - tasty
+    - tasty-discover
+    - tasty-hunit
 #  aoc_2018_01:
 #    main: aoc_2018_01.hs
 #    ghc-options: -Wall -O2 -main-is AOC_2018_01

@@ -8,14 +8,17 @@
 -}
 module Main (main) where
 
-import Control.Monad (unless)
+import Data.Text (Text)
+import Data.Text qualified as T (pack)
+import Data.Text.IO qualified as TIO (putStrLn, readFile)
 import System.Environment (getArgs, getProgName)
 import System.IO (hPutStrLn, stderr)
 
-import AOC_2015_01 qualified (solve)
+import AOC_2015_01 qualified (solvers)
+import AOC_2015_02 qualified (solvers)
 
 -- Given valid command line arguments, return input file name and appropriate solve function
-parseProblem :: [String] -> Maybe (String, String -> (String, String))
+parseProblem :: [String] -> Maybe (String, (Text -> Text, Text -> Text))
 parseProblem args = case args of
     [year, problem] ->
         let year' :: Int = read year
@@ -23,23 +26,27 @@ parseProblem args = case args of
             valid :: Bool = year' >= 2015 && problem' >= 1 && problem' <= 25
             problem'' :: String = if problem' < 10 then '0' : show problem' else show problem'
             fn = "../aoc-data/input/" ++ year ++ "_" ++ problem'' ++ ".txt"
-            maybeSolve = case (year', problem') of
-                (2015, 1) -> Just AOC_2015_01.solve
+            maybeSolvers = case (year', problem') of
+                (2015, 1) -> Just AOC_2015_01.solvers
+                (2015, 2) -> Just AOC_2015_02.solvers
                 _ -> Nothing
-         in case (valid, maybeSolve) of
-                (True, Just solve) -> Just (fn, solve)
+         in case (valid, maybeSolvers) of
+                (True, Just solvers) -> Just (fn, addShow solvers)
                 _ -> Nothing
     _ -> Nothing
+
+
+addShow :: (Show a, Show b) => (Text -> a, Text -> b) -> (Text -> Text, Text -> Text)
+addShow (f, g) = (T.pack . show . f, T.pack . show . g)
 
 main :: IO ()
 main = do
     args <- getArgs
     case parseProblem args of
-        Just (filename, solve) -> do
-            input <- readFile filename
-            let (output1, output2) = solve input
-            putStrLn output1
-            unless (null output2) $ putStrLn output2
+        Just (filename, (solveA, solveB)) -> do
+            input <- TIO.readFile filename
+            TIO.putStrLn $ solveA input
+            TIO.putStrLn $ solveB input
         _ -> do
             progName <- getProgName
             hPutStrLn stderr $ "Usage: " ++ progName ++ " year problem"

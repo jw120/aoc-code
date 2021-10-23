@@ -5,6 +5,10 @@
         "bytestring",
         "doctest",
         "foldl",
+        "hunit",
         "scanl"
+    ],
+    "cSpell.ignoreWords": [
+        "Wcompat"
     ]
 }

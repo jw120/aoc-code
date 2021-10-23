@@ -1,24 +1,27 @@
-module AOC_2015_01 (solve) where
-
-import Data.List (foldl', scanl')
-
-countFloors :: String -> Int
-countFloors = foldl' move 0
-
-{- | Find first visit to basement
-
- >>> firstVisit ")"
- 1
- >>> firstVisit "()())"
- 5
+{- |
+ Module      : AOC_2015_01
+ Description : Advent of code 2015 day 1
+ Copyright   : (c) Joe Watson 2021
+ License     : GPL-3
+ Maintainer  : jw1200@gmail.com
+ Stability   : experimental
 -}
-firstVisit :: String -> Int
-firstVisit = length . takeWhile (/= (- 1)) . scanl' move 0
+module AOC_2015_01 (solvers, firstVisit) where
+
+import Data.List (scanl')
+import Data.Text (Text)
+import Data.Text qualified as T (foldl', unpack)
+
+solvers :: (Text -> Int, Text -> Int)
+solvers = (countFloors, firstVisit)
+
+countFloors :: Text -> Int
+countFloors = T.foldl' move 0
+
+firstVisit :: Text -> Int
+firstVisit = length . takeWhile (/= (- 1)) . scanl' move 0 . T.unpack
 
 move :: Int -> Char -> Int
 move i '(' = i + 1
 move i ')' = i - 1
 move _ c = error $ "Unexpected character" ++ [c]
-
-solve :: String -> (String, String)
-solve s = (show $ countFloors s, show $ firstVisit s)
