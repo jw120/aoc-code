@@ -41,6 +41,13 @@ Assumes `../aoc-data` (which is a private repo) holds personalized input data an
 - Python 2020 - Avoid duplication in Day 17
 - R etc (add from aoc folder)
 
+## Haskell reboot in 2021
+
+Started on 2015 problems. Now have one executable and have each day's provide a solver function
+
+stack run 2015 1
+
+
 ## Haskell setup
 
 Uses stack

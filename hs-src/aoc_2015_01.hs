@@ -1,4 +1,4 @@
-module AOC_2015_01 where
+module AOC_2015_01 (solve) where
 
 import Data.List (foldl', scanl')
 
@@ -20,8 +20,5 @@ move i '(' = i + 1
 move i ')' = i - 1
 move _ c = error $ "Unexpected character" ++ [c]
 
-main :: IO ()
-main = do
-    instructions <- getContents
-    print $ countFloors instructions
-    print $ firstVisit instructions
+solve :: String -> (String, String)
+solve s = (show $ countFloors s, show $ firstVisit s)

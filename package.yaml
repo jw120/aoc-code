@@ -4,9 +4,10 @@ github:              "jw1200/aoc-code"
 license:             GPL-3.0-or-later
 author:              "Joe Watson"
 maintainer:          "joe_watson@mail.com"
-copyright:           "2020 Joe Watson"
+copyright:           "2021 Joe Watson"
 
-source-dirs: haskell
+library:
+  source-dirs: hs-src
 
 extra-source-files:
 - README.md
@@ -85,9 +86,16 @@ default-extensions:
   TypeSynonymInstances
 
 executables:
- aoc_2015_01:
-   main: aoc_2015_01.hs
-   ghc-options: -main-is AOC_2015_01
+ aoc-exe:
+  main:                Main.hs
+  source-dirs:         hs-app
+  dependencies:
+  - aoc-code
+
+tests:
+  doctest:
+    main:               doctest.hs
+    source-dirs:        hs-test
 #  aoc_2018_01:
 #    main: aoc_2018_01.hs
 #    ghc-options: -Wall -O2 -main-is AOC_2018_01
@@ -165,6 +173,4 @@ executables:
 #    ghc-options: -Wall -O2 -main-is AOC_2018_25
 
 
-tests:
-  doctest:
-    main:               doctest.hs
+
