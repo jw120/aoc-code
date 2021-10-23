@@ -101,7 +101,10 @@ tests:
     - aoc-code
     - tasty
     - tasty-discover
+    - tasty-golden
     - tasty-hunit
+    - bytestring
+    - binary
 #  aoc_2018_01:
 #    main: aoc_2018_01.hs
 #    ghc-options: -Wall -O2 -main-is AOC_2018_01

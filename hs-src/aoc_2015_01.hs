@@ -10,10 +10,10 @@ module AOC_2015_01 (solvers, firstVisit) where
 
 import Data.List (scanl')
 import Data.Text (Text)
-import Data.Text qualified as T (foldl', unpack)
+import Data.Text qualified as T (foldl', pack, unpack)
 
-solvers :: (Text -> Int, Text -> Int)
-solvers = (countFloors, firstVisit)
+solvers :: (Text -> Text, Text -> Text)
+solvers = (T.pack . show . countFloors, T.pack . show . firstVisit)
 
 countFloors :: Text -> Int
 countFloors = T.foldl' move 0

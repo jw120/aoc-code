@@ -8,3 +8,4 @@ out/
 aoc-code.cabal
 stack.yaml
 stack.yaml.lock
+.vs_code/*.log

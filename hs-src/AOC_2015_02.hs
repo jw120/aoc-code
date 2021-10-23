@@ -9,15 +9,18 @@
 module AOC_2015_02 (solvers, paper, ribbon, box) where
 
 import Data.Text (Text)
-import Data.Text qualified as T (lines)
+import Data.Text qualified as T (lines, pack)
 import Text.Megaparsec (eof)
 import Text.Megaparsec.Char (char)
 import Text.Megaparsec.Char.Lexer qualified as ML (decimal)
 
 import Utilities (Parser, parseOrStop)
 
-solvers :: (Text -> Int, Text -> Int)
-solvers = (sum . map (paper . box) . T.lines, sum . map (ribbon . box) . T.lines)
+solvers :: (Text -> Text, Text -> Text)
+solvers =
+    ( T.pack . show . sum . map (paper . box) . T.lines
+    , T.pack . show . sum . map (ribbon . box) . T.lines
+    )
 
 box :: Text -> (Int, Int, Int)
 box = parseOrStop pBox
