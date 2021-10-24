@@ -1,0 +1,8 @@
+cradle:
+  stack:
+    - path: "./hs-src/"
+      component: "aoc-code"
+    - path: "./hs-app/"
+      component: "aoc-code:exe:aoc-exe"
+    - path: "./hs-test/"
+      component: "aoc-code:test:test"

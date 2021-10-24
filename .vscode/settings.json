@@ -5,10 +5,27 @@
         "bytestring",
         "doctest",
         "foldl",
+        "GADT",
+        "Generalised",
+        "ghci",
         "hunit",
-        "scanl"
+        "Monomorphism",
+        "Newtype",
+        "runhaskell",
+        "scanl",
+        "Sigs",
+        "vals",
+        "venv"
     ],
     "cSpell.ignoreWords": [
-        "Wcompat"
+        "Wcompat",
+        "Widentities",
+        "Wincomplete",
+        "Wmissing",
+        "Wpartial",
+        "Wredundant",
+        "ckczppom",
+        "fwarn",
+        "pqrstuv"
     ]
 }

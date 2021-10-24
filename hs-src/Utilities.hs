@@ -9,6 +9,7 @@
 module Utilities (Parser, parseOrStop, applySolvers) where
 
 import Data.Text (Text)
+import Data.Text qualified as T (strip)
 import Data.Text.IO qualified as TIO (readFile)
 import Data.Void (Void)
 import Text.Megaparsec (Parsec, errorBundlePretty, parse)
@@ -25,5 +26,5 @@ parseOrStop p s = case parse p "" s of
 applySolvers :: (Text -> Text, Text -> Text) -> String -> IO Text
 applySolvers (solveA, solveB) name = do
     let inputFile = "../aoc-data/input/" ++ name ++ ".txt"
-    input <- TIO.readFile inputFile
+    input <- T.strip <$> TIO.readFile inputFile
     return $ solveA input <> "\n" <> solveB input <> "\n"

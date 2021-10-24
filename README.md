@@ -47,6 +47,9 @@ Started on 2015 problems. Now have one executable and have each day's provide a 
 
 stack run 2015 1
 
+Stuck on:
+* 2015-04 - MD5s - find a non-naive solution that is faster
+
 
 ## Haskell setup
 
