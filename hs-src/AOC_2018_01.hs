@@ -1,6 +1,6 @@
 {- |
  Module      : AOC_2018_01
- Description : Advent of code 2011 day 1
+ Description : Advent of code 2018 day 1
  Copyright   : (c) Joe Watson 2021
  License     : GPL-3
  Maintainer  : jw1200@gmail.com

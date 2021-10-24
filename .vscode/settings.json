@@ -4,6 +4,7 @@
         "attoparsec",
         "bytestring",
         "doctest",
+        "elems",
         "foldl",
         "GADT",
         "Generalised",

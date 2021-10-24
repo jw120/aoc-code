@@ -43,7 +43,8 @@ Assumes `../aoc-data` (which is a private repo) holds personalized input data an
 
 ## Haskell reboot in 2021
 
-Started on 2015 problems. Now have one executable and have each day's provide a solver function
+Started on 2015 problems. Now have one executable and have each day's provide a solver function. Uses tasty for testing
+which includes Golden file testing that creates and checks ../aoc-data/good files
 
 stack run 2015 1
 stack test --test-arguments=--pattern=2018

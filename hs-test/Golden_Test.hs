@@ -12,6 +12,7 @@ import AOC_2015_02 (solvers)
 import AOC_2015_03 (solvers)
 import AOC_2015_04 (solvers)
 import AOC_2018_01 (solvers)
+import AOC_2018_02 (solvers)
 import Utilities (applySolvers)
 
 problems :: [((Text -> Text, Text -> Text), String)]
@@ -21,6 +22,7 @@ problems =
     , (AOC_2015_03.solvers, "2015_03")
     , (AOC_2015_04.solvers, "2015_04")
     , (AOC_2018_01.solvers, "2018_01")
+    , (AOC_2018_02.solvers, "2018_02")
     ]
 
 problemToTest :: ((Text -> Text, Text -> Text), String) -> TestTree
