@@ -29,9 +29,8 @@ niceOne t = numVowels >= 3 && hasDoubleLetter && not hasBadPair
             || "xy" `T.isInfixOf` t
 
 niceTwo :: Text -> Bool
-niceTwo t = repeats >= 1 && hasRepeatedBetween
+niceTwo t = not (null repeats) && hasRepeatedBetween
   where
+    pairs = zip [(0 :: Int) ..] $ T.zip t (T.drop 1 t)
+    repeats = [(i, j) | (i, (a, b)) <- pairs, (j, (c, d)) <- pairs, j > i + 1, a == c, b == d]
     hasRepeatedBetween = any (uncurry (==)) $ T.zip t (T.drop 2 t)
-    pairs :: [(Int, (Char, Char))]
-    pairs = zip [0 ..] $ T.zip t (T.drop 1 t)
-    repeats :: Int = sum [1 | (i, (a, b)) <- pairs, (j, (c, d)) <- pairs, j > i + 1, a == c, b == d]

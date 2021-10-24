@@ -20,7 +20,7 @@ dependencies:
 - megaparsec
 - containers
 - pureMD5
-#- array
+- array
 #- attoparsec
 - bytestring
 # - doctest

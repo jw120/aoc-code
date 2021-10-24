@@ -49,8 +49,9 @@ which includes Golden file testing that creates and checks ../aoc-data/good file
 stack run 2015 1
 stack test --test-arguments=--pattern=2018
 
-Stuck on:
-* 2015-04 - MD5s - find a non-naive solution that is faster
+To improve
+* 2015-04 (17s) - MD5s - find a non-naive solution that is faster
+* 2015-06 (18s) - Array updates - faster
 
 
 ## Haskell setup

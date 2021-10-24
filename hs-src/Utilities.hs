@@ -6,7 +6,7 @@
  Maintainer  : jw1200@gmail.com
  Stability   : experimental
 -}
-module Utilities (Parser, parseOrStop, applySolvers, pSignedInt) where
+module Utilities (Parser, parseOrStop, applySolvers, pSignedInt, pUnsignedInt) where
 
 import Control.Applicative qualified as A (empty)
 import Data.Text (Text)
@@ -25,12 +25,16 @@ parseOrStop p s = case M.parse (p <* M.eof) "" s of
     Left bundle -> error (M.errorBundlePretty bundle)
     Right x -> x
 
+spaceConsumer :: Parser ()
+spaceConsumer = ML.space MC.space1 A.empty A.empty
+
+-- | Megaparsec parser for an signed integer
+pUnsignedInt :: Parser Int
+pUnsignedInt = ML.lexeme spaceConsumer ML.decimal
+
 -- | Megaparsec parser for a signed integer
 pSignedInt :: Parser Int
-pSignedInt = ML.signed spaceConsumer integer
-  where
-    spaceConsumer = ML.space MC.space1 A.empty A.empty
-    integer = ML.lexeme spaceConsumer ML.decimal
+pSignedInt = ML.signed spaceConsumer pUnsignedInt
 
 -- | Apply the solving functions to the given file name
 applySolvers :: (Text -> Text, Text -> Text) -> String -> IO Text
