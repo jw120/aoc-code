@@ -18,7 +18,7 @@ Assumes `../aoc-data` (which is a private repo) holds personalized input data an
 * 2020 my first time completing. No major problems.
 
     + Done without hints except looking up the Chinese Remainder Theorem (Day 13),
-    + Day 20 was the most work - lot of fiddly proessing to fit the images together, but the sea monster is a nice pay off
+    + Day 20 was the most work - lot of fiddly processing to fit the images together, but the sea monster is a nice pay off
     + Briefly stuck finding a fast method for day 23 (crab cups), saw on reddit the hint to use another data structure
     + Lots of Life
 
@@ -30,7 +30,7 @@ Assumes `../aoc-data` (which is a private repo) holds personalized input data an
 * 2018
 
     + Going back to these in Haskell in 2020/21 after doing 2019/20 in Python - clear that Python is a better fit for smaller programs were iterative improvement works, Haskell takes more effort to do easy things
-    + Day 17 (water pouring) not finished in 2018, solved in 2020 after briefly looking at reddit discussion and seeing I had the wrong definition of the extent of the map for couting the final score.
+    + Day 17 (water pouring) not finished in 2018, solved in 2020 after briefly looking at reddit discussion and seeing I had the wrong definition of the extent of the map for counting the final score.
 
 ## TODO
 
@@ -46,6 +46,7 @@ Assumes `../aoc-data` (which is a private repo) holds personalized input data an
 Started on 2015 problems. Now have one executable and have each day's provide a solver function
 
 stack run 2015 1
+stack test --test-arguments=--pattern=2018
 
 Stuck on:
 * 2015-04 - MD5s - find a non-naive solution that is faster
@@ -55,7 +56,7 @@ Stuck on:
 
 Uses stack
 
-Built with the "Haskell" VS Code extenstion that uses the Haskell Language Server
+Built with the "Haskell" VS Code extension that uses the Haskell Language Server
 
 stack build aoc-code:aoc_2018_12
 stack exec aoc_2018_17 <../aoc-data/input/2018_17.txt
@@ -75,7 +76,7 @@ of python)
 python3 -m venv .venv
 ```
 
-To use the environnment for the current shell session. This adpots the version of python used
+To use the environment for the current shell session. This adopts the version of python used
 when setting up the environment (and aliases `python` and `pip` to that version) and redirects
 them to use `.venv/lib` for python libraries
 
@@ -89,6 +90,6 @@ To install development packages into the local environment
 pip install -r requirements.txt
 ```
 
-Editting done with VS Code and its built-in extension
+Editing done with VS Code and its built-in extension
 
 
