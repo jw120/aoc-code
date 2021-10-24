@@ -69,5 +69,5 @@ hasOneDiff = hasOneDiff' False
         | -- Fail if find second difference
           otherwise =
             hasOneDiff' True xs ys -- Keep going with first difference
-    hasOneDiff' found [] [] = found -- Succed if only one difference and both at end
+    hasOneDiff' found [] [] = found -- Succeed if only one difference and both at end
     hasOneDiff' _ _ _ = False -- Fail if mismatched lists
