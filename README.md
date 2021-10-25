@@ -53,6 +53,8 @@ To improve
 * 2015-04 (17s) - MD5s - find a non-naive solution that is faster
 * 2015-06 (18s) - Array updates - faster
 
+To Do - standardize imports (Map., Set., <|> from utilities?)
+
 
 ## Haskell setup
 

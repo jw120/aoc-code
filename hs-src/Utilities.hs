@@ -6,7 +6,15 @@
  Maintainer  : jw1200@gmail.com
  Stability   : experimental
 -}
-module Utilities (Parser, parseOrStop, applySolvers, pSignedInt, pUnsignedInt) where
+module Utilities (
+    Parser,
+    Utilities.lexeme,
+    parseOrStop,
+    applySolvers,
+    pSignedInt,
+    pUnsignedInt,
+    pSymbol,
+) where
 
 import Control.Applicative qualified as A (empty)
 import Data.Text (Text)
@@ -15,7 +23,7 @@ import Data.Text.IO qualified as TIO (readFile)
 import Data.Void (Void)
 import Text.Megaparsec qualified as M (Parsec, eof, errorBundlePretty, parse)
 import Text.Megaparsec.Char as MC (space1)
-import Text.Megaparsec.Char.Lexer as ML (decimal, lexeme, signed, space)
+import Text.Megaparsec.Char.Lexer as ML (decimal, lexeme, signed, space, symbol)
 
 type Parser = M.Parsec Void Text
 
@@ -28,6 +36,12 @@ parseOrStop p s = case M.parse (p <* M.eof) "" s of
 spaceConsumer :: Parser ()
 spaceConsumer = ML.space MC.space1 A.empty A.empty
 
+-- | Convert a parser so it consumes any trailing space
+lexeme :: Parser x -> Parser x
+lexeme = ML.lexeme spaceConsumer
+
+-- Parsers follow megaparsec convention and consume trailing space
+
 -- | Megaparsec parser for an signed integer
 pUnsignedInt :: Parser Int
 pUnsignedInt = ML.lexeme spaceConsumer ML.decimal
@@ -35,6 +49,10 @@ pUnsignedInt = ML.lexeme spaceConsumer ML.decimal
 -- | Megaparsec parser for a signed integer
 pSignedInt :: Parser Int
 pSignedInt = ML.signed spaceConsumer pUnsignedInt
+
+-- | Megaparsec parser for a symbol (a verbatim string)
+pSymbol :: Text -> Parser Text
+pSymbol = ML.symbol spaceConsumer
 
 -- | Apply the solving functions to the given file name
 applySolvers :: (Text -> Text, Text -> Text) -> String -> IO Text
