@@ -10,8 +10,7 @@ module AOC_2015_02 (solvers, paper, ribbon, box) where
 
 import Data.Text (Text)
 import Data.Text qualified as T (lines, pack)
-import Text.Megaparsec (eof)
-import Text.Megaparsec.Char (char)
+import Text.Megaparsec.Char qualified as MC (char)
 import Text.Megaparsec.Char.Lexer qualified as ML (decimal)
 
 import Utilities (Parser, parseOrStop)
@@ -28,11 +27,10 @@ box = parseOrStop pBox
 pBox :: Parser (Int, Int, Int)
 pBox = do
     x <- ML.decimal
-    _ <- char 'x'
+    _ <- MC.char 'x'
     y <- ML.decimal
-    _ <- char 'x'
+    _ <- MC.char 'x'
     z <- ML.decimal
-    _ <- eof
     return $ sortTriple (x, y, z)
 
 sortTriple :: (Int, Int, Int) -> (Int, Int, Int)

@@ -8,7 +8,7 @@
 -}
 module AOC_2015_01 (solvers, firstVisit) where
 
-import Data.List (scanl')
+import Data.List qualified as L (scanl')
 import Data.Text (Text)
 import Data.Text qualified as T (foldl', pack, unpack)
 
@@ -19,7 +19,7 @@ countFloors :: Text -> Int
 countFloors = T.foldl' move 0
 
 firstVisit :: Text -> Int
-firstVisit = length . takeWhile (/= (- 1)) . scanl' move 0 . T.unpack
+firstVisit = length . takeWhile (/= (- 1)) . L.scanl' move 0 . T.unpack
 
 move :: Int -> Char -> Int
 move i '(' = i + 1

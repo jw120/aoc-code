@@ -8,7 +8,7 @@
 -}
 module AOC_2018_02 (solvers) where
 
-import Data.List (foldl')
+import Data.List qualified as L (foldl')
 import Data.Map (Map)
 import Data.Map qualified as Map
 import Data.Text (Text)
@@ -25,7 +25,7 @@ solvers =
 checkSum :: [String] -> Int
 checkSum ids = count2 * count3
   where
-    (count2, count3) = foldl' accPair (0, 0) $ map hasReps ids
+    (count2, count3) = L.foldl' accPair (0, 0) $ map hasReps ids
     accPair :: (Int, Int) -> (Bool, Bool) -> (Int, Int)
     accPair (acc1, acc2) (x1, x2) =
         (acc1 + if x1 then 1 else 0, acc2 + if x2 then 1 else 0)
@@ -38,7 +38,7 @@ hasReps s = (2 `elem` counts, 3 `elem` counts)
 
 -- | Build a map of the counts of each element of the list
 buildCountMap :: Ord k => [k] -> Map k Int
-buildCountMap = foldl' addCount Map.empty
+buildCountMap = L.foldl' addCount Map.empty
   where
     addCount m x = Map.insertWith (+) x 1 m
 

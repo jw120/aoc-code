@@ -13,7 +13,7 @@ import Data.Digest.Pure.MD5 qualified as M (md5)
 import Data.List qualified as L (replicate)
 import Data.Text (Text)
 import Data.Text qualified as T (pack)
-import Data.Text.Encoding (encodeUtf8)
+import Data.Text.Encoding qualified as TE (encodeUtf8)
 
 solvers :: (Text -> Text, Text -> Text)
 solvers =
@@ -29,4 +29,4 @@ firstZeros n prefix = go 1
         | otherwise = go (x + 1)
       where
         target = L.replicate n '0'
-        x' = show . M.md5 . LBS.fromStrict $ encodeUtf8 (prefix <> T.pack (show x))
+        x' = show . M.md5 . LBS.fromStrict $ TE.encodeUtf8 (prefix <> T.pack (show x))

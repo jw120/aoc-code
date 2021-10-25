@@ -10,14 +10,12 @@ module AOC_2015_06 (solvers, instruction, apply1, lights1, start1) where
 
 import Data.Array (Array)
 import Data.Array qualified as A (elems, listArray, range, (!), (//))
-import Data.Functor (($>))
 import Data.List qualified as L (foldl')
 import Data.Text (Text)
 import Data.Text qualified as T (lines, pack)
-import Text.Megaparsec ((<|>))
 import Text.Megaparsec.Char qualified as MC (char, string)
 
-import Utilities (Parser, pUnsignedInt, parseOrStop)
+import Utilities (Parser, pUnsignedInt, parseOrStop, ($>), (<|>))
 
 solvers :: (Text -> Text, Text -> Text)
 solvers =

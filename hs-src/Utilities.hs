@@ -14,9 +14,13 @@ module Utilities (
     pSignedInt,
     pUnsignedInt,
     pSymbol,
+    (<|>),
+    ($>),
 ) where
 
+import Control.Applicative ((<|>))
 import Control.Applicative qualified as A (empty)
+import Data.Functor (($>))
 import Data.Text (Text)
 import Data.Text qualified as T (strip)
 import Data.Text.IO qualified as TIO (readFile)

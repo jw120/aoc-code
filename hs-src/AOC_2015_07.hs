@@ -8,19 +8,17 @@
 -}
 module AOC_2015_07 (solvers, booklet, value) where
 
-import Data.Bits (complement, shift, (.&.), (.|.))
-import Data.Functor (($>))
+import Data.Bits qualified as Bits (complement, shift, (.&.), (.|.))
 import Data.List qualified as L (foldl')
 import Data.Map (Map)
 import Data.Map qualified as Map (empty, insert, (!))
 import Data.Text (Text)
 import Data.Text qualified as T (lines, pack)
 import Data.Word (Word16)
-import Text.Megaparsec ((<|>))
 import Text.Megaparsec qualified as M (some, try)
 import Text.Megaparsec.Char qualified as MC (lowerChar)
 
-import Utilities (lexeme, pSymbol, pUnsignedInt, parseOrStop)
+import Utilities (lexeme, pSymbol, pUnsignedInt, parseOrStop, ($>), (<|>))
 
 solvers :: (Text -> Text, Text -> Text)
 solvers =
@@ -95,28 +93,28 @@ value b wire = case b Map.! wire of
     And wire1 wire2 ->
         let (b1, value1) = value b wire1
             (b2, value2) = value b1 wire2
-            val = value1 .&. value2
+            val = value1 Bits..&. value2
          in (Map.insert wire (Value val) b2, val)
     AndLit x wireIn ->
         let (b', valueIn) = value b wireIn
-            val = x .&. valueIn
+            val = x Bits..&. valueIn
          in (Map.insert wire (Value val) b', val)
     Or wire1 wire2 ->
         let (b1, value1) = value b wire1
             (b2, value2) = value b1 wire2
-            val = value1 .|. value2
+            val = value1 Bits..|. value2
          in (Map.insert wire (Value val) b2, val)
     LShift wireIn n ->
         let (b', valueIn) = value b wireIn
-            val = valueIn `shift` n
+            val = valueIn `Bits.shift` n
          in (Map.insert wire (Value val) b', val)
     RShift wireIn n ->
         let (b', valueIn) = value b wireIn
-            val = valueIn `shift` (- n)
+            val = valueIn `Bits.shift` (- n)
          in (Map.insert wire (Value val) b', val)
     Not wireIn ->
         let (b', valueIn) = value b wireIn
-            val = complement valueIn
+            val = Bits.complement valueIn
          in (Map.insert wire (Value val) b', val)
     Direct wireIn ->
         let (b', valueIn) = value b wireIn
