@@ -17,6 +17,7 @@
         "runhaskell",
         "scanl",
         "Sigs",
+        "unlines",
         "vals",
         "venv"
     ],

@@ -12,7 +12,7 @@ import Data.Bits (complement, shift, (.&.), (.|.))
 import Data.Functor (($>))
 import Data.List qualified as L (foldl')
 import Data.Map (Map)
-import Data.Map qualified as Map (empty, insert, lookup)
+import Data.Map qualified as Map (empty, insert, (!))
 import Data.Text (Text)
 import Data.Text qualified as T (lines, pack)
 import Data.Word (Word16)
@@ -24,84 +24,100 @@ import Utilities (lexeme, pSymbol, pUnsignedInt, parseOrStop)
 
 solvers :: (Text -> Text, Text -> Text)
 solvers =
-    ( T.pack . show . (`value` "a") . booklet . T.lines
-    , const "NYI"
+    ( T.pack . show . snd . partA
+    , T.pack . show . snd . partB
     )
 
+partA :: Text -> (Booklet, Word16)
+partA = (`value` "a") . booklet . T.lines
+
+partB :: Text -> (Booklet, Word16)
+partB t = value bBooklet "a"
+  where
+    aValue = snd $ partA t
+    freshBooklet = booklet $ T.lines t
+    bBooklet = Map.insert "b" (Value aValue) freshBooklet
+
 type Wire = Text
+
+type Booklet = Map Wire Connection
 
 data Connection
     = Value Word16
     | And Wire Wire
-    | And' Word16 Wire
+    | AndLit Word16 Wire -- AND gate with a literal input
     | Or Wire Wire
     | LShift Wire Int
     | RShift Wire Int
     | Not Wire
     | Direct Wire
 
-type Booklet = Map Wire Connection
-
 booklet :: [Text] -> Booklet
-booklet = L.foldl' (\m (w, c) -> Map.insert w c m) Map.empty . map instruction
+booklet = L.foldl' (\m (c, w) -> Map.insert w c m) Map.empty . map instruction
 
-instruction :: Text -> (Wire, Connection)
+instruction :: Text -> (Connection, Wire)
 instruction = parseOrStop pInstruction
   where
     pInstruction =
         M.try pDirect
             <|> M.try pBinary
-            <|> M.try pBinary'
+            <|> M.try pAndLit
             <|> M.try pShift
             <|> M.try pUnary
             <|> pValue
     pWire = lexeme (T.pack <$> M.some MC.lowerChar)
-    pValue = do
-        input <- fromIntegral <$> pUnsignedInt
-        _ <- pSymbol "->"
-        output <- pWire
-        return (output, Value input)
-    pDirect = do
-        input <- pWire
-        _ <- pSymbol "->"
-        output <- pWire
-        return (output, Direct input)
+    pWord16 = fromIntegral <$> pUnsignedInt
+    pOutput = pSymbol "->" *> pWire
+    pValue = (,) <$> (Value <$> pWord16) <*> pOutput
+    pDirect = (,) <$> (Direct <$> pWire) <*> pOutput
+    pUnary = (,) <$> (Not <$> (pSymbol "NOT" *> pWire)) <*> pOutput
     pBinary = do
         input1 <- pWire
         isAnd <- (pSymbol "AND" $> True) <|> (pSymbol "OR" $> False)
         input2 <- pWire
-        _ <- pSymbol "->"
-        output <- pWire
-        return (output, (if isAnd then And else Or) input1 input2)
-    pBinary' = do
-        input1 <- fromIntegral <$> pUnsignedInt
-        _ <- pSymbol "AND"
-        input2 <- pWire
-        _ <- pSymbol "->"
-        output <- pWire
-        return (output, And' input1 input2)
+        output <- pOutput
+        return ((if isAnd then And else Or) input1 input2, output)
+    pAndLit = do
+        input1 <- pWord16
+        input2 <- pSymbol "AND" *> pWire
+        output <- pOutput
+        return (AndLit input1 input2, output)
     pShift = do
         input1 <- pWire
         isLeft <- (pSymbol "LSHIFT" $> True) <|> (pSymbol "RSHIFT" $> False)
         input2 <- pUnsignedInt
-        _ <- pSymbol "->"
-        output <- pWire
-        return (output, (if isLeft then LShift else RShift) input1 input2)
-    pUnary = do
-        _ <- pSymbol "NOT"
-        input <- pWire
-        _ <- pSymbol "->"
-        output <- pWire
-        return (output, Not input)
+        output <- pOutput
+        return ((if isLeft then LShift else RShift) input1 input2, output)
 
-value :: Booklet -> Wire -> Word16
-value b wire = case Map.lookup wire b of
-    Just (Value x) -> x
-    Just (And v1 v2) -> value b v1 .&. value b v2
-    Just (And' x v) -> x .&. value b v
-    Just (Or v1 v2) -> value b v1 .|. value b v2
-    Just (LShift v n) -> value b v `shift` n
-    Just (RShift v n) -> value b v `shift` (- n)
-    Just (Not v) -> complement (value b v)
-    Just (Direct v) -> value b v
-    Nothing -> error "Internal failure"
+value :: Booklet -> Wire -> (Booklet, Word16)
+value b wire = case b Map.! wire of
+    Value x -> (b, x)
+    And wire1 wire2 ->
+        let (b1, value1) = value b wire1
+            (b2, value2) = value b1 wire2
+            val = value1 .&. value2
+         in (Map.insert wire (Value val) b2, val)
+    AndLit x wireIn ->
+        let (b', valueIn) = value b wireIn
+            val = x .&. valueIn
+         in (Map.insert wire (Value val) b', val)
+    Or wire1 wire2 ->
+        let (b1, value1) = value b wire1
+            (b2, value2) = value b1 wire2
+            val = value1 .|. value2
+         in (Map.insert wire (Value val) b2, val)
+    LShift wireIn n ->
+        let (b', valueIn) = value b wireIn
+            val = valueIn `shift` n
+         in (Map.insert wire (Value val) b', val)
+    RShift wireIn n ->
+        let (b', valueIn) = value b wireIn
+            val = valueIn `shift` (- n)
+         in (Map.insert wire (Value val) b', val)
+    Not wireIn ->
+        let (b', valueIn) = value b wireIn
+            val = complement valueIn
+         in (Map.insert wire (Value val) b', val)
+    Direct wireIn ->
+        let (b', valueIn) = value b wireIn
+         in (Map.insert wire (Value valueIn) b', valueIn)

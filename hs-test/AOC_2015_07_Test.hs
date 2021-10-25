@@ -26,7 +26,7 @@ exampleWires = map (\c -> T.pack [c]) "defghixyzq"
 
 unit_2015_07_booklet :: IO ()
 unit_2015_07_booklet =
-    map (value (booklet exampleInput)) exampleWires
+    map (snd . value (booklet exampleInput)) exampleWires
         @?= [ 72
             , 507
             , 492
