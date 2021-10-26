@@ -17,11 +17,11 @@ import Data.Text qualified as T (pack, unpack)
 
 -- import Utilities (Parser, pSymbol, lexeme, pUnsignedInt, parseOrStop, ($>), (<|>))
 
-solvers :: (Text -> Text, Text -> Text)
-solvers =
-    ( T.pack . nextValid . T.unpack
-    , T.pack . nextValid . increment . nextValid . T.unpack
-    )
+solvers :: Text -> (Text, Text)
+solvers t = (T.pack a, T.pack b)
+  where
+    a = nextValid $ T.unpack t
+    b = nextValid $ increment a
 
 increment :: String -> String
 increment = incrementFromEnd 0

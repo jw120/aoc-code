@@ -15,11 +15,13 @@ import Text.Megaparsec.Char.Lexer qualified as ML (decimal)
 
 import Utilities (Parser, parseOrStop)
 
-solvers :: (Text -> Text, Text -> Text)
-solvers =
-    ( T.pack . show . sum . map (paper . box) . T.lines
-    , T.pack . show . sum . map (ribbon . box) . T.lines
+solvers :: Text -> (Text, Text)
+solvers t =
+    ( T.pack . show . sum $ map (paper . box) ls
+    , T.pack . show . sum $ map (ribbon . box) ls
     )
+  where
+    ls = T.lines t
 
 box :: Text -> (Int, Int, Int)
 box = parseOrStop pBox

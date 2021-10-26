@@ -15,10 +15,10 @@ import Data.Text (Text)
 import Data.Text qualified as T (pack)
 import Data.Text.Encoding qualified as TE (encodeUtf8)
 
-solvers :: (Text -> Text, Text -> Text)
-solvers =
-    ( T.pack . show . firstZeros 5
-    , T.pack . show . firstZeros 6
+solvers :: Text -> (Text, Text)
+solvers t =
+    ( T.pack . show $ firstZeros 5 t
+    , T.pack . show $ firstZeros 6 t
     )
 
 firstZeros :: Int -> Text -> Int

@@ -20,20 +20,22 @@ import Text.Megaparsec.Char qualified as MC (lowerChar)
 
 import Utilities (lexeme, pSymbol, pUnsignedInt, parseOrStop, ($>), (<|>))
 
-solvers :: (Text -> Text, Text -> Text)
-solvers =
-    ( T.pack . show . snd . partA
-    , T.pack . show . snd . partB
+solvers :: Text -> (Text, Text)
+solvers t =
+    ( T.pack $ show a
+    , T.pack . show . snd $ partB ls a
     )
-
-partA :: Text -> (Booklet, Word16)
-partA = (`value` "a") . booklet . T.lines
-
-partB :: Text -> (Booklet, Word16)
-partB t = value bBooklet "a"
   where
-    aValue = snd $ partA t
-    freshBooklet = booklet $ T.lines t
+    ls = T.lines t
+    a = snd $ partA ls
+
+partA :: [Text] -> (Booklet, Word16)
+partA = (`value` "a") . booklet
+
+partB :: [Text] -> Word16 -> (Booklet, Word16)
+partB ls aValue = value bBooklet "a"
+  where
+    freshBooklet = booklet ls
     bBooklet = Map.insert "b" (Value aValue) freshBooklet
 
 type Wire = Text

@@ -15,11 +15,13 @@ import Data.Text qualified as T (lines, pack)
 
 import Utilities (pSignedInt, parseOrStop)
 
-solvers :: (Text -> Text, Text -> Text)
-solvers =
-    ( T.pack . show . sum . map num . T.lines
-    , T.pack . show . firstRepeat . scanl (+) 0 . cycle . map num . T.lines
+solvers :: Text -> (Text, Text)
+solvers t =
+    ( T.pack . show $ sum numbers
+    , T.pack . show . firstRepeat . scanl (+) 0 $ cycle numbers
     )
+  where
+    numbers = map num $ T.lines t
 
 -- | Read an integer with a +/-
 num :: Text -> Int

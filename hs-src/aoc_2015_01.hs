@@ -12,8 +12,8 @@ import Data.List qualified as L (scanl')
 import Data.Text (Text)
 import Data.Text qualified as T (foldl', pack, unpack)
 
-solvers :: (Text -> Text, Text -> Text)
-solvers = (T.pack . show . countFloors, T.pack . show . firstVisit)
+solvers :: Text -> (Text, Text)
+solvers t = (T.pack . show $ countFloors t, T.pack . show $ firstVisit t)
 
 countFloors :: Text -> Int
 countFloors = T.foldl' move 0

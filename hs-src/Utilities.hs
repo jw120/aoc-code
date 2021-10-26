@@ -59,8 +59,9 @@ pSymbol :: Text -> Parser Text
 pSymbol = ML.symbol spaceConsumer
 
 -- | Apply the solving functions to the given file name
-applySolvers :: (Text -> Text, Text -> Text) -> String -> IO Text
-applySolvers (solveA, solveB) name = do
+applySolvers :: (Text -> (Text, Text)) -> String -> IO Text
+applySolvers solver name = do
     let inputFile = "../aoc-data/input/" ++ name ++ ".txt"
     input <- T.strip <$> TIO.readFile inputFile
-    return $ solveA input <> "\n" <> solveB input <> "\n"
+    let (outputA, outputB) = solver input
+    return $ outputA <> "\n" <> outputB <> "\n"

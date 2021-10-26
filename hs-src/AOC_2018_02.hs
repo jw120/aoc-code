@@ -14,11 +14,13 @@ import Data.Map qualified as Map
 import Data.Text (Text)
 import Data.Text qualified as T (pack, unpack)
 
-solvers :: (Text -> Text, Text -> Text)
-solvers =
-    ( T.pack . show . checkSum . lines . T.unpack
-    , T.pack . pairWithOneDiff . lines . T.unpack
+solvers :: Text -> (Text, Text)
+solvers t =
+    ( T.pack . show $ checkSum ls
+    , T.pack $ pairWithOneDiff ls
     )
+  where
+    ls = lines $ T.unpack t
 
 -- Part (a) solution. Product of number of ids with a 2-count character and the number
 -- with a 3-count character

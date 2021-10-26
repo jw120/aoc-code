@@ -20,13 +20,15 @@ import Debug.Trace (trace)
 import Text.Megaparsec as M (some)
 import Text.Megaparsec.Char qualified as MC (letterChar, string)
 
-import Utilities (Parser, lexeme, pSymbol, pUnsignedInt, parseOrStop, ($>), (<|>))
+import Utilities (Parser, pUnsignedInt, parseOrStop)
 
-solvers :: (Text -> Text, Text -> Text)
-solvers =
-    ( T.pack . show . partA . T.lines
-    , const "NYI"
+solvers :: Text -> (Text, Text)
+solvers t =
+    ( T.pack . show $ partA ls
+    , "NYI"
     )
+  where
+    ls = T.lines t
 
 partA :: [Text] -> Int
 partA ts = trace (show cities) $ shortestPath (makeDistance distances) cities

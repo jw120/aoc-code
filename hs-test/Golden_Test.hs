@@ -19,8 +19,8 @@ import AOC_2015_08 (solvers)
 -- import AOC_2015_09 (solvers)
 import AOC_2015_10 (solvers)
 import AOC_2015_11 (solvers)
+import AOC_2015_12 (solvers)
 
--- import AOC_2015_12 (solvers)
 -- import AOC_2015_13 (solvers)
 -- import AOC_2015_14 (solvers)
 -- import AOC_2015_15 (solvers)
@@ -39,7 +39,7 @@ import AOC_2018_01 (solvers)
 import AOC_2018_02 (solvers)
 import Utilities (applySolvers)
 
-problems :: [((Text -> Text, Text -> Text), String)]
+problems :: [(Text -> (Text, Text), String)]
 problems =
     [ (AOC_2015_01.solvers, "2015_01")
     , (AOC_2015_02.solvers, "2015_02")
@@ -52,8 +52,8 @@ problems =
     , -- , (AOC_2015_09.solvers, "2015_09")
       (AOC_2015_10.solvers, "2015_10")
     , (AOC_2015_11.solvers, "2015_11")
-    , -- , (AOC_2015_12.solvers, "2015_12")
-      -- , (AOC_2015_13.solvers, "2015_13")
+    , (AOC_2015_12.solvers, "2015_12")
+    , -- , (AOC_2015_13.solvers, "2015_13")
       -- , (AOC_2015_14.solvers, "2015_14")
       -- , (AOC_2015_15.solvers, "2015_15")
       -- , (AOC_2015_16.solvers, "2015_16")
@@ -70,7 +70,7 @@ problems =
     , (AOC_2018_02.solvers, "2018_02")
     ]
 
-problemToTest :: ((Text -> Text, Text -> Text), String) -> TestTree
+problemToTest :: (Text -> (Text, Text), String) -> TestTree
 problemToTest (slv, name) = goldenVsString name goldenFile runTest
   where
     goldenFile = "../aoc-data/good/" ++ name ++ ".txt"

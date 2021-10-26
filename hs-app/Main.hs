@@ -24,8 +24,8 @@ import AOC_2015_08 qualified (solvers)
 import AOC_2015_09 qualified (solvers)
 import AOC_2015_10 qualified (solvers)
 import AOC_2015_11 qualified (solvers)
+import AOC_2015_12 qualified (solvers)
 
--- import AOC_2015_12 qualified (solvers)
 -- import AOC_2015_13 qualified (solvers)
 -- import AOC_2015_14 qualified (solvers)
 -- import AOC_2015_15 qualified (solvers)
@@ -45,7 +45,7 @@ import AOC_2018_02 qualified (solvers)
 import Utilities (applySolvers)
 
 -- Given valid command line arguments, return input file name and appropriate solve function
-parseProblem :: [String] -> Maybe (String, (Text -> Text, Text -> Text))
+parseProblem :: [String] -> Maybe (String, Text -> (Text, Text))
 parseProblem args = case args of
     [year, problem] ->
         let year' :: Int = read year
@@ -65,7 +65,7 @@ parseProblem args = case args of
                 (2015, 9) -> Just AOC_2015_09.solvers
                 (2015, 10) -> Just AOC_2015_10.solvers
                 (2015, 11) -> Just AOC_2015_11.solvers
-                -- (2015, 12) -> Just AOC_2015_12.solvers
+                (2015, 12) -> Just AOC_2015_12.solvers
                 -- (2015, 13) -> Just AOC_2015_13.solvers
                 -- (2015, 14) -> Just AOC_2015_14.solvers
                 -- (2015, 15) -> Just AOC_2015_15.solvers

@@ -17,11 +17,13 @@ import Text.Megaparsec.Char qualified as MC (char, string)
 
 import Utilities (Parser, pUnsignedInt, parseOrStop, ($>), (<|>))
 
-solvers :: (Text -> Text, Text -> Text)
-solvers =
-    ( T.pack . show . lights1 . L.foldl' apply1 start1 . map instruction . T.lines
-    , T.pack . show . lights2 . L.foldl' apply2 start2 . map instruction . T.lines
+solvers :: Text -> (Text, Text)
+solvers t =
+    ( T.pack . show . lights1 $ L.foldl' apply1 start1 ins
+    , T.pack . show . lights2 $ L.foldl' apply2 start2 ins
     )
+  where
+    ins = map instruction $ T.lines t
 
 type Grid1 = Array (Int, Int) Bool
 type Grid2 = Array (Int, Int) Int

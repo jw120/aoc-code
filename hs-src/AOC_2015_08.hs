@@ -18,11 +18,13 @@ import Text.Megaparsec.Char qualified as MC (char, hexDigitChar)
 
 import Utilities (parseOrStop, (<|>))
 
-solvers :: (Text -> Text, Text -> Text)
-solvers =
-    ( T.pack . show . partA . T.lines
-    , T.pack . show . partB . T.lines
+solvers :: Text -> (Text, Text)
+solvers t =
+    ( T.pack . show $ partA ls
+    , T.pack . show $ partB ls
     )
+  where
+    ls = T.lines t
 
 partA :: [Text] -> Int
 partA ts = sum (map T.length ts) - sum (map (T.length . deEscape) ts)

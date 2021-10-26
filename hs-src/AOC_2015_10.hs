@@ -19,11 +19,13 @@ import Data.Text qualified as T (pack, unpack)
 
 -- import Utilities (Parser, pSymbol, lexeme, pUnsignedInt, parseOrStop, ($>), (<|>))
 
-solvers :: (Text -> Text, Text -> Text)
-solvers =
-    ( T.pack . show . length . (!! 40) . iterate lookSay . map (\c -> read [c]) . T.unpack
-    , T.pack . show . length . (!! 50) . iterate lookSay . map (\c -> read [c]) . T.unpack
+solvers :: Text -> (Text, Text)
+solvers t =
+    ( T.pack . show . length $ inp !! 40
+    , T.pack . show . length $ inp !! 50
     )
+  where
+    inp = iterate lookSay . map (\c -> read [c]) $ T.unpack t
 
 lookSay :: [Int] -> [Int]
 lookSay s@(x : _) =

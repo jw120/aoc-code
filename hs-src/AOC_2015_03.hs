@@ -18,11 +18,13 @@ import Text.Megaparsec.Char qualified as MC (char)
 
 import Utilities (parseOrStop, ($>), (<|>))
 
-solvers :: (Text -> Text, Text -> Text)
-solvers =
-    ( T.pack . show . houses . route
-    , T.pack . show . robotHouses . route
+solvers :: Text -> (Text, Text)
+solvers t =
+    ( T.pack . show $ houses r
+    , T.pack . show $ robotHouses r
     )
+  where
+    r = route t
 
 data Move = North | East | South | West
 

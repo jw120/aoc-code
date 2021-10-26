@@ -11,11 +11,13 @@ module AOC_2015_05 (solvers, niceOne, niceTwo) where
 import Data.Text (Text)
 import Data.Text qualified as T (drop, filter, isInfixOf, length, lines, pack, zip)
 
-solvers :: (Text -> Text, Text -> Text)
-solvers =
-    ( T.pack . show . length . filter id . map niceOne . T.lines
-    , T.pack . show . length . filter id . map niceTwo . T.lines
+solvers :: Text -> (Text, Text)
+solvers t =
+    ( T.pack . show . length . filter id $ map niceOne ls
+    , T.pack . show . length . filter id $ map niceTwo ls
     )
+  where
+    ls = T.lines t
 
 niceOne :: Text -> Bool
 niceOne t = numVowels >= 3 && hasDoubleLetter && not hasBadPair
