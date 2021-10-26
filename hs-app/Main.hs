@@ -21,6 +21,19 @@ import AOC_2015_05 qualified (solvers)
 import AOC_2015_06 qualified (solvers)
 import AOC_2015_07 qualified (solvers)
 import AOC_2015_08 qualified (solvers)
+import AOC_2015_09 qualified (solvers)
+import AOC_2015_10 qualified (solvers)
+
+-- import AOC_2015_11 qualified (solvers)
+-- import AOC_2015_12 qualified (solvers)
+-- import AOC_2015_13 qualified (solvers)
+-- import AOC_2015_14 qualified (solvers)
+-- import AOC_2015_15 qualified (solvers)
+-- import AOC_2015_16 qualified (solvers)
+-- import AOC_2015_17 qualified (solvers)
+-- import AOC_2015_18 qualified (solvers)
+-- import AOC_2015_19 qualified (solvers)
+-- import AOC_2015_20 qualified (solvers)
 import AOC_2018_01 qualified (solvers)
 import AOC_2018_02 qualified (solvers)
 import Utilities (applySolvers)
@@ -43,6 +56,18 @@ parseProblem args = case args of
                 (2015, 6) -> Just AOC_2015_06.solvers
                 (2015, 7) -> Just AOC_2015_07.solvers
                 (2015, 8) -> Just AOC_2015_08.solvers
+                (2015, 9) -> Just AOC_2015_09.solvers
+                (2015, 10) -> Just AOC_2015_10.solvers
+                -- (2015, 11) -> Just AOC_2015_11.solvers
+                -- (2015, 12) -> Just AOC_2015_12.solvers
+                -- (2015, 13) -> Just AOC_2015_13.solvers
+                -- (2015, 14) -> Just AOC_2015_14.solvers
+                -- (2015, 15) -> Just AOC_2015_15.solvers
+                -- (2015, 16) -> Just AOC_2015_16.solvers
+                -- (2015, 17) -> Just AOC_2015_17.solvers
+                -- (2015, 18) -> Just AOC_2015_18.solvers
+                -- (2015, 19) -> Just AOC_2015_19.solvers
+                -- (2015, 20) -> Just AOC_2015_20.solvers
                 (2018, 1) -> Just AOC_2018_01.solvers
                 (2018, 2) -> Just AOC_2018_02.solvers
                 _ -> Nothing

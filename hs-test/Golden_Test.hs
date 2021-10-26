@@ -15,6 +15,8 @@ import AOC_2015_05 (solvers)
 import AOC_2015_06 (solvers)
 import AOC_2015_07 (solvers)
 import AOC_2015_08 (solvers)
+
+import AOC_2015_10 (solvers)
 import AOC_2018_01 (solvers)
 import AOC_2018_02 (solvers)
 import Utilities (applySolvers)
@@ -29,6 +31,7 @@ problems =
     , (AOC_2015_06.solvers, "2015_06")
     , (AOC_2015_07.solvers, "2015_07")
     , (AOC_2015_08.solvers, "2015_08")
+    , (AOC_2015_10.solvers, "2015_10")
     , (AOC_2018_01.solvers, "2018_01")
     , (AOC_2018_02.solvers, "2018_02")
     ]
