@@ -42,6 +42,16 @@ import AOC_2015_12 qualified (solvers)
 
 import AOC_2018_01 qualified (solvers)
 import AOC_2018_02 qualified (solvers)
+import AOC_2018_03 qualified (solvers)
+
+-- import AOC_2018_04 qualified (solvers)
+-- import AOC_2018_05 qualified (solvers)
+-- import AOC_2018_06 qualified (solvers)
+-- import AOC_2018_07 qualified (solvers)
+-- import AOC_2018_08 qualified (solvers)
+-- import AOC_2018_09 qualified (solvers)
+-- import AOC_2018_10 qualified (solvers)
+
 import Utilities (applySolvers)
 
 -- Given valid command line arguments, return input file name and appropriate solve function
@@ -78,9 +88,17 @@ parseProblem args = case args of
                 -- (2015, 22) -> Just AOC_2015_20.solvers
                 -- (2015, 23) -> Just AOC_2015_20.solvers
                 -- (2015, 24) -> Just AOC_2015_20.solvers
-                -- (2015, 25) -> Just AOC_2015_20.solverss
+                -- (2015, 25) -> Just AOC_2015_20.solvers
                 (2018, 1) -> Just AOC_2018_01.solvers
                 (2018, 2) -> Just AOC_2018_02.solvers
+                (2018, 3) -> Just AOC_2018_03.solvers
+                -- (2018, 4) -> Just AOC_2018_04.solvers
+                -- (2018, 5) -> Just AOC_2018_05.solvers
+                -- (2018, 6) -> Just AOC_2018_06.solvers
+                -- (2018, 7) -> Just AOC_2018_07.solvers
+                -- (2018, 8) -> Just AOC_2018_08.solvers
+                -- (2018, 9) -> Just AOC_2018_09.solvers
+                -- (2018, 10) -> Just AOC_2018_10.solvers
                 _ -> Nothing
          in case (valid, maybeSolvers) of
                 (True, Just solvers) -> Just (name, solvers)

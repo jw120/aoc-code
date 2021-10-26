@@ -37,6 +37,16 @@ import AOC_2015_12 (solvers)
 
 import AOC_2018_01 (solvers)
 import AOC_2018_02 (solvers)
+import AOC_2018_03 (solvers)
+
+-- import AOC_2018_04 (solvers)
+-- import AOC_2018_05 (solvers)
+-- import AOC_2018_06 (solvers)
+-- import AOC_2018_07 (solvers)
+-- import AOC_2018_08 (solvers)
+-- import AOC_2018_09 (solvers)
+-- import AOC_2018_10 (solvers)
+
 import Utilities (applySolvers)
 
 problems :: [(Text -> (Text, Text), String)]
@@ -68,6 +78,14 @@ problems =
       -- , (AOC_2015_25.solvers, "2015_25")
       (AOC_2018_01.solvers, "2018_01")
     , (AOC_2018_02.solvers, "2018_02")
+    , (AOC_2018_03.solvers, "2018_03")
+    -- , (AOC_2018_04.solvers, "2018_04")
+    -- , (AOC_2018_05.solvers, "2018_05")
+    -- , (AOC_2018_06.solvers, "2018_06")
+    -- , (AOC_2018_07.solvers, "2018_07")
+    -- , (AOC_2018_08.solvers, "2018_08")
+    -- , (AOC_2018_09.solvers, "2018_09")
+    -- , (AOC_2018_10.solvers, "2018_10")
     ]
 
 problemToTest :: (Text -> (Text, Text), String) -> TestTree
