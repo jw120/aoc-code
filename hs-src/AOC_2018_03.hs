@@ -2,13 +2,12 @@ module AOC_2018_03 (solvers) where
 
 import Data.Array.Unboxed (UArray)
 import Data.Array.Unboxed qualified as U (listArray, (!), (//))
-import Data.Attoparsec.ByteString.Char8 qualified as A (char, decimal, parseOnly, skipSpace)
-import Data.ByteString (ByteString)
-import Data.ByteString.Char8 qualified as BC (lines)
 import Data.List qualified as L (foldl')
 import Data.Text (Text)
-import Data.Text qualified as T (pack)
-import Data.Text.Encoding qualified as TE (encodeUtf8)
+import Data.Text qualified as T (lines, pack)
+import Text.Megaparsec.Char qualified as MC (char, string)
+
+import Utilities (Parser, pUnsignedInt, parseOrStop)
 
 solvers :: Text -> (Text, Text)
 solvers t =
@@ -16,7 +15,7 @@ solvers t =
     , T.pack . show $findUnOverlapped fabric claims
     )
   where
-    claims = map parseClaim . BC.lines $ TE.encodeUtf8 t
+    claims = map (parseOrStop pClaim) $ T.lines t
     fabric = L.foldl' addClaim emptyFabric claims
 
 -- Size of the fabric
@@ -34,30 +33,14 @@ data Claim = Claim
     }
     deriving (Show)
 
-{- | Parse a Claim from a string
-
- >>> parseClaim $ BC.pack "#1 @ 1,3: 4x4"
- Claim {idCode = 1, x = 1, y = 3, w = 4, h = 4}
--}
-parseClaim :: ByteString -> Claim
-parseClaim s = case A.parseOnly claimParser s of
-    Left msg -> error msg
-    Right claim -> claim
-  where
-    claimParser = do
-        _ <- A.char '#'
-        c_id <- A.decimal
-        A.skipSpace
-        _ <- A.char '@'
-        A.skipSpace
-        c_x <- A.decimal
-        _ <- A.char ','
-        c_y <- A.decimal
-        _ <- A.char ':'
-        A.skipSpace
-        c_w <- A.decimal
-        _ <- A.char 'x'
-        Claim c_id c_x c_y c_w <$> A.decimal
+pClaim :: Parser Claim
+pClaim = do
+    c_id <- MC.char '#' *> pUnsignedInt
+    c_x <- MC.string "@ " *> pUnsignedInt
+    c_y <- MC.char ',' *> pUnsignedInt
+    c_w <- MC.string ": " *> pUnsignedInt
+    c_h <- MC.char 'x' *> pUnsignedInt
+    return $ Claim{idCode = c_id, x = c_x, y = c_y, w = c_w, h = c_h}
 
 -- Main function for part (a) - number of overlapping squares on the fabric
 overlaps :: Fabric -> Int

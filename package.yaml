@@ -21,8 +21,8 @@ dependencies:
 - containers
 - pureMD5
 - array
-- attoparsec
 - bytestring
+#- attoparsec
 #- monad-loops
 
 ghc-options:
