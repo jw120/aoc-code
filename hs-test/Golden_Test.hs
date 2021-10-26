@@ -38,7 +38,8 @@ import AOC_2018_01 (solvers)
 import AOC_2018_02 (solvers)
 import AOC_2018_03 (solvers)
 
--- import AOC_2018_04 (solvers)
+import AOC_2018_04 (solvers)
+
 -- import AOC_2018_05 (solvers)
 -- import AOC_2018_06 (solvers)
 -- import AOC_2018_07 (solvers)
@@ -78,7 +79,7 @@ problems =
       (AOC_2018_01.solvers, "2018_01")
     , (AOC_2018_02.solvers, "2018_02")
     , (AOC_2018_03.solvers, "2018_03")
-    -- , (AOC_2018_04.solvers, "2018_04")
+    , (AOC_2018_04.solvers, "2018_04")
     -- , (AOC_2018_05.solvers, "2018_05")
     -- , (AOC_2018_06.solvers, "2018_06")
     -- , (AOC_2018_07.solvers, "2018_07")
@@ -96,4 +97,4 @@ problemToTest (slv, name) = goldenVsString name goldenFile runTest
 
 test_golden :: IO TestTree
 test_golden = do
-    return $ testGroup "Haskell AOC Golden tests" (map problemToTest problems)
+    return $ testGroup "Golden tests" (map problemToTest problems)

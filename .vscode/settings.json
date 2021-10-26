@@ -3,6 +3,7 @@
     "cSpell.words": [
         "attoparsec",
         "bytestring",
+        "concat",
         "doctest",
         "elems",
         "foldl",

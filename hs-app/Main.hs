@@ -44,7 +44,8 @@ import AOC_2018_01 qualified (solvers)
 import AOC_2018_02 qualified (solvers)
 import AOC_2018_03 qualified (solvers)
 
--- import AOC_2018_04 qualified (solvers)
+import AOC_2018_04 qualified (solvers)
+
 -- import AOC_2018_05 qualified (solvers)
 -- import AOC_2018_06 qualified (solvers)
 -- import AOC_2018_07 qualified (solvers)
@@ -92,7 +93,7 @@ parseProblem args = case args of
                 (2018, 1) -> Just AOC_2018_01.solvers
                 (2018, 2) -> Just AOC_2018_02.solvers
                 (2018, 3) -> Just AOC_2018_03.solvers
-                -- (2018, 4) -> Just AOC_2018_04.solvers
+                (2018, 4) -> Just AOC_2018_04.solvers
                 -- (2018, 5) -> Just AOC_2018_05.solvers
                 -- (2018, 6) -> Just AOC_2018_06.solvers
                 -- (2018, 7) -> Just AOC_2018_07.solvers
