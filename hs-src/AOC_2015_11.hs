@@ -6,21 +6,21 @@
  Maintainer  : jw1200@gmail.com
  Stability   : experimental
 -}
-module AOC_2015_11 (solvers, increment) where
+module AOC_2015_11 (solvers, increment, nextValid, valid) where
 
 --import Data.List qualified as L (foldl')
+
 import Data.Char qualified as C (chr, ord)
 import Data.Text (Text)
 
---import Data.Text qualified as T (lines, pack)
---import Text.Megaparsec.Char qualified as MC (char, string)
+import Data.Text qualified as T (pack, unpack)
 
 -- import Utilities (Parser, pSymbol, lexeme, pUnsignedInt, parseOrStop, ($>), (<|>))
 
 solvers :: (Text -> Text, Text -> Text)
 solvers =
-    ( const "NYI"
-    , const "NYI"
+    ( T.pack . nextValid . T.unpack
+    , T.pack . nextValid . increment . nextValid . T.unpack
     )
 
 increment :: String -> String
@@ -36,6 +36,14 @@ increment = incrementFromEnd 0
 valid :: String -> Bool
 valid s = hasIncreasingTriple && not hasConfusingLetter && hasTwoPairs
   where
-    hasIncreasingTriple = undefined
+    hasIncreasingTriple = or $ zipWith3 isAscending s (drop 1 s) (drop 2 s)
     hasConfusingLetter = 'i' `elem` s || 'o' `elem` s || 'l' `elem` s
-    hasTwoPairs = undefined
+    hasTwoPairs = numPairs > 1 && not (numPairs == 2 && hasTriple)
+    numPairs = length . filter (uncurry (==)) $ zip s (drop 1 s)
+    hasTriple = or $ zipWith3 (\a b c -> a == b && b == c) s (drop 1 s) (drop 2 s)
+    isAscending a b c = (C.ord b == 1 + C.ord a) && (C.ord c == 1 + C.ord b)
+
+nextValid :: String -> String
+nextValid s
+    | valid s = s
+    | otherwise = nextValid (increment s)

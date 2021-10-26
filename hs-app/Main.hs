@@ -23,8 +23,8 @@ import AOC_2015_07 qualified (solvers)
 import AOC_2015_08 qualified (solvers)
 import AOC_2015_09 qualified (solvers)
 import AOC_2015_10 qualified (solvers)
+import AOC_2015_11 qualified (solvers)
 
--- import AOC_2015_11 qualified (solvers)
 -- import AOC_2015_12 qualified (solvers)
 -- import AOC_2015_13 qualified (solvers)
 -- import AOC_2015_14 qualified (solvers)
@@ -34,6 +34,12 @@ import AOC_2015_10 qualified (solvers)
 -- import AOC_2015_18 qualified (solvers)
 -- import AOC_2015_19 qualified (solvers)
 -- import AOC_2015_20 qualified (solvers)
+-- import AOC_2015_21 qualified (solvers)
+-- import AOC_2015_22 qualified (solvers)
+-- import AOC_2015_23 qualified (solvers)
+-- import AOC_2015_24 qualified (solvers)
+-- import AOC_2015_25 qualified (solvers)
+
 import AOC_2018_01 qualified (solvers)
 import AOC_2018_02 qualified (solvers)
 import Utilities (applySolvers)
@@ -58,7 +64,7 @@ parseProblem args = case args of
                 (2015, 8) -> Just AOC_2015_08.solvers
                 (2015, 9) -> Just AOC_2015_09.solvers
                 (2015, 10) -> Just AOC_2015_10.solvers
-                -- (2015, 11) -> Just AOC_2015_11.solvers
+                (2015, 11) -> Just AOC_2015_11.solvers
                 -- (2015, 12) -> Just AOC_2015_12.solvers
                 -- (2015, 13) -> Just AOC_2015_13.solvers
                 -- (2015, 14) -> Just AOC_2015_14.solvers
@@ -68,6 +74,11 @@ parseProblem args = case args of
                 -- (2015, 18) -> Just AOC_2015_18.solvers
                 -- (2015, 19) -> Just AOC_2015_19.solvers
                 -- (2015, 20) -> Just AOC_2015_20.solvers
+                -- (2015, 21) -> Just AOC_2015_20.solvers
+                -- (2015, 22) -> Just AOC_2015_20.solvers
+                -- (2015, 23) -> Just AOC_2015_20.solvers
+                -- (2015, 24) -> Just AOC_2015_20.solvers
+                -- (2015, 25) -> Just AOC_2015_20.solverss
                 (2018, 1) -> Just AOC_2018_01.solvers
                 (2018, 2) -> Just AOC_2018_02.solvers
                 _ -> Nothing
