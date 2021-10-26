@@ -4,7 +4,7 @@ import Test.Tasty.HUnit ((@?=))
 
 import Data.Text (Text)
 
-import AOC_2015_09 (makeDistance, shortestPath)
+import AOC_2015_09 (Extreme (..), makeDistance, shortestPath)
 
 dists :: [((Text, Text), Int)]
 dists =
@@ -17,4 +17,4 @@ cities :: [Text]
 cities = ["London", "Dublin", "Belfast"]
 
 unit_2015_09_distance_1 :: IO ()
-unit_2015_09_distance_1 = shortestPath (makeDistance dists) cities @?= 605
+unit_2015_09_distance_1 = shortestPath Min (makeDistance dists) cities @?= 605

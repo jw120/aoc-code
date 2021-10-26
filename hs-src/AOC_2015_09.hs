@@ -6,35 +6,37 @@
  Maintainer  : jw1200@gmail.com
  Stability   : experimental
 -}
-module AOC_2015_09 (makeDistance, solvers, shortestPath) where
+module AOC_2015_09 (makeDistance, solvers, shortestPath, Extreme (..)) where
 
 --import Data.Functor (($>))
 --import Data.List qualified as L (foldl')
 
-import Data.List qualified as L (permutations, sortOn)
+import Data.List qualified as L (permutations)
 import Data.Map.Lazy qualified as Map (fromList, lookup)
 import Data.Set qualified as Set (fromList, toList)
 import Data.Text (Text)
 import Data.Text qualified as T (lines, pack, unpack)
-import Debug.Trace (trace)
 import Text.Megaparsec as M (some)
 import Text.Megaparsec.Char qualified as MC (letterChar, string)
 
 import Utilities (Parser, pUnsignedInt, parseOrStop)
 
+data Extreme = Max | Min
+
 solvers :: Text -> (Text, Text)
 solvers t =
-    ( T.pack . show $ partA ls
-    , "NYI"
+    ( T.pack . show $ solve Min ls
+    , T.pack . show $ solve Max ls
     )
   where
     ls = T.lines t
 
-partA :: [Text] -> Int
-partA ts = trace (show cities) $ shortestPath (makeDistance distances) cities
+solve :: Extreme -> [Text] -> Int
+solve x ts = shortestPath x (makeDistance distances) cities
   where
-    distances = trace (show ts) $ map (parseOrStop pDist) ts
-    cities = trace (show distances) $ Set.toList . Set.fromList $ map (fst . fst) distances
+    distances = map (parseOrStop pDist) ts
+    allCities = map (fst . fst) distances ++ map (snd . fst) distances
+    cities = Set.toList $ Set.fromList allCities
 
 pDist :: Parser ((Text, Text), Int)
 pDist = do
@@ -45,10 +47,12 @@ pDist = do
     d <- pUnsignedInt
     return ((a, b), d)
 
-shortestPath :: Show x => (x -> x -> Int) -> [x] -> Int
-shortestPath distance locations = trace traceText $ minimum distances
+shortestPath :: Extreme -> (x -> x -> Int) -> [x] -> Int
+shortestPath x distance locations = extreme distances
   where
-    traceText = unlines . map show . L.sortOn fst $ zip distances routes
+    extreme = case x of
+        Max -> maximum
+        Min -> minimum
     routes = L.permutations locations
     distances = map totalDistance routes
     totalDistance (a : b : cs) = distance a b + totalDistance (b : cs)
