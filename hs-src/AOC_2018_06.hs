@@ -1,5 +1,11 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-
+{- |
+ Module      : AOC_2018_06
+ Description : Advent of code 2018 day 6
+ Copyright   : (c) Joe Watson 2021
+ License     : GPL-3
+ Maintainer  : jw1200@gmail.com
+ Stability   : experimental
+-}
 module AOC_2018_06 where
 
 import Data.Array (Array, Ix)

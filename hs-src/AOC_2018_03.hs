@@ -1,3 +1,11 @@
+{- |
+ Module      : AOC_2018_03
+ Description : Advent of code 2018 day 3
+ Copyright   : (c) Joe Watson 2021
+ License     : GPL-3
+ Maintainer  : jw1200@gmail.com
+ Stability   : experimental
+-}
 module AOC_2018_03 (solvers) where
 
 import Data.Array.Unboxed (UArray)

@@ -1,6 +1,11 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-
+{- |
+ Module      : AOC_2018_04
+ Description : Advent of code 2018 day 4
+ Copyright   : (c) Joe Watson 2021
+ License     : GPL-3
+ Maintainer  : jw1200@gmail.com
+ Stability   : experimental
+-}
 module AOC_2018_04 where
 
 import Data.List qualified as L (foldl', nub, sortBy)

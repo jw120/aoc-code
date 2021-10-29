@@ -42,7 +42,8 @@ import AOC_2018_04 (solvers)
 import AOC_2018_05 (solvers)
 import AOC_2018_06 (solvers)
 
--- import AOC_2018_07 (solvers)
+import AOC_2018_07 (solvers)
+
 -- import AOC_2018_08 (solvers)
 -- import AOC_2018_09 (solvers)
 -- import AOC_2018_10 (solvers)
@@ -82,7 +83,7 @@ problems =
     , (AOC_2018_04.solvers, "2018_04")
     , (AOC_2018_05.solvers, "2018_05")
     , (AOC_2018_06.solvers, "2018_06")
-    -- , (AOC_2018_07.solvers, "2018_07")
+    , (AOC_2018_07.solvers, "2018_07")
     -- , (AOC_2018_08.solvers, "2018_08")
     -- , (AOC_2018_09.solvers, "2018_09")
     -- , (AOC_2018_10.solvers, "2018_10")

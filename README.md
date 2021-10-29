@@ -53,6 +53,7 @@ To improve
 * 2015-04 (17s) - MD5s - find a non-naive solution that is faster
 * 2015-06 (18s) - Array updates - faster
 
+Can we make solvers have type: (Show a, Show b) => Text -> (a, b) without having string output printed within quotes
 
 Hints used - 2015/9 - ran web code to spot my error (missing a city)
 
