@@ -10,7 +10,6 @@ module AOC_2015_17 (solvers, solutions, ways) where
 
 import Data.Text (Text)
 import Data.Text qualified as T (lines, pack, unpack)
-import Debug.Trace (trace)
 
 solvers :: Text -> (Text, Text)
 solvers t =
