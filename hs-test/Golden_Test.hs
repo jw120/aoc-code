@@ -23,7 +23,8 @@ import AOC_2015_13 (solvers)
 
 import AOC_2015_14 (solvers)
 
--- import AOC_2015_15 (solvers)
+import AOC_2015_15 (solvers)
+
 -- import AOC_2015_16 (solvers)
 -- import AOC_2015_17 (solvers)
 -- import AOC_2015_18 (solvers)
@@ -66,8 +67,8 @@ problems =
     , (AOC_2015_12.solvers, "2015_12")
     , (AOC_2015_13.solvers, "2015_13")
     , (AOC_2015_14.solvers, "2015_14")
-    , -- , (AOC_2015_15.solvers, "2015_15")
-      -- , (AOC_2015_16.solvers, "2015_16")
+    , (AOC_2015_15.solvers, "2015_15")
+    , -- , (AOC_2015_16.solvers, "2015_16")
       -- , (AOC_2015_17.solvers, "2015_17")
       -- , (AOC_2015_18.solvers, "2015_18")
       -- , (AOC_2015_19.solvers, "2015_19")
