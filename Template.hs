@@ -8,11 +8,12 @@
 -}
 module AOC_2015_XX (solvers) where
 
+-- import Data.Map.Lazy (Map)
+-- import Data.Map.Lazy qualified as Map (fromList, empty, insert, insertWith, (!))
 --import Data.List qualified as L (foldl')
 import Data.Text (Text)
-
---import Data.Text qualified as T (pack)
---import Text.Megaparsec qualified as M (some, )
+import Data.Text qualified as T (lines, pack)
+--import Text.Megaparsec qualified as M (some, sepBy)
 --import Text.Megaparsec.Char qualified as MC (char, string, letterChar)
 
 -- import Utilities (Parser, pSymbol, lexeme, pUnsignedInt, parseOrStop, ($>), (<|>))

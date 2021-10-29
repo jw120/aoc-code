@@ -1,6 +1,7 @@
 {
     "python.pythonPath": ".venv/bin/python",
     "cSpell.words": [
+        "akitas",
         "attoparsec",
         "bytestring",
         "concat",
@@ -21,7 +22,8 @@
         "snoc",
         "unlines",
         "vals",
-        "venv"
+        "venv",
+        "vizslas"
     ],
     "cSpell.ignoreWords": [
         "Wcompat",
