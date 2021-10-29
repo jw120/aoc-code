@@ -25,11 +25,8 @@ import AOC_2015_09 qualified (solvers)
 import AOC_2015_10 qualified (solvers)
 import AOC_2015_11 qualified (solvers)
 import AOC_2015_12 qualified (solvers)
-
 import AOC_2015_13 qualified (solvers)
-
 import AOC_2015_14 qualified (solvers)
-
 import AOC_2015_15 qualified (solvers)
 
 -- import AOC_2015_16 qualified (solvers)
@@ -49,13 +46,26 @@ import AOC_2018_03 qualified (solvers)
 import AOC_2018_04 qualified (solvers)
 import AOC_2018_05 qualified (solvers)
 import AOC_2018_06 qualified (solvers)
-
 import AOC_2018_07 qualified (solvers)
-
 import AOC_2018_08 qualified (solvers)
+import AOC_2018_09 qualified (solvers)
+import AOC_2018_10 qualified (solvers)
 
--- import AOC_2018_09 qualified (solvers)
--- import AOC_2018_10 qualified (solvers)
+-- import AOC_2018_11 qualified (solvers)
+-- import AOC_2018_12 qualified (solvers)
+-- import AOC_2018_13 qualified (solvers)
+-- import AOC_2018_14 qualified (solvers)
+-- import AOC_2018_15 qualified (solvers)
+-- import AOC_2018_16 qualified (solvers)
+-- import AOC_2018_17 qualified (solvers)
+-- import AOC_2018_18 qualified (solvers)
+-- import AOC_2018_19 qualified (solvers)
+-- import AOC_2018_20 qualified (solvers)
+-- import AOC_2018_21 qualified (solvers)
+-- import AOC_2018_22 qualified (solvers)
+-- import AOC_2018_23 qualified (solvers)
+-- import AOC_2018_24 qualified (solvers)
+-- import AOC_2018_25 qualified (solvers)
 
 import Utilities (applySolvers)
 
@@ -102,8 +112,24 @@ parseProblem args = case args of
                 (2018, 6) -> Just AOC_2018_06.solvers
                 (2018, 7) -> Just AOC_2018_07.solvers
                 (2018, 8) -> Just AOC_2018_08.solvers
-                -- (2018, 9) -> Just AOC_2018_09.solvers
-                -- (2018, 10) -> Just AOC_2018_10.solvers
+                (2018, 9) -> Just AOC_2018_09.solvers
+                (2018, 10) -> Just AOC_2018_10.solvers
+                -- (2018, 11) -> Just AOC_2018_11.solvers
+                -- (2018, 12) -> Just AOC_2018_12.solvers
+                -- (2018, 13) -> Just AOC_2018_13.solvers
+                -- (2018, 14) -> Just AOC_2018_14.solvers
+                -- (2018, 15) -> Just AOC_2018_15.solvers
+                -- (2018, 16) -> Just AOC_2018_16.solvers
+                -- (2018, 17) -> Just AOC_2018_17.solvers
+                -- (2018, 18) -> Just AOC_2018_18.solvers
+                -- (2018, 19) -> Just AOC_2018_19.solvers
+                -- (2018, 20) -> Just AOC_2018_20.solvers
+                -- (2018, 21) -> Just AOC_2018_21.solvers
+                -- (2018, 22) -> Just AOC_2018_22.solvers
+                -- (2018, 23) -> Just AOC_2018_23.solvers
+                -- (2018, 24) -> Just AOC_2018_24.solvers
+                -- (2018, 25) -> Just AOC_2018_25.solvers
+
                 _ -> Nothing
          in case (valid, maybeSolvers) of
                 (True, Just solvers) -> Just (name, solvers)

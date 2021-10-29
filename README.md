@@ -48,6 +48,7 @@ which includes Golden file testing that creates and checks ../aoc-data/good file
 
 stack run 2015 1
 stack test --test-arguments=--pattern=2018
+stack test --test-arguments=--pattern=fast
 
 To improve
 * 2015-04 (17s) - MD5s - find a non-naive solution that is faster
