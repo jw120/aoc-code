@@ -11,9 +11,12 @@ H -> CRn... and other rules which start with C...
 Rn and Y made in the middle
 
 So
-[i] for positions of a terminal in target: say 5, 10
-[j] for positions of a terminals in test:
+[i] for positions of any one terminal in target: say 5, 10
+[j] for positions of the same terminal in test:
     - impossible if last j > last i, last but 1 j > last but 1 i etc
+Also need to have compatible sequence of terminals in test and targets
+Ar 0, Ar 5 , C 8
+      Ar 3
 
 
 
