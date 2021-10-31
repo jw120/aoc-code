@@ -1,0 +1,184 @@
+
+
+Atoms which have no rules are:
+ArCRnY
+Atoms which are preserved in their rules
+ThSi
+
+They are made by:
+Al => ThRnFAr and similar rules ...Ar
+H -> CRn... and other rules which start with C...
+Rn and Y made in the middle
+
+So
+[i] for positions of a terminal in target: say 5, 10
+[j] for positions of a terminals in test:
+    - impossible if last j > last i, last but 1 j > last but 1 i etc
+
+
+
+
+
+Al => ThF
+Al => ThRnFAr
+B => BCa
+B => TiB
+B => TiRnFAr
+Ca => CaCa
+Ca => PB
+Ca => PRnFAr
+Ca => SiRnFYFAr
+Ca => SiRnMgAr
+Ca => SiTh
+F => CaF
+F => PMg
+F => SiAl
+H => CRnAlAr
+H => CRnFYFYFAr
+H => CRnFYMgAr
+H => CRnMgYFAr
+H => HCa
+H => NRnFYFAr
+H => NRnMgAr
+H => NTh
+H => OB
+H => ORnFAr
+Mg => BF
+Mg => TiMg
+N => CRnFAr
+N => HSi
+O => CRnFYFAr
+O => CRnMgAr
+O => HP
+O => NRnFAr
+O => OTi
+P => CaP
+P => PTi
+P => SiRnFAr
+Si => CaSi
+Th => ThCa
+Ti => BP
+Ti => TiTi
+e => HF
+e => NAl
+e => OMg
+
+
+CRn
+    CaSi
+Rn
+    BSi
+Rn
+    F
+Ar
+    TiBPTiTiBF
+Ar
+    PBCaSiThSiRnTiBPBPMg
+Ar
+    CaSiRnTiMg
+Ar
+    CaSiThCaSiRnF
+Ar
+    RnSi
+Rn
+    F
+Ar
+    TiTiBF
+Ar
+    CaCaSiRnSiThCaCaSiRnMg
+Ar
+    F
+Y
+    Si
+Rn
+    F
+Y
+    CaF
+Ar
+    SiThCaSiThPBPTiMg
+Ar
+    CaPRnSiAl
+Ar
+    PBCaCaSi
+Rn
+    F
+Y
+    SiThCa
+Rn
+    F
+Ar
+Ar
+    CaCaSi
+Rn
+    PBSi
+Rn
+    F
+Ar
+    Mg
+Y
+    CaCaCaCaSiThCaCaSiAl
+Ar
+    CaCaSiRnPBSiAl
+Ar
+    BCaCaCaCaSiThCaPBSiThPBPBCaSi
+Rn
+    F
+Y
+    F
+Ar
+    SiThCaSi
+Rn
+    F
+Ar
+    BCaCaSi
+Rn
+    FYF
+Ar
+    SiThCaPBSiThCaSi
+Rn
+    PMg
+Ar
+Rn
+    F
+Ar
+    PTiBCaP
+Rn
+    F
+Ar
+    CaCaCaCaSi
+Rn
+    CaCaSi
+Rn
+    F
+Y
+    F
+Ar
+    F
+Ar
+    BCaSiThF
+Ar
+    ThSiThSi
+Rn
+    TiRnPMg
+Ar
+    F
+Ar
+    CaSiThCaPBCaSi
+Rn
+    BF
+Ar
+    CaCaP
+Rn
+    CaCaPMg
+Ar
+    Si
+Rn
+    F
+Y
+    F
+Ar
+    CaSiTh
+Rn
+    PBPMg
+Ar
+

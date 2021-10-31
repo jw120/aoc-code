@@ -9,25 +9,26 @@
 module AOC_2015_19 (solvers, stepsTo, readInput, Atom (..), Molecule, Replacement) where
 
 import Data.List qualified as L (foldl', inits, tails)
+import Data.Map qualified as Map (empty, insertWith, keys)
+import Data.Map.Lazy (Map)
 import Data.Set (Set)
 import Data.Set qualified as Set (difference, empty, filter, fromList, member, null, singleton, size, toList, union, unions)
 import Data.Text (Text)
 import Data.Text qualified as T (cons, lines, null, pack, singleton, strip, unpack)
 
---import Debug.Trace (trace)
+import Debug.Trace (trace)
 import Text.Megaparsec qualified as M (optional, some)
 import Text.Megaparsec.Char qualified as MC (letterChar, lowerChar, string)
 
 import Utilities (Parser, parseOrStop)
 
-trace :: p1 -> p2 -> p2
-trace _ x = x
-
 solvers :: Text -> (Text, Text)
 solvers t =
-    ( T.pack . show $ uncurry numMolecules $ readInput t
-    , T.pack . show $ uncurry stepsTo $ readInput t
+    ( T.pack . show $ uncurry numMolecules $ trace (analyze (target, rules)) (target, rules)
+    , "NYI" -- T.pack . show $ uncurry stepsTo (target, rules)
     )
+  where
+    (target, rules) = readInput t
 
 newtype Atom = Atom Text deriving (Eq, Ord, Show)
 type Molecule = [Atom]
@@ -59,10 +60,10 @@ stepsTo target rules = go 0 start Set.empty
     go stepsDone frontier visited
         | target `Set.member` frontier = stepsDone
         | Set.null frontier = error "Failed - empty frontier"
-        | otherwise = trace (showMoleculeSet frontier) $ go (stepsDone + 1) frontier''' visited'
+        | otherwise = go (stepsDone + 1) frontier''' visited'
       where
         visited' = visited `Set.union` frontier
-        frontier' = Set.unions [trace (show (r, f)) $ replacements r f | r <- rules, f <- Set.toList frontier]
+        frontier' = Set.unions [replacements r f | r <- rules, f <- Set.toList frontier]
         frontier'' = frontier' `Set.difference` visited'
         frontier''' = Set.filter ((<= length target) . length) frontier''
 
@@ -71,6 +72,12 @@ showMoleculeSet = show . map showMolecule . Set.toList
 
 showMolecule :: [Atom] -> String
 showMolecule = concatMap (\(Atom x) -> T.unpack x)
+
+analyze :: (Molecule, [Replacement]) -> String
+analyze (target, rules) = "Terminals: " ++ showMolecule terminalAtoms
+  where
+    rulesMap = L.foldl' (\m (x, r) -> Map.insertWith (++) x r m) Map.empty rules
+    terminalAtoms = Set.toList . Set.fromList $ filter (`notElem` Map.keys rulesMap) target
 
 readInput :: Text -> (Molecule, [Replacement])
 readInput t = (parseOrStop pMolecule (last ls), map (parseOrStop pReplacement) (init ls))
