@@ -10,7 +10,8 @@ module AOC_2015_19 (solvers, stepsTo, readInput, Atom (..), Molecule, Replacemen
 
 import Data.List qualified as L (foldl', inits, tails)
 import Data.Map qualified as Map (empty, insertWith, keys)
-import Data.Map.Lazy (Map)
+
+-- import Data.Map.Lazy (Map)
 import Data.Set (Set)
 import Data.Set qualified as Set (difference, empty, filter, fromList, member, null, singleton, size, toList, union, unions)
 import Data.Text (Text)
@@ -67,8 +68,8 @@ stepsTo target rules = go 0 start Set.empty
         frontier'' = frontier' `Set.difference` visited'
         frontier''' = Set.filter ((<= length target) . length) frontier''
 
-showMoleculeSet :: Set Molecule -> String
-showMoleculeSet = show . map showMolecule . Set.toList
+-- showMoleculeSet :: Set Molecule -> String
+-- showMoleculeSet = show . map showMolecule . Set.toList
 
 showMolecule :: [Atom] -> String
 showMolecule = concatMap (\(Atom x) -> T.unpack x)
