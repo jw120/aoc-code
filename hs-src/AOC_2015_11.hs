@@ -13,14 +13,14 @@ module AOC_2015_11 (solvers, increment, nextValid, valid) where
 import Data.Char qualified as C (chr, ord)
 import Data.Text (Text)
 
-import Data.Text qualified as T (pack, unpack)
+import Data.Text qualified as T (pack, strip, unpack)
 
 -- import Utilities (Parser, pSymbol, lexeme, pUnsignedInt, parseOrStop, ($>), (<|>))
 
 solvers :: Text -> (Text, Text)
 solvers t = (T.pack a, T.pack b)
   where
-    a = nextValid $ T.unpack t
+    a = nextValid . T.unpack $ T.strip t
     b = nextValid $ increment a
 
 increment :: String -> String

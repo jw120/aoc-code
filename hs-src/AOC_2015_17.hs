@@ -9,7 +9,7 @@
 module AOC_2015_17 (solvers, solutions, ways) where
 
 import Data.Text (Text)
-import Data.Text qualified as T (lines, pack, unpack)
+import Data.Text qualified as T (lines, pack, strip, unpack)
 
 solvers :: Text -> (Text, Text)
 solvers t =
@@ -18,7 +18,7 @@ solvers t =
     )
   where
     volume = 150
-    containers = map (read . T.unpack) $ T.lines t
+    containers = map (read . T.unpack) . T.lines $ T.strip t
     possibleSolutions = solutions volume containers
     fewestContainers = minimum $ map length possibleSolutions
     fewestContainerSolutions = filter ((==) fewestContainers . length) possibleSolutions

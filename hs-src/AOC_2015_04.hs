@@ -12,13 +12,13 @@ import Data.ByteString.Lazy qualified as LBS (fromStrict)
 import Data.Digest.Pure.MD5 qualified as M (md5)
 import Data.List qualified as L (replicate)
 import Data.Text (Text)
-import Data.Text qualified as T (pack)
+import Data.Text qualified as T (pack, strip)
 import Data.Text.Encoding qualified as TE (encodeUtf8)
 
 solvers :: Text -> (Text, Text)
 solvers t =
-    ( T.pack . show $ firstZeros 5 t
-    , T.pack . show $ firstZeros 6 t
+    ( T.pack . show . firstZeros 5 $ T.strip t
+    , T.pack . show . firstZeros 6 $ T.strip t
     )
 
 firstZeros :: Int -> Text -> Int

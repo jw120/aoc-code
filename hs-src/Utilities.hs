@@ -22,7 +22,6 @@ import Control.Applicative ((<|>))
 import Control.Applicative qualified as A (empty)
 import Data.Functor (($>))
 import Data.Text (Text)
-import Data.Text qualified as T (strip)
 import Data.Text.IO qualified as TIO (readFile)
 import Data.Void (Void)
 import Text.Megaparsec qualified as M (Parsec, eof, errorBundlePretty, parse)
@@ -62,6 +61,6 @@ pSymbol = ML.symbol spaceConsumer
 applySolvers :: (Text -> (Text, Text)) -> String -> IO Text
 applySolvers solver name = do
     let inputFile = "../aoc-data/input/" ++ name ++ ".txt"
-    input <- T.strip <$> TIO.readFile inputFile
+    input <- TIO.readFile inputFile
     let (outputA, outputB) = solver input
     return $ outputA <> "\n" <> outputB <> "\n"

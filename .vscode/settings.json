@@ -7,6 +7,7 @@
         "concat",
         "doctest",
         "elems",
+        "fmap",
         "foldl",
         "GADT",
         "Generalised",

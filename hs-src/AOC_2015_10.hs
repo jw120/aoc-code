@@ -12,7 +12,7 @@ module AOC_2015_10 (solvers, lookSay) where
 import Data.List qualified as L (span)
 import Data.Text (Text)
 
-import Data.Text qualified as T (pack, unpack)
+import Data.Text qualified as T (pack, strip, unpack)
 
 --import Text.Megaparsec ((<|>))
 --import Text.Megaparsec.Char qualified as MC (char, string)
@@ -25,7 +25,7 @@ solvers t =
     , T.pack . show . length $ inp !! 50
     )
   where
-    inp = iterate lookSay . map (\c -> read [c]) $ T.unpack t
+    inp = iterate lookSay . map (\c -> read [c]) . T.unpack $ T.strip t
 
 lookSay :: [Int] -> [Int]
 lookSay s@(x : _) =

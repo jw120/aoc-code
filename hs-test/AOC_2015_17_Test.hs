@@ -8,4 +8,4 @@ unit_2015_17_ways :: IO ()
 unit_2015_17_ways = ways 25 [20, 15, 10, 5, 5] @?= 4
 
 unit_2015_17_solutions :: IO ()
-unit_2015_17_solutions = solutions 25 [20, 15, 10, 5, 5] @?= [[777]]
+unit_2015_17_solutions = solutions 25 [20, 15, 10, 5, 5] @?= [[20, 5], [20, 5], [15, 10], [15, 5, 5]]
