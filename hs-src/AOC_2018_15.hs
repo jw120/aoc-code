@@ -8,17 +8,16 @@
 -}
 module AOC_2018_15 (solvers) where
 
-import Control.Monad qualified as Mon (foldM, when)
 import Data.Array.IArray (Array, Ix)
 import Data.Array.IArray qualified as A (array, bounds, (!))
-import Data.List qualified as L (nub, partition)
+import Data.List qualified as L (foldl', nub, partition)
 import Data.Map (Map)
 import Data.Map qualified as Map (delete, elems, filter, fromList, insert, keys, lookup, member, notMember, toList, (!))
-import Data.Maybe qualified as Maybe (fromJust)
+import Data.Maybe qualified as Maybe (fromJust, mapMaybe)
 import Data.Set (Set)
 import Data.Set qualified as Set (difference, empty, filter, fromList, intersection, null, singleton, toList, union, unions)
 import Data.Text (Text)
-import Data.Text qualified as T (lines, pack)
+import Data.Text qualified as T (concat, length, lines, pack, unpack)
 
 solvers :: Text -> (Text, Text)
 solvers t =
@@ -88,47 +87,38 @@ initialHealth :: Int = 200
 --
 
 -- | Update the given mob
-update :: Bool -> State -> Coord -> State
-update logging s c = case Map.lookup c (mobs s) of
+update :: State -> Coord -> State
+update s c = case Map.lookup c (mobs s) of
     -- Catch the case where a mob is killed before it has a chance to move
     Nothing -> s
-    Just _mob -> let enemyNeighbors = adjacentEnemies s c
-                     (s', c') = if null enemyNeighbors then move logging s c else (s, c)
-                     enemyNeighbors' = adjacentEnemies s' c'
-        if finished s' || null enemyNeighbors'
-            then return s'
-            else do
-                let target = leastHP s enemyNeighbors'
-                when logging $ putStrLn ("Attacking with " ++ show c' ++ " to " ++ show target)
-                return $ attack s' target
+    Just _mob ->
+        let enemyNeighbors = adjacentEnemies s c
+            (s', c') = if null enemyNeighbors then move s c else (s, c)
+            enemyNeighbors' = adjacentEnemies s' c'
+         in if finished s' || null enemyNeighbors'
+                then s'
+                else attack s' $ leastHP s enemyNeighbors'
 
 -- | Move the mob at given coordinates
-move :: Bool -> State -> Coord -> IO (State, Coord)
-move logging s c = do
+move :: State -> Coord -> (State, Coord)
+move s c =
     let mob = Maybe.fromJust $ Map.lookup c (mobs s)
-    when logging $ putStrLn ("Moving " ++ show (side mob) ++ " from " ++ show c)
-    let enemyPositions = map fst . Map.toList . Map.filter ((/= side mob) . side) $ mobs s
-    if null enemyPositions
-        then return (s{finished = True}, c)
-        else do
-            when logging $ putStrLn ("Enemies: " ++ show enemyPositions)
-            let openPositions = L.nub . filter (isOpen s) $ concatMap adjacent enemyPositions
-            when logging $ putStrLn ("Open positions: " ++ show openPositions)
-            if null openPositions
-                then return (s, c)
-                else do
-                    let closestPositions = findClosest s c openPositions
-                    when logging $ putStrLn ("Closest positions: " ++ show closestPositions)
-                    if null closestPositions -- no reachable position
-                        then return (s, c)
-                        else do
-                            let destination = minimum closestPositions
-                            when logging $ putStrLn ("Chosen position: " ++ show destination)
-                            let closestFirstSteps = findClosest s destination . filter (isOpen s) $ adjacent c
-                            when logging $ putStrLn ("First steps closest to destination: " ++ show closestFirstSteps)
-                            let firstStep = minimum closestFirstSteps
-                            when logging $ putStrLn ("First step: " ++ show firstStep)
-                            return (s{mobs = Map.insert firstStep mob (Map.delete c (mobs s))}, firstStep)
+        enemyPositions = map fst . Map.toList . Map.filter ((/= side mob) . side) $ mobs s
+     in if null enemyPositions
+            then (s{finished = True}, c)
+            else
+                let openPositions = L.nub . filter (isOpen s) $ concatMap adjacent enemyPositions
+                 in if null openPositions
+                        then (s, c)
+                        else
+                            let closestPositions = findClosest s c openPositions
+                             in if null closestPositions -- no reachable position
+                                    then (s, c)
+                                    else
+                                        let destination = minimum closestPositions
+                                            closestFirstSteps = findClosest s destination . filter (isOpen s) $ adjacent c
+                                            firstStep = minimum closestFirstSteps
+                                         in (s{mobs = Map.insert firstStep mob (Map.delete c (mobs s))}, firstStep)
 
 -- | Make an attack against the mob at given coordinates
 attack :: State -> Coord -> State
@@ -140,43 +130,30 @@ attack s c
     attackPower :: Int = if side targetMob == Elf then 3 else elfPower s
     hp :: Int = health targetMob - attackPower
 
--- | Update every unit n times
-updateAll :: Bool -> Int -> State -> IO State
-updateAll logging n = go 0
-  where
-    go :: Int -> State -> IO State
-    go i s
-        | i >= n = return s
-        | otherwise = do
-            s' <- Mon.foldM (update logging) s (Map.keys (mobs s))
-            go (i + 1) s'
-
 -- | Part (a) Update to steady state. Return number of rounds, elves health, goblins health
-runToSteadyState :: Bool -> State -> IO (Int, [Int], [Int])
-runToSteadyState logging state = toScore <$> go (0, state)
+runToSteadyState :: State -> (Int, [Int], [Int])
+runToSteadyState state = toScore $ go (0, state)
   where
     toScore :: (Int, State) -> (Int, [Int], [Int])
     toScore (i, s) = (i - 1, map health es, map health gs)
       where
         (es, gs) = L.partition ((== Elf) . side) $ Map.elems (mobs s)
-    go :: (Int, State) -> IO (Int, State)
+    go :: (Int, State) -> (Int, State)
     go (i, s)
-        | finished s = return (i, s)
-        | otherwise = do
-            s' <- Mon.foldM (update logging) s (Map.keys (mobs s))
-            go (i + 1, s')
+        | finished s = (i, s)
+        | otherwise = go (i + 1, L.foldl' update s (Map.keys (mobs s)))
 
 -- | Part (b) Increase elf attack power until no elves die
-rampElfPower :: Bool -> State -> IO (Int, [Int])
-rampElfPower logging s = go 3
+rampElfPower :: State -> (Int, [Int])
+rampElfPower s = go 3
   where
     allElves :: [Int] = map health . filter ((== Elf) . side) . Map.elems $ mobs s
-    go :: Int -> IO (Int, [Int])
-    go p = do
-        (n, elves, _) <- runToSteadyState logging (s{elfPower = p})
-        if length elves == length allElves
-            then return (n, elves)
-            else go (p + 1)
+    go :: Int -> (Int, [Int])
+    go p
+        | length elves == length allElves = (n, elves)
+        | otherwise = go (p + 1)
+      where
+        (n, elves, _) = runToSteadyState (s{elfPower = p})
 
 -- | Return all adjacent coordinates
 adjacent :: Coord -> [Coord]
@@ -229,7 +206,7 @@ isOpen :: State -> Coord -> Bool
 isOpen s c = cavern s A.! c && Map.notMember c (mobs s)
 
 -- | Read State from input
-readState :: [String] -> State
+readState :: [Text] -> State
 readState xs =
     State
         { cavern = A.array (cZero, Coord{coordX = xMax, coordY = yMax}) cavernData
@@ -238,18 +215,12 @@ readState xs =
         , elfPower = 3
         }
   where
-    (xMax, yMax) = (length (head xs) - 1, length xs - 1)
-    tiles :: [(Coord, Char)] = zip [Coord{coordX = x, coordY = y} | y <- [0 .. yMax], x <- [0 .. xMax]] (concat xs)
-    cavernData :: [(Coord, Bool)] = map (\(c, x) -> (c, x `elem` ".GE")) tiles
-    mobsData :: [(Coord, Mob)] = mapMaybe toMob tiles
+    (xMax, yMax) = (T.length (head xs) - 1, length xs - 1)
+    tilesInput :: [Char] = T.unpack $ T.concat xs
+    tiles :: [(Coord, Char)] = zip [Coord{coordX = x, coordY = y} | y <- [0 .. yMax], x <- [0 .. xMax]] tilesInput
+    cavernData :: [(Coord, Bool)] = map (\(c, x) -> (c, x `elem` (".GE" :: String))) tiles
+    mobsData :: [(Coord, Mob)] = Maybe.mapMaybe toMob tiles
     toMob :: (Coord, Char) -> Maybe (Coord, Mob)
     toMob (c, 'E') = Just (c, Mob{side = Elf, health = initialHealth})
     toMob (c, 'G') = Just (c, Mob{side = Goblin, health = initialHealth})
     toMob _ = Nothing
-
--- Show summary of mob HP
-hpSum :: State -> String
-hpSum s = "E: " ++ show (sideHealth Elf) ++ ", G: " ++ show (sideHealth Goblin)
-  where
-    sideHealth :: Side -> [Int]
-    sideHealth x = map health . filter ((== x) . side) . Map.elems $ mobs s

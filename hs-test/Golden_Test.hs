@@ -23,9 +23,7 @@ import AOC_2015_13 (solvers)
 import AOC_2015_14 (solvers)
 import AOC_2015_15 (solvers)
 import AOC_2015_16 (solvers)
-
 import AOC_2015_17 (solvers)
-
 import AOC_2015_18 (solvers)
 
 -- import AOC_2015_19 (solvers)
@@ -51,8 +49,8 @@ import AOC_2018_11 (solvers)
 -- import AOC_2018_12 (solvers)
 import AOC_2018_13 (solvers)
 import AOC_2018_14 (solvers)
+import AOC_2018_15 (solvers)
 
--- import AOC_2018_15 (solvers)
 -- import AOC_2018_16 (solvers)
 -- import AOC_2018_17 (solvers)
 -- import AOC_2018_18 (solvers)
@@ -107,7 +105,7 @@ problems =
     , -- , (AOC_2018_12.solvers, "2018_12", "fast")
       (AOC_2018_13.solvers, "2018_13", "fast")
     , (AOC_2018_14.solvers, "2018_14", "slow")
-    -- , (AOC_2018_15.solvers, "2018_15", "fast")
+    , (AOC_2018_15.solvers, "2018_15", "slow")
     -- , (AOC_2018_16.solvers, "2018_16", "fast")
     -- , (AOC_2018_17.solvers, "2018_17", "fast")
     -- , (AOC_2018_18.solvers, "2018_18", "fast")
