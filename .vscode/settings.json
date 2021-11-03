@@ -2,10 +2,12 @@
     "python.pythonPath": ".venv/bin/python",
     "cSpell.words": [
         "akitas",
+        "assocs",
         "attoparsec",
         "bytestring",
         "concat",
         "doctest",
+        "Elem",
         "elems",
         "fmap",
         "foldl",

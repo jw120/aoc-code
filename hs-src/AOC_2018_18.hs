@@ -8,30 +8,29 @@
 -}
 module AOC_2018_18 (solvers) where
 
-import Data.Array.IArray (Array, (!))
-import Data.Array.IArray qualified as A
+import Data.Array.IArray (Array)
+import Data.Array.IArray qualified as A (array, assocs, bounds, elems, (!))
 import Data.Map (Map)
-import Data.Map qualified as M
-
--- import Data.Map.Lazy (Map)
--- import Data.Map.Lazy qualified as Map (fromList, empty, insert, insertWith, (!))
---import Data.List qualified as L (foldl')
+import Data.Map qualified as Map (empty, insert, lookup)
 import Data.Text (Text)
-import Data.Text qualified as T (lines, pack)
-
---import Text.Megaparsec qualified as M (some, sepBy)
---import Text.Megaparsec.Char qualified as MC (char, string, letterChar)
-
--- import Utilities (Parser, pSymbol, lexeme, pUnsignedInt, parseOrStop, ($>), (<|>))
+import Data.Text qualified as T (length, lines, pack, unpack)
 
 solvers :: Text -> (Text, Text)
 solvers t =
-    ( "NYI"
-    , "NYI"
+    ( T.pack . show . resources $ areaList !! 10
+    , T.pack . show $ lookupLoop loop (1000000000 - skip)
     )
+  where
+    initialArea = readArea t
+    areaList = iterate update initialArea
+    -- Rather than look for a loop in the areas, instead look at resources
+    -- But need to skip initial values to allow sequence to converge
+    skip = 450 -- obtained manually by looking at the generated sequence
+    resourceList = map resources areaList
+    loop = findLoop $ drop skip resourceList
 
 --
--- Site holds on site which can be open ground, trees or a lumberyard
+-- Site holds on site which can be open ground, trees or a lumber yard
 ---
 
 data Site
@@ -58,59 +57,39 @@ instance Show Site where
 newtype Area = Area (Array (Int, Int) Site) deriving (Eq)
 
 instance Show Area where
-    show (Area a) = init $ unlines [row y | y <- [0 .. yMax]]
+    show (Area a) = init $ unlines [row y | y <- [yMin .. yMax]]
       where
-        ((0, 0), (xMax, yMax)) = A.bounds a
+        ((xMin, yMin), (xMax, yMax)) = A.bounds a
         row :: Int -> String
-        row j = concat [show (a ! (i, j)) | i <- [0 .. xMax]]
+        row j = concat [show (a A.! (i, j)) | i <- [xMin .. xMax]]
 
-{- | Read an Area from a string
-
- >>> readArea ".#.\n|#|\n||#\n"
- .#.
- |#|
- ||#
--}
-readArea :: String -> Area
+-- | Read an Area from a string
+readArea :: Text -> Area
 readArea s
     | all hasValidLength stringRows = Area $ A.array ((0, 0), (size - 1, size - 1)) siteData
     | otherwise = error "Invalid size for Area"
   where
-    stringRows :: [String] = lines s
+    stringRows :: [Text] = T.lines s
     size = length stringRows
-    hasValidLength :: String -> Bool
-    hasValidLength = (== size) . length
-    toData :: Int -> String -> [((Int, Int), Site)]
-    toData y rowStr = zip [(x, y) | x <- [0 .. size -1]] $ map readSite rowStr
+    hasValidLength :: Text -> Bool
+    hasValidLength = (== size) . T.length
+    toData :: Int -> Text -> [((Int, Int), Site)]
+    toData y rowStr = zip [(x, y) | x <- [0 .. size -1]] $ map readSite $ T.unpack rowStr
     siteData :: [((Int, Int), Site)]
     siteData = concat $ zipWith toData [0 .. size - 1] stringRows
 
-{- | Return list with the contents of the sites adjacent to the site whose coordinates are given
-
- >>> concatMap show $ adjacentSites (0, 0) test0
- "#.."
- >>> concatMap show $ adjacentSites (2, 2) test0
- "...|..|#"
- >>> concatMap show $ adjacentSites (9, 3) test0
- "#..#|"
--}
+-- | Return list with the contents of the sites adjacent to the site whose coordinates are given
 adjacentSites :: (Int, Int) -> Area -> [Site]
-adjacentSites (x, y) (Area a) = [a ! (i, j) | j <- [y - 1 .. y + 1], i <- [x - 1 .. x + 1], valid (i, j)]
+adjacentSites (x, y) (Area a) = [a A.! (i, j) | j <- [y - 1 .. y + 1], i <- [x - 1 .. x + 1], valid (i, j)]
   where
-    ((0, 0), (xMax, yMax)) = A.bounds a
-    valid (c, r) = (c /= x || r /= y) && c >= 0 && c <= xMax && r >= 0 && r <= yMax
+    ((xMin, yMin), (xMax, yMax)) = A.bounds a
+    valid (c, r) = (c /= x || r /= y) && c >= xMin && c <= xMax && r >= yMin && r <= yMax
 
 --
 -- Update logic
 --
 
-{- | Apply update rules to the area
-
- >>> update test0 == test1
- True
- >>> (iterate update test0) !! 10 == test10
- True
--}
+-- | Apply update rules to the area
 update :: Area -> Area
 update (Area a) = Area $ A.array (A.bounds a) (map updateSite (A.assocs a))
   where
@@ -128,104 +107,28 @@ update (Area a) = Area $ A.array (A.bounds a) (map updateSite (A.assocs a))
         | Trees `notElem` surrounds = OpenGround
         | otherwise = LumberYard
 
-{- | Resource values of an Area
-
- >>> resources test10
- 1147
--}
+-- | Resource values of an Area
 resources :: Area -> Int
 resources (Area a) = trees * lumberYards
   where
     trees = length . filter (== Trees) $ A.elems a
     lumberYards = length . filter (== LumberYard) $ A.elems a
 
-test0 :: Area
-test0 =
-    readArea $
-        ".#.#...|#.\n"
-            ++ ".....#|##|\n"
-            ++ ".|..|...#.\n"
-            ++ "..|#.....#\n"
-            ++ "#.#|||#|#|\n"
-            ++ "...#.||...\n"
-            ++ ".|....|...\n"
-            ++ "||...#|.#|\n"
-            ++ "|.||||..|.\n"
-            ++ "...#.|..|.\n"
-
-test1 :: Area
-test1 =
-    readArea . unlines $
-        [ ".......##."
-        , "......|###"
-        , ".|..|...#."
-        , "..|#||...#"
-        , "..##||.|#|"
-        , "...#||||.."
-        , "||...|||.."
-        , "|||||.||.|"
-        , "||||||||||"
-        , "....||..|."
-        ]
-
-test10 :: Area
-test10 =
-    readArea . unlines $
-        [ ".||##....."
-        , "||###....."
-        , "||##......"
-        , "|##.....##"
-        , "|##.....##"
-        , "|##....##|"
-        , "||##.####|"
-        , "||#####|||"
-        , "||||#|||||"
-        , "||||||||||"
-        ]
-
-main :: IO ()
-main = do
-    initialArea <- readArea <$> getContents
-    let areaList = iterate update initialArea
-    let updatedArea = areaList !! 10
-    print $ resources updatedArea
-    -- Rather than look for a loop in the areas, instead look at resources
-    -- But need to skip initial values to allow sequence to converge
-    let skip = 450 -- obtained manually by looking at the generated sequence
-    let resourceList = map resources areaList
-    let loop = findLoop $ drop skip resourceList
-    print $ lookupLoop loop (1000000000 - skip)
-
---   showSeq 0 initialArea
-
--- -- Used to explore loop
--- showSeq :: Int -> Area -> IO ()
--- showSeq n a = do
---   putStrLn $ show n ++ ": " ++ show (resources a)
---   showSeq (n + 1) (update a)
-
 {- | Find a repeating pattern in a sequence
- | Given a sequence x_0, x_1... return the repeating part and the index that the loop starts
-
- >>> findLoop [0,1,2,3,4,5,3,4,5,3,4,5]
- ([3,4,5],3)
+ Given a sequence x_0, x_1... return the repeating part and the index that the loop starts
 -}
 findLoop :: Ord a => [a] -> ([a], Int)
-findLoop zs = (subseq, first)
+findLoop zs = (subsequence, first)
   where
-    subseq = take (firstRep - first) $ drop first zs
-    (first, firstRep) = go M.empty 0 zs
+    subsequence = take (firstRep - first) $ drop first zs
+    (first, firstRep) = go Map.empty 0 zs
     go :: Ord b => Map b Int -> Int -> [b] -> (Int, Int)
-    go m i (x : xs) = case M.lookup x m of
+    go m i (x : xs) = case Map.lookup x m of
         Just n -> (n, i)
-        Nothing -> go (M.insert x i m) (i + 1) xs
+        Nothing -> go (Map.insert x i m) (i + 1) xs
     go _ _ [] = error "Unexpected empty list in findLoop"
 
-{- | Lookup a value in a repeating sequence
-
- >>> lookupLoop ([3,4,5],3) 10
- 4
--}
+-- | Lookup a value in a repeating sequence
 lookupLoop :: ([x], Int) -> Int -> x
 lookupLoop (xs, start) n = xs !! nAroundLoop
   where
