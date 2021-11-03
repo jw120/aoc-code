@@ -16,6 +16,7 @@
         "ghci",
         "hohoho",
         "hunit",
+        "Lexer",
         "LSHIFT",
         "Monomorphism",
         "Newtype",
@@ -25,6 +26,7 @@
         "Sigs",
         "snoc",
         "unlines",
+        "unwords",
         "vals",
         "venv",
         "vizslas"

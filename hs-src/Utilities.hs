@@ -14,6 +14,8 @@ module Utilities (
     pSignedInt,
     pUnsignedInt,
     pSymbol,
+    readSignedDecimal,
+    readUnsignedDecimal,
     (<|>),
     ($>),
 ) where
@@ -22,7 +24,9 @@ import Control.Applicative ((<|>))
 import Control.Applicative qualified as A (empty)
 import Data.Functor (($>))
 import Data.Text (Text)
+import Data.Text qualified as T (unpack)
 import Data.Text.IO qualified as TIO (readFile)
+import Data.Text.Read qualified as TR (decimal, signed)
 import Data.Void (Void)
 import Text.Megaparsec qualified as M (Parsec, eof, errorBundlePretty, parse)
 import Text.Megaparsec.Char as MC (space1)
@@ -64,3 +68,15 @@ applySolvers solver name = do
     input <- TIO.readFile inputFile
     let (outputA, outputB) = solver input
     return $ outputA <> "\n" <> outputB <> "\n"
+
+-- | Read an unsigned decimal number from text
+readUnsignedDecimal :: Text -> Int
+readUnsignedDecimal t = case TR.decimal t of
+    Right (x, "") -> x
+    _ -> error $ "Invalid number " ++ T.unpack t
+
+-- | Read a signed decimal number from text
+readSignedDecimal :: Text -> Int
+readSignedDecimal t = case TR.signed TR.decimal t of
+    Right (x, "") -> x
+    _ -> error $ "Invalid number " ++ T.unpack t
