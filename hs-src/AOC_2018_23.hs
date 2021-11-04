@@ -1,24 +1,38 @@
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ScopedTypeVariables #-}
+{- |
+ Module      : AOC_2018_23
+ Description : Advent of code 2018 day 23
+ Copyright   : (c) Joe Watson 2021
+ License     : GPL-3
+ Maintainer  : jw1200@gmail.com
+ Stability   : experimental
+-}
+module AOC_2018_23 (solvers) where
 
-module AOC_2018_23 where
+import Data.Foldable qualified as Fold (maximumBy)
+import Data.Ord qualified as Ord (comparing)
+import Data.Text (Text)
+import Data.Text qualified as T (lines, pack)
+import Text.Megaparsec.Char qualified as MC (char, string)
 
-import qualified Data.Attoparsec.ByteString.Char8 as AC
-import Data.ByteString (ByteString)
-import qualified Data.ByteString as B
-import qualified Data.ByteString.Char8 as BC
-import Data.Foldable (maximumBy)
-import Data.Ord (comparing)
+import Utilities (Parser, pSignedInt, pUnsignedInt, parseOrStop)
+
+solvers :: Text -> (Text, Text)
+solvers t =
+    ( T.pack . show $ partA bots
+    , "NYI"
+    )
+  where
+    bots = map (parseOrStop pBot) $ T.lines t
 
 data Bot = Bot
-  { botX :: Int,
-    botY :: Int,
-    botZ :: Int,
-    botR :: Int
-  }
+    { botX :: Int
+    , botY :: Int
+    , botZ :: Int
+    , botR :: Int
+    }
 
 instance Show Bot where
-  show b = "pos=<" ++ show (botX b) ++ "," ++ show (botY b) ++ "," ++ show (botZ b) ++ ">, r=" ++ show (botR b)
+    show b = "pos=<" ++ show (botX b) ++ "," ++ show (botY b) ++ "," ++ show (botZ b) ++ ">, r=" ++ show (botR b)
 
 botDistance :: Bot -> Bot -> Int
 botDistance b1 b2 = distance (botX b1, botY b1, botZ b1) (botX b2, botY b2, botZ b2)
@@ -26,53 +40,37 @@ botDistance b1 b2 = distance (botX b1, botY b1, botZ b1) (botX b2, botY b2, botZ
 distance :: (Int, Int, Int) -> (Int, Int, Int) -> Int
 distance (a, b, c) (d, e, f) = abs (a - d) + abs (b - e) + abs (c - f)
 
--- | Read a Bot record from a line of input
---
--- >>> readBot (BC.pack "pos=<1,1,2>, r=1")
--- pos=<1,1,2>, r=1
-readBot :: ByteString -> Bot
-readBot s = either (error . withInput) id . AC.parseOnly bot $ s
-  where
-    withInput :: String -> String
-    withInput msg = concat [msg, " (reading ", BC.unpack s, ")"]
-    bot :: AC.Parser Bot
-    bot = do
-      _ <- AC.string "pos=<"
-      x <- AC.signed AC.decimal
-      _ <- AC.char ','
-      y <- AC.signed AC.decimal
-      _ <- AC.char ','
-      z <- AC.signed AC.decimal
-      _ <- AC.string ">, r="
-      r <- AC.decimal
-      return Bot {botX = x, botY = y, botZ = z, botR = r}
+pBot :: Parser Bot
+pBot = do
+    x <- MC.string "pos=<" *> pSignedInt
+    y <- MC.char ',' *> pSignedInt
+    z <- MC.char ',' *> pSignedInt
+    r <- MC.string ">, r=" *> pUnsignedInt
+    return Bot{botX = x, botY = y, botZ = z, botR = r}
 
 -- | Solve part A, number of bots in range of the strongest bot
---
--- >>> partA testA
--- 7
 partA :: [Bot] -> Int
 partA bots = length $ filter (<= botR strongestBot) distances
   where
-    strongestBot :: Bot = maximumBy (comparing botR) bots
+    strongestBot :: Bot = Fold.maximumBy (Ord.comparing botR) bots
     distances :: [Int] = map (botDistance strongestBot) bots
 
 -- Octree region of space bounded by x0 <= x <= x1 etc
 data Oct = Oct
-  { x0 :: Int,
-    x1 :: Int,
-    y0 :: Int,
-    y1 :: Int,
-    z0 :: Int,
-    z1 :: Int
-  }
-  deriving (Show)
+    { x0 :: Int
+    , x1 :: Int
+    , y0 :: Int
+    , y1 :: Int
+    , z0 :: Int
+    , z1 :: Int
+    }
+    deriving (Show)
 
-corners :: Oct -> [(Int, Int, Int)]
-corners o = [(x, y, z) | x <- [x0 o, x1 o], y <- [y0 o, y1 o], z <- [z0 o, z1 o]]
+-- corners :: Oct -> [(Int, Int, Int)]
+-- corners o = [(x, y, z) | x <- [x0 o, x1 o], y <- [y0 o, y1 o], z <- [z0 o, z1 o]]
 
-unitSize :: Oct -> Bool
-unitSize o = x0 o == x1 o && y0 o == y1 o && z0 o == z1 o
+-- unitSize :: Oct -> Bool
+-- unitSize o = x0 o == x1 o && y0 o == y1 o && z0 o == z1 o
 
 {-
 
@@ -92,7 +90,7 @@ closestOrigin o = closest (x0 o) (x1 o) + closest (y0 o) (y1 o) + closest (z0 o)
     closest :: Int -> Int -> Int
     closest a b = min (abs a) (abs b)
 
--- | Octtree that spans the points given
+-- | Octree that spans the points given
 --
 -- >>> fullRegion testA
 -- Oct {x0 = 0, x1 = 4, y0 = 0, y1 = 5, z0 = 0, z1 = 3}
@@ -111,7 +109,7 @@ fullRegion bots =
     ys = map y bots
     zs = map z bots
 
--- | Return octtree that is in range of the most points
+-- | Return octree that is in range of the most points
 mostInRange :: [Bot] -> Int
 mostInRange bots = go $ fullRegion bots
   where
@@ -129,7 +127,7 @@ splitOnOct o bots = (filter (isFullyInside o) bots, filter (isFullyOutside o) bo
     neither :: Bot -> Bool
     neither b = not (isFullyInside o b) && not (isFullyOutside o b)
 
--- | Is the bot centre within the Octtree
+-- | Is the bot centre within the Octree
 isInside :: Oct -> Bot -> Bool
 isInside o b =
   x0 o <= x b && x b <= x1 o
@@ -138,7 +136,7 @@ isInside o b =
     && z0 o <= z b
     && z b <= z1 o
 
--- | Is the full range of the bot contained within the Octtree
+-- | Is the full range of the bot contained within the Octree
 isFullyInside :: Oct -> Bot -> Bool
 isFullyInside o b =
   x0 o <= x b - r b && x b + r b <= x1 o
@@ -147,7 +145,7 @@ isFullyInside o b =
     && z0 o <= z b - r b
     && z b + r b <= z1 o
 
--- | Is no part of the range of the bot overlapping the Octtree
+-- | Is no part of the range of the bot overlapping the Octree
 isFullyOutside :: Oct -> Bot -> Bool
 isFullyOutside o b = not (isInside o b) && farAway
   where
@@ -155,23 +153,17 @@ isFullyOutside o b = not (isInside o b) && farAway
 
 -}
 
-main :: IO ()
-main = do
-  bots :: [Bot] <- map readBot . BC.lines <$> B.getContents
-  print $ partA bots
-  print ("NYI" :: String)
-
-testA :: [Bot]
-testA =
-  map
-    readBot
-    [ "pos=<0,0,0>, r=4",
-      "pos=<1,0,0>, r=1",
-      "pos=<4,0,0>, r=3",
-      "pos=<0,2,0>, r=1",
-      "pos=<0,5,0>, r=3",
-      "pos=<0,0,3>, r=1",
-      "pos=<1,1,1>, r=1",
-      "pos=<1,1,2>, r=1",
-      "pos=<1,3,1>, r=1"
-    ]
+-- testA :: [Bot]
+-- testA =
+--     map
+--         readBot
+--         [ "pos=<0,0,0>, r=4"
+--         , "pos=<1,0,0>, r=1"
+--         , "pos=<4,0,0>, r=3"
+--         , "pos=<0,2,0>, r=1"
+--         , "pos=<0,5,0>, r=3"
+--         , "pos=<0,0,3>, r=1"
+--         , "pos=<1,1,1>, r=1"
+--         , "pos=<1,1,2>, r=1"
+--         , "pos=<1,3,1>, r=1"
+--         ]

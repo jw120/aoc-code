@@ -20,6 +20,7 @@
         "LSHIFT",
         "Monomorphism",
         "Newtype",
+        "Octree",
         "RSHIFT",
         "runhaskell",
         "scanl",
