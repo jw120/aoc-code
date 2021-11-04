@@ -26,8 +26,9 @@ solvers t = case T.lines t of
         startState :: State = initialState (readIP ipStr)
         prog :: Program = readProgram progStr
         finalState :: State = run prog startState
-        startState' = startState{registers = registers startState A.// [(0, 1)]}
-        finalState' :: State = run prog startState'
+
+-- startState' = startState{registers = registers startState A.// [(0, 1)]}
+-- finalState' :: State = run prog startState'
 
 type Registers = Array Int Int -- always size 6
 

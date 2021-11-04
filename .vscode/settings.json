@@ -25,6 +25,7 @@
         "scanl",
         "Sigs",
         "snoc",
+        "uncons",
         "unlines",
         "unwords",
         "vals",
@@ -58,5 +59,6 @@
         "ugknbfddgicrmopn",
         "uurcxstgmygtbstg",
         "xxyxx"
-    ]
+    ],
+    "editor.detectIndentation": false
 }

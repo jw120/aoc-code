@@ -55,7 +55,8 @@ import AOC_2018_17 (solvers)
 import AOC_2018_18 (solvers)
 
 -- import AOC_2018_19 (solvers)
--- import AOC_2018_20 (solvers)
+import AOC_2018_20 (solvers)
+
 -- import AOC_2018_21 (solvers)
 -- import AOC_2018_22 (solvers)
 -- import AOC_2018_23 (solvers)
@@ -109,13 +110,13 @@ problems =
     , (AOC_2018_16.solvers, "2018_16", "fast")
     , (AOC_2018_17.solvers, "2018_17", "slow")
     , (AOC_2018_18.solvers, "2018_18", "fast")
-    -- , (AOC_2018_19.solvers, "2018_19", "fast")
-    -- , (AOC_2018_20.solvers, "2018_20", "fast")
-    -- , (AOC_2018_21.solvers, "2018_21", "fast")
-    -- , (AOC_2018_22.solvers, "2018_22", "fast")
-    -- , (AOC_2018_23.solvers, "2018_23", "fast")
-    -- , (AOC_2018_24.solvers, "2018_24", "fast")
-    -- , (AOC_2018_25.solvers, "2018_25", "fast")
+    , -- , (AOC_2018_19.solvers, "2018_19", "fast")
+      (AOC_2018_20.solvers, "2018_20", "slow")
+      -- , (AOC_2018_21.solvers, "2018_21", "fast")
+      -- , (AOC_2018_22.solvers, "2018_22", "fast")
+      -- , (AOC_2018_23.solvers, "2018_23", "fast")
+      -- , (AOC_2018_24.solvers, "2018_24", "fast")
+      -- , (AOC_2018_25.solvers, "2018_25", "fast")
     ]
 
 problemToTest :: (Text -> (Text, Text), String, String) -> TestTree
