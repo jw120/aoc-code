@@ -8,9 +8,12 @@
 -}
 module AOC_2018_12 (solvers) where
 
--- import Data.Map.Lazy (Map)
--- import Data.Map.Lazy qualified as Map (fromList, empty, insert, insertWith, (!))
+import Data.Map.Lazy (Map)
+import Data.Map.Lazy qualified as Map (empty, insert, lookup)
+
 --import Data.List qualified as L (foldl')
+-- import Data.Set (Set)
+-- import Data.Set qualified as Set (empty, insert, member)
 import Data.Text (Text)
 import Data.Text qualified as T (last, lines, null, pack)
 import Text.Megaparsec qualified as M (many)
@@ -20,14 +23,21 @@ import Utilities (Parser, parseOrStop, ($>), (<|>))
 
 solvers :: Text -> (Text, Text)
 solvers t =
-    ( T.pack . show $ run 20 rules initialState
-    , let (rep, n, delta) = untilRepeat rules initialState
-       in T.pack $ show (sumState rep) ++ " " ++ show (n, delta)
+    ( T.pack . show . sumState $ run 20 rules initialState
+    , T.pack . show $ loopsNeeded * loopStep + finalInc + sumState loopState
     )
   where
     ls = T.lines t
     initialState = parseOrStop pInitial $ head ls
     rules = map (parseOrStop pRule) . filter ((== '#') . T.last) $ filter (not . T.null) $ tail ls
+    -- We find that our configuration repeats at loopState -- same state as period generations previously
+    -- with the plant indices shifted the given amount
+    (loopState, generation, period) = untilRepeat rules initialState
+    finalGeneration = 50_000_000_000
+    loopsNeeded = (finalGeneration - generation) `div` period
+    loopStep = sumState (run period rules loopState) - sumState loopState
+    remainingSteps = finalGeneration - (generation + period * loopsNeeded)
+    finalInc = sumState (run remainingSteps rules loopState) - sumState loopState
 
 newtype State = State [(Int, Bool)] deriving (Eq)
 
@@ -89,14 +99,23 @@ run n rules s
     | n == 0 = s
     | otherwise = error "bad run"
 
--- | Sum of number of trues in a State
+-- | Sum of number of true values in a State
 sumState :: State -> Int
 sumState (State s) = sum . map fst $ filter snd s
 
 -- | Iterate until a state's plants repeats (irrespective of numbering)
 untilRepeat :: [Rule] -> State -> (State, Int, Int)
-untilRepeat rules s = go 1 s (apply rules s)
+untilRepeat rules = go 0 Map.empty
   where
-    go i s1@(State x1) s2@(State x2)
-        | map snd x1 == map snd x2 = (s1, i, fst (head x2) - fst (head x1))
-        | otherwise = go (i + 1) s2 (apply rules s2)
+    go :: Int -> Map [Int] Int -> State -> (State, Int, Int)
+    go generation visited s =
+        let sFingerPrint = fingerprint s
+         in case Map.lookup sFingerPrint visited of
+                Just previousGeneration ->
+                    (s, generation, generation - previousGeneration)
+                Nothing -> go (generation + 1) (Map.insert sFingerPrint generation visited) (apply rules s)
+    -- represent state by the indices of the plants relative to first plant
+    fingerprint :: State -> [Int]
+    fingerprint (State xs) = case map fst (filter snd xs) of
+        firstIndex : otherIndices -> map (\i -> i - firstIndex) otherIndices
+        [] -> []
