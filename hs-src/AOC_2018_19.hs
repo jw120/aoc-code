@@ -5,6 +5,53 @@
  License     : GPL-3
  Maintainer  : jw1200@gmail.com
  Stability   : experimental
+
+Day 19 involves running a program on the device that (disassembly show) returns the sum of factors of a large integer.
+The part B version takes an unfeasible length of time, so we have to shortcut its solution.
+
+Program below
+    - First jumps to instruction 17 and sets r5 to the target value
+    - Then jumps nack to instruction 1 and accumulates in r0 all the factors of r5 by cycling over r1 and r2
+
+cspell:disable
+#ip 4
+0   addi 4 16 4     goto 17L                   jmp +16
+1L  seti 1 5 1      r1 = 1
+2L  seti 1 2 2      r2 = 2
+3L   mulr 1 2 3     r3 = r1 * r2
+4   eqrr 3 5 3      if r3 == r5: r0+=r1        r3 = r3 == r5
+5   addr 3 4 4
+6   addi 4 1 4
+7   addr 1 0 0
+8   addi 2 1 2      r2 += 1
+9   gtrr 2 5 3      if r2 <= r5: jmp 3L        r3 = r2 > r5
+10  addr 4 3 4
+11  seti 2 7 4
+12  addi 1 1 1      r1 += 1
+13  gtrr 1 5 3      if r1 <= r5: jmp 2L
+14  addr 3 4 4
+15  seti 1 9 4
+16  mulr 4 4 4      halt                        ip = 256
+17L addi 5 2 5                                  r5 += 2
+18  mulr 5 5 5                                  r5 = r5 * r5
+19  mulr 4 5 5                                  r5 = r4 * r5
+20  muli 5 11 5     r5 = 11 * r4*(r5 + 2)^2     r5 = r5 * 11
+21  addi 3 1 3                                  r3++
+22  mulr 3 4 3                                  r3=r3*r4
+23  addi 3 18 3     r3 = (r3 + 1)*r4 + 18       r3 += 18
+24  addr 5 3 5      r5 = r3 + r5                r5 = r3 + r5
+25  addr 4 0 4      ip += r0
+26  seti 0 3 4      r4 = 0                      r4 = 0
+27  setr 4 2 3      r3 = r4                     r3 = r4
+28  mulr 3 4 3      r3 *= r4
+29  addr 4 3 3      r3 += r4
+30  mulr 4 3 3      r3 *= r4
+31  muli 3 14 3     r3 *= 14
+32  mulr 3 4 3      r3 *= r4
+33  addr 5 3 5      r5 += r3
+34  seti 0 4 0      r0 = 0
+35  seti 0 5 4      jump L1
+cspell:disable
 -}
 module AOC_2018_19 (solvers) where
 
@@ -19,16 +66,17 @@ solvers :: Text -> (Text, Text)
 solvers t = case T.lines t of
     [] -> error "No input"
     (ipStr : progStr) ->
-        ( T.pack . show $ registers finalState A.! 0
-        , "NYI" -- T.pack . show $ registers finalState' A.! 0
+        ( T.pack . show $ sumFactors a
+        , T.pack . show $ sumFactors b
         )
       where
-        startState :: State = initialState (readIP ipStr)
         prog :: Program = readProgram progStr
-        finalState :: State = run prog startState
-
--- startState' = startState{registers = registers startState A.// [(0, 1)]}
--- finalState' :: State = run prog startState'
+        aStart :: State = initialState (readIP ipStr)
+        bStart :: State = aStart{registers = registers aStart A.// [(0, 1)]}
+        a :: Int = (A.! 5) . registers $ runUntil 1 prog aStart
+        b :: Int = (A.! 5) . registers $ runUntil 1 prog bStart
+        sumFactors :: Int -> Int
+        sumFactors x = sum [i | i <- [1 .. x], x `mod` i == 0]
 
 type Registers = Array Int Int -- always size 6
 
@@ -90,11 +138,7 @@ instance Show Instruction where
 
 type Program = Array Int Instruction
 
-{- | Read an instruction
-
- >>> readInstruction "seti 6 0 2"
- Seti 6 0 2
--}
+-- | Read an instruction
 readInstruction :: Text -> Instruction
 readInstruction t = case T.words t of
     [opString, aString, bString, cString] ->
@@ -110,29 +154,13 @@ readInstruction t = case T.words t of
 readProgram :: [Text] -> Program
 readProgram ts = A.listArray (0, length ts - 1) $ map readInstruction ts
 
-{- | Read the IP assignment line
-
- >>> readIP "#ip 4"
- 4
--}
+-- | Read the IP assignment line
 readIP :: Text -> Int
 readIP t = case T.words t of
     ["#ip", ipText] -> readUnsignedDecimal ipText
     _ -> error $ "Invalid ip line" ++ T.unpack t
 
-{- | Step one instruction of the program
-
- >>> step (initialState 0) testProgram
- 1:[0,5,0,0,0,0]
- >>> step (step (initialState 0) testProgram) testProgram
- 2:[1,5,6,0,0,0]
- >>> step (step (step (initialState 0) testProgram) testProgram) testProgram
- 4:[3,5,6,0,0,0]
- >>> step (step (step (step (initialState 0) testProgram) testProgram) testProgram) testProgram
- 6:[5,5,6,0,0,0]
- >>> step (step (step (step (step (initialState 0) testProgram) testProgram) testProgram) testProgram) testProgram
- 7:[6,5,6,0,0,9]
--}
+-- | Step one instruction of the program
 step :: State -> Program -> State
 step s p = s{registers = r', ipValue = ipValue'}
   where
@@ -162,15 +190,14 @@ step s p = s{registers = r', ipValue = ipValue'}
 
 -- cspell:enable
 
-{- | Run the program until it halts
-
- >>> run testProgram (initialState 0)
- 7:[6,5,6,0,0,9]
--}
-run :: Program -> State -> State
-run p = go
+-- | Run the program until it halts or reaches the given IP value
+runUntil :: Int -> Program -> State -> State
+runUntil x p = go
   where
     go :: State -> State
     go s
-        | ipValue s >= 0 && ipValue s < length p = go (step s p)
+        | ipValue s >= 0 && ipValue s < length p && ipValue s /= x = go (step s p)
         | otherwise = s
+
+-- showSome :: Int -> Program -> State -> Text
+-- showSome n program state = T.unlines . map (T.pack . show) . take n . zip [0 :: Int ..] $ iterate (`step` program) state

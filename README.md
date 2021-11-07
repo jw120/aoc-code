@@ -34,7 +34,6 @@ Assumes `../aoc-data` (which is a private repo) holds personalized input data an
 
 ## TODO
 
-- Haskell 2018 - get doctest to work
 - Haskell 2018 - fill in missing
 - Haskell 2018 - linting and warnings
 - Python 2020 - Speed up slow solutions
@@ -57,6 +56,8 @@ To improve
 Can we make solvers have type: (Show a, Show b) => Text -> (a, b) without having string output printed within quotes
 
 Hints used - 2015/9 - ran web code to spot my error (missing a city)
+    + 2018/19 googled a hint before disassembling
+
 
 
 

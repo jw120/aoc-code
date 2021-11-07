@@ -29,7 +29,7 @@ import Data.Set qualified as Set (
  )
 
 import Data.Text (Text)
-import Data.Text qualified as T (cons, head, init, last, null, pack, tail, uncons, unpack)
+import Data.Text qualified as T (cons, init, pack, tail, uncons, unpack)
 
 solvers :: Text -> (Text, Text)
 solvers t =
@@ -153,17 +153,17 @@ remaining n doors = totalRooms - floodTo n doors
     xRoomCount = 1 + (xDoorMax - xDoorMin) `div` 2
     yRoomCount = 1 + (yDoorMax - yDoorMin) `div` 2
 
--- | Generate a set of the positions adjacent to the given position
-neighbours :: Position -> Set Position
-neighbours p = Set.fromList [step North p, step East p, step South p, step West p]
+-- -- | Generate a set of the positions adjacent to the given position
+-- neighbours :: Position -> Set Position
+-- neighbours p = Set.fromList [step North p, step East p, step South p, step West p]
 
--- | Call the solver
-runRegex :: Text -> Int
-runRegex = flood . parseRegex
+-- -- | Call the solver
+-- runRegex :: Text -> Int
+-- runRegex = flood . parseRegex
 
-parseRegex :: Text -> Set Position
-parseRegex s
-    | T.null s = error "Null string"
-    | T.head s /= '^' = error "Missing ^"
-    | T.last s /= '$' = error "Missing $"
-    | otherwise = readPath . T.init $ T.tail s
+-- parseRegex :: Text -> Set Position
+-- parseRegex s
+--     | T.null s = error "Null string"
+--     | T.head s /= '^' = error "Missing ^"
+--     | T.last s /= '$' = error "Missing $"
+--     | otherwise = readPath . T.init $ T.tail s
