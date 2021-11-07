@@ -53,7 +53,7 @@ cspell:disable
 35  seti 0 5 4      jump L1
 cspell:disable
 -}
-module AOC_2018_19 (solvers) where
+module AOC_2018_19 (solvers, initialState, readIP, readProgram, runUntil, step, Program, State (..)) where
 
 import Data.Array.IArray (Array)
 import Data.Array.IArray qualified as A (elems, listArray, (!), (//))
