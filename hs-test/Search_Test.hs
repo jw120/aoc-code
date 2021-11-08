@@ -13,8 +13,12 @@ maze1 =
     [ "#..E"
     , "S.##"
     ]
-maze1Path :: [MazePosition]
-maze1Path = [(0,1),(1,1),(1,0),(2,0),(3,0)]
+
+unit_basic_maze_1 :: IO ()
+unit_basic_maze_1 =
+    let (moves, _, start, finish) = mkMaze maze1
+    in bfsBasic moves start finish @?= Just (4, [(0,1),(1,1),(1,0),(2,0),(3,0)])
+
 
 -- Very simple maze to test bfsBasic
 maze2 :: [String]
@@ -25,8 +29,11 @@ maze2 =
     , "##.#."
     , ".S..."
     ]
-maze2PathLength :: Int
-maze2PathLength :: Int = 12
+
+unit_basic_maze_2 :: IO ()
+unit_basic_maze_2 =
+    let (moves, _, start, finish) = mkMaze maze2
+    in (\(x, y) -> (x, length y)) <$> bfsBasic moves start finish @?= Just (11, 12)
 
 -- Very simple maze with no solution to test bfsBasic
 maze3 :: [String]
@@ -37,10 +44,15 @@ maze3 =
     , "##.#."
     , ".S..."
     ]
+unit_basic_maze_3 :: IO ()
+unit_basic_maze_3 =
+    let (moves, _, start, finish) = mkMaze maze3
+    in bfsBasic moves start finish @?= Nothing
 
 
-mkMaze :: [String] -> (MazePosition -> [MazePosition], MazePosition, MazePosition)
-mkMaze xs = (moves, start, finish)
+-- Provide drivers for mazes with bfsBasic and bfsVariable
+mkMaze :: [String] -> (MazePosition -> [MazePosition], Int -> MazePosition -> [MazePosition], MazePosition, MazePosition)
+mkMaze xs = (movesBasic, movesVariable, start, finish)
     where
         tagged :: [(MazePosition, Char)] =
             [((i, j), c) | (j, row) <- zip [0..] xs, (i, c) <- zip [0..] row]
@@ -49,26 +61,18 @@ mkMaze xs = (moves, start, finish)
         height = length xs
         start = fst . head $ filter ((== 'S') . snd) tagged
         finish = fst . head $ filter ((== 'E') . snd) tagged
-        moves :: MazePosition -> [MazePosition]
-        moves p = filter open . filter inBounds $ adjacents p
+        -- basic moves: N/E/S/W
+        movesBasic :: MazePosition -> [MazePosition]
+        movesBasic p = filter open . filter inBounds $ simpleAdjacents p
+        -- variable length moves. N/E/S/W moves have length 2, diagonal moves have length 3
+        movesVariable :: Int -> MazePosition -> [MazePosition]
+        movesVariable 2 p = filter open . filter inBounds $ simpleAdjacents p
+        movesVariable 3 p = filter open . filter inBounds $ adjacents p
             where
-                adjacents (i, j) = [(i - 1, j), (i, j - 1), (i + 1, j), (i, j + 1)]
-                inBounds (i, j) = i >=0 && i < width && j >=0 && j < height
-                open (i, j) = grid A.! (i, j)
+                adjacents (i, j) = [ (i - 1, j - 1), (i + 1, j - 1), (i - 1, j + 1), (i + 1, j + 1)]
+        movesVariable _ p = []
+        simpleAdjacents (i, j) = [(i - 1, j), (i, j - 1), (i + 1, j), (i, j + 1)]
+        inBounds (i, j) = i >=0 && i < width && j >=0 && j < height
+        open (i, j) = grid A.! (i, j)
 
 
-unit_search_maze_1 :: IO ()
-unit_search_maze_1 =
-    let (moves, start, finish) = mkMaze maze1
-    in bfsBasic moves start finish @?= Just maze1Path
-
-unit_search_maze_2 :: IO ()
-unit_search_maze_2 =
-    let (moves, start, finish) = mkMaze maze2
-    in length <$> bfsBasic moves start finish @?= Just maze2PathLength
-
-
-unit_search_maze_3 :: IO ()
-unit_search_maze_3 =
-    let (moves, start, finish) = mkMaze maze3
-    in bfsBasic moves start finish @?= Nothing
