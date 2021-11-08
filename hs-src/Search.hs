@@ -10,7 +10,7 @@ module Search (bfsBasic, bfsVariable) where
 
 import Data.List qualified as L (foldl')
 import Data.Map (Map)
-import Data.Map qualified as Map (empty, fromList, keys, keysSet, lookup, singleton, union)
+import Data.Map qualified as Map (empty, filter, fromList, keys, keysSet, lookup, map, null, singleton, toList, union)
 import Data.Set (Set)
 import Data.Set qualified as Set (difference, fromList, member, null, singleton, toList, union)
 
@@ -24,18 +24,12 @@ bfsBasic ::
     position ->
     -- | Starting state
     position ->
-    -- | Returns one of the shortest paths from start to finish if one exists
+    -- | Returns distance from start to finish and one of the shortest back-paths from finish to start if one exists
     Maybe (Int, [position])
 bfsBasic moves finishPosition startPosition =
-    case go (0, Set.singleton startPosition, Set.singleton startPosition, Map.singleton startPosition Nothing) of
+    case go 0 (Set.singleton startPosition) (Set.singleton startPosition) (Map.singleton startPosition Nothing) of
         Nothing -> Nothing
-        Just (distance, _, _, backtrackMap) -> Just $ (distance, traceBack finishPosition)
-          where
-            traceBack :: position -> [position]
-            traceBack p = case Map.lookup p backtrackMap of
-                Just (Just p') -> p : traceBack p'
-                Just Nothing -> [p]
-                Nothing -> error "Lost our way on trackback"
+        Just (distance, _, _, trackBackMap) -> Just (distance, trackBack trackBackMap finishPosition)
   where
     go ::
         -- | Distance from starting position
@@ -50,7 +44,7 @@ bfsBasic moves finishPosition startPosition =
     go distance visited frontier traceBack
         | finishPosition `Set.member` frontier = Just (distance, visited, frontier, traceBack)
         | Set.null frontier = Nothing
-        | otherwise = go (distance + 1, visited', frontier', traceBack')
+        | otherwise = go (distance + 1) visited' frontier' traceBack'
       where
         movesFromFrontier = L.foldl' addNextPositions Map.empty $ Set.toList frontier
         frontier' = Set.fromList (Map.keys movesFromFrontier) `Set.difference` visited
@@ -73,96 +67,43 @@ bfsVariable ::
     position ->
     -- | Starting state
     position ->
-    -- | Returns one of the shortest paths from start to finish if one exists
+    -- | Returns distance from start to finish and one of the shortest back-paths from finish to start if one exists
     Maybe (Int, [position])
 bfsVariable moves longestMove finishPosition startPosition =
-    case go (0, Set.singleton startPosition, Set.singleton startPosition, Map.singleton startPosition Nothing) of
+    case go 0 (Map.singleton startPosition 0) (Map.singleton startPosition 0) (Map.singleton startPosition Nothing) of
         Nothing -> Nothing
-        Just (distance, _, _, backtrackMap) -> Just $ (distance, traceBack finishPosition)
-          where
-            traceBack :: position -> [position]
-            traceBack p = case Map.lookup p backtrackMap of
-                Just (Just p') -> p : traceBack p'
-                Just Nothing -> [p]
-                Nothing -> error "Lost our way on trackback"
+        Just (distance, _, _, trackBackMap) -> Just (distance, trackBack trackBackMap finishPosition)
   where
     go ::
         -- | Distance from starting position
         Int ->
-        -- | All the positions which we have visited
-        Set position ->
-        -- | Frontier subset of visited positions - only consider moves from here. Up to longestMove steps behind
-        Set position ->
+        -- | All the positions which we have visited and the distances they were reached on.
+        Map position Int ->
+        -- | Frontier subset of visited positions and the distances they were reached on.
+        -- We only consider moves from here. Up to longestMove steps behind
+        Map position Int ->
         -- Map for back-tracking, holds the incoming position for each visited position
         Map position (Maybe position) ->
-        Maybe (Int, Set position, Set position, Map position (Maybe position))
-
-        (Int, Set position, Set position, Map position (Maybe position)) ->
-        Maybe (Int, Set position, Set position, Map position (Maybe position))
-    go (distance, lastChangeDistance, visited, frontier, traceBack) -- frontier is a subset of (the keys in) visited
-        | finishPosition `Set.member` frontier = Just (distance, lastChangeDistance, visited, frontier, traceBack)
-        | distance > lastChangeDistance + longestMove = Nothing
-        | otherwise = go (distance + 1, lastChangeDistance, visited', frontier', traceBack')
+        Maybe (Int, Map position Int, Map position Int, Map position (Maybe position))
+    go distance visited frontier traceBack = case Map.lookup finishPosition frontier of
+        Just finishDistance -> Just (finishDistance, visited, frontier, traceBack)
+        Nothing ->
+            if Map.null frontier
+                then Nothing
+                else go (distance + 1) visited' frontier' traceBack'
       where
-        movesFromFrontier = L.foldl' addNextPositions Map.empty $ Set.toList frontier
-        frontier' = Set.fromList (Map.keys movesFromFrontier) `Set.difference` visited
-        visited' = visited `Set.union` Map.keysSet movesFromFrontier
-        traceBack' = traceBack `Map.union` movesFromFrontier
-        lastChange
-        addNextPositions :: Map position (Maybe position) -> position -> Map position (Maybe position)
-        addNextPositions m pos = Map.union m nextPositions
+        movesFromFrontier = L.foldl' addNextPositions Map.empty $ Map.toList frontier
+        visited' = visited `Map.union` Map.map fst movesFromFrontier
+        frontier' = Map.filter (> distance - longestMove) visited'
+        traceBack' = traceBack `Map.union` Map.map snd movesFromFrontier
+        addNextPositions :: Map position (Int, Maybe position) -> (position, Int) -> Map position (Int, Maybe position)
+        addNextPositions m (pos, dist) = Map.union m nextPositions
           where
-            nextPositions = Map.fromList . map (,Just pos) $ moves (distance - lastChangeDistance) pos
+            nextPositions = Map.fromList . map (,(distance, Just pos)) $ moves (distance - dist) pos
 
-{-
-
-{- | Simple breadth-first search with single-distance steps and potentially multiple end-states
- Returns first final state found and map for backtracking
--}
-bfs ::
-    forall position.
-    Ord position =>
-    -- | Function to generates list of moves available from current position that are within the given distance
-    (position -> [position]) ->
-    -- | Function to test if the current position is a finish state
-    (position -> Bool) ->
-    -- | Starting state
-    position ->
-    -- | Returns least-distance final positions and distance from the start and a map that gives (one of) the positions
-    -- from which that position is reached
-    Maybe (Map position (Maybe position), Set position)
-bfs moves isFinish startPosition = go (Map.singleton startPosition Nothing, Set.singleton startPosition)
-  where
-    go ::
-        (Map position (Maybe position), Set position) ->
-        Maybe (Map position (Maybe position), Set position)
-    go (visited, frontier) -- frontier is a subset of (the keys in) visited
-        | not (Set.null finishedFrontier) = Just (visited, finishedFrontier)
-        | otherwise = go (newVisited, newFrontier)
-      where
-        finishedFrontier :: Set position = Set.filter isFinish frontier
-        newVisited :: Map position (Maybe position) = L.foldl' addNextPositions Map.empty $ Set.toList frontier
-        addNextPositions :: Map position (Maybe position) -> position -> Map position (Maybe position)
-        addNextPositions m pos = Map.union m nextPositions
-            where nextPositions = Map.fromList . map (\next -> (next, Just pos)) $ moves pos
-        beyondFrontier = Set.fromList . concatMap . map (\pos -> (pos, moves pos)) $ Set.toList frontier
-        newFrontier = beyondFrontier `Set.difference` Map.keysSet visited
-        newFrontierMap = Map.fromList $ map (\pos -> (pos, newFrontier
-        newVisited = visited
-
-{-
-f= {0} v = {}
-f = {1, 2}. v = {}
-
--}
-
--- case moves (pos, dist) of
--- [] -> Nothing
--- (nextPos, nextDist) : _ -> case Map.lookup nextPos visited of
---     Nothing ->
-
---     go ((pos', dist'), visited')
---     where
---         visited' = Map.insert
-
--}
+-- Construct backward path from finish to start from backtrack map
+trackBack :: Ord position => Map position (Maybe position) -> position -> [position]
+trackBack m p = case Map.lookup p m of
+    Just (Just p') -> p : trackBack m p'
+    Just Nothing -> [p]
+    Nothing -> error "Lost our way on trackback"

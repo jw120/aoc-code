@@ -4,6 +4,7 @@
         "akitas",
         "assocs",
         "attoparsec",
+        "Bifunctor",
         "bytestring",
         "concat",
         "doctest",
