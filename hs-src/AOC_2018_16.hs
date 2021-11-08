@@ -20,7 +20,7 @@ import Data.Text qualified as T (breakOn, drop, lines, pack, snoc, stripPrefix, 
 
 solvers :: Text -> (Text, Text)
 solvers t =
-    ( T.pack . show $ length (filter ((>= 3) . length) (map possOps samples))
+    ( T.pack . show $ length (filter ((>= 3) . length) (map possibleOps samples))
     , T.pack . show $ output A.! 0
     )
   where
@@ -68,6 +68,7 @@ applyAs op i r = r A.// [(c, newVal)]
   where
     (a, b, c) = (i A.! 1, i A.! 2, i A.! 3)
     newVal = case op of
+        -- cspell:disable
         Addr -> r A.! a + r A.! b
         Addi -> r A.! a + b
         Mulr -> r A.! a * r A.! b
@@ -87,14 +88,17 @@ applyAs op i r = r A.// [(c, newVal)]
 
 {- | Which Operations are possible interpretations of the instruction and before/after registers
 
- >>> possOps ((ar [3,2,1,1]),(ar [9,2,1,2]),(ar [3,2,2,1]))
+ >>> possibleOps ((ar [3,2,1,1]),(ar [9,2,1,2]),(ar [3,2,2,1]))
  [Addi,Mulr,Seti]
 -}
-possOps :: (Registers, Instruction, Registers) -> [Operation]
-possOps (r, i, r') = filter poss allOperations
+
+-- cspell:enable
+
+possibleOps :: (Registers, Instruction, Registers) -> [Operation]
+possibleOps (r, i, r') = filter possible allOperations
   where
-    poss :: Operation -> Bool
-    poss op = applyAs op i r == r'
+    possible :: Operation -> Bool
+    possible op = applyAs op i r == r'
 
 -- Assign possible operations to each opcode
 assignOpcodes :: [(Registers, Instruction, Registers)] -> Map Int [Operation]
@@ -106,7 +110,7 @@ assignOpcodes = L.foldl' assign Map.empty
         Nothing -> Map.insert code p' m
       where
         code = i A.! 0
-        p' = possOps (r, i, r')
+        p' = possibleOps (r, i, r')
 
 -- Allocate opcodes to each instruction
 deduceOpcodes :: Map Int [Operation] -> Map Int Operation

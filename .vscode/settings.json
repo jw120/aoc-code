@@ -9,6 +9,7 @@
         "doctest",
         "Elem",
         "elems",
+        "Eqrr",
         "fmap",
         "foldl",
         "GADT",
