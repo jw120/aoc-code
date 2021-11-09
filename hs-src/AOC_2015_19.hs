@@ -13,7 +13,7 @@ import Data.Map qualified as Map (empty, insertWith, keys)
 
 -- import Data.Map.Lazy (Map)
 import Data.Set (Set)
-import Data.Set qualified as Set (difference, empty, filter, fromList, member, null, singleton, size, toList, union, unions)
+import Data.Set qualified as Set (empty, fromList, size, toList, union)
 import Data.Text (Text)
 import Data.Text qualified as T (cons, lines, null, pack, singleton, strip, unpack)
 
@@ -21,6 +21,7 @@ import Debug.Trace (trace)
 import Text.Megaparsec qualified as M (optional, some)
 import Text.Megaparsec.Char qualified as MC (letterChar, lowerChar, string)
 
+import Search qualified (bfsBasic)
 import Utilities (Parser, parseOrStop)
 
 solvers :: Text -> (Text, Text)
@@ -40,11 +41,11 @@ numMolecules :: Molecule -> [Replacement] -> Int
 numMolecules molecule = Set.size . L.foldl' addReplacements Set.empty
   where
     addReplacements :: Set Molecule -> (Atom, Molecule) -> Set Molecule
-    addReplacements s (a, m) = s `Set.union` replacements (a, m) molecule
+    addReplacements s (a, m) = s `Set.union` Set.fromList (replacements (a, m) molecule)
 
 -- Molecules reached by applying one replacement
-replacements :: (Atom, Molecule) -> Molecule -> Set Molecule
-replacements (target, replacement) m = Set.fromList . concatMap replace $ zip (L.inits m) (L.tails m)
+replacements :: (Atom, Molecule) -> Molecule -> [Molecule]
+replacements (target, replacement) m = concatMap replace $ zip (L.inits m) (L.tails m)
   where
     replace :: (Molecule, Molecule) -> [Molecule]
     replace (h, t : ts)
@@ -52,21 +53,32 @@ replacements (target, replacement) m = Set.fromList . concatMap replace $ zip (L
         | otherwise = []
     replace (_, []) = []
 
+-- custom code replaced with Search.bfsBasic
+--
+-- -- bfs search to find
+-- stepsTo :: Molecule -> [Replacement] -> Int
+-- stepsTo target rules = go 0 start Set.empty
+--   where
+--     start :: Set Molecule = Set.singleton $ [Atom "e"]
+--     go :: Int -> Set Molecule -> Set Molecule -> Int
+--     go stepsDone frontier visited
+--         | target `Set.member` frontier = stepsDone
+--         | Set.null frontier = error "Failed - empty frontier"
+--         | otherwise = go (stepsDone + 1) frontier''' visited'
+--       where
+--         visited' = visited `Set.union` frontier
+--         frontier' = Set.unions [replacements r f | r <- rules, f <- Set.toList frontier]
+--         frontier'' = frontier' `Set.difference` visited'
+--         frontier''' = Set.filter ((<= length target) . length) frontier''
+
 -- bfs search to find
 stepsTo :: Molecule -> [Replacement] -> Int
-stepsTo target rules = go 0 start Set.empty
+stepsTo target rules = case Search.bfsBasic moves target [Atom "e"] of
+    Just (steps, _path) -> steps
+    Nothing -> error "No path found in stepsTo"
   where
-    start :: Set Molecule = Set.singleton $ [Atom "e"]
-    go :: Int -> Set Molecule -> Set Molecule -> Int
-    go stepsDone frontier visited
-        | target `Set.member` frontier = stepsDone
-        | Set.null frontier = error "Failed - empty frontier"
-        | otherwise = go (stepsDone + 1) frontier''' visited'
-      where
-        visited' = visited `Set.union` frontier
-        frontier' = Set.unions [replacements r f | r <- rules, f <- Set.toList frontier]
-        frontier'' = frontier' `Set.difference` visited'
-        frontier''' = Set.filter ((<= length target) . length) frontier''
+    moves :: Molecule -> [Molecule]
+    moves m = concatMap (`replacements` m) rules
 
 -- showMoleculeSet :: Set Molecule -> String
 -- showMoleculeSet = show . map showMolecule . Set.toList
