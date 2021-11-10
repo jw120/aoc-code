@@ -14,6 +14,8 @@ import Data.Map qualified as Map (empty, filter, fromList, keys, keysSet, lookup
 import Data.Set (Set)
 import Data.Set qualified as Set (difference, fromList, member, null, singleton, toList, union)
 
+--import Debug.Trace (trace)
+
 -- | Basic breadth-first search with single-distance steps and single end-state. Returns distance and path.
 bfsBasic ::
     forall position.
