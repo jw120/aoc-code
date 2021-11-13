@@ -8,6 +8,7 @@
 -}
 module Search (bfsBasic, bfsVariable) where
 
+import Control.Monad (foldM)
 import Data.List qualified as L (foldl')
 import Data.Map (Map)
 import Data.Map qualified as Map (empty, filter, fromList, keys, keysSet, lookup, map, null, singleton, toList, union)
@@ -59,10 +60,10 @@ bfsBasic moves finishPosition startPosition =
 
 -- | Breadth-first search with variable-distance steps and single end-state. Returns distance and path.
 bfsVariable ::
-    forall position.
-    Ord position =>
+    forall position m.
+    (Ord position, Monad m) =>
     -- | Function to generates list of moves with the given incremental distance available from current position
-    (Int -> position -> [position]) ->
+    (Int -> position -> m [position]) ->
     -- Longest distance move to be consider
     Int ->
     -- | Finish state
@@ -70,9 +71,10 @@ bfsVariable ::
     -- | Starting state
     position ->
     -- | Returns distance from start to finish and one of the shortest back-paths from finish to start if one exists
-    Maybe (Int, [position])
-bfsVariable moves longestMove finishPosition startPosition =
-    case go 0 (Map.singleton startPosition 0) (Map.singleton startPosition 0) (Map.singleton startPosition Nothing) of
+    m (Maybe (Int, [position]))
+bfsVariable moves longestMove finishPosition startPosition = do
+    goValue <- go 0 (Map.singleton startPosition 0) (Map.singleton startPosition 0) (Map.singleton startPosition Nothing)
+    return $ case goValue of
         Nothing -> Nothing
         Just (distance, _, _, trackBackMap) -> Just (distance, trackBack trackBackMap finishPosition)
   where
@@ -86,22 +88,31 @@ bfsVariable moves longestMove finishPosition startPosition =
         Map position Int ->
         -- Map for back-tracking, holds the incoming position for each visited position
         Map position (Maybe position) ->
-        Maybe (Int, Map position Int, Map position Int, Map position (Maybe position))
+        m (Maybe (Int, Map position Int, Map position Int, Map position (Maybe position)))
     go distance visited frontier traceBack = case Map.lookup finishPosition frontier of
-        Just finishDistance -> Just (finishDistance, visited, frontier, traceBack)
+        Just finishDistance -> return $ Just (finishDistance, visited, frontier, traceBack)
         Nothing ->
             if Map.null frontier
-                then Nothing
-                else go (distance + 1) visited' frontier' traceBack'
+                then return Nothing
+                else do
+                    v <- visited'
+                    f <- frontier'
+                    t <- traceBack'
+                    go (distance + 1) v f t
       where
-        movesFromFrontier = L.foldl' addNextPositions Map.empty $ Map.toList frontier
-        visited' = visited `Map.union` Map.map fst movesFromFrontier
-        frontier' = Map.filter (> distance - longestMove) visited'
-        traceBack' = traceBack `Map.union` Map.map snd movesFromFrontier
-        addNextPositions :: Map position (Int, Maybe position) -> (position, Int) -> Map position (Int, Maybe position)
-        addNextPositions m (pos, dist) = Map.union m nextPositions
-          where
-            nextPositions = Map.fromList . map (,(distance, Just pos)) $ moves (distance - dist) pos
+        movesFromFrontier :: m (Map position (Int, Maybe position))
+        movesFromFrontier = foldM addNextPositions Map.empty $ Map.toList frontier
+        visited' :: m (Map position Int)
+        visited' = (\ms -> visited `Map.union` Map.map fst ms) <$> movesFromFrontier
+        frontier' :: m (Map position Int)
+        frontier' = Map.filter (> distance - longestMove) <$> visited'
+        traceBack' :: m (Map position (Maybe position))
+        traceBack' = (\ms -> traceBack `Map.union` Map.map snd ms) <$> movesFromFrontier
+        addNextPositions :: Map position (Int, Maybe position) -> (position, Int) -> m (Map position (Int, Maybe position))
+        addNextPositions m (pos, dist) = do
+            available <- moves (distance - dist) pos
+            let nextPositions = Map.fromList . map (,(distance, Just pos)) $ available
+            return $ Map.union m nextPositions
 
 -- Construct backward path from finish to start from backtrack map
 trackBack :: Ord position => Map position (Maybe position) -> position -> [position]

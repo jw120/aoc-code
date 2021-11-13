@@ -2,6 +2,8 @@ module Search_Test where
 
 import Test.Tasty.HUnit ((@?=))
 
+import Control.Monad.State.Strict (State)
+import Control.Monad.State.Strict qualified as State (evalState)
 import Data.Array qualified as A (array, (!))
 import Data.Bifunctor qualified as Bifunctor (second)
 import Search (bfsBasic, bfsVariable)
@@ -23,7 +25,9 @@ unit_basic_maze_1 =
 unit_variable_maze_1 :: IO ()
 unit_variable_maze_1 =
     let (_, moves, start, finish) = mkMaze maze1
-     in Bifunctor.second length <$> bfsVariable moves 3 finish start @?= Just (7, 4)
+        moves' :: Int -> (Int, Int) -> State () [(Int, Int)]
+        moves' d p = return $ moves d p
+     in Bifunctor.second length <$> State.evalState (bfsVariable moves' 3 finish start) () @?= Just (7, 4)
 
 -- Very simple maze to test bfsBasic
 maze2 :: [String]
@@ -43,7 +47,9 @@ unit_basic_maze_2 =
 unit_variable_maze_2 :: IO ()
 unit_variable_maze_2 =
     let (_, moves, start, finish) = mkMaze maze2
-     in bfsVariable moves 3 finish start @?= Just (18, [(4, 0), (3, 0), (2, 0), (1, 0), (0, 1), (1, 2), (2, 3), (1, 4)])
+        moves' :: Int -> (Int, Int) -> State () [(Int, Int)]
+        moves' d p = return $ moves d p
+     in State.evalState (bfsVariable moves' 3 finish start) () @?= Just (18, [(4, 0), (3, 0), (2, 0), (1, 0), (0, 1), (1, 2), (2, 3), (1, 4)])
 
 -- Very simple maze with no solution to test bfsBasic
 maze3 :: [String]
@@ -62,7 +68,9 @@ unit_basic_maze_3 =
 unit_variable_maze_3 :: IO ()
 unit_variable_maze_3 =
     let (_, moves, start, finish) = mkMaze maze3
-     in bfsVariable moves 3 finish start @?= Nothing
+        moves' :: Int -> (Int, Int) -> State () [(Int, Int)]
+        moves' d p = return $ moves d p
+     in State.evalState (bfsVariable moves' 3 finish start) () @?= Nothing
 
 -- Provide drivers for mazes with bfsBasic and bfsVariable
 mkMaze :: [String] -> (MazePosition -> [MazePosition], Int -> MazePosition -> [MazePosition], MazePosition, MazePosition)
