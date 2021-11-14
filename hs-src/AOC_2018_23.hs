@@ -6,57 +6,103 @@
  Maintainer  : jw1200@gmail.com
  Stability   : experimental
 -}
-module AOC_2018_23 (solvers) where
+module AOC_2018_23 (solvers, inMaxRange, Bot, pBot) where
 
 import Data.Foldable qualified as Fold (maximumBy)
 import Data.Function ((&))
-import Data.List qualified as L (partition)
 import Data.Ord qualified as Ord (comparing)
 import Data.Text (Text)
 import Data.Text qualified as T (lines, pack)
+import Debug.Trace (trace)
 import Text.Megaparsec.Char qualified as MC (char, string)
 
 import Utilities (Parser, pSignedInt, pUnsignedInt, parseOrStop)
 
 solvers :: Text -> (Text, Text)
 solvers t =
-    ( T.pack . show $ partA bots
-    , "NYI"
+    ( T.pack . show . length $ filter (<= botRadius strongestBot) distances
+    , T.pack . show . minimum . map (distance origin . closestOrigin) . snd $ inMaxRange bots
     )
   where
     bots = map (parseOrStop pBot) $ T.lines t
+    strongestBot :: Bot = Fold.maximumBy (Ord.comparing botRadius) bots
+    distances :: [Int] = map (distance (botPoint strongestBot) . botPoint) bots
+    origin = Point{pointX = 0, pointY = 0, pointZ = 0}
 
--- | Solve part A, number of bots in range of the strongest bot
-partA :: [Bot] -> Int
-partA bots = length $ filter (<= botR strongestBot) distances
+-- | Return octrees that are in range of the maximum number of bots
+inMaxRange :: [Bot] -> (Int, [Oct])
+inMaxRange bs = go (0, []) (fullRegion bs) bs
   where
-    strongestBot :: Bot = Fold.maximumBy (Ord.comparing botR) bots
-    distances :: [Int] = map (botDistance strongestBot) bots
+    go :: (Int, [Oct]) -> Oct -> [Bot] -> (Int, [Oct])
+    go (n, acc) _ [] = (n, acc)
+    go (n, acc) oct bots
+        | isUnitSize oct = trace (show (n, acc, oct, length bots)) $ goUnit (n, acc) oct bots
+        | otherwise = trace (show (n, acc, oct, length bots)) $ goNonUnit (n, acc) oct bots
+    goUnit :: (Int, [Oct]) -> Oct -> [Bot] -> (Int, [Oct])
+    goUnit (n, acc) oct bots
+        | nUnit > n = (nUnit, [oct])
+        | nUnit == n = (nUnit, oct : acc)
+        | otherwise = (n, acc)
+      where
+        nUnit = length $ filter (coversAll oct) bots
+    goNonUnit (n, acc) oct bots
+        | length (filter (overlaps oct) bots) < n = (n, acc)
+        | otherwise =
+            subtrees oct
+                &
+                & filterViableTrees
+                & map (\(o, full, partial) -> go (n - length full, []) o (full ++ partial)
+                & combineTrees
+      where
+        subtreesWithOverlaps = map (addOverlaps bots) $ subtrees oct
+        viableTrees = filterViableTrees subtreesWithOverlaps
+        exploredTrees = map ((\(o, full, partial) -> go (threshold, []) o (full ++ partial)) viableTrees
 
--- | Solve part B
-partB :: [Bot] -> Int
-partB = closestOrigin . mostInRange
+        addOverlaps :: [Bot] -> Oct -> (Oct, [Bot], [Bot])
+        addOverlaps bb o = (o, filter (coversAll o) bb, filter (\b -> overlaps o b && not (coversAll o b)) bb)
+        filterViableTrees :: [(Oct, [Bot], [Bot])] -> [(Oct, [Bot], [Bot])]
+        filterViableTrees xs =
+            map (\(o, full, partial, _minN, _maxN) -> (o, full, partial)) $
+                filter (\(_o, _full, _partial, _minN, maxN) -> maxN >= threshold) os'
+          where
+            os' = map (\(o, full, partial) -> (o, full, partial, length full, length full + length partial)) xs
+            highestMin = maximum $ map (\(_o, _full, _partial, minN, _maxN) -> minN) os'
+            threshold = max n highestMin
+
+        combineTrees :: [(Int, [Oct])] -> (Int, [Oct])
+        combineTrees results = (nMax, concatMap snd $ filter ((== nMax) . fst) results)
+          where
+            nMax = maximum $ map fst results
+
+--
+-- Points
+--
+
+data Point = Point
+    { pointX :: Int
+    , pointY :: Int
+    , pointZ :: Int
+    }
+
+instance Show Point where
+    show p = "<" ++ show (pointX p) ++ "," ++ show (pointY p) ++ "," ++ show (pointZ p) ++ ">"
+
+-- Manhattan distance between two points
+distance :: Point -> Point -> Int
+distance Point{pointX = x1, pointY = y1, pointZ = z1} Point{pointX = x2, pointY = y2, pointZ = z2} =
+    abs (x1 - x2) + abs (y1 - y2) + abs (z1 - z2)
 
 --
 -- Bot support
 --
 
 data Bot = Bot
-    { botX :: Int
-    , botY :: Int
-    , botZ :: Int
-    , botR :: Int
+    { botPoint :: Point
+    , botRadius :: Int
     }
 
 instance Show Bot where
-    show b = "pos=<" ++ show (botX b) ++ "," ++ show (botY b) ++ "," ++ show (botZ b) ++ ">, r=" ++ show (botR b)
-
-botDistance :: Bot -> Bot -> Int
-botDistance b1 b2 = distance (botX b1, botY b1, botZ b1) (botX b2, botY b2, botZ b2)
-
--- Manhattan distance between two points
-distance :: (Int, Int, Int) -> (Int, Int, Int) -> Int
-distance (a, b, c) (d, e, f) = abs (a - d) + abs (b - e) + abs (c - f)
+    show b = "pos=" ++ show (botPoint b) ++ ", r=" ++ show (botRadius b)
 
 pBot :: Parser Bot
 pBot = do
@@ -64,11 +110,11 @@ pBot = do
     y <- MC.char ',' *> pSignedInt
     z <- MC.char ',' *> pSignedInt
     r <- MC.string ">, r=" *> pUnsignedInt
-    return Bot{botX = x, botY = y, botZ = z, botR = r}
+    return Bot{botPoint = Point{pointX = x, pointY = y, pointZ = z}, botRadius = r}
 
--- Does the bot cover the given point
-covers :: Bot -> (Int, Int, Int) -> Bool
-covers Bot{botX = x, botY = y, botZ = z, botR = r} (a, b, c) = distance (x, y, z) (a, b, c) <= r
+-- Does the bot cover the given point?
+covers :: Point -> Bot -> Bool
+covers z Bot{botPoint = p, botRadius = r} = distance p z <= r
 
 --
 -- Octree support
@@ -76,93 +122,85 @@ covers Bot{botX = x, botY = y, botZ = z, botR = r} (a, b, c) = distance (x, y, z
 
 -- Octree region of space bounded by x0 <= x <= x1 etc
 data Oct = Oct
-    { x0 :: Int
-    , x1 :: Int
-    , y0 :: Int
-    , y1 :: Int
-    , z0 :: Int
-    , z1 :: Int
+    { octX :: (Int, Int)
+    , octY :: (Int, Int)
+    , octZ :: (Int, Int)
     }
-    deriving (Show)
+    deriving (Eq, Show)
 
--- | Return the 8 corners of an octree region
-corners :: Oct -> [(Int, Int, Int)]
-corners o = [(x, y, z) | x <- [x0 o, x1 o], y <- [y0 o, y1 o], z <- [z0 o, z1 o]]
+-- | Return the distinct corners of an octree region
+corners :: Oct -> [Point]
+corners oct =
+    [ Point{pointX = x, pointY = y, pointZ = z}
+    | x <- pairToList $ octX oct
+    , y <- pairToList $ octY oct
+    , z <- pairToList $ octZ oct
+    ]
+  where
+    pairToList (a, b)
+        | a == b = [a]
+        | otherwise = [a, b]
 
 -- | Is the octree of unit size
 isUnitSize :: Oct -> Bool
-isUnitSize o = x0 o == x1 o && y0 o == y1 o && z0 o == z1 o
+isUnitSize oct = isUnit (octX oct) && isUnit (octY oct) && isUnit (octZ oct)
+  where
+    isUnit (a, b) = a == b
 
--- | Smallest octree that includes the positions of all the bots given
+-- | Closest Point to the origin within the octree
+closestOrigin :: Oct -> Point
+closestOrigin Oct{octX = x, octY = y, octZ = z} = Point{pointX = closest x, pointY = closest y, pointZ = closest z}
+  where
+    closest :: (Int, Int) -> Int
+    closest (a, b)
+        | a <= 0 && b >= 0 = 0
+        | a >= 0 = a
+        | otherwise = b
+
+-- | Return up to 8 octrees that are the children of this octree
+subtrees :: Oct -> [Oct]
+subtrees oct =
+    [ Oct{octX = x, octY = y, octZ = z}
+    | x <- splitRange (octX oct)
+    , y <- splitRange (octY oct)
+    , z <- splitRange (octZ oct)
+    ]
+  where
+    splitRange :: (Int, Int) -> [(Int, Int)]
+    splitRange (a, b)
+        | a == b = [(a, a)]
+        | otherwise = [(a, mid), (mid + 1, b)]
+      where
+        mid = (a + b) `div` 2
+
+--
+-- Combining Octree and bot
+--
+
+-- Does the bot cover all of the octree?
+coversAll :: Oct -> Bot -> Bool
+coversAll oct bot = all (`covers` bot) $ corners oct
+
+-- Does the bot cover any part of the octree?
+overlaps :: Oct -> Bot -> Bool
+overlaps
+    Oct{octX = ox, octY = oy, octZ = oz}
+    Bot{botPoint = Point{pointX = px, pointY = py, pointZ = pz}, botRadius = r} =
+        dist ox px + dist oy py + dist oz pz <= r
+      where
+        dist (a, b) c
+            | a <= c && c <= b = 0
+            | otherwise = min (abs (a - c)) (abs (b - c))
+
+-- | Create the smallest octree that includes the positions of all the bots given
 fullRegion :: [Bot] -> Oct
 fullRegion bots =
     Oct
-        { x0 = minimum xs
-        , x1 = maximum xs
-        , y0 = minimum ys
-        , y1 = maximum ys
-        , z0 = minimum zs
-        , z1 = maximum zs
+        { octX = (minimum xs, maximum xs)
+        , octY = (minimum ys, maximum ys)
+        , octZ = (minimum zs, maximum zs)
         }
   where
-    xs = map botX bots
-    ys = map botY bots
-    zs = map botZ bots
-
--- | Divide a list of bots into those that cover all or part of the octree
-filterCovers :: Oct -> [Bot] -> ([Bot], [Bot])
-filterCovers oct bots = L.partition (coversAll oct) $ filter (overlaps oct) bots
-  where
-    -- does the bot cover any part of the octree?
-    overlaps :: Oct -> Bot -> Bool
-    overlaps (Oct x0 x1 y0 y1 z0 z1) (Bot x y z r) =
-        x0 - r <= x && x <= x1 + r && y0 - r <= y && y <= y1 + r && z0 - r <= z && z <= z1 + r
-    -- does the bot cover all of the octree?
-    coversAll :: Oct -> Bot -> Bool
-    coversAll o bot = all (covers bot) $ corners o
-
---
---
---
-
--- | Return octrees that are in range of the maximum number of bots
-inMaxRange :: [Bot] -> (Int, [Oct])
-inMaxRange b = go (0, []) (fullRegion b) b
-  where
-    go :: (Int, [Oct]) -> Oct -> [Bot] -> (Int, [Oct])
-    go (n, acc) oct bots
-        | isUnitSize oct = goUnit (n, acc) oct bots
-        | otherwise = goNonUnit (n, acc) oct bots
-    goUnit :: (Int, [Oct]) -> Oct -> [Bot] -> (Int, [Oct])
-    goUnit (n, acc) oct bots
-        | nUnit > n = (nUnit, [oct])
-        | nUnit == n = (nUnit, oct : acc)
-        | otherwise = (n, acc)
-      where
-        nUnit = length . fst $ filterCovers oct bots
-    goNonUnit (n, acc) oct bots =
-        let (fullyCovers, partiallyCovers) = filterCovers o bots
-         in if length fullyCovers + length partiallyCovers < n
-                then (n, acc)
-                else
-                    subtrees oct
-                        & map (\o -> (o, filterCovers o bots))
-                        & filter (\(_o, (full, partial)) -> length full + length partial >= n)
-                        & map (\(o, (full, partial)) -> (length full, go (n - length full, []) o partial))
-                        & combineTrees
-      where
-        combineTrees :: [(Int, (Int, [Oct]))] -> (Int, [Oct])
-        combineTrees = undefined
-
-{- | Closest distance to origin within the octree
-
- >>> closestOrigin $ fullRegion testA
- 0
- >>> closestOrigin $ Oct {x0 = 1, x1 = 2, y0 = 2, y1 = 3, z0 = 3, z1 = 9}
- 6
--}
-closestOrigin :: Oct -> Int
-closestOrigin o = closest (x0 o) (x1 o) + closest (y0 o) (y1 o) + closest (z0 o) (z1 o)
-  where
-    closest :: Int -> Int -> Int
-    closest a b = min (abs a) (abs b)
+    xs = map (pointX . botPoint) bots
+    ys = map (pointY . botPoint) bots
+    zs = map (pointZ . botPoint) bots
