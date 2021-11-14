@@ -23,6 +23,7 @@
         "Monomorphism",
         "Newtype",
         "Octree",
+        "octrees",
         "RSHIFT",
         "runhaskell",
         "scanl",
