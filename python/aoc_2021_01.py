@@ -24,7 +24,7 @@ def sliding(xs: list[int]) -> list[int]:
     [6, 9, 12]
     >>> sliding([])
     []
-    sliding([1, 2])
+    >>> sliding([1, 2])
     []
     """
     return [x + y + z for x, y, z in zip(xs, xs[1:], xs[2:])]

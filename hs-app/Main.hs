@@ -66,6 +66,8 @@ import AOC_2018_23 qualified (solvers)
 import AOC_2018_24 qualified (solvers)
 import AOC_2018_25 qualified (solvers)
 
+import AOC_2021_01 qualified (solvers)
+
 import Utilities (applySolvers)
 
 -- Given valid command line arguments, return input file name and appropriate solve function
@@ -128,6 +130,7 @@ parseProblem args = case args of
                 (2018, 23) -> Just AOC_2018_23.solvers
                 (2018, 24) -> Just AOC_2018_24.solvers
                 (2018, 25) -> Just AOC_2018_25.solvers
+                (2021, 1) -> Just AOC_2021_01.solvers
                 _ -> Nothing
          in case (valid, maybeSolvers) of
                 (True, Just solvers) -> Just (name, solvers)

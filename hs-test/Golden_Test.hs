@@ -61,6 +61,8 @@ import AOC_2018_22 (solvers)
 import AOC_2018_24 (solvers)
 import AOC_2018_25 (solvers)
 
+import AOC_2021_01 (solvers)
+
 import Utilities (applySolvers)
 
 problems :: [(Text -> (Text, Text), String, String)]
@@ -115,6 +117,7 @@ problems =
     , -- , (AOC_2018_23.solvers, "2018_23", "fast")
       (AOC_2018_24.solvers, "2018_24", "fast")
     , (AOC_2018_25.solvers, "2018_25", "fast")
+    , (AOC_2021_01.solvers, "2021_01", "fast")
     ]
 
 problemToTest :: (Text -> (Text, Text), String, String) -> TestTree
