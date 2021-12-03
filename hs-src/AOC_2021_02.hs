@@ -8,6 +8,7 @@
 -}
 module AOC_2021_02 (solvers, pCommand, applyCommand, applyCommand', Command (..)) where
 
+import Data.List qualified as L (foldl')
 import Data.Text (Text)
 import Data.Text qualified as T (lines, pack)
 import Text.Megaparsec.Char as MC (string)
@@ -16,8 +17,8 @@ import Utilities (Parser, pUnsignedInt, parseOrStop, (<|>))
 
 solvers :: Text -> (Text, Text)
 solvers t =
-    ( T.pack . show . uncurry (*) $ foldr applyCommand (0, 0) commands
-    , T.pack . show . (\(h, d, _) -> h * d) $ foldr applyCommand' (0, 0, 0) commands
+    ( T.pack . show . uncurry (*) $ L.foldl' applyCommand (0, 0) commands
+    , T.pack . show . (\(h, d, _) -> h * d) $ L.foldl' applyCommand' (0, 0, 0) commands
     )
   where
     commands = map (parseOrStop pCommand) $ T.lines t
@@ -33,12 +34,12 @@ pCommand =
         <|> Down <$> (string "down " *> pUnsignedInt)
         <|> Up <$> (string "up " *> pUnsignedInt)
 
-applyCommand :: Command -> (Int, Int) -> (Int, Int)
-applyCommand (Forward n) (horiz, depth) = (horiz + n, depth)
-applyCommand (Down n) (horiz, depth) = (horiz, depth + n)
-applyCommand (Up n) (horiz, depth) = (horiz, depth - n)
+applyCommand :: (Int, Int) -> Command -> (Int, Int)
+applyCommand (horiz, depth) (Forward n) = (horiz + n, depth)
+applyCommand (horiz, depth) (Down n) = (horiz, depth + n)
+applyCommand (horiz, depth) (Up n) = (horiz, depth - n)
 
-applyCommand' :: Command -> (Int, Int, Int) -> (Int, Int, Int)
-applyCommand' (Forward n) (horiz, depth, aim) = (horiz + n, depth + aim * n, aim)
-applyCommand' (Down n) (horiz, depth, aim) = (horiz, depth, aim + n)
-applyCommand' (Up n) (horiz, depth, aim) = (horiz, depth, aim - n)
+applyCommand' :: (Int, Int, Int) -> Command -> (Int, Int, Int)
+applyCommand' (horiz, depth, aim) (Forward n) = (horiz + n, depth + aim * n, aim)
+applyCommand' (horiz, depth, aim) (Down n) = (horiz, depth, aim + n)
+applyCommand' (horiz, depth, aim) (Up n) = (horiz, depth, aim - n)
