@@ -7,10 +7,10 @@ from typing import Tuple
 
 
 def change(s: str) -> Tuple[int, int]:
-    """Return distance and depth changes for a given command"""
+    """Return distance and depth changes for a given command."""
     ws = s.strip().split()
     if len(ws) != 2 or not ws[1].isnumeric():
-        raise ValueError("Invalid command format: " + ws)
+        raise ValueError("Invalid command format: " + s)
     if ws[0] == "forward":
         return (int(ws[1]), 0)
     if ws[0] == "down":
@@ -41,7 +41,7 @@ def apply2(
 
 
 def run2(cs: list[str]) -> int:
-    """Return product of distance and depth after running given complex commands
+    """Return product of distance and depth after running given complex commands.
 
     >>> run2(["forward 5", "down 5", "forward 8", "up 3", "down 8", "forward 2"])
     900

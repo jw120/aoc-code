@@ -6,16 +6,18 @@ from sys import stdin
 
 
 def bit_counts(ss: list[str]) -> Counter[int]:
-    """Return the number of 1s at each bit position in a list of binary number strings
+    """Return the number of 1s at each bit position in a list of binary number strings.
 
-    >>> bit_counts(["101"])
-    Counter({0: 1, 2: 1})
-    >>> bit_counts(["101", "111"])
-    Counter({0: 2, 2: 2, 1: 1})
-    >>> bit_counts(test_data)
-    Counter({0: 5, 1: 7, 2: 8, 3: 5, 4: 7   })
+    Bit positions are 0-indexed from the start of the string.
+
+    >>> sorted(bit_counts(["101"]).items())
+    [(0, 1), (2, 1)]
+    >>> sorted(bit_counts(["101", "111"]).items())
+    [(0, 2), (1, 1), (2, 2)]
+    >>> sorted(bit_counts(test_data).items())
+    [(0, 7), (1, 5), (2, 8), (3, 7), (4, 5)]
     """
-    return Counter(b for s in ss for b in range(0, len(s)) if s[-b - 1] == "1")
+    return Counter(i for s in ss for i, b in enumerate(s) if b == "1")
 
 
 test_data: list[str] = [
@@ -45,8 +47,8 @@ def most_common_bits(ss: list[str]) -> str:
     n = len(ss)
 
     counts = bit_counts(ss)
-    assert n / 2 not in counts.values()
-    return "".join("1" if counts[b] > n // 2 else "0" for b in range(w - 1, -1, -1))
+    assert n / 2 not in counts.values()  # Problem does not account for ties
+    return "".join("1" if counts[b] > n // 2 else "0" for b in range(w))
 
 
 def not_bits(s: str) -> str:
@@ -70,7 +72,37 @@ def part1(numbers: list[str]) -> int:
     return gamma * epsilon
 
 
+def filter_string(ss: list[str], least: bool) -> str:
+    """Return the remaining string after filtering for the most (or least) common bit.
+
+    >>> filter_string(test_data, False)
+    '10111'
+    >>> filter_string(test_data, True)
+    '01010'
+    """
+    b = 0
+    while len(ss) > 1:
+        counts: Counter[str] = Counter((s[b] for s in ss))
+        selected_value: str = "1" if (counts["1"] >= len(ss) / 2) ^ least else "0"
+        ss = [s for s in ss if s[b] == selected_value]
+        b += 1
+    assert len(ss) == 1
+    return ss[0]
+
+
+def part2(numbers: list[str]) -> int:
+    """Part two solution.
+
+    >>> part2(test_data)
+    230
+    """
+    oxygen = int(filter_string(numbers, False), 2)
+    co2 = int(filter_string(numbers, True), 2)
+    return oxygen * co2
+
+
 if __name__ == "__main__":
     testmod()
     numbers: list[str] = stdin.read().splitlines()
     print(part1(numbers))
+    print(part2(numbers))
