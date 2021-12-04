@@ -67,6 +67,16 @@ import AOC_2018_24 qualified (solvers)
 import AOC_2018_25 qualified (solvers)
 
 import AOC_2021_01 qualified (solvers)
+import AOC_2021_02 qualified (solvers)
+import AOC_2021_03 qualified (solvers)
+
+-- import AOC_2021_04 qualified (solvers)
+-- import AOC_2021_05 qualified (solvers)
+-- import AOC_2021_06 qualified (solvers)
+-- import AOC_2021_07 qualified (solvers)
+-- import AOC_2021_08 qualified (solvers)
+-- import AOC_2021_09 qualified (solvers)
+-- import AOC_2021_10 qualified (solvers)
 
 import Utilities (applySolvers)
 
@@ -131,6 +141,15 @@ parseProblem args = case args of
                 (2018, 24) -> Just AOC_2018_24.solvers
                 (2018, 25) -> Just AOC_2018_25.solvers
                 (2021, 1) -> Just AOC_2021_01.solvers
+                (2021, 2) -> Just AOC_2021_02.solvers
+                (2021, 3) -> Just AOC_2021_03.solvers
+                -- (2021, 4) -> Just AOC_2021_04.solvers
+                -- (2021, 5) -> Just AOC_2021_05.solvers
+                -- (2021, 6) -> Just AOC_2021_06.solvers
+                -- (2021, 7) -> Just AOC_2021_07.solvers
+                -- (2021, 8) -> Just AOC_2021_08.solvers
+                -- (2021, 9) -> Just AOC_2021_09.solvers
+                -- (2021, 10) -> Just AOC_2021_10.solvers
                 _ -> Nothing
          in case (valid, maybeSolvers) of
                 (True, Just solvers) -> Just (name, solvers)
