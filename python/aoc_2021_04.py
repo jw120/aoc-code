@@ -2,13 +2,13 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import Optional
+from typing import ClassVar, Optional
 
 
 class Board:
     """5x5 Bingo board."""
 
-    SIZE = 5
+    SIZE: ClassVar[int] = 5
 
     def __init__(self, s: str) -> None:
         """Create new bingo board based on the provided string."""

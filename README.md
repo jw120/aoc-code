@@ -28,6 +28,11 @@ stack test --test-arguments=--pattern=fast
 
 Assumes modern python (tested with 3.9) installed as `python3` and `pip3`.
 
+```
+python python/golden_test.py --fast
+python python/golden_test.py
+```
+
 Doctest for tests
 
 Best run in a venv using the following (with this directory as the current directory). To set up the local environment (using `python3` to get the newest system installed version of python)

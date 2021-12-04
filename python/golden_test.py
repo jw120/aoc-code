@@ -4,6 +4,7 @@ Runs all of our python solutions and compares to known-good solutions. If the
 solution does not exist, then we create the file
 """
 
+import argparse
 from filecmp import cmp
 from os.path import exists
 from subprocess import run
@@ -58,13 +59,18 @@ def test(year: int, day: int) -> None:
         good_file.close()
 
 
-def all_tests(run_slow: bool) -> None:
+def all_tests(fast_only: bool) -> None:
     """Run tests for all completed problems."""
     for year, days in completed:
         for day in days:
-            if run_slow or (year, day) not in slow:
+            if not fast_only or (year, day) not in slow:
                 test(year, day)
 
 
 if __name__ == "__main__":
-    all_tests(False)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--fast", action="store_true", help="only run solutions which are not slow"
+    )
+    args = parser.parse_args()
+    all_tests(args.fast)
