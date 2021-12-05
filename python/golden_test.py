@@ -20,8 +20,8 @@ ELAPSED_MS_THRESHOLD: int = 500  # Show time taken if reaches this
 
 completed: list[Tuple[int, Iterable[int]]] = [
     (2019, list(range(1, 12)) + [13, 14, 15]),
-    (2020, range(1, 25)),
-    (2021, range(1, 5)),
+    (2020, range(1, 26)),
+    (2021, range(1, 6)),
 ]
 
 slow: Set[Tuple[int, int]] = {

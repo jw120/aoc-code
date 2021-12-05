@@ -29,6 +29,7 @@ stack test --test-arguments=--pattern=fast
 Assumes modern python (tested with 3.9) installed as `python3` and `pip3`.
 
 ```
+python python/aoc_2021_05.py <../aoc-data/input/2021_05.txt
 python python/golden_test.py --fast
 python python/golden_test.py
 ```
@@ -56,6 +57,8 @@ TODO
 To improve
 * 2015-04 (17s) - MD5s - find a non-naive solution that is faster
 * 2015-06 (18s) - Array updates - faster
+
+Try 2021-03 in numpy
 
 Can we make solvers have type: (Show a, Show b) => Text -> (a, b) without having string output printed within quotes
 
