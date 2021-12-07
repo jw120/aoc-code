@@ -67,7 +67,8 @@ import AOC_2021_03 (solvers)
 import AOC_2021_04 (solvers)
 import AOC_2021_05 (solvers)
 
--- import AOC_2021_06 (solvers)
+import AOC_2021_06 (solvers)
+
 -- import AOC_2021_07 (solvers)
 -- import AOC_2021_08 (solvers)
 -- import AOC_2021_09 (solvers)
@@ -132,7 +133,7 @@ problems =
     , (AOC_2021_03.solvers, "2021_03", "fast")
     , (AOC_2021_04.solvers, "2021_04", "fast")
     , (AOC_2021_05.solvers, "2021_05", "fast")
-    -- , (AOC_2021_06.solvers, "2021_06", "fast")
+    , (AOC_2021_06.solvers, "2021_06", "fast")
     -- , (AOC_2021_07.solvers, "2021_07", "fast")
     -- , (AOC_2021_08.solvers, "2021_08", "fast")
     -- , (AOC_2021_09.solvers, "2021_09", "fast")
