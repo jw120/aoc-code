@@ -6,7 +6,7 @@
  Maintainer  : jw1200@gmail.com
  Stability   : experimental
 -}
-module AOC_2021_06 (solvers, step, alive, alive') where
+module AOC_2021_06 (solvers, step, alive, alive', alive'') where
 
 import Data.Array (Array)
 import Data.Array qualified as A (array, (!))
@@ -17,8 +17,8 @@ import Utilities (pUnsignedInt, parseOrStop)
 
 solvers :: Text -> (Text, Text)
 solvers t =
-    ( T.pack . show $ alive' 80 initial
-    , T.pack . show $ alive' 256 initial
+    ( T.pack . show $ alive'' 80 initial
+    , T.pack . show $ alive'' 256 initial
     )
   where
     initial = map (parseOrStop pUnsignedInt) $ T.split (== ',') t
@@ -67,3 +67,14 @@ alive' n = sum . map (\i -> g A.! (n, i))
         | t == 0 = 1
         | i == fishMin = g A.! (t - 1, fishReset) + g A.! (t - 1, fishNew)
         | otherwise = g A.! (t - 1, i - 1)
+
+-- Simpler version of dynamic programming version of alive, just track the number of descendants from a fish that is about to reset
+alive'' :: Int -> [Int] -> Int
+alive'' n = sum . map (\i -> g A.! (n - i))
+  where
+    g :: Array Int Int
+    g = A.array (- fishNew, n) [(t, f t) | t <- [- fishNew .. n]]
+    f :: Int -> Int
+    f t
+        | t <= 0 = 1
+        | otherwise = g A.! (t - 1 - fishReset) + g A.! (t - 1 - fishNew)

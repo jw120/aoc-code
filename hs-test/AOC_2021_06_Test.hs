@@ -2,7 +2,7 @@ module AOC_2021_06_Test where
 
 import Test.Tasty.HUnit ((@?=))
 
-import AOC_2021_06 (alive, alive', step)
+import AOC_2021_06 (alive, alive', alive'', step)
 
 test1 :: [Int]
 test1 = [3, 4, 3, 1, 2]
@@ -46,3 +46,15 @@ unit_2021_06_alive'3 = alive' 18 test1 @?= 26
 
 unit_2021_06_alive'4 :: IO ()
 unit_2021_06_alive'4 = alive' 256 test1 @?= 26984457539
+
+unit_2021_06_alive''1 :: IO ()
+unit_2021_06_alive''1 = alive'' 1 test1 @?= 5
+
+unit_2021_06_alive''2 :: IO ()
+unit_2021_06_alive''2 = alive'' 2 test1 @?= 6
+
+unit_2021_06_alive''3 :: IO ()
+unit_2021_06_alive''3 = alive'' 18 test1 @?= 26
+
+unit_2021_06_alive''4 :: IO ()
+unit_2021_06_alive''4 = alive'' 256 test1 @?= 26984457539
