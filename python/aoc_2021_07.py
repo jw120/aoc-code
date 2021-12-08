@@ -7,20 +7,36 @@ from typing import Callable, Tuple
 test_data: list[int] = [16, 1, 2, 0, 4, 2, 7, 1, 2, 14]
 
 
-def fuel(positions: list[int], target: int) -> int:
-    """Return fuel need to move crabs from their initial positions to the target position.
+def fuel1(positions: list[int], target: int) -> int:
+    """Return part 1 fuel need to move crabs from their initial positions to the target position.
 
-    >>> [fuel(test_data, i) for i in [2, 1, 3, 10]]
+    >>> [fuel1(test_data, i) for i in [2, 1, 3, 10]]
     [37, 41, 39, 71]
     """
     return sum(abs(x - target) for x in positions)
 
 
+def fuel2(positions: list[int], target: int) -> int:
+    """Return part 2 fuel need to move crabs from their initial positions to the target position.
+
+    >>> [fuel2(test_data, i) for i in [5, 2]]
+    [168, 206]
+    """
+
+    def sum_to(n: int) -> int:
+        """Sum of 1, 2, 3... n"""
+        return n * (n + 1) // 2
+
+    return sum(sum_to(abs(x - target)) for x in positions)
+
+
 def find_minimum(f: Callable[[int], int], bounds: Tuple[int, int]) -> int:
     """Find the minimum value of f(x) within the given bounds x_min <= x <= x_max.
 
-    >>> find_minimum(lambda x: fuel(test_data, x), (0, 16))
+    >>> find_minimum(lambda x: fuel1(test_data, x), (0, 16))
     37
+    >>> find_minimum(lambda x: fuel2(test_data, x), (0, 16))
+    168
     """
     x_min, x_max = bounds
     while True:
@@ -41,4 +57,6 @@ def find_minimum(f: Callable[[int], int], bounds: Tuple[int, int]) -> int:
 if __name__ == "__main__":
     testmod()
     crabs: list[int] = [int(x) for x in stdin.read().split(",")]
-    print(find_minimum(lambda x: fuel(crabs, x), (min(crabs), max(crabs))))
+    bounds = (min(crabs), max(crabs))
+    print(find_minimum(lambda x: fuel1(crabs, x), bounds))
+    print(find_minimum(lambda x: fuel2(crabs, x), bounds))
