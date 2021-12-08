@@ -34,6 +34,8 @@ python python/golden_test.py --fast
 python python/golden_test.py
 ```
 
+TODO - change golden_test to look at which files exist
+
 Doctest for tests
 
 Best run in a venv using the following (with this directory as the current directory). To set up the local environment (using `python3` to get the newest system installed version of python)
