@@ -5,12 +5,16 @@
  License     : GPL-3
  Maintainer  : jw1200@gmail.com
  Stability   : experimental
+
+Haskell solution trying to avoid any hand-calculations and derive all the logic from
+the digitSegments mapping.
 -}
 module AOC_2021_08 (solvers) where
 
 import Data.List qualified as L (foldl')
 import Data.Map (Map)
-import Data.Map qualified as Map (fromList, (!))
+import Data.Map qualified as Map (elems, empty, filter, fromList, insertWith, keys, toList, (!))
+import Data.Maybe qualified as Maybe (mapMaybe)
 import Data.Set (Set)
 import Data.Set qualified as Set (fromList)
 import Data.Text (Text)
@@ -55,6 +59,7 @@ count1478 = length . filter ((`elem` lengths1478) . length)
   where
     lengths1478 = map (length . (digitSegments Map.!)) [1, 4, 7, 8]
 
+type Digit = Int
 type Wire = Char
 type Segment = Char
 type Assignment = Map Wire (Set Segment)
@@ -71,7 +76,18 @@ lengthConstraints :: [[Wire]] -> [(Set Wire, Set Segment)]
 lengthConstraints = undefined
 
 countConstraints :: [[Wire]] -> [(Set Wire, Set Segment)]
-countConstraints = undefined
+countConstraints signals = Maybe.mapMaybe () $ Map.toList wireCounts
+  where
+    wireCounts :: Count Wire = count $ concat signals
+    -- How many times does each segment appear (in the digits 0..9)
+    segment09Counts :: Count Segment = count . concat $ Map.elems digitSegments
+    -- Which of these segment counts are unique
+    uniqueSegment09Counts :: [Int] = Map.keys . Map.filter (== 1) . count $ Map.elems segment09Counts
+    -- Mapping from a segment count to the segment
+    segment09CountToSegment :: Int -> Maybe Segment
+    segment09CountToSegment count
+        | count `elem` uniqueSegment09Counts = Just $ invert segment09Counts Map.! count
+        | otherwise = Nothing
 
 -- | Update tassignment: given wires must be given segments, other wires cannot be those segments
 assignWires :: Assignment -> (Set Wire, Set Segment) -> Assignment
@@ -83,6 +99,14 @@ applyAssignment = undefined
 combineDigits :: [Int] -> Int
 combineDigits [a, b, c, d] = 1000 * a + 100 * b + 10 * c + d
 combineDigits _ = error "Wrong number of digits"
+
+type Count a = Map a Int
+
+count :: Ord a => [a] -> Count a
+count = L.foldl' (\m x -> Map.insertWith (+) x 1 m) Map.empty
+
+invert :: Ord a => Map k a -> Map a k
+invert = Map.fromList . map (\(x, y) -> (y, x)) . Map.toList
 
 {-
 """Advent of Code 2021 - Day 8."""
