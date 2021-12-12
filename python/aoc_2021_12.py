@@ -1,14 +1,14 @@
 """Advent of Code 2021 - Day 12."""
 
-# from __future__ import annotations
+from __future__ import annotations
 
 from collections import deque
 from doctest import testmod
 from sys import stdin
+from typing import Optional
 
 Cave = str
 Maze = dict[Cave, list[Cave]]
-Path = deque[str]
 
 test1: list[str] = ["start-A", "start-b", "A-c", "A-b", "b-d", "A-end", "b-end"]
 
@@ -62,21 +62,31 @@ def read_maze(links: list[str]) -> Maze:
     return maze
 
 
-def all_lower_unique(p: Path) -> bool:
-    """Test if all lower case caves in the path unique.
+class Path:
+    def __init__(self) -> None:
+        self._final_cave: Optional[Cave] = None
+        self._visited: frozenset[Cave] = frozenset()
+        self._all_small_unique: bool = True
 
-    >>> all_lower_unique(deque(["start", "a", "B", "c", "B", "d"]))
-    True
-    >>> all_lower_unique(deque(["start", "a", "B", "c", "B", "a"]))
-    False
-    """
-    visited: set[str] = set()
-    for x in p:
-        if x.islower():
-            if x in visited:
-                return False
-            visited.add(x)
-    return True
+    def final_cave(self) -> Cave:
+        if self._final_cave is None:
+            raise ValueError("Empty path!")
+        return self._final_cave
+
+    def includes(self, cave: Cave) -> bool:
+        return cave in self._visited
+
+    def all_small_unique(self) -> bool:
+        return self._all_small_unique
+
+    def extend(self, cave: Cave) -> Path:
+        p = Path()
+        p._final_cave = cave
+        p._visited = self._visited | frozenset([cave])
+        p._all_small_unique = self._all_small_unique and not (
+            cave.islower() and self.includes(cave)
+        )
+        return p
 
 
 def paths(maze: Maze, allow_one_revisit: bool) -> int:
@@ -98,26 +108,22 @@ def paths(maze: Maze, allow_one_revisit: bool) -> int:
     >>> paths(read_maze(test3), True)
     3509
     """
-    complete_paths: deque[Path] = deque()
-    working_paths: deque[Path] = deque([deque(["start"])])
+    complete_paths: int = 0
+    working_paths: deque[Path] = deque([Path().extend("start")])
     while working_paths:
         current_path: Path = working_paths.pop()
-        current_path_final_cave: Cave = current_path[-1]
-        if current_path_final_cave == "end":
-            complete_paths.append(current_path)
+        if current_path.final_cave() == "end":
+            complete_paths += 1
             continue
-        for exit_cave in maze[current_path_final_cave]:
+        for exit_cave in maze[current_path.final_cave()]:
             if (
                 exit_cave.isupper()
-                or exit_cave not in current_path
-                or (allow_one_revisit and all_lower_unique(current_path))
+                or not current_path.includes(exit_cave)
+                or (allow_one_revisit and current_path.all_small_unique())
             ):
-                new_path = current_path.copy()
-                new_path.append(exit_cave)
+                new_path = current_path.extend(exit_cave)
                 working_paths.append(new_path)
-    # for p in complete_paths:
-    #     print(list(p))
-    return len(complete_paths)
+    return complete_paths
 
 
 if __name__ == "__main__":
