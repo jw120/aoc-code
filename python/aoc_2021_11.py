@@ -28,8 +28,8 @@ class Grid:
             [int(c) for c in line] for line in s.splitlines()
         ]
         self.extent = Extent(len(self.energy), len(self.energy[0]))
-        assert self.extent.row > 0
-        assert all(len(row) == self.extent.col for row in self.energy)
+        assert self.extent.x > 0
+        assert all(len(row) == self.extent.y for row in self.energy)
         self.flash_count = 0
         self.step_count = 0
 
@@ -46,8 +46,8 @@ class Grid:
         for _ in range(n):
             to_flash: list[Coord] = []
             for c in self.extent.upto():
-                self.energy[c.row][c.col] += 1
-                if self.energy[c.row][c.col] > 9:
+                self.energy[c.x][c.y] += 1
+                if self.energy[c.x][c.y] > 9:
                     to_flash.append(c)
             flashed: Set[Coord] = set()
             while to_flash:
@@ -55,13 +55,13 @@ class Grid:
                 if c not in flashed:
                     flashed.add(c)
                     self.flash_count += 1
-                    self.energy[c.row][c.col] = 0
+                    self.energy[c.x][c.y] = 0
                     for nc in c.adjacents_with_diagonals(self.extent):
-                        self.energy[nc.row][nc.col] += 1
-                        if self.energy[nc.row][nc.col] > 9:
+                        self.energy[nc.x][nc.y] += 1
+                        if self.energy[nc.x][nc.y] > 9:
                             to_flash.append(nc)
             for c in flashed:
-                self.energy[c.row][c.col] = 0
+                self.energy[c.x][c.y] = 0
             self.step_count += 1
             if stop_when_all_flash and len(flashed) == self.extent.size:
                 return self
