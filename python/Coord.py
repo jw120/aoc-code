@@ -11,8 +11,8 @@ from typing import Iterable, Iterator, Optional
 class Coord:
     """Coordinates of a position in a 2-d grid."""
 
-    row: int
-    col: int
+    x: int
+    y: int
 
     def in_bounds(self, extent: Extent) -> bool:
         """Test if this position is within the given bounds.
@@ -23,23 +23,18 @@ class Coord:
         [True, False, False, False, True, True]
 
         """
-        return (
-            self.row >= 0
-            and self.row < extent.row
-            and self.col >= 0
-            and self.col < extent.col
-        )
+        return self.x >= 0 and self.x < extent.x and self.y >= 0 and self.y < extent.y
 
     def adjacents(self, extent: Optional[Extent] = None) -> Iterable[Coord]:
         """Return all the cells adjacent to this one given one (excluding diagonals), optionally checking bounds."""
-        r, c = self.row, self.col
+        x, y = self.x, self.y
         possible_cells = (
-            Coord(x, y)
-            for x, y in [
-                (r - 1, c),
-                (r, c - 1),
-                (r, c + 1),
-                (r + 1, c),
+            Coord(p, q)
+            for p, q in [
+                (x - 1, y),
+                (x, y - 1),
+                (x, y + 1),
+                (x + 1, y),
             ]
         )
         if extent is None:
@@ -50,18 +45,18 @@ class Coord:
         self, extent: Optional[Extent] = None
     ) -> Iterable[Coord]:
         """Return all the cells adjacent to this one given one (including diagonals), optionally checking bounds."""
-        r, c = self.row, self.col
+        x, y = self.x, self.y
         possible_cells = (
-            Coord(x, y)
-            for x, y in [
-                (r - 1, c - 1),
-                (r - 1, c),
-                (r - 1, c + 1),
-                (r, c - 1),
-                (r, c + 1),
-                (r + 1, c - 1),
-                (r + 1, c),
-                (r + 1, c + 1),
+            Coord(p, q)
+            for p, q in [
+                (x - 1, y - 1),
+                (x - 1, y),
+                (x - 1, y + 1),
+                (x, y - 1),
+                (x, y + 1),
+                (x + 1, y - 1),
+                (x + 1, y),
+                (x + 1, y + 1),
             ]
         )
         if extent is None:
@@ -72,11 +67,11 @@ class Coord:
 class Extent(Coord):
     @property
     def size(self) -> int:
-        return self.row * self.col
+        return self.x * self.y
 
     def upto(self) -> Iterator[Coord]:
         """Return an iterator over all."""
-        return (Coord(r, c) for r in range(self.row) for c in range(self.col))
+        return (Coord(x, y) for x in range(self.x) for y in range(self.y))
 
 
 if __name__ == "__main__":
