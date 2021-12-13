@@ -33,6 +33,7 @@
         "uncons",
         "unlines",
         "unwords",
+        "upto",
         "vals",
         "venv",
         "vizslas"

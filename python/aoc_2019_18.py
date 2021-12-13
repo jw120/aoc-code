@@ -7,19 +7,7 @@ from dataclasses import dataclass
 from sys import stdin
 from typing import Callable, Dict, List, Optional, Set, Tuple, TypeVar
 
-
-@dataclass(eq=True, frozen=True)
-class Coord:
-    """Coordinates of a position in our grid."""
-
-    row: int
-    col: int
-
-    def out_of_bounds(self, num_rows: int, num_cols: int) -> bool:
-        """Test if this position is outside the given bounds."""
-        return (
-            self.row < 0 or self.row >= num_rows or self.col < 0 or self.col >= num_cols
-        )
+from Coord import Coord
 
 
 @dataclass(eq=True, frozen=True)
@@ -48,8 +36,7 @@ class Walker:
 class Maze:
     def __init__(self, lines: List[str]) -> None:
 
-        self._rows: int = len(lines)
-        self._cols: int = len(lines[0])
+        self._extent: Coord = Coord(len(lines), len(lines[0]))
         self._doors: Dict[Coord, str] = {}
         self._keys: Dict[Coord, str] = {}
         self.start: Coord
@@ -60,8 +47,8 @@ class Maze:
         self._all_keys: Set[str] = set(self._keys.values())
 
         assert self.start is not None
-        assert len(self._walls) == self._rows
-        assert all(len(row) == self._cols for row in self._walls)
+        assert len(self._walls) == self._extent.row
+        assert all(len(row) == self._extent.col for row in self._walls)
         assert set(self._doors.values()) <= set(map(str.upper, self._keys.values()))
 
     def _add_char(self, x: str, row: int, col: int) -> bool:
@@ -93,7 +80,7 @@ class Maze:
     def _open(self, w: Walker) -> bool:
         """Can we move to the given walker state."""
         #        print("Is open", w)
-        if w.position.out_of_bounds(self._rows, self._cols):
+        if not w.position.in_bounds(self._extent):
             #            print("OOB")
             return False
         if self.wall(w.position):
@@ -120,10 +107,10 @@ class Maze:
         return "#" if self.wall(p) else "."
 
     def _show_row(self, row: int) -> str:
-        return "".join(self._show_location(row, col) for col in range(self._cols))
+        return "".join(self._show_location(row, col) for col in range(self._extent.col))
 
     def show(self) -> str:
-        return "\n".join(self._show_row(row) for row in range(self._rows))
+        return "\n".join(self._show_row(row) for row in range(self._extent.row))
 
 
 S = TypeVar("S")
