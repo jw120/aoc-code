@@ -2,6 +2,8 @@
 
 # This assumes we never need to go up or left
 
+from __future__ import annotations
+
 from doctest import testmod
 from sys import stdin
 
@@ -28,12 +30,28 @@ class Grid:
         self._total_risk: list[list[int]] = [
             [0] * self._extent.x for _ in range(self._extent.y)
         ]
+        self._expanded: bool = False
+
+    def expand(self) -> Grid:
+        self._expanded = True
+        self._total_risk = [[0] * self._extent.x * 5 for _ in range(self._extent.y * 5)]
+        return self
+
+    @property
+    def extent(self) -> Extent:
+        if self._expanded:
+            return Extent(self._extent.x * 5, self._extent.y * 5)
+        return self._extent
 
     def risk(self, c: Coord) -> int:
-        return self._risk[c.x][c.y]
-
-    def set_risk(self, c: Coord, val: int) -> None:
-        self._risk[c.x][c.y] = val
+        if self._expanded:
+            offset = c.x // self._extent.x + c.y // self._extent.y
+            return (
+                (self._risk[c.x % self._extent.x][c.y % self._extent.y] + offset - 1)
+                % 9
+            ) + 1
+        else:
+            return self._risk[c.x][c.y]
 
     def total_risk(self, c: Coord) -> int:
         return self._total_risk[c.x][c.y]
@@ -42,8 +60,7 @@ class Grid:
         self._total_risk[c.x][c.y] = val
 
     def assign_total_risks(self) -> None:
-        self.set_total_risk(Coord(0, 0), 0)
-        for c in self._extent.upto():
+        for c in self.extent.upto():
             if c.x == 0 and c.y == 0:
                 incoming: int = -self.risk(c)
             elif c.x == 0 and c.y > 0:
@@ -61,13 +78,24 @@ class Grid:
 
         >>> Grid(test_data).exit_total_risk()
         40
+        #>>> Grid(test_data).expand().exit_total_risk()
+        #315
         """
         self.assign_total_risks()
-        return self.total_risk(self._extent + Coord(-1, -1))
+        # for c in self.extent.upto():
+        #     if c.x < self.extent.x - 1:
+        #         if self.total_risk(c) > self.total_risk(c + Coord(1, 0)):
+        #             print("Descending x", c)
+        #     if c.y < self.extent.y - 1:
+        #         if self.total_risk(c) > self.total_risk(c + Coord(0, 1)):
+        #             print("Descending y", c)
+
+        return self.total_risk(self.extent + Coord(-1, -1))
 
 
 if __name__ == "__main__":
     testmod()
     rows = stdin.read().splitlines()
     g = Grid(rows)
-    print(g.exit_total_risk())
+#    print(g.exit_total_risk())
+#    print(g.expand().exit_total_risk())
