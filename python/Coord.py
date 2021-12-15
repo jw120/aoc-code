@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from doctest import testmod
-from typing import Iterable, Iterator, Optional
+from typing import Any, Iterable, Iterator, Optional
 
 
 @dataclass(eq=True, frozen=True)
@@ -63,6 +63,12 @@ class Coord:
             return possible_cells
         return (c for c in possible_cells if c.in_bounds(extent))
 
+    def __add__(self, other: Any) -> Coord:
+        if isinstance(other, Coord):
+            return Coord(self.x + other.x, self.y + other.y)
+        else:
+            raise TypeError
+
 
 class Extent(Coord):
     @property
@@ -70,7 +76,10 @@ class Extent(Coord):
         return self.x * self.y
 
     def upto(self) -> Iterator[Coord]:
-        """Return an iterator over all."""
+        """Return an iterator over all coordinates in bound.
+
+        Order is (x=0, y=0), (x=0, y=1),...
+        """
         return (Coord(x, y) for x in range(self.x) for y in range(self.y))
 
 
