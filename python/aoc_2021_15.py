@@ -1,6 +1,6 @@
 """Advent of Code 2021 - Day 15."""
 
-# This assumes we never need to go up or left
+# This would better done using Dijkstra's algorithm or A*
 
 from __future__ import annotations
 
@@ -53,49 +53,44 @@ class Grid:
         else:
             return self._risk[c.x][c.y]
 
-    def total_risk(self, c: Coord) -> int:
-        return self._total_risk[c.x][c.y]
+    def walk(self) -> int:
+        """Return risk of lowest risk path to destination.
 
-    def set_total_risk(self, c: Coord, val: int) -> None:
-        self._total_risk[c.x][c.y] = val
-
-    def assign_total_risks(self) -> None:
-        for c in self.extent.upto():
-            if c.x == 0 and c.y == 0:
-                incoming: int = -self.risk(c)
-            elif c.x == 0 and c.y > 0:
-                incoming = self.total_risk(c + Coord(0, -1))
-            elif c.y == 0 and c.x > 0:
-                incoming = self.total_risk(c + Coord(-1, 0))
-            else:
-                incoming = min(
-                    self.total_risk(c + Coord(0, -1)), self.total_risk(c + Coord(-1, 0))
-                )
-            self.set_total_risk(c, self.risk(c) + incoming)
-
-    def exit_total_risk(self) -> int:
-        """Total risk for the whole grid.
-
-        >>> Grid(test_data).exit_total_risk()
+        >>> Grid(test_data).walk()
         40
-        #>>> Grid(test_data).expand().exit_total_risk()
-        #315
+        >>> Grid(test_data).expand().walk()
+        315
         """
-        self.assign_total_risks()
-        # for c in self.extent.upto():
-        #     if c.x < self.extent.x - 1:
-        #         if self.total_risk(c) > self.total_risk(c + Coord(1, 0)):
-        #             print("Descending x", c)
-        #     if c.y < self.extent.y - 1:
-        #         if self.total_risk(c) > self.total_risk(c + Coord(0, 1)):
-        #             print("Descending y", c)
-
-        return self.total_risk(self.extent + Coord(-1, -1))
+        risk: int = 0
+        frontier: dict[Coord, int] = {Coord(0, 0): 0}
+        visited: set[Coord] = set()
+        extent: Extent = self.extent
+        destination: Coord = extent + Coord(-1, -1)
+        while destination not in frontier:
+            risk += 1
+            new_frontier: dict[Coord, int] = {}
+            not_needed: set[Coord] = set()
+            for c, c_risk in frontier.items():
+                if c_risk + 9 < risk:
+                    not_needed.add(c)
+                else:
+                    for n in c.adjacents(extent):
+                        if (
+                            n not in frontier
+                            and n not in visited
+                            and c_risk + self.risk(n) == risk
+                        ):
+                            new_frontier[n] = risk
+            frontier = frontier | new_frontier
+            for c in not_needed:
+                del frontier[c]
+                visited.add(c)
+        return risk
 
 
 if __name__ == "__main__":
     testmod()
     rows = stdin.read().splitlines()
     g = Grid(rows)
-#    print(g.exit_total_risk())
-#    print(g.expand().exit_total_risk())
+    print(g.walk())
+    print(g.expand().walk())
