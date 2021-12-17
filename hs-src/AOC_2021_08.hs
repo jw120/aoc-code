@@ -11,6 +11,13 @@ the digitSegments mapping.
 -}
 module AOC_2021_08 (solvers) where
 
+import Data.Text (Text)
+
+solvers :: Text -> (Text, Text)
+solvers = undefined
+
+{-
+
 import Data.List qualified as L (foldl')
 import Data.Map (Map)
 import Data.Map qualified as Map (elems, empty, filter, fromList, insertWith, keys, toList, (!))
@@ -107,6 +114,8 @@ count = L.foldl' (\m x -> Map.insertWith (+) x 1 m) Map.empty
 
 invert :: Ord a => Map k a -> Map a k
 invert = Map.fromList . map (\(x, y) -> (y, x)) . Map.toList
+
+-}
 
 {-
 """Advent of Code 2021 - Day 8."""
