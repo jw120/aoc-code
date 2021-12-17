@@ -8,15 +8,16 @@
  Maintainer  : jw1200@gmail.com
  Stability   : experimental
 -}
-module AOC_2021_16 (solvers, readPacket, Packet (..), Content (..)) where
+module AOC_2021_16 (solvers, eval, readPacket, Packet (..), Content (..), versionSum) where
 
+import Control.Monad qualified as Monad (replicateM, replicateM_)
 import Data.Bits (Bits ((.&.)))
 import Data.Char qualified as C (digitToInt)
 import Data.List qualified as L (foldl')
 import Data.Text (Text)
-import Data.Text qualified as T (lines, pack, unpack, words)
+import Data.Text qualified as T (pack, strip, unpack)
 import Data.Void (Void)
-import Text.Megaparsec qualified as M (Parsec, eof, errorBundlePretty, many, optional, parse, try)
+import Text.Megaparsec qualified as M (Parsec, eof, errorBundlePretty, getOffset, many, optional, parse, try)
 import Text.Megaparsec.Char qualified as MC (char)
 
 import Utilities (($>), (<|>))
@@ -26,9 +27,11 @@ type Parser = M.Parsec Void [Bit]
 
 solvers :: Text -> (Text, Text)
 solvers t =
-    ( "NYI" -- T.pack . show . count1478 $ concatMap snd problems
-    , "NYI" -- T.pack . show . sum $ map solve problems
+    ( T.pack . show $ versionSum packet
+    , T.pack . show $ eval packet
     )
+  where
+    packet = readPacket $ T.strip t
 
 data Packet = Packet Int Content deriving (Show, Eq)
 
@@ -36,6 +39,21 @@ data Content
     = Literal Int
     | Operator Int [Packet]
     deriving (Show, Eq)
+
+versionSum :: Packet -> Int
+versionSum (Packet version (Literal _)) = version
+versionSum (Packet version (Operator _ packets)) = version + sum (map versionSum packets)
+
+eval :: Packet -> Int
+eval (Packet _ (Literal x)) = x
+eval (Packet _ (Operator 0 packets)) = sum (map eval packets)
+eval (Packet _ (Operator 1 packets)) = product (map eval packets)
+eval (Packet _ (Operator 2 packets)) = minimum (map eval packets)
+eval (Packet _ (Operator 3 packets)) = maximum (map eval packets)
+eval (Packet _ (Operator 5 [p, q])) = if eval p > eval q then 1 else 0
+eval (Packet _ (Operator 6 [p, q])) = if eval p < eval q then 1 else 0
+eval (Packet _ (Operator 7 [p, q])) = if eval p == eval q then 1 else 0
+eval p = error $ "Cannot evaluate: " ++ show p
 
 readPacket :: Text -> Packet
 readPacket t = case M.parse pFullPacket "" (hexToBits t) of
@@ -52,12 +70,9 @@ hexToBits = concatMap (intToBits . C.digitToInt) . T.unpack
 pFullPacket :: Parser Packet
 pFullPacket = do
     packet <- pPacket
-    _ <- exactly 7 $ M.optional pZero
+    Monad.replicateM_ 7 $ M.optional pZero
     _ <- M.eof
     return packet
-
--- 110 100 10111 11110 00101000
--- VVV TTT AAAAA BBBBB CCCCC
 
 -- Parse a normal packet
 pPacket :: Parser Packet
@@ -74,15 +89,20 @@ pLiteral = do
     combineBlocks = L.foldl' (\acc x -> acc * 16 + x) 0
 
 pOperator :: Parser Content
-pOperator = pNumber
+pOperator = M.try pLength <|> pNumber
   where
-    pLength = undefined
+    pLength = do
+        typeId <- pBits 3
+        _ <- pZero
+        numBits <- pBits 15
+        packets <- manyUntil numBits pPacket
+        return $ Operator typeId packets
     -- A number of sub-packets
     pNumber = do
         typeId <- pBits 3
         _ <- pOne
         numPackets <- pBits 11
-        packets <- exactly numPackets pPacket
+        packets <- Monad.replicateM numPackets pPacket
         return $ Operator typeId packets
 
 -- Parse n bits as an integer
@@ -104,14 +124,23 @@ pOne = MC.char '1' $> 1
 pZero :: Parser Int
 pZero = MC.char '0' $> 0
 
--- apply a parser exactly x times and collect results in a list
-exactly :: Int -> Parser a -> Parser [a]
-exactly n p
-    | n <= 0 = return []
-    | otherwise = do
-        x <- p
-        xs <- exactly (n - 1) p
-        return $ x : xs
+-- keep applying a parser until the offset has advanced by (exactly) the given amount
+manyUntil :: Int -> Parser a -> Parser [a]
+manyUntil n p = do
+    start <- M.getOffset
+    go (start + n)
+  where
+    go target = do
+        current <- M.getOffset
+        if current == target
+            then return []
+            else
+                if current < target
+                    then do
+                        x <- p
+                        xs <- go target
+                        return $ x : xs
+                    else error "Gone too far"
 
 {-
 
