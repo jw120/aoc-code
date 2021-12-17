@@ -1,8 +1,13 @@
 cradle:
   stack:
-    - path: "./hs-src/"
-      component: "aoc-code"
-    - path: "./hs-app/"
+    - path: "./hs-src"
+      component: "aoc-code:lib"
+
+    - path: "./hs-app/Main.hs"
       component: "aoc-code:exe:aoc-exe"
-    - path: "./hs-test/"
+
+    - path: "./hs-app/Paths_aoc_code.hs"
+      component: "aoc-code:exe:aoc-exe"
+
+    - path: "./hs-test"
       component: "aoc-code:test:test"
