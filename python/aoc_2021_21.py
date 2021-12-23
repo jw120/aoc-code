@@ -19,14 +19,14 @@ class Player:
 class DeterministicDie:
     def __init__(self, sides: int):
         self.sides = sides
-        self.next = 1
+        self.nxt = 1
         self.count = 0
 
     def roll(self) -> int:
-        next: int = self.next
-        self.next = 1 if self.next == self.sides else self.next + 1
+        nxt: int = self.nxt
+        self.next = 1 if self.nxt == self.sides else self.nxt + 1
         self.count += 1
-        return next
+        return nxt
 
 
 def partA(start1: int, start2: int) -> int:
@@ -49,8 +49,9 @@ def partA(start1: int, start2: int) -> int:
 
 
 def partB(start1: int, start2: int) -> int:
-    """Simulate universe splitting on each roll. Return number of universes in which
-    the player with more wins wins.
+    """Simulate universe splitting on each roll.
+
+    Return number of universes in which the player with more wins wins.
 
     State of the game is the next player, the two current squares and the two scores
 

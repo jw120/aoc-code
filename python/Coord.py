@@ -83,5 +83,14 @@ class Extent(Coord):
         return (Coord(x, y) for x in range(self.x) for y in range(self.y))
 
 
+@dataclass(eq=True, frozen=True)
+class Coord3:
+    """Coordinates of a position in a 3-d grid."""
+
+    x: int
+    y: int
+    z: int
+
+
 if __name__ == "__main__":
     testmod()
