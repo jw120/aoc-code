@@ -11,6 +11,8 @@ from Coord import Coord, Extent
 
 import numpy as np
 
+# Works but slow - should avoid scanning over whole grid each step (add a list of mobile slugs?)
+
 
 class Item(Enum):
     EMPTY = auto()
