@@ -107,11 +107,7 @@ def merge(p: Cuboid, q: Cuboid) -> Optional[Cuboid]:
 
 
 def merge_adjacents(cs: list[Cuboid]) -> None:
-    """Simplify a list of disjoint cuboids by merging adjacenet pairs.
-
-    >>> merge_adjacents(combine(combine([], test1[0]), test1[1]))
-    QQ
-    """
+    """Simplify a list of disjoint cuboids by merging adjacenet pairs."""
     for c, d in combinations(cs, 2):
         assert c.disjoint(
             d
@@ -150,7 +146,7 @@ def combine(cs: list[Cuboid], step: Tuple[bool, Cuboid]) -> list[Cuboid]:
     39
     """
     turn_on, x = step
-    print("Combining", turn_on, x.as_tuple())
+    # print("Combining", turn_on, x.as_tuple())
     if not cs:
         return [x] if turn_on else []
     # Start by checking all existing cuboids are disjoint
@@ -163,9 +159,9 @@ def combine(cs: list[Cuboid], step: Tuple[bool, Cuboid]) -> list[Cuboid]:
         filter(lambda c: x.overlap(c) and not x.includes(c), cs)
     )
     disjoint_cuboids = list(filter(lambda c: c.disjoint(x), cs))
-    print(
-        f"{len(cs)}+1 -> {len(overlapping_cuboids)} overlapping, {len(disjoint_cuboids)} disjoint"
-    )
+    # print(
+    #     f"{len(cs)}+1 -> {len(overlapping_cuboids)} overlapping, {len(disjoint_cuboids)} disjoint"
+    # )
     # Replace the cuboids that overlap with x with all possible cuboids
     x_coords = sorted(
         chain.from_iterable((c._min.x, c._max.x) for c in overlapping_cuboids)
@@ -211,8 +207,8 @@ def combine_steps(steps: list[Tuple[bool, Cuboid]]) -> list[Cuboid]:
 
     >>> total_volume(combine_steps(test1))
     39
-    #    >>> total_volume(combine_steps(test2))
-    #   590784
+    >>> total_volume(combine_steps(test2))
+    590784
     """
     return reduce(combine, steps, [])
 
@@ -272,7 +268,6 @@ test2 = [
 
 if __name__ == "__main__":
     testmod()
-    # print(total_volume(combine_steps(test2[:-2])))
     steps = [read_step(line) for line in stdin.read().splitlines()]
     scope = Cuboid(-50, 51, -50, 51, -50, 51)
     small_steps = [s for s in steps if scope.overlap(s[1])]
