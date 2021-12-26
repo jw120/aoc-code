@@ -95,14 +95,12 @@ class SeaFloor:
         moved = False
         can_move: list[Coord] = [c for c in self.over_floor() if self.can_east(c)]
         for m in can_move:
-            # print(">", m)
             self.set_floor(m, Item.EMPTY)
             moved = True
         for m in can_move:
             self.set_floor(self.east(m), Item.EAST)
         can_move = [c for c in self.over_floor() if self.can_south(c)]
         for m in can_move:
-            # print("v", m)
             self.set_floor(m, Item.EMPTY)
             moved = True
         for m in can_move:
@@ -120,6 +118,7 @@ class SeaFloor:
         while True:
             moved: bool = self.step()
             steps += 1
+            print(steps)
             if not moved:
                 return steps
 
