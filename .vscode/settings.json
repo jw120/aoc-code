@@ -8,6 +8,7 @@
         "bytestring",
         "concat",
         "doctest",
+        "dtype",
         "Elem",
         "elems",
         "Eqrr",

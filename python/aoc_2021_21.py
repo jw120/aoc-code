@@ -24,7 +24,7 @@ class DeterministicDie:
 
     def roll(self) -> int:
         nxt: int = self.nxt
-        self.next = 1 if self.nxt == self.sides else self.nxt + 1
+        self.nxt = 1 if self.nxt == self.sides else self.nxt + 1
         self.count += 1
         return nxt
 
