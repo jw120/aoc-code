@@ -91,6 +91,18 @@ class Coord3:
     y: int
     z: int
 
+    def __add__(self, other: Any) -> Coord3:
+        if isinstance(other, Coord3):
+            return Coord3(self.x + other.x, self.y + other.y, self.z + other.z)
+        else:
+            raise TypeError
+
+    def __sub__(self, other: Any) -> Coord3:
+        if isinstance(other, Coord3):
+            return Coord3(self.x - other.x, self.y - other.y, self.z - other.z)
+        else:
+            raise TypeError
+
 
 if __name__ == "__main__":
     testmod()
