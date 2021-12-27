@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from doctest import testmod
-from typing import Any, Iterable, Iterator, Optional
+from typing import Any, Iterable, Iterator, Optional, Tuple
 
 
 @dataclass(eq=True, frozen=True)
@@ -90,6 +90,9 @@ class Coord3:
     x: int
     y: int
     z: int
+
+    def as_tuple(self) -> Tuple[int, int, int]:
+        return (self.x, self.y, self.z)
 
     def __add__(self, other: Any) -> Coord3:
         if isinstance(other, Coord3):
