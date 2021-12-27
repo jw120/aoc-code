@@ -32,6 +32,10 @@ class Rotation:
         )
 
     @staticmethod
+    def identity() -> Rotation:
+        return Rotation(Coord3(1, 0, 0), Coord3(0, 1, 0))
+
+    @staticmethod
     def all_rotations() -> Iterable[Rotation]:
 
         dirs = [Coord3(1, 0, 0), Coord3(0, 1, 0), Coord3(0, 0, 1)]
@@ -55,8 +59,8 @@ class Rotation:
 class Scanner:
     def __init__(self, ss: Optional[list[str]] = None):
         if ss is None:
-            self._number: int = -1
-            self._beacons: list[Coord3] = []
+            self.number: int = -1
+            self.beacons: list[Coord3] = []
         else:
             assert len(ss) > 0, "Empty list making Scanner"
             assert ss[0].startswith("--- scanner "), (
@@ -65,25 +69,23 @@ class Scanner:
             assert ss[0].endswith(" ---"), (
                 "Scanner initial line missing suffix: '" + ss[0] + "'"
             )
-            self._number = int(ss[0].removeprefix("--- scanner ").removesuffix(" ---"))
-            self._beacons = [
-                Coord3(*[int(i) for i in row.split(",")]) for row in ss[1:]
-            ]
+            self.number = int(ss[0].removeprefix("--- scanner ").removesuffix(" ---"))
+            self.beacons = [Coord3(*[int(i) for i in row.split(",")]) for row in ss[1:]]
 
     def rotated(self, r: Rotation) -> Scanner:
         """Return a copy of the scanner after applying the rotation."""
         other = Scanner()
-        other._number = self._number
-        other._beacons = [r.rotate(b) for b in self._beacons]
+        other.number = self.number
+        other.beacons = [r.rotate(b) for b in self.beacons]
         return other
 
     def is_match(self, other: Scanner, offset: Coord3, min_match: int) -> bool:
         """Test if other scanner matches with the given offset and at least `min_match` beacons."""
         matches_found: int = 0
-        # print("Testing self", [b.as_tuple() for b in self._beacons])
-        # print("Versus others", [b.as_tuple() for b in other._beacons])
-        for p in self._beacons:
-            for q in other._beacons:
+        # print("Testing self", [b.as_tuple() for b in self.beacons])
+        # print("Versus others", [b.as_tuple() for b in other.beacons])
+        for p in self.beacons:
+            for q in other.beacons:
                 if q + offset == p:
                     matches_found += 1
                     break
@@ -101,17 +103,102 @@ class Scanner:
         """
         for r in Rotation.all_rotations():
             other_rotated: Scanner = other.rotated(r)
-            for p in self._beacons:
-                for q in other_rotated._beacons:
+            for p in self.beacons:
+                for q in other_rotated.beacons:
                     offset = p - q
                     if self.is_match(other_rotated, offset, min_match):
                         return offset, r
         return None
 
 
-def beacons(scanners: list[Scanner], min_match: int) -> list[Coord3]:
-    """Return all the beacons found from combining the scanners."""
-    pass
+def beacons(input_scanners: list[Scanner], min_match: int) -> list[Coord3]:
+    """Return all the beacons found from combining the scanners.
+
+    #>>> beacons(test3, 12)
+    #QQ
+    """
+    # Numbers of scanners not yet matched
+    unmatched_scanners: set[int]
+    # Number of first scanner matched (sets frame for located_beacons and scanner matches)
+    base_scanner: int
+    # Lookup table of scanners, with their matches once they are found
+    scanners: dict[int, Tuple[Scanner, Optional[Tuple[Coord3, Rotation]]]] = {
+        s.number: (s, None) for s in input_scanners
+    }
+    # Located beacons (in frame of base_scanner)
+    located_beacons: set[Coord3]
+    # Pairs of scanners that we have found don't match
+    pairs_failed: set[Tuple[int, int]] = set()
+
+    # Find first match to set base_scanner and start matched_scanners
+    match: Optional[Tuple[Coord3, Rotation]] = None
+    s_index: int = 0
+    while match is None:
+        s = input_scanners[s_index]
+        for t in input_scanners[s_index + 1 :]:
+            match = s.find_match(t, min_match)
+            print("Checked", s.number, t.number, match)
+            if match is None:
+                pairs_failed.add((s.number, t.number))
+            else:
+                break
+    unmatched_scanners = {
+        x.number
+        for x in input_scanners
+        if x.number != s.number and x.number != t.number
+    }
+    base_scanner = s.number
+    offset, rotation = match
+    scanners[s.number] = (s, (Coord3(0, 0, 0), Rotation.identity()))
+    scanners[t.number] = (t, (offset, rotation))
+    located_beacons = set(s.beacons) | {b + offset for b in t.rotated(rotation).beacons}
+    print("Base scanner is", base_scanner)
+    print("Matched scanners are:")
+    for s, m in scanners.values():
+        if m is not None:
+            print(s.number, m[0].as_tuple())
+    print("Unmatched scanners are", unmatched_scanners)
+    print(f"{len(located_beacons)} located beacons")
+    #    for b in sorted(b.as_tuple() for b in located_beacons):
+    #        print(b)
+
+    # Now match the other scanners
+    while unmatched_scanners:
+        for s in input_scanners:
+            for t in input_scanners:
+                s_match = scanners[s.number][1]
+                if s.number == t.number:
+                    print("Skipping (equal)", s.number, t.number)
+                elif s_match is None:
+                    print("Skipping (first must be located)", s.number, t.number)
+                elif scanners[t.number][1] is not None:
+                    print("Skipping (second must not be located)", s.number, t.number)
+                elif (s.number, t.number) in pairs_failed:
+                    print("Skipping (failed already)", s.number, t.number)
+                else:
+                    print("Trying", s.number, t.number)
+                    match = s.find_match(t, min_match)
+                    if match is None:
+                        print("Failed")
+                        pairs_failed.add((s.number, t.number))
+                    else:
+                        print("Matched")
+                        offset, rotation = match
+                        print("Offset vs", s.number, "is", offset)
+                        s_offset, s_rotation = s_match
+                        # NEED TO GO TO FRAME OF base_scanner
+                        scanners[t.number] = (t, (s_offset - offset, rotation))
+                        unmatched_scanners.remove(t.number)
+
+    print("Base scanner is", base_scanner)
+    print("Matched scanners are:")
+    for s, m in scanners.values():
+        if m is not None:
+            print(s.number, m[0].as_tuple())
+    print("Unmatched scanners are", unmatched_scanners)
+    print(f"{len(located_beacons)} located beacons")
+
+    return list(located_beacons)
 
 
 test1: list[Scanner] = [
@@ -133,7 +220,7 @@ test2: list[Scanner] = [
     ),
     Scanner(
         [
-            "--- scanner 0 ---",
+            "--- scanner 1 ---",
             "1,-1,1",
             "2,-2,2",
             "3,-3,3",
@@ -144,7 +231,7 @@ test2: list[Scanner] = [
     ),
     Scanner(
         [
-            "--- scanner 0 ---",
+            "--- scanner 2 ---",
             "-1,-1,-1",
             "-2,-2,-2",
             "-3,-3,-3",
@@ -155,7 +242,7 @@ test2: list[Scanner] = [
     ),
     Scanner(
         [
-            "--- scanner 0 ---",
+            "--- scanner 3 ---",
             "1,1,-1",
             "2,2,-2",
             "3,3,-3",
@@ -165,7 +252,7 @@ test2: list[Scanner] = [
         ]
     ),
     Scanner(
-        ["--- scanner 0 ---", "1,1,1", "2,2,2", "3,3,3", "3,1,2", "-6,-4,-5", "0,7,-8"]
+        ["--- scanner 4 ---", "1,1,1", "2,2,2", "3,3,3", "3,1,2", "-6,-4,-5", "0,7,-8"]
     ),
 ]
 
@@ -327,5 +414,6 @@ test3: list[Scanner] = [
 
 if __name__ == "__main__":
     testmod()
+    beacons(test3, 12)
 
-    print(test3[0].find_match(test3[1], 12))
+#    print(test3[0].find_match(test3[1], 12))
