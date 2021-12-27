@@ -3,13 +3,45 @@
 from __future__ import annotations
 
 from doctest import testmod
-from typing import Optional
+from itertools import chain
+from typing import Iterable, Optional
 
 # from enum import Enum, auto
 # from sys import stdin
 
 
 from Coord import Coord3
+
+
+class Rotation:
+    """90 degree rotations of axes (which remain right-handed)."""
+
+    def __init__(self, a: Coord3, b: Coord3):
+        self.a = a
+        self.b = b
+        self.c = Coord3(
+            a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x
+        )
+
+    @staticmethod
+    def all_rotations() -> Iterable[Rotation]:
+
+        dirs = [Coord3(1, 0, 0), Coord3(0, 1, 0), Coord3(0, 0, 1)]
+
+        def flips(a: Coord3, b: Coord3) -> list[tuple[Coord3, Coord3]]:
+            return [(a, b), (-a, b), (a, -b), (-a, -b)]
+
+        return (
+            Rotation(a, b)
+            for a, b in chain(
+                *[
+                    flips(x_dir, y_dir)
+                    for x_dir in dirs
+                    for y_dir in dirs
+                    if y_dir != x_dir
+                ]
+            )
+        )
 
 
 class Scanner:

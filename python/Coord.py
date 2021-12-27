@@ -103,6 +103,9 @@ class Coord3:
         else:
             raise TypeError
 
+    def __neg__(self) -> Coord3:
+        return Coord3(-self.x, -self.y, -self.z)
+
 
 if __name__ == "__main__":
     testmod()
