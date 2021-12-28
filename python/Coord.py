@@ -91,6 +91,10 @@ class Coord3:
     y: int
     z: int
 
+    def manhattan(self, other: Coord3) -> int:
+        """Return Manhattan distance to the other coordinate."""
+        return abs(self.x - other.x) + abs(self.y - other.y) + abs(self.z - other.z)
+
     def as_tuple(self) -> Tuple[int, int, int]:
         return (self.x, self.y, self.z)
 

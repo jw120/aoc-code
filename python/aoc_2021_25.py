@@ -120,7 +120,7 @@ class SeaFloor:
         while True:
             moved: bool = self.step()
             steps += 1
-            print(steps)
+            #            print(steps)
             if not moved:
                 return steps
 

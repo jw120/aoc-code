@@ -18,7 +18,7 @@ Assumes `../aoc-data` (which is a private repo) holds personalized input data an
 Single executable with one module per day that provides a solver solver function. Uses tasty for unit tests
 which includes Golden file testing that creates and checks ../aoc-data/good files
 
- implicit-hie used for hie.
+implicit-hie used for hie.
 
 ```{haskell}
 stack run 2015 1
