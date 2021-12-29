@@ -82,6 +82,13 @@ class Extent(Coord):
         """
         return (Coord(x, y) for x in range(self.x) for y in range(self.y))
 
+    def upto_by_y(self) -> Iterator[Coord]:
+        """Return an iterator over all coordinates in bound.
+
+        Order is (x=0, y=0), (x=1, y=0),...
+        """
+        return (Coord(x, y) for y in range(self.y) for x in range(self.x))
+
 
 @dataclass(eq=True, frozen=True)
 class Coord3:
