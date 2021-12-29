@@ -66,8 +66,6 @@ class Image:
         )
         if distance_beyond_extent == 0:
             return c in self.lit_pixels
-        elif distance_beyond_extent <= 2:
-            return False
         else:
             return self.distant_pixel
 
@@ -98,19 +96,19 @@ class Image:
             if algo[self.value_around(c)]
         )
         other.distant_pixel = algo[511] if self.distant_pixel else algo[0]
-        if other.lit_pixels:
-            other.min_extent = Coord(
-                min(c.x for c in other.lit_pixels), min(c.y for c in other.lit_pixels)
-            )
-            other.max_extent = Coord(
-                max(c.x for c in other.lit_pixels) + 1,
-                max(c.y for c in other.lit_pixels) + 1,
-            )
-            return other
-        else:
-            other.min_extent = Coord(0, 0)
-            other.max_extent = Coord(0, 0)
-            return other
+        other.set_extents()
+        return other
+
+    def enhanced_repeated_copy(self, algo: Algorithm, n: int) -> Image:
+        """Create a new image by applying the algorithm n times.
+
+        >>> test1.enhanced_repeated_copy(test_algo1, 50).number_lit
+        3351
+        """
+        image = self
+        for _ in range(n):
+            image = image.enhanced_copy(algo)
+        return image
 
     @property
     def number_lit(self) -> int:
@@ -147,7 +145,8 @@ if __name__ == "__main__":
     algo_block, image_block = stdin.read().split("\n\n")
     algo = read_algo(algo_block)
     image = Image(image_block.splitlines())
-    image.show()
-    image.enhanced_copy(algo).show()
-    image.enhanced_copy(algo).enhanced_copy(algo).show()
+    # image.show()
+    # image.enhanced_copy(algo).show()
+    # image.enhanced_copy(algo).enhanced_copy(algo).show()
     print(image.enhanced_copy(algo).enhanced_copy(algo).number_lit)
+    print(image.enhanced_repeated_copy(algo, 50).number_lit)
