@@ -2,6 +2,7 @@
 
 # from __future__ import annotations
 
+from collections import Counter
 from doctest import testmod
 from typing import Iterable, Tuple, Union
 
@@ -33,42 +34,53 @@ Position = Union[HallPosition, RoomPosition]
 Amphipod = int
 State = dict[Position, Amphipod]
 
+# Hallway positions by the exits of each room
 room_exits: dict[AmphipodKind, HallPosition] = {"A": 2, "B": 4, "C": 6, "D": 8}
 
 
 def pod_kind(pod: int) -> AmphipodKind:
     """Return the kind of the given amphipod.
 
-    >>> [target_room(pod) for pod in range(8)]
+    >>> [pod_kind(pod) for pod in range(8)]
     ['A', 'A', 'B', 'B', 'C', 'C', 'D', 'D']
     """
     assert pod >= 0 and pod < 8
     return "ABCD"[pod // 2]
 
 
-def room_available(state: State, kind: AmphipodKind) -> bool:
-    """Is the room available for an amphipod to move into.
+def room_available(state: State, target_kind: AmphipodKind) -> bool:
+    """Is the target room available for an amphipod to move into.
 
     Available if only occupied by an amphipod of the same kind.
 
-    >>> room_available(test1, ")
+    >>> [room_available(test1, room) for room in "ABCD"]
+    [False, False, False, False]
 
+    >>> [room_available(test2, c) for c in "ABCD"]
+    [False, False, True, False]
     """
-    for pod, position in state.items():
+    for position, pod in state.items():
         if not isinstance(position, int):
             room_kind, room_upper = position
-            if room_kind == kind and pod_kind(pod) != kind:
+            if room_kind == target_kind and pod_kind(pod) != target_kind:
                 return False
     return True
 
 
 def room_empty(state: State, kind: AmphipodKind) -> bool:
-    """Is the given room empty (which allows an entering amphipod to take the bottom slot)."""
-    for pod, position in state.items():
+    """Is the given room empty (which allows an entering amphipod to take the bottom slot).
+
+    >>> [room_empty(test1, room) for room in "ABCD"]
+    [False, False, False, False]
+    >>> [room_empty(test2, room) for room in "ABCD"]
+    [False, False, False, False]
+    >>> [room_empty(test_empty, room) for room in "ABCD"]
+    [False, True, False, False]
+    """
+    for position, pod in state.items():
         if not isinstance(position, int):
             room_kind, room_upper = position
             if room_kind == kind:
-                assert not room_upper, "Don't expect only upper position filled"
                 return False
     return True
 
@@ -108,21 +120,60 @@ def available_moves(state: State) -> Iterable[Tuple[Amphipod, Position]]:
 #         if a.type:
 #             pass
 
-test1 = {
-    0: ("A", False),
-    1: ("D", False),
-    2: ("A", True),
-    3: ("C", True),
-    4: ("B", True),
-    5: ("C", False),
-    6: ("B", False),
-    7: ("D", True),
-}
+
+state_template: str = (
+    "#############\n#...........#\n###A#B#C#D###\n  #a#b#c#d#\n  #########"
+)
 
 
-def read_state(s: list[str]) -> State:
-    pass
+def read_initial_state(s: str) -> State:
+    """Read an initial state (all amphipods in rooms).
 
+    >>> [pod_kind(test1[(k, u)]) for k in "ABCD" for u in [True, False]]
+    ['B', 'A', 'C', 'D', 'B', 'C', 'D', 'A']
+    >>> sorted(test1.values())
+    [0, 1, 2, 3, 4, 5, 6, 7]
+    >>> sorted(test1.keys())
+    [('A', False), ('A', True), ('B', False), ('B', True), ('C', False), ('C', True), ('D', False), ('D', True)]
+    """
+    assert len(s) == len(
+        state_template
+    ), f"Wrong length for state {len(s)} vs. {len(state_template)}"
+    state: State = {}
+    amphipod_counts: Counter[AmphipodKind] = Counter()
+    for ch, template in zip(s, state_template):
+        if ch in "ABCD" and template in "AaBbCcDd":
+            position = (template.upper(), template.isupper())
+            pod = "ABCD".index(ch) * 2 + amphipod_counts[ch]
+            amphipod_counts[ch] += 1
+            state[position] = pod
+        else:
+            assert ch in "#.\n " and ch == template, (
+                "Bad character: '" + ch + template + "'"
+            )
+    assert len(state) == 8, "Wrong number of items in state"
+    assert all(
+        amphipod_counts[c] == 2 for c in "ABCD"
+    ), "Wrong number of kinds in state"
+    return state
+
+
+# Test 1 is the starting state for the example problem
+test1: State = read_initial_state(
+    "#############\n#...........#\n###B#C#B#D###\n  #A#D#C#A#\n  #########"
+)
+
+# Test 2 is the second state for the example problem
+test2: State = test1.copy()
+test2[4] = test2[("C", True)]
+del test2[("C", True)]
+
+# Test empty has an empty room
+test_empty: State = test1.copy()
+test_empty[0] = test_empty[("B", True)]
+test_empty[1] = test_empty[("B", False)]
+del test_empty[("B", True)]
+del test_empty[("B", False)]
 
 # class State:
 #     def __init__(lines: list[str]) -> None:
