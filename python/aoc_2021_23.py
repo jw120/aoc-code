@@ -2,7 +2,7 @@
 
 # from __future__ import annotations
 
-from collections import Counter
+from collections import Counter, deque
 from doctest import testmod
 from typing import Iterable, Tuple, Union
 
@@ -150,6 +150,16 @@ def available_moves(state: State) -> Iterable[Tuple[Position, Position]]:
                         yield (start_position, end_hall)
 
 
+def move(state: State, p: Position, q: Position) -> State:
+    """Return a new state applying the given move."""
+    assert p in state, "Can't move from an empty position"
+    assert q not in state, "Can't move to a non-empty position"
+    new_state = state.copy()
+    new_state[q] = new_state[p]
+    del new_state[p]
+    return new_state
+
+
 def organized(state: State) -> bool:
     """Test if all the amphipods have been organized.
 
@@ -165,6 +175,26 @@ def organized(state: State) -> bool:
         if room_kind != pod_kind(pod):
             return False
     return True
+
+
+def solve(start_state: State) -> None:
+    """Solve the state (BFS a la Wikipedia)."""
+    queue: deque[State] = deque([start_state])
+    explored: set[frozenset[Tuple[Position, Amphipod]]] = {
+        frozenset(start_state.items())
+    }
+    while queue:
+        state = queue.pop()
+        print("Dequeue", state)
+        if organized(state):
+            print("Finished")
+            return
+        for from_position, to_position in available_moves(state):
+            new_state = move(state, from_position, to_position)
+            new_state_hash = frozenset(new_state.items())
+            if new_state_hash not in explored:
+                explored.add(new_state_hash)
+                queue.appendleft(new_state)
 
 
 state_template: str = (
@@ -260,3 +290,4 @@ test_organized: State = dict(
 
 if __name__ == "__main__":
     testmod()
+    solve(test1)
