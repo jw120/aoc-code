@@ -2,10 +2,12 @@
 
 # from __future__ import annotations
 
-from collections import Counter, deque
+from collections import Counter
+from dataclasses import dataclass
 from doctest import testmod
+from heapq import heappop, heappush
 from sys import stdin
-from typing import Iterable, Tuple, Union
+from typing import Any, Iterable, Tuple, Union
 
 
 """
@@ -90,7 +92,7 @@ def room_empty(state: State, kind: AmphipodKind) -> bool:
     return True
 
 
-def hallway_number(state) -> int:
+def hallway_number(state: State) -> int:
     """Return the number of pods in the hallway.
 
     >>> [hallway_number(s) for s in [test1, test2, test3]]
@@ -162,14 +164,14 @@ def available_moves(state: State) -> Iterable[Tuple[Position, Position]]:
                             yield (start_position, end_hall)
 
 
-def move(state: State, p: Position, q: Position) -> State:
+def move(state: State, p: Position, q: Position) -> Tuple[State, int]:
     """Return a new state applying the given move."""
     assert p in state, "Can't move from an empty position"
     assert q not in state, "Can't move to a non-empty position"
     new_state = state.copy()
     new_state[q] = new_state[p]
     del new_state[p]
-    return new_state
+    return new_state, 0
 
 
 def organized(state: State) -> bool:
@@ -189,26 +191,35 @@ def organized(state: State) -> bool:
     return True
 
 
+@dataclass(order=True)
+class WrappedState:
+    frozen_state: frozenset[Tuple[Position, Amphipod]]
+    cost: int
+
+
 def solve(start_state: State) -> None:
     """Solve the state (BFS a la Wikipedia)."""
-    queue: deque[State] = deque([start_state])
+    pq: Any = []  # heapq is an untyped module
+    heappush(pq, WrappedState(frozenset(start_state.items()), 0))
     explored: set[frozenset[Tuple[Position, Amphipod]]] = {
         frozenset(start_state.items())
     }
-    while queue:
-        state = queue.pop()
-        # print(f"Dequeued ({len(queue)} left):")
-        # show_state(state)
+    while pq:
+        wrapped_state = heappop(pq)
+        state = dict(wrapped_state.frozen_state)
+        cost = wrapped_state.cost
         if organized(state):
-            print("Finished")
+            print("Finished", cost)
             show_state(state)
             return
         for from_position, to_position in available_moves(state):
-            new_state = move(state, from_position, to_position)
+            new_state, extra_cost = move(state, from_position, to_position)
             new_state_hash = frozenset(new_state.items())
             if new_state_hash not in explored:
                 explored.add(new_state_hash)
-                queue.appendleft(new_state)
+                heappush(
+                    pq, WrappedState(frozenset(new_state.items()), cost + extra_cost)
+                )
     print("Failed")
 
 
