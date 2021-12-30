@@ -37,6 +37,9 @@ State = dict[Position, Amphipod]
 # Hallway positions by the exits of each room
 room_exits: dict[AmphipodKind, HallPosition] = {"A": 2, "B": 4, "C": 6, "D": 8}
 
+# Valid hallway positions are those which are not exits
+valid_hallway_positions: set[HallPosition] = {0, 1, 3, 5, 7, 9, 10}
+
 
 def pod_kind(pod: int) -> AmphipodKind:
     """Return the kind of the given amphipod.
@@ -88,37 +91,80 @@ def room_empty(state: State, kind: AmphipodKind) -> bool:
 def path_available(state: State, p: RoomPosition, q: HallPosition) -> bool:
     """Is a path available between the room and hallway (no blocking amphipods).
 
-    >>> path_available(test1, ('A', True), 0)
-    True
+    Does not test if either end-state is occupied.
+
+    >>> [path_available(test1, (room, upper), 0) for room in "ABCD" for upper in [True, False]]
+    [True, False, True, False, True, False, True, False]
+    >>> [path_available(test2, (room, upper), 0) for room in "ABCD" for upper in [True, False]]
+    [True, False, False, False, False, False, False, False]
+    >>> [path_available(test2, (room, upper), 9) for room in "ABCD" for upper in [True, False]]
+    [False, False, True, False, True, True, True, False]
+    >>> [path_available(test3, (room, upper), 3) for room in "ABCD" for upper in [True, False]]
+    [True, False, True, True, False, False, False, False]
     """
     p_room, p_upper = p
     # Check to see if blocked by upper position in the room
     if not p_upper and (p_room, True) in state:
         return False
     room_exit: HallPosition = room_exits[p_room]
-    path = range(room_exit, q + 1) if room_exit < 1 else range(q, room_exit + 1)
+    path = range(room_exit + 1, q) if room_exit < q else range(q + 1, room_exit)
     return all(p not in state for p in path)
 
 
-def available_moves(state: State) -> Iterable[Tuple[Amphipod, Position]]:
-    for position, pod in state.items():
-        # If the Amphipod is in the hallway, can only move to a room
-        if isinstance(position, int):
-            kind = pod_kind(pod)
+def available_moves(state: State) -> Iterable[Tuple[Position, Position]]:
+    """Return all available moves.
+
+    >>> expected_moves = {((p, True), h) for p in "ABCD" for h in valid_hallway_positions}
+    >>> set(available_moves(test1)) == expected_moves
+    True
+    >>> expected_moves =  {(('A', True),  h) for h in [0,1]}
+    >>> expected_moves |= {(('B', True),  h) for h in [5, 7, 9, 10]}
+    >>> expected_moves |= {(('D', True),  h) for h in [5, 7, 9, 10]}
+    >>> set(available_moves(test2)) == expected_moves
+    True
+    >>> expected_moves =  {(('A', True),  h) for h in [0,1]}
+    >>> expected_moves |= {(('D', True),  h) for h in [7, 9, 10]}
+    >>> expected_moves |= {(3, ('B', False))}
+    >>> set(available_moves(test3)) == expected_moves
+    True
+    """
+    for start_position, pod in state.items():
+        kind = pod_kind(pod)
+        # Amphipod is in the hallway, can only move to a room
+        if isinstance(start_position, int):
             if room_available(state, kind):
-                new_position: RoomPosition = (kind, not room_empty(state, kind))
-                if path_available(state, new_position, position):
-                    yield (pod, (kind, not room_empty(state, kind)))
+                end_room: RoomPosition = (kind, not room_empty(state, kind))
+                if path_available(state, end_room, start_position):
+                    yield (start_position, end_room)
+        # Amphipod in room moves to hallway
+        else:
+            start_kind, start_upper = start_position
+            # Only try and move if pod is in the wrong room (or in the right room but above a wrong pod)
+            if start_kind != kind or (
+                start_upper and pod_kind(state[(start_kind, False)]) != kind
+            ):
+                for end_hall in valid_hallway_positions:
+                    if end_hall not in state and path_available(
+                        state, start_position, end_hall
+                    ):
+                        yield (start_position, end_hall)
 
 
-#            room_kind, room_upper = position.room
+def organized(state: State) -> bool:
+    """Test if all the amphipods have been organized.
 
-
-# def organized(state) -> bool:
-#     """Test if all the amphipods have been organized."""
-#     for a in state.keys:
-#         if a.type:
-#             pass
+    >>> organized(test1)
+    False
+    >>> organized(test_organized)
+    True
+    """
+    for position, pod in state.items():
+        if isinstance(position, int):
+            return False
+        room_kind, _room_upper = position
+        if room_kind != pod_kind(pod):
+            return False
+    return True
 
 
 state_template: str = (
@@ -158,33 +204,59 @@ def read_initial_state(s: str) -> State:
     return state
 
 
-# Test 1 is the starting state for the example problem
+""" test1 is the starting state for the example problem
+
+#############
+#...........#
+###B#C#B#D###
+  #A#D#C#A#
+  #########
+
+"""
 test1: State = read_initial_state(
     "#############\n#...........#\n###B#C#B#D###\n  #A#D#C#A#\n  #########"
 )
 
-# Test 2 is the second state for the example problem
+""" test2 is the second step for the example problem
+
+#############
+#...B.......#
+###B#C#.#D###
+  #A#D#C#A#
+  #########
+
+"""
 test2: State = test1.copy()
-test2[4] = test2[("C", True)]
+test2[3] = test2[("C", True)]
 del test2[("C", True)]
 
-# Test empty has an empty room
+""" test3 is an intermediate step shown from the example problem
+
+#############
+#...B.D.....#
+###B#.#C#D###
+  #A#.#C#A#
+  #########
+
+"""
+test3: State = test2.copy()
+test3[("C", True)] = test3[("B", True)]
+test3[5] = test3[("B", False)]
+del test3[("B", True)]
+del test3[("B", False)]
+
+
+# test_empty has an empty room
 test_empty: State = test1.copy()
 test_empty[0] = test_empty[("B", True)]
 test_empty[1] = test_empty[("B", False)]
 del test_empty[("B", True)]
 del test_empty[("B", False)]
 
-# class State:
-#     def __init__(lines: list[str]) -> None:
-#         assert len(lines) > 0, "No lines in maze"
-#         assert all(
-#             len(line) == len(line[0]) for line in lines[1:]
-#         ), "Uneven lines in maze"
-#         # self[]
-#         # self.extent = Extent(len(lines[0]), len(lines))
-#         # self.walls: dict[Coord, bool] = {c: lines[c.y][c.x] == "#"
-
+# test_organized is a fully organized_state
+test_organized: State = dict(
+    zip([(room, upper) for room in "ABCD" for upper in [True, False]], range(8))
+)
 
 if __name__ == "__main__":
     testmod()
