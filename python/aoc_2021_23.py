@@ -4,209 +4,274 @@ from __future__ import annotations
 
 from collections import Counter
 from doctest import testmod
-from heapq import heappop, heappush
+
+# from heapq import heappop, heappush
 from sys import stdin
-from typing import Any, Iterable, Tuple, Union
+from typing import Any, ClassVar, Iterable, Optional, Tuple
 
 
-"""
+class Kind:
+    """Amphipod kind and index for the rooms."""
 
-We hard-code the shape of the burrow, numbering the hall positions
-and labelling the rooms by the type of the Amphipod which want to be there.
+    _indices: ClassVar[dict[str, int]] = {"A": 0, "B": 1, "C": 2, "D": 3}
+    _costs: ClassVar[dict[str, int]] = {"A": 1, "B": 10, "C": 100, "D": 1000}
+    _hallway_exits: ClassVar[dict[str, int]] = {"A": 2, "B": 4, "C": 6, "D": 8}
 
-Positions are then either a room kind and an upper position flag or an
-index for the hallway.
+    def __init__(self, kind: str) -> None:
+        assert kind in "ABCD", f"Invalid kind: '{kind}'"
+        self.char: str = kind
 
-We number the Amphipods as 0..7 where 0..1 are type A, 2..3 are type B etc.
+    def __eq__(self, other: Any) -> bool:
+        return isinstance(other, Kind) and self.char == other.char
 
-#############
-#01234567890#
-###A#B#C#D###
-  #A#B#C#D#
-  #########
+    @staticmethod
+    def every() -> Iterable[Kind]:
+        for c in "ABCD":
+            yield Kind(c)
 
-"""
+    @property
+    def hallway_exit(self) -> int:
+        """Hallway position that is the exit from this kind's room."""
+        return Kind._hallway_exits[self.char]
 
-AmphipodKind = str
-HallPosition = int
-RoomPosition = Tuple[AmphipodKind, bool]
-Position = Union[HallPosition, RoomPosition]
-Amphipod = int
-State = dict[Position, Amphipod]
+    @property
+    def cost(self) -> int:
+        """Cost of moving an amphipod of this kind."""
+        return Kind._costs[self.char]
 
-# Hallway positions by the exits of each room
-room_exits: dict[AmphipodKind, HallPosition] = {"A": 2, "B": 4, "C": 6, "D": 8}
-
-# Valid hallway positions are those which are not exits
-valid_hallway_positions: set[HallPosition] = {0, 1, 3, 5, 7, 9, 10}
-
-
-# Cost of moving each kind of amphipod
-kind_cost: dict[AmphipodKind, int] = {"A": 1, "B": 10, "C": 100, "D": 1000}
+    @property
+    def index(self) -> int:
+        return Kind._indices[self.char]
 
 
-def pod_kind(pod: int) -> AmphipodKind:
-    """Return the kind of the given amphipod.
+class Amphipod:
 
-    >>> [pod_kind(pod) for pod in range(8)]
-    ['A', 'A', 'B', 'B', 'C', 'C', 'D', 'D']
-    """
-    assert pod >= 0 and pod < 8
-    return "ABCD"[pod // 2]
+    _kind_counts: ClassVar[Counter[Kind]] = Counter()
+    _room_size: ClassVar[int]
+
+    def __init__(self, room_size: int, kind: Kind) -> None:
+        assert room_size in [2, 4], f"Invalid room size: {room_size}"
+        self.kind = kind
+        self.index = kind.index * room_size + Amphipod._kind_counts[kind]
+        Amphipod._kind_counts[kind] += 1
+        Amphipod._room_size = room_size
+
+    def __eq__(self, other: Any) -> bool:
+        return (
+            isinstance(other, Amphipod)
+            and self.kind == other.kind
+            and self.index == other.index
+        )
+
+    @classmethod
+    def reset(cls) -> None:
+        assert all(
+            cls._kind_counts[kind] == cls._room_size for kind in Kind.every()
+        ), "Wrong number of pod kinds"
+        cls._kind_counts = Counter()
 
 
-def room_available(state: State, target_kind: AmphipodKind) -> bool:
-    """Is the target room available for an amphipod to move into.
+class Position:
 
-    Available if only occupied by an amphipod of the same kind.
+    valid_hallway_indices: ClassVar[set[int]] = {0, 1, 3, 5, 7, 9, 10}
 
-    >>> [room_available(test1, room) for room in "ABCD"]
-    [False, False, False, False]
+    def __init__(self, room: Optional[Kind], room_index: int) -> None:
+        self.room = room
+        self.index = room_index
 
-    >>> [room_available(test2, c) for c in "ABCD"]
-    [False, False, True, False]
-    """
-    for position, pod in state.items():
-        if not isinstance(position, int):
-            room_kind, room_upper = position
-            if room_kind == target_kind and pod_kind(pod) != target_kind:
+    def __eq__(self, other: Any) -> bool:
+        return (
+            isinstance(other, Position)
+            and self.room == other.room
+            and self.index == other.index
+        )
+
+
+class State:
+    """State holds a (mutable) mapping from positions to amphipods"""
+
+    template: ClassVar[
+        str
+    ] = "#############\n#...........#\n###A#B#C#D###\n  #a#b#c#d#\n  #########"
+
+    def __init__(
+        self,
+        room_size: int,
+        s: Optional[str],
+    ) -> None:
+        """Initialize a state (all amphipods in rooms).
+
+        >>> test1.show()
+        ...........
+          B C B D
+          A D C A
+        """
+
+        self.room_size = room_size
+        self.mapping: dict[Position, Amphipod] = {}
+        if s is not None:
+            assert len(s) == len(
+                State.template
+            ), f"Wrong length {len(s)} vs. {len(State.template)}"
+            for ch, template in zip(s, State.template):
+                if ch in "ABCD" and template in "AaBbCcDd":
+                    position = Position(
+                        Kind(template.upper()),
+                        0 if template.isupper() else (room_size - 1),
+                    )
+                    self.mapping[position] = Amphipod(room_size, Kind(ch))
+                else:
+                    assert ch in "#.\n " and ch == template, (
+                        "Bad character: '" + ch + template + "'"
+                    )
+            assert len(self.mapping) == 4 * room_size, "Wrong number of items in state"
+            Amphipod.reset()
+
+    def room_available(self, target_kind: Kind) -> bool:
+        """Is the target room available for an amphipod to move into.
+
+        Available if only occupied by amphipods of the same kind.
+
+        >>> [room_available(test1, room) for room in Kind.every()]
+        [False, False, False, False]
+
+        >>> [room_available(test2, room) for room in Kind.every()]
+        [False, False, True, False]
+        """
+        for position, pod in self.mapping.items():
+            if position.room == target_kind and pod.kind != target_kind:
                 return False
-    return True
+        return True
 
+    @property
+    def hallway_number(self) -> int:
+        """Return the number of pods in the hallway.
 
-def room_empty(state: State, kind: AmphipodKind) -> bool:
-    """Is the given room empty (which allows an entering amphipod to take the bottom slot).
+        >>> [s.hallway_number for s in [test1, test2, test3]]
+        [0, 1, 2]
+        """
+        return sum(isinstance(pos, int) for pos in self.mapping.keys())
 
-    >>> [room_empty(test1, room) for room in "ABCD"]
-    [False, False, False, False]
-    >>> [room_empty(test2, room) for room in "ABCD"]
-    [False, False, False, False]
-    >>> [room_empty(test_empty, room) for room in "ABCD"]
-    [False, True, False, False]
-    """
-    for position, pod in state.items():
-        if not isinstance(position, int):
-            room_kind, room_upper = position
-            if room_kind == kind:
+    def path_available(self, p: Position, q: Position) -> bool:
+        """Is a path available between the room and hallway (no blocking amphipods).
+
+        Does not test if either end-state is occupied.
+
+        >>> [path_available(test1, (room, upper), 0) for room in "ABCD" for upper in [True, False]]
+        [True, False, True, False, True, False, True, False]
+        >>> [path_available(test2, (room, upper), 0) for room in "ABCD" for upper in [True, False]]
+        [True, False, False, False, False, False, False, False]
+        >>> [path_available(test2, (room, upper), 9) for room in "ABCD" for upper in [True, False]]
+        [False, False, True, False, True, True, True, False]
+        >>> [path_available(test3, (room, upper), 3) for room in "ABCD" for upper in [True, False]]
+        [True, False, True, True, False, False, False, False]
+        """
+        assert p.room is not None, "path_available start must be a room"
+        assert q.room is None, "path_available destination must be a hallway"
+        # Check to see if blocked by upper position in the room
+        if any(Position(p.room, i) in self.mapping for i in range(p.index)):
+            return False
+        room_exit_index: int = p.room.hallway_exit
+        if room_exit_index < q.index:
+            path = range(room_exit_index + 1, q.index)
+        else:
+            path = range(q.index + 1, room_exit_index)
+        return all(Position(None, i) not in state for i in path)
+
+    def available_moves(
+        self: State, max_hallway_number: int
+    ) -> Iterable[Tuple[Position, Position]]:
+        """Return all available moves.
+
+        >>> expected_moves = {((p, True), h) for p in "ABCD" for h in valid_hallway_positions}
+        >>> set(available_moves(test1, 3)) == expected_moves
+        True
+        >>> expected_moves =  {(('A', True),  h) for h in [0,1]}
+        >>> expected_moves |= {(('B', True),  h) for h in [5, 7, 9, 10]}
+        >>> expected_moves |= {(('D', True),  h) for h in [5, 7, 9, 10]}
+        >>> set(available_moves(test2, 3)) == expected_moves
+        True
+        >>> expected_moves = {(3, ('B', False))}
+        >>> expected_moves |= {(('A', True),  h) for h in [0,1]}
+        >>> expected_moves |= {(('D', True),  h) for h in [7, 9, 10]}
+        >>> set(available_moves(test3, 3)) == expected_moves
+        True
+        """
+
+        # for start_position, pod in state.items():
+        #     kind = pod_kind(pod)
+        #     # Amphipod is in the hallway, can only move to a room
+        #     if isinstance(start_position, int):
+        #         if room_available(state, kind):
+        #             end_room: RoomPosition = (kind, not room_empty(state, kind))
+        #             if path_available(state, end_room, start_position):
+        #                 yield (start_position, end_room)
+        #     # Amphipod in room moves to hallway
+        #     else:
+        #         if hallway_number(state) < max_hallway_number:
+        #             start_kind, start_upper = start_position
+        #             # Only try and move if pod is in the wrong room (or in the right room but above a wrong pod)
+        #             if start_kind != kind or (
+        #                 start_upper and pod_kind(state[(start_kind, False)]) != kind
+        #             ):
+        #                 for end_hall in valid_hallway_positions:
+        #                     if end_hall not in state and path_available(
+        #                         state, start_position, end_hall
+        #                     ):
+        #                         yield (start_position, end_hall)
+        pass
+
+    def move(self, p: Position, q: Position) -> Tuple[State, int]:
+        """Return a new state applying the given move and the cost of the move."""
+        assert p in self.mapping, "Can't move from an empty position"
+        pod = self.mapping[p]
+        assert q not in self.mapping, "Can't move to a non-empty position"
+
+        def hallway_and_extra(x: Position) -> Tuple[int, int]:
+            """Return the hallway index of the position and extra moves need in the room."""
+            if x.room is None:
+                return x.index, 0
+            else:
+                return x.room.hallway_exit, x.index
+
+        p_hallway, p_extra = hallway_and_extra(p)
+        q_hallway, q_extra = hallway_and_extra(q)
+        distance = abs(p_hallway - q_hallway) + p_extra + q_extra
+        cost = distance * pod.kind.cost
+
+        new_state = State(self.room_size, None)
+        new_state.mapping = self.mapping.copy()
+        new_state.mapping[q] = pod
+        del new_state.mapping[p]
+
+        return new_state, cost
+
+    def organized(self) -> bool:
+        """Test if all the amphipods have been organized.
+
+        >>> organized(test1)
+        False
+        >>> organized(test_organized)
+        True
+        """
+        for position, pod in self.mapping.items():
+            if position.room is None or position.room != pod.kind:
                 return False
-    return True
+        return True
 
-
-def hallway_number(state: State) -> int:
-    """Return the number of pods in the hallway.
-
-    >>> [hallway_number(s) for s in [test1, test2, test3]]
-    [0, 1, 2]
-    """
-    return sum(isinstance(pos, int) for pos in state.keys())
-
-
-def path_available(state: State, p: RoomPosition, q: HallPosition) -> bool:
-    """Is a path available between the room and hallway (no blocking amphipods).
-
-    Does not test if either end-state is occupied.
-
-    >>> [path_available(test1, (room, upper), 0) for room in "ABCD" for upper in [True, False]]
-    [True, False, True, False, True, False, True, False]
-    >>> [path_available(test2, (room, upper), 0) for room in "ABCD" for upper in [True, False]]
-    [True, False, False, False, False, False, False, False]
-    >>> [path_available(test2, (room, upper), 9) for room in "ABCD" for upper in [True, False]]
-    [False, False, True, False, True, True, True, False]
-    >>> [path_available(test3, (room, upper), 3) for room in "ABCD" for upper in [True, False]]
-    [True, False, True, True, False, False, False, False]
-    """
-    p_room, p_upper = p
-    # Check to see if blocked by upper position in the room
-    if not p_upper and (p_room, True) in state:
-        return False
-    room_exit: HallPosition = room_exits[p_room]
-    path = range(room_exit + 1, q) if room_exit < q else range(q + 1, room_exit)
-    return all(p not in state for p in path)
-
-
-def available_moves(
-    state: State, max_hallway_number: int
-) -> Iterable[Tuple[Position, Position]]:
-    """Return all available moves.
-
-    >>> expected_moves = {((p, True), h) for p in "ABCD" for h in valid_hallway_positions}
-    >>> set(available_moves(test1, 3)) == expected_moves
-    True
-    >>> expected_moves =  {(('A', True),  h) for h in [0,1]}
-    >>> expected_moves |= {(('B', True),  h) for h in [5, 7, 9, 10]}
-    >>> expected_moves |= {(('D', True),  h) for h in [5, 7, 9, 10]}
-    >>> set(available_moves(test2, 3)) == expected_moves
-    True
-    >>> expected_moves = {(3, ('B', False))}
-    >>> expected_moves |= {(('A', True),  h) for h in [0,1]}
-    >>> expected_moves |= {(('D', True),  h) for h in [7, 9, 10]}
-    >>> set(available_moves(test3, 3)) == expected_moves
-    True
-    """
-    for start_position, pod in state.items():
-        kind = pod_kind(pod)
-        # Amphipod is in the hallway, can only move to a room
-        if isinstance(start_position, int):
-            if room_available(state, kind):
-                end_room: RoomPosition = (kind, not room_empty(state, kind))
-                if path_available(state, end_room, start_position):
-                    yield (start_position, end_room)
-        # Amphipod in room moves to hallway
-        else:
-            if hallway_number(state) < max_hallway_number:
-                start_kind, start_upper = start_position
-                # Only try and move if pod is in the wrong room (or in the right room but above a wrong pod)
-                if start_kind != kind or (
-                    start_upper and pod_kind(state[(start_kind, False)]) != kind
-                ):
-                    for end_hall in valid_hallway_positions:
-                        if end_hall not in state and path_available(
-                            state, start_position, end_hall
-                        ):
-                            yield (start_position, end_hall)
-
-
-def move(state: State, p: Position, q: Position) -> Tuple[State, int]:
-    """Return a new state applying the given move and the cost of the move."""
-    assert p in state, "Can't move from an empty position"
-    assert q not in state, "Can't move to a non-empty position"
-
-    def hallway_and_extra(x: Position) -> Tuple[int, int]:
-        """Return the hallway index of the position and extra moves need in the room."""
-        if isinstance(x, int):
-            return x, 0
-        else:
-            kind, upper = x
-            return room_exits[kind], 1 if upper else 2
-
-    p_hallway, p_extra = hallway_and_extra(p)
-    q_hallway, q_extra = hallway_and_extra(q)
-    distance = abs(p_hallway - q_hallway) + p_extra + q_extra
-    cost = distance * kind_cost[pod_kind(state[p])]
-    # print("Moved", p, q, pod_kind(state[p]), cost)
-
-    new_state = state.copy()
-    new_state[q] = new_state[p]
-    del new_state[p]
-
-    return new_state, cost
-
-
-def organized(state: State) -> bool:
-    """Test if all the amphipods have been organized.
-
-    >>> organized(test1)
-    False
-    >>> organized(test_organized)
-    True
-    """
-    for position, pod in state.items():
-        if isinstance(position, int):
-            return False
-        room_kind, _room_upper = position
-        if room_kind != pod_kind(pod):
-            return False
-    return True
+    def show(self) -> None:
+        print(
+            "".join(
+                self.mapping[Position(None, i)].kind.char if (None, i) in state else "."
+                for i in range(11)
+            )
+        )
+        print("  ", end="")
+        for room_index in range(self.room_size):
+            for kind in Kind.every():
+                pod = self.mapping.get(Position(kind, room_index), None)
+                print(pod.kind.char + " " if pod is not None else ". ", end="")
+            print()
 
 
 StateHashable = frozenset[Tuple[Position, Amphipod]]
@@ -237,79 +302,29 @@ def solve(start_state: State, max_hallway_number: int) -> int:
     >>> solve(test1, 3)
     12521
     """
-    start_state_hashable = frozenset(start_state.items())
-    pq: Any = []  # heapq is an untyped module
-    explored: dict[StateHashable, int] = {start_state_hashable: 0}
-    heappush(pq, WrappedState(start_state_hashable, explored))
-    while pq:
-        wrapped_state = heappop(pq)
-        state = dict(wrapped_state.state_hashable)
-        cost = explored[wrapped_state.state_hashable]
-        if organized(state):
-            # print("Found solution", cost)
-            # show_state(state)
-            return cost
-        for from_position, to_position in available_moves(state, max_hallway_number):
-            new_state, extra_cost = move(state, from_position, to_position)
-            new_state_hash = frozenset(new_state.items())
-            new_cost = cost + extra_cost
-            if new_state_hash in explored:
-                if new_cost < explored[new_state_hash]:
-                    explored[new_state_hash] = new_cost
-            else:
-                explored[new_state_hash] = new_cost
-                heappush(pq, WrappedState(new_state_hash, explored))
-    raise RuntimeError("No solution found")
-
-
-state_template: str = (
-    "#############\n#...........#\n###A#B#C#D###\n  #a#b#c#d#\n  #########"
-)
-
-
-def read_initial_state(s: str) -> State:
-    """Read an initial state (all amphipods in rooms).
-
-    >>> [pod_kind(test1[(k, u)]) for k in "ABCD" for u in [True, False]]
-    ['B', 'A', 'C', 'D', 'B', 'C', 'D', 'A']
-    >>> sorted(test1.values())
-    [0, 1, 2, 3, 4, 5, 6, 7]
-    >>> sorted(test1.keys())
-    [('A', False), ('A', True), ('B', False), ('B', True), ('C', False), ('C', True), ('D', False), ('D', True)]
-    """
-    assert len(s) == len(
-        state_template
-    ), f"Wrong length for state {len(s)} vs. {len(state_template)}"
-    state: State = {}
-    amphipod_counts: Counter[AmphipodKind] = Counter()
-    for ch, template in zip(s, state_template):
-        if ch in "ABCD" and template in "AaBbCcDd":
-            position = (template.upper(), template.isupper())
-            pod = "ABCD".index(ch) * 2 + amphipod_counts[ch]
-            amphipod_counts[ch] += 1
-            state[position] = pod
-        else:
-            assert ch in "#.\n " and ch == template, (
-                "Bad character: '" + ch + template + "'"
-            )
-    assert len(state) == 8, "Wrong number of items in state"
-    assert all(
-        amphipod_counts[c] == 2 for c in "ABCD"
-    ), "Wrong number of kinds in state"
-    return state
-
-
-def show_state(state: State) -> None:
-    print("".join(pod_kind(state[x]) if x in state else "." for x in range(11)))
-    print("  ", end="")
-    for kind in "ABCD":
-        pod = state.get((kind, True), None)
-        print(pod_kind(pod) + " " if pod is not None else ". ", end="")
-    print("\n  ", end="")
-    for kind in "ABCD":
-        pod = state.get((kind, False), None)
-        print(pod_kind(pod) + " " if pod is not None else ". ", end="")
-    print()
+    # start_state_hashable = frozenset(start_state.items())
+    # pq: Any = []  # heapq is an untyped module
+    # explored: dict[StateHashable, int] = {start_state_hashable: 0}
+    # heappush(pq, WrappedState(start_state_hashable, explored))
+    # while pq:
+    #     wrapped_state = heappop(pq)
+    #     state = dict(wrapped_state.state_hashable)
+    #     cost = explored[wrapped_state.state_hashable]
+    #     if organized(state):
+    #         # print("Found solution", cost)
+    #         # show_state(state)
+    #         return cost
+    #     for from_position, to_position in available_moves(state, max_hallway_number):
+    #         new_state, extra_cost = move(state, from_position, to_position)
+    #         new_state_hash = frozenset(new_state.items())
+    #         new_cost = cost + extra_cost
+    #         if new_state_hash in explored:
+    #             if new_cost < explored[new_state_hash]:
+    #                 explored[new_state_hash] = new_cost
+    #         else:
+    #             explored[new_state_hash] = new_cost
+    #             heappush(pq, WrappedState(new_state_hash, explored))
+    # raise RuntimeError("No solution found")
 
 
 """ test1 is the starting state for the example problem
@@ -321,8 +336,8 @@ def show_state(state: State) -> None:
   #########
 
 """
-test1: State = read_initial_state(
-    "#############\n#...........#\n###B#C#B#D###\n  #A#D#C#A#\n  #########"
+test1: State = State(
+    2, "#############\n#...........#\n###B#C#B#D###\n  #A#D#C#A#\n  #########"
 )
 
 """ test2 is the second step for the example problem
