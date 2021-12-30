@@ -24,6 +24,15 @@ class Kind:
     def __eq__(self, other: Any) -> bool:
         return isinstance(other, Kind) and self.char == other.char
 
+    def __hash__(self) -> int:
+        return hash(self.char)
+
+    def __str__(self) -> str:
+        return self.char
+
+    def __repr__(self) -> str:
+        return f"Kind({self.char})"
+
     @staticmethod
     def every() -> Iterable[Kind]:
         for c in "ABCD":
@@ -47,7 +56,7 @@ class Kind:
 class Amphipod:
 
     _kind_counts: ClassVar[Counter[Kind]] = Counter()
-    _room_size: ClassVar[int]
+    _room_size: ClassVar[int] = 0
 
     def __init__(self, room_size: int, kind: Kind) -> None:
         assert room_size in [2, 4], f"Invalid room size: {room_size}"
@@ -63,16 +72,23 @@ class Amphipod:
             and self.index == other.index
         )
 
+    def __str__(self) -> str:
+        return self.kind.char + "_" + str(self.index)
+
+    def __repr__(self) -> str:
+        return f"Amphipod({self._room_size}, '{self.kind.char}')"
+
     @classmethod
     def reset(cls) -> None:
-        assert all(
+        assert not cls._kind_counts or all(
             cls._kind_counts[kind] == cls._room_size for kind in Kind.every()
-        ), "Wrong number of pod kinds"
+        ), ("Wrong number of pod kinds" + str(cls._kind_counts) + str(cls._room_size))
         cls._kind_counts = Counter()
 
 
 class Position:
 
+    hallway_size: ClassVar[int] = 11
     valid_hallway_indices: ClassVar[set[int]] = {0, 1, 3, 5, 7, 9, 10}
 
     def __init__(self, room: Optional[Kind], room_index: int) -> None:
@@ -85,6 +101,16 @@ class Position:
             and self.room == other.room
             and self.index == other.index
         )
+
+    def __hash__(self) -> int:
+        return hash((self.room, self.index))
+
+    def __str__(self) -> str:
+        return "H" if self.room is None else self.room.char + "-" + str(self.index)
+
+    def __repr__(self) -> str:
+        room = "None" if self.room is None else "'" + self.room.char + "'"
+        return f"Position({room}, {self.index})"
 
 
 class State:
@@ -102,13 +128,14 @@ class State:
         """Initialize a state (all amphipods in rooms).
 
         >>> test1.show()
-        ...........
+        -----------
           B C B D
           A D C A
         """
         self.room_size = room_size
         self.mapping: dict[Position, Amphipod] = {}
         if s is not None:
+            Amphipod.reset()
             assert len(s) == len(
                 State.template
             ), f"Wrong length {len(s)} vs. {len(State.template)}"
@@ -124,17 +151,16 @@ class State:
                         "Bad character: '" + ch + template + "'"
                     )
             assert len(self.mapping) == 4 * room_size, "Wrong number of items in state"
-            Amphipod.reset()
 
     def room_available(self, target_kind: Kind) -> bool:
         """Is the target room available for an amphipod to move into.
 
         Available if only occupied by amphipods of the same kind.
 
-        >>> [room_available(test1, room) for room in Kind.every()]
+        >>> [test1.room_available(kind) for kind in Kind.every()]
         [False, False, False, False]
 
-        >>> [room_available(test2, room) for room in Kind.every()]
+        >>> [test2.room_available(kind) for kind in Kind.every()]
         [False, False, True, False]
         """
         for position, pod in self.mapping.items():
@@ -149,20 +175,20 @@ class State:
         >>> [s.hallway_number for s in [test1, test2, test3]]
         [0, 1, 2]
         """
-        return sum(isinstance(pos, int) for pos in self.mapping.keys())
+        return sum(position.room is None for position in self.mapping.keys())
 
     def path_available(self, p: Position, q: Position) -> bool:
         """Is a path available between the room and hallway (no blocking amphipods).
 
         Does not test if either end-state is occupied.
 
-        >>> [path_available(test1, (room, upper), 0) for room in "ABCD" for upper in [True, False]]
+        >>> [test1.path_available(Position(r, i), Position(None, 0)) for r in Kind.every() for i in range(2)]
         [True, False, True, False, True, False, True, False]
-        >>> [path_available(test2, (room, upper), 0) for room in "ABCD" for upper in [True, False]]
+        >>> [test2.path_available(Position(r, i), Position(None, 0)) for r in Kind.every() for i in range(2)]
         [True, False, False, False, False, False, False, False]
-        >>> [path_available(test2, (room, upper), 9) for room in "ABCD" for upper in [True, False]]
+        >>> [test2.path_available(Position(r, i), Position(None, 9)) for r in Kind.every() for i in range(2)]
         [False, False, True, False, True, True, True, False]
-        >>> [path_available(test3, (room, upper), 3) for room in "ABCD" for upper in [True, False]]
+        >>> [test3.path_available(Position(r, i), Position(None, 3)) for r in Kind.every() for i in range(2)]
         [True, False, True, True, False, False, False, False]
         """
         assert p.room is not None, "path_available start must be a room"
@@ -182,19 +208,23 @@ class State:
     ) -> Iterable[Tuple[Position, Position]]:
         """Return all available moves.
 
-        >>> expected_moves = {((p, True), h) for p in "ABCD" for h in valid_hallway_positions}
-        >>> set(available_moves(test1, 3)) == expected_moves
+        >>> expected_moves = {(Position(k, 0), Position(None, h)) for k in Kind.every() for h in Position.valid_hallway_indices}
+        >>> expected_moves
+        QQ
+        >>> list(test1.available_moves(3))
+        QQQ
+        >>> set(test1.available_moves(3)) == expected_moves
         True
-        >>> expected_moves =  {(('A', True),  h) for h in [0,1]}
-        >>> expected_moves |= {(('B', True),  h) for h in [5, 7, 9, 10]}
-        >>> expected_moves |= {(('D', True),  h) for h in [5, 7, 9, 10]}
-        >>> set(available_moves(test2, 3)) == expected_moves
-        True
-        >>> expected_moves = {(3, ('B', False))}
-        >>> expected_moves |= {(('A', True),  h) for h in [0,1]}
-        >>> expected_moves |= {(('D', True),  h) for h in [7, 9, 10]}
-        >>> set(available_moves(test3, 3)) == expected_moves
-        True
+        # >>> expected_moves =  {(('A', True),  h) for h in [0,1]}
+        # >>> expected_moves |= {(('B', True),  h) for h in [5, 7, 9, 10]}
+        # >>> expected_moves |= {(('D', True),  h) for h in [5, 7, 9, 10]}
+        # >>> set(available_moves(test2, 3)) == expected_moves
+        # True
+        # >>> expected_moves = {(3, ('B', False))}
+        # >>> expected_moves |= {(('A', True),  h) for h in [0,1]}
+        # >>> expected_moves |= {(('D', True),  h) for h in [7, 9, 10]}
+        # >>> set(available_moves(test3, 3)) == expected_moves
+        # True
         """
         # for start_position, pod in state.items():
         #     kind = pod_kind(pod)
@@ -249,12 +279,13 @@ class State:
 
         return new_state, cost
 
+    @property
     def organized(self) -> bool:
         """Test if all the amphipods have been organized.
 
-        >>> organized(test1)
-        False
-        >>> organized(test_organized)
+        #>>> test1.organized
+        #False
+        >>> test_organized.organized
         True
         """
         for position, pod in self.mapping.items():
@@ -267,16 +298,16 @@ class State:
             "".join(
                 self.mapping[Position(None, i)].kind.char
                 if Position(None, i) in self.mapping
-                else "."
-                for i in range(11)
+                else "-"
+                for i in range(Position.hallway_size)
             )
         )
-        print("  ", end="")
         for room_index in range(self.room_size):
+            row: str = ""
             for kind in Kind.every():
                 pod = self.mapping.get(Position(kind, room_index), None)
-                print(pod.kind.char + " " if pod is not None else ". ", end="")
-            print()
+                row += pod.kind.char if pod is not None else "-"
+            print(" ", " ".join(row))
 
 
 StateHashable = frozenset[Tuple[Position, Amphipod]]
@@ -372,15 +403,9 @@ del test3.mapping[Position(Kind("B"), 0)]
 del test3.mapping[Position(Kind("B"), 1)]
 
 
-# test_empty has an empty room
-test_empty: State = test1.copy()
-test_empty.mapping[Position(None, 0)] = test_empty.mapping[Position(Kind("B"), 0)]
-test_empty.mapping[Position(None, 1)] = test_empty.mapping[Position(Kind("B"), 1)]
-del test_empty.mapping[Position(Kind("B"), 0)]
-del test_empty.mapping[Position(Kind("B"), 1)]
-
 # test_organized is a fully organized_state
 test_organized: State = test1.copy()
+Amphipod.reset()
 test_organized.mapping = dict(
     zip(
         [
@@ -388,11 +413,13 @@ test_organized.mapping = dict(
             for kind in Kind.every()
             for i in range(test_organized.room_size)
         ],
-        [Amphipod(test_organized.room_size, kind) for kind in Kind.every()]
-        + [Amphipod(test_organized.room_size, kind) for kind in Kind.every()],
+        [
+            Amphipod(test_organized.room_size, kind)
+            for kind in Kind.every()
+            for _ in range(test_organized.room_size)
+        ],
     )
 )
-Amphipod.reset()
 
 
 # class TestMove:
@@ -430,5 +457,5 @@ Amphipod.reset()
 
 if __name__ == "__main__":
     testmod()
-    state = State(2, stdin.read().strip())
-    print(state.solve(3))
+#    state = State(2, stdin.read().strip())
+#    print(state.solve(3))
