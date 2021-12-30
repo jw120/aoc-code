@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from collections import Counter
-from dataclasses import dataclass, field
 from doctest import testmod
 from heapq import heappop, heappush
 from sys import stdin
@@ -34,9 +33,6 @@ RoomPosition = Tuple[AmphipodKind, bool]
 Position = Union[HallPosition, RoomPosition]
 Amphipod = int
 State = dict[Position, Amphipod]
-
-# Cap number of hallway pods to speed up algorithm
-max_hallway_number = 3
 
 # Hallway positions by the exits of each room
 room_exits: dict[AmphipodKind, HallPosition] = {"A": 2, "B": 4, "C": 6, "D": 8}
@@ -128,21 +124,23 @@ def path_available(state: State, p: RoomPosition, q: HallPosition) -> bool:
     return all(p not in state for p in path)
 
 
-def available_moves(state: State) -> Iterable[Tuple[Position, Position]]:
+def available_moves(
+    state: State, max_hallway_number: int
+) -> Iterable[Tuple[Position, Position]]:
     """Return all available moves.
 
     >>> expected_moves = {((p, True), h) for p in "ABCD" for h in valid_hallway_positions}
-    >>> set(available_moves(test1)) == expected_moves
+    >>> set(available_moves(test1, 3)) == expected_moves
     True
     >>> expected_moves =  {(('A', True),  h) for h in [0,1]}
     >>> expected_moves |= {(('B', True),  h) for h in [5, 7, 9, 10]}
     >>> expected_moves |= {(('D', True),  h) for h in [5, 7, 9, 10]}
-    >>> set(available_moves(test2)) == expected_moves
+    >>> set(available_moves(test2, 3)) == expected_moves
     True
     >>> expected_moves = {(3, ('B', False))}
-    >>> expected_moves |= (set() if max_hallway_number <= 2 else {(('A', True),  h) for h in [0,1]})
-    >>> expected_moves |= (set() if max_hallway_number <= 2 else {(('D', True),  h) for h in [7, 9, 10]})
-    >>> set(available_moves(test3)) == expected_moves
+    >>> expected_moves |= {(('A', True),  h) for h in [0,1]}
+    >>> expected_moves |= {(('D', True),  h) for h in [7, 9, 10]}
+    >>> set(available_moves(test3, 3)) == expected_moves
     True
     """
     for start_position, pod in state.items():
@@ -211,32 +209,47 @@ def organized(state: State) -> bool:
     return True
 
 
-@dataclass(order=True)
+StateHashable = frozenset[Tuple[Position, Amphipod]]
+
+
 class WrappedState:
-    state_hash: StateHash = field(compare=False)
-    cost: int
+    def __init__(
+        self, state_hashable: StateHashable, cost_lookup: dict[StateHashable, int]
+    ) -> None:
+        self.state_hashable = state_hashable
+        self.cost_lookup = cost_lookup
+
+    def cost(self) -> int:
+        return self.cost_lookup[self.state_hashable]
+
+    def __hash__(self) -> int:
+        return hash(self.state_hashable)
+
+    def __lt__(self, other: Any) -> bool:
+        if isinstance(other, WrappedState):
+            return self.cost() < other.cost()
+        return NotImplemented
 
 
-StateHash = frozenset[Tuple[Position, Amphipod]]
+def solve(start_state: State, max_hallway_number: int) -> int:
+    """Solve the state (BFS a la Wikipedia).
 
-
-def solve(start_state: State) -> None:
-    """Solve the state (BFS a la Wikipedia)."""
+    >>> solve(test1, 3)
+    12521
+    """
+    start_state_hashable = frozenset(start_state.items())
     pq: Any = []  # heapq is an untyped module
-    heappush(pq, WrappedState(frozenset(start_state.items()), 0))
-    explored: dict[StateHash, int] = {frozenset(start_state.items()): 0}
+    explored: dict[StateHashable, int] = {start_state_hashable: 0}
+    heappush(pq, WrappedState(start_state_hashable, explored))
     while pq:
         wrapped_state = heappop(pq)
-        state = dict(wrapped_state.state_hash)
-        cost = explored[wrapped_state.state_hash]
-        if cost in [240, 440]:
-            print(f"Cost: {cost}, {len(pq)} in pq")
-            show_state(state)
+        state = dict(wrapped_state.state_hashable)
+        cost = explored[wrapped_state.state_hashable]
         if organized(state):
-            print("Found solution", cost)
-            show_state(state)
-            # return
-        for from_position, to_position in available_moves(state):
+            # print("Found solution", cost)
+            # show_state(state)
+            return cost
+        for from_position, to_position in available_moves(state, max_hallway_number):
             new_state, extra_cost = move(state, from_position, to_position)
             new_state_hash = frozenset(new_state.items())
             new_cost = cost + extra_cost
@@ -245,8 +258,8 @@ def solve(start_state: State) -> None:
                     explored[new_state_hash] = new_cost
             else:
                 explored[new_state_hash] = new_cost
-                heappush(pq, WrappedState(new_state_hash, new_cost))
-    print("Finished")
+                heappush(pq, WrappedState(new_state_hash, explored))
+    raise RuntimeError("No solution found")
 
 
 state_template: str = (
@@ -354,95 +367,40 @@ test_organized: State = dict(
 )
 
 
-class TestMove:
-    def __init__(self) -> None:
-        self.state = test1
-        self.total_cost = 0
+# class TestMove:
+#     def __init__(self) -> None:
+#         self.state = test1
+#         self.total_cost = 0
 
-    def move(self, a: Position, b: Position) -> TestMove:
-        assert (a, b) in available_moves(self.state)
-        self.state, extra_cost = move(self.state, a, b)
-        self.total_cost += extra_cost
-        # print(self.total_cost)
-        # show_state(self.state)
-        return self
+#     def move(self, a: Position, b: Position) -> TestMove:
+#         assert (a, b) in available_moves(self.state)
+#         self.state, extra_cost = move(self.state, a, b)
+#         self.total_cost += extra_cost
+#         # print(self.total_cost)
+#         # show_state(self.state)
+#         return self
+
+
+# t = (
+#     TestMove()
+#     .move(("C", True), 3)
+#     .move(("B", True), 5)
+#     .move(5, ("C", True))
+#     .move(("B", False), 5)
+#     .move(3, ("B", False))
+#     .move(("A", True), 3)
+#     .move(3, ("B", True))
+#     .move(("D", True), 7)
+#     .move(("D", False), 9)
+#     .move(7, ("D", False))
+#     .move(5, ("D", True))
+#     .move(9, ("A", True))
+# )
+# assert organized(t.state)
+# assert t.total_cost == 12521
 
 
 if __name__ == "__main__":
     testmod()
-
-    t = (
-        TestMove()
-        .move(("C", True), 3)
-        .move(("B", True), 5)
-        .move(5, ("C", True))
-        .move(("B", False), 5)
-        .move(3, ("B", False))
-        .move(("A", True), 3)
-        .move(3, ("B", True))
-        .move(("D", True), 7)
-        .move(("D", False), 9)
-        .move(7, ("D", False))
-        .move(5, ("D", True))
-        .move(9, ("A", True))
-    )
-    assert organized(t.state)
-    assert t.total_cost == 12521
-
-    # s0 = test1
-    # cost = 0
-    # show_state(s0)
-
-    # move1 = (("C", True), 3)
-    # assert move1 in available_moves(s0)
-    # s1, extra_cost = move(s0, move1[0], move1[1])
-    # cost += extra_cost
-    # print(cost)
-    # show_state(s1)
-
-    # move2 = (("B", True), 5)
-    # assert move2 in available_moves(s1)
-    # s2, extra_cost = move(s1, move2[0], move2[1])
-    # cost += extra_cost
-    # print(cost)
-    # show_state(s2)
-
-    # move3 = (5, ("C", True))
-    # assert move3 in available_moves(s2)
-    # s3, extra_cost = move(s2, move3[0], move3[1])
-    # cost += extra_cost
-    # print(cost)
-    # show_state(s3)
-
-    # move4 = (("B", False), 5)
-    # assert move4 in available_moves(s3)
-    # s4, extra_cost = move(s3, move4[0], move4[1])
-    # cost += extra_cost
-    # print(cost)
-    # show_state(s4)
-
-    # move5 = (3, ("B", False))
-    # assert move5 in available_moves(s4)
-    # s5, extra_cost = move(s4, move5[0], move5[1])
-    # cost += extra_cost
-    # print(cost)
-    # show_state(s5)
-
-    # move6 = (("A", True), 3)
-    # assert move6 in available_moves(s5)
-    # s6, extra_cost = move(s5, move6[0], move6[1])
-    # cost += extra_cost
-    # print(cost)
-    # show_state(s6)
-
-    # move7 = (3, ("B", True))
-    # assert move7 in available_moves(s6)
-    # s7, extra_cost = move(s6, move7[0], move7[1])
-    # cost += extra_cost
-    # print(cost)
-    # show_state(s7)
-
-    solve(test1)
-
     state = read_initial_state(stdin.read().strip())
-    solve(state)
+    print(solve(state, 3))
