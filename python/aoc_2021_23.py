@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from collections import Counter
 from doctest import testmod
-
-# from heapq import heappop, heappush
 from sys import stdin
 from typing import Any, ClassVar, Iterable, Optional, Tuple
+
+# from heapq import heappop, heappush
 
 
 class Kind:
@@ -88,7 +88,7 @@ class Position:
 
 
 class State:
-    """State holds a (mutable) mapping from positions to amphipods"""
+    """State holds a (mutable) mapping from positions to amphipods."""
 
     template: ClassVar[
         str
@@ -106,7 +106,6 @@ class State:
           B C B D
           A D C A
         """
-
         self.room_size = room_size
         self.mapping: dict[Position, Amphipod] = {}
         if s is not None:
@@ -176,7 +175,7 @@ class State:
             path = range(room_exit_index + 1, q.index)
         else:
             path = range(q.index + 1, room_exit_index)
-        return all(Position(None, i) not in state for i in path)
+        return all(Position(None, i) not in self.mapping for i in path)
 
     def available_moves(
         self: State, max_hallway_number: int
@@ -197,7 +196,6 @@ class State:
         >>> set(available_moves(test3, 3)) == expected_moves
         True
         """
-
         # for start_position, pod in state.items():
         #     kind = pod_kind(pod)
         #     # Amphipod is in the hallway, can only move to a room
@@ -221,6 +219,12 @@ class State:
         #                         yield (start_position, end_hall)
         pass
 
+    def copy(self) -> State:
+        """Return a copy of the state."""
+        other = State(self.room_size, None)
+        other.mapping = self.mapping.copy()
+        return other
+
     def move(self, p: Position, q: Position) -> Tuple[State, int]:
         """Return a new state applying the given move and the cost of the move."""
         assert p in self.mapping, "Can't move from an empty position"
@@ -239,8 +243,7 @@ class State:
         distance = abs(p_hallway - q_hallway) + p_extra + q_extra
         cost = distance * pod.kind.cost
 
-        new_state = State(self.room_size, None)
-        new_state.mapping = self.mapping.copy()
+        new_state = self.copy()
         new_state.mapping[q] = pod
         del new_state.mapping[p]
 
@@ -262,7 +265,9 @@ class State:
     def show(self) -> None:
         print(
             "".join(
-                self.mapping[Position(None, i)].kind.char if (None, i) in state else "."
+                self.mapping[Position(None, i)].kind.char
+                if Position(None, i) in self.mapping
+                else "."
                 for i in range(11)
             )
         )
@@ -349,9 +354,7 @@ test1: State = State(
   #########
 
 """
-test2: State = test1.copy()
-test2[3] = test2[("C", True)]
-del test2[("C", True)]
+test2: State = test1.move(Position(Kind("C"), 0), Position(None, 3))[0]
 
 """ test3 is an intermediate step shown from the example problem
 
@@ -363,23 +366,33 @@ del test2[("C", True)]
 
 """
 test3: State = test2.copy()
-test3[("C", True)] = test3[("B", True)]
-test3[5] = test3[("B", False)]
-del test3[("B", True)]
-del test3[("B", False)]
+test3.mapping[Position(Kind("C"), 0)] = test3.mapping[Position(Kind("B"), 0)]
+test3.mapping[Position(None, 5)] = test3.mapping[Position(Kind("B"), 1)]
+del test3.mapping[Position(Kind("B"), 0)]
+del test3.mapping[Position(Kind("B"), 1)]
 
 
 # test_empty has an empty room
 test_empty: State = test1.copy()
-test_empty[0] = test_empty[("B", True)]
-test_empty[1] = test_empty[("B", False)]
-del test_empty[("B", True)]
-del test_empty[("B", False)]
+test_empty.mapping[Position(None, 0)] = test_empty.mapping[Position(Kind("B"), 0)]
+test_empty.mapping[Position(None, 1)] = test_empty.mapping[Position(Kind("B"), 1)]
+del test_empty.mapping[Position(Kind("B"), 0)]
+del test_empty.mapping[Position(Kind("B"), 1)]
 
 # test_organized is a fully organized_state
-test_organized: State = dict(
-    zip([(room, upper) for room in "ABCD" for upper in [True, False]], range(8))
+test_organized: State = test1.copy()
+test_organized.mapping = dict(
+    zip(
+        [
+            Position(kind, i)
+            for kind in Kind.every()
+            for i in range(test_organized.room_size)
+        ],
+        [Amphipod(test_organized.room_size, kind) for kind in Kind.every()]
+        + [Amphipod(test_organized.room_size, kind) for kind in Kind.every()],
+    )
 )
+Amphipod.reset()
 
 
 # class TestMove:
@@ -417,5 +430,5 @@ test_organized: State = dict(
 
 if __name__ == "__main__":
     testmod()
-    state = read_initial_state(stdin.read().strip())
-    print(solve(state, 3))
+    state = State(2, stdin.read().strip())
+    print(state.solve(3))
