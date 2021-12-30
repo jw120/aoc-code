@@ -4,9 +4,8 @@
 
 from collections import Counter, deque
 from doctest import testmod
+from sys import stdin
 from typing import Iterable, Tuple, Union
-
-# from sys import stdin
 
 
 """
@@ -33,6 +32,9 @@ RoomPosition = Tuple[AmphipodKind, bool]
 Position = Union[HallPosition, RoomPosition]
 Amphipod = int
 State = dict[Position, Amphipod]
+
+# Cap number of hallway pods to speed up algorithm
+max_hallway_number = 3
 
 # Hallway positions by the exits of each room
 room_exits: dict[AmphipodKind, HallPosition] = {"A": 2, "B": 4, "C": 6, "D": 8}
@@ -88,6 +90,15 @@ def room_empty(state: State, kind: AmphipodKind) -> bool:
     return True
 
 
+def hallway_number(state) -> int:
+    """Return the number of pods in the hallway.
+
+    >>> [hallway_number(s) for s in [test1, test2, test3]]
+    [0, 1, 2]
+    """
+    return sum(isinstance(pos, int) for pos in state.keys())
+
+
 def path_available(state: State, p: RoomPosition, q: HallPosition) -> bool:
     """Is a path available between the room and hallway (no blocking amphipods).
 
@@ -122,9 +133,9 @@ def available_moves(state: State) -> Iterable[Tuple[Position, Position]]:
     >>> expected_moves |= {(('D', True),  h) for h in [5, 7, 9, 10]}
     >>> set(available_moves(test2)) == expected_moves
     True
-    >>> expected_moves =  {(('A', True),  h) for h in [0,1]}
-    >>> expected_moves |= {(('D', True),  h) for h in [7, 9, 10]}
-    >>> expected_moves |= {(3, ('B', False))}
+    >>> expected_moves = {(3, ('B', False))}
+    >>> expected_moves |= (set() if max_hallway_number <= 2 else {(('A', True),  h) for h in [0,1]})
+    >>> expected_moves |= (set() if max_hallway_number <= 2 else {(('D', True),  h) for h in [7, 9, 10]})
     >>> set(available_moves(test3)) == expected_moves
     True
     """
@@ -138,16 +149,17 @@ def available_moves(state: State) -> Iterable[Tuple[Position, Position]]:
                     yield (start_position, end_room)
         # Amphipod in room moves to hallway
         else:
-            start_kind, start_upper = start_position
-            # Only try and move if pod is in the wrong room (or in the right room but above a wrong pod)
-            if start_kind != kind or (
-                start_upper and pod_kind(state[(start_kind, False)]) != kind
-            ):
-                for end_hall in valid_hallway_positions:
-                    if end_hall not in state and path_available(
-                        state, start_position, end_hall
-                    ):
-                        yield (start_position, end_hall)
+            if hallway_number(state) < max_hallway_number:
+                start_kind, start_upper = start_position
+                # Only try and move if pod is in the wrong room (or in the right room but above a wrong pod)
+                if start_kind != kind or (
+                    start_upper and pod_kind(state[(start_kind, False)]) != kind
+                ):
+                    for end_hall in valid_hallway_positions:
+                        if end_hall not in state and path_available(
+                            state, start_position, end_hall
+                        ):
+                            yield (start_position, end_hall)
 
 
 def move(state: State, p: Position, q: Position) -> State:
@@ -185,9 +197,11 @@ def solve(start_state: State) -> None:
     }
     while queue:
         state = queue.pop()
-        print("Dequeue", state)
+        # print(f"Dequeued ({len(queue)} left):")
+        # show_state(state)
         if organized(state):
             print("Finished")
+            show_state(state)
             return
         for from_position, to_position in available_moves(state):
             new_state = move(state, from_position, to_position)
@@ -195,6 +209,7 @@ def solve(start_state: State) -> None:
             if new_state_hash not in explored:
                 explored.add(new_state_hash)
                 queue.appendleft(new_state)
+    print("Failed")
 
 
 state_template: str = (
@@ -232,6 +247,19 @@ def read_initial_state(s: str) -> State:
         amphipod_counts[c] == 2 for c in "ABCD"
     ), "Wrong number of kinds in state"
     return state
+
+
+def show_state(state: State) -> None:
+    print("".join(pod_kind(state[x]) if x in state else "." for x in range(11)))
+    print("  ", end="")
+    for kind in "ABCD":
+        pod = state.get((kind, True), None)
+        print(pod_kind(pod) + " " if pod is not None else ". ", end="")
+    print("\n  ", end="")
+    for kind in "ABCD":
+        pod = state.get((kind, False), None)
+        print(pod_kind(pod) + " " if pod is not None else ". ", end="")
+    print()
 
 
 """ test1 is the starting state for the example problem
@@ -291,3 +319,5 @@ test_organized: State = dict(
 if __name__ == "__main__":
     testmod()
     solve(test1)
+    state = read_initial_state(stdin.read().strip())
+    solve(state)
