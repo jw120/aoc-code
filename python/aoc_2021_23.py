@@ -114,6 +114,7 @@ class State:
         self.room_size = room_size
         self.mapping: dict[Position, Amphipod] = {}
         self.cost: int = 0  # Used only within .solve()
+        assert room_size in [2, 4], "Unknown room size"
         if s is not None:
             Amphipod.reset()
             assert len(s) == len(
@@ -130,6 +131,15 @@ class State:
                     assert ch in "#.\n " and ch == template, (
                         "Bad character: '" + ch + template + "'"
                     )
+            if room_size == 4:
+                self.mapping[Position(Kind.A, 1)] = Amphipod(room_size, Kind.D)
+                self.mapping[Position(Kind.B, 1)] = Amphipod(room_size, Kind.C)
+                self.mapping[Position(Kind.C, 1)] = Amphipod(room_size, Kind.B)
+                self.mapping[Position(Kind.D, 1)] = Amphipod(room_size, Kind.A)
+                self.mapping[Position(Kind.A, 2)] = Amphipod(room_size, Kind.D)
+                self.mapping[Position(Kind.B, 2)] = Amphipod(room_size, Kind.B)
+                self.mapping[Position(Kind.C, 2)] = Amphipod(room_size, Kind.A)
+                self.mapping[Position(Kind.D, 2)] = Amphipod(room_size, Kind.C)
             assert len(self.mapping) == 4 * room_size, "Wrong number of items in state"
 
     def room_available(self, target_kind: Kind) -> Optional[Position]:
@@ -327,6 +337,8 @@ def solve(start_state: State, max_hallway_number: int) -> int:
 
     >>> solve(test1, 3)
     12521
+    >>> solve(test1_4, 8)
+    44169
     """
     # Keep track of states to be explored in a priority queue of Tuple[State, Cost]
     # Complication is that we may find a lower cost to the state after it has been queued, to
@@ -343,12 +355,7 @@ def solve(start_state: State, max_hallway_number: int) -> int:
         queued_state: QueuedState = heappop(pq)
         state = queued_state.state
         del pq_costs[state]
-        # print("Cost", state.cost, "remaining", len(pq))
-        # state.show()
-        # print()
         if state.organized:
-            # print("Found solution", cost)
-            # show_state(state)
             return state.cost
         for from_position, to_position in state.available_moves(max_hallway_number):
             new_state = state.move(from_position, to_position)
@@ -362,7 +369,6 @@ def solve(start_state: State, max_hallway_number: int) -> int:
                 pq_removed: list[QueuedState] = []
                 while (qs := heappop(pq)).state != new_state:
                     pq_removed.append(qs)
-                # print("Re-worked", len(pq_removed))
                 heappush(pq, QueuedState(new_state))
                 for qs in pq_removed:
                     heappush(pq, qs)
@@ -425,6 +431,11 @@ test_organized.mapping = dict(
 )
 
 
+test1_4: State = State(
+    4, "#############\n#...........#\n###B#C#B#D###\n  #A#D#C#A#\n  #########"
+)
+
+
 class TestMove:
     def __init__(self, max_hallway_number: int) -> None:
         self.state = test1
@@ -460,5 +471,6 @@ class TestMove:
 
 if __name__ == "__main__":
     testmod()
-    state = State(2, stdin.read().strip())
-    print(solve(state, 3))
+    input_data = stdin.read().strip()
+    print(solve(State(2, input_data), 3))
+    print(solve(State(4, input_data), 8))
