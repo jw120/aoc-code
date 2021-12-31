@@ -4,52 +4,29 @@ from __future__ import annotations
 
 from collections import Counter
 from doctest import testmod
+from enum import Enum
 from heapq import heappop, heappush
 from sys import stdin
 from typing import Any, ClassVar, Iterable, Optional, Tuple
 
 
-class Kind:
+class Kind(Enum):
     """Amphipod kind and index for the rooms."""
 
-    _indices: ClassVar[dict[str, int]] = {"A": 0, "B": 1, "C": 2, "D": 3}
-    _costs: ClassVar[dict[str, int]] = {"A": 1, "B": 10, "C": 100, "D": 1000}
-    _hallway_exits: ClassVar[dict[str, int]] = {"A": 2, "B": 4, "C": 6, "D": 8}
-
-    def __init__(self, kind: str) -> None:
-        assert kind in "ABCD", f"Invalid kind: '{kind}'"
-        self.char: str = kind
-
-    def __eq__(self, other: Any) -> bool:
-        return isinstance(other, Kind) and self.char == other.char
-
-    def __hash__(self) -> int:
-        return hash(self.char)
-
-    def __str__(self) -> str:
-        return self.char
-
-    def __repr__(self) -> str:
-        return f"Kind({self.char})"
-
-    @staticmethod
-    def every() -> Iterable[Kind]:
-        for c in "ABCD":
-            yield Kind(c)
+    A = 0
+    B = 1
+    C = 2
+    D = 3
 
     @property
     def hallway_exit(self) -> int:
-        """Hallway position that is the exit from this kind's room."""
-        return Kind._hallway_exits[self.char]
+        """Return the hallway index or the exit from the room of this kind."""
+        return (self.value + 1) * 2
 
     @property
     def cost(self) -> int:
-        """Cost of moving an amphipod of this kind."""
-        return Kind._costs[self.char]
-
-    @property
-    def index(self) -> int:
-        return Kind._indices[self.char]
+        """Return the cost of a one step move of an amphipod of this kind."""
+        return {"A": 1, "B": 10, "C": 100, "D": 1000}[self.name]
 
 
 class Amphipod:
@@ -60,7 +37,7 @@ class Amphipod:
     def __init__(self, room_size: int, kind: Kind) -> None:
         assert room_size in [2, 4], f"Invalid room size: {room_size}"
         self.kind = kind
-        self.index = kind.index * room_size + Amphipod._kind_counts[kind]
+        self.index = kind.value * room_size + Amphipod._kind_counts[kind]
         Amphipod._kind_counts[kind] += 1
         Amphipod._room_size = room_size
 
@@ -75,15 +52,15 @@ class Amphipod:
         return hash(self.index)
 
     def __str__(self) -> str:
-        return self.kind.char + "_" + str(self.index)
+        return self.kind.name + "_" + str(self.index)
 
     def __repr__(self) -> str:
-        return f"Amphipod({self._room_size}, '{self.kind.char}')"
+        return f"Amphipod({self._room_size}, '{self.kind.name}')"
 
     @classmethod
     def reset(cls) -> None:
         assert not cls._kind_counts or all(
-            cls._kind_counts[kind] == cls._room_size for kind in Kind.every()
+            cls._kind_counts[kind] == cls._room_size for kind in Kind
         ), ("Wrong number of pod kinds" + str(cls._kind_counts) + str(cls._room_size))
         cls._kind_counts = Counter()
 
@@ -108,10 +85,10 @@ class Position:
         return hash((self.room, self.index))
 
     def __str__(self) -> str:
-        return "H" if self.room is None else self.room.char + "-" + str(self.index)
+        return "H" if self.room is None else self.room.name + "-" + str(self.index)
 
     def __repr__(self) -> str:
-        room = "None" if self.room is None else "'" + self.room.char + "'"
+        room = "None" if self.room is None else "'" + self.room.name + "'"
         return f"Position({room}, {self.index})"
 
 
@@ -145,10 +122,10 @@ class State:
             for ch, template in zip(s, State.template):
                 if ch in "ABCD" and template in "AaBbCcDd":
                     position = Position(
-                        Kind(template.upper()),
+                        Kind[template.upper()],
                         0 if template.isupper() else (room_size - 1),
                     )
-                    self.mapping[position] = Amphipod(room_size, Kind(ch))
+                    self.mapping[position] = Amphipod(room_size, Kind[ch])
                 else:
                     assert ch in "#.\n " and ch == template, (
                         "Bad character: '" + ch + template + "'"
@@ -160,11 +137,11 @@ class State:
 
         Available if only occupied by amphipods of the same kind.
 
-        >>> [test1.room_available(kind) for kind in Kind.every()]
+        >>> [test1.room_available(kind) for kind in Kind]
         [None, None, None, None]
-        >>> [test2.room_available(kind) for kind in Kind.every()]
+        >>> [test2.room_available(kind) for kind in Kind]
         [None, None, Position('C', 0), None]
-        >>> [test3.room_available(kind) for kind in Kind.every() if kind != Kind('C')]
+        >>> [test3.room_available(kind) for kind in Kind if kind != Kind.C]
         [None, Position('B', 1), None]
         """
         # Target room is available if only occupied by pods of target kind
@@ -192,15 +169,15 @@ class State:
         Does not test if either end-state is occupied. Only considers paths from a room to a hallway
         (or vice versa).
 
-        >>> [test1.path_available(Position(r, i), Position(None, 0)) for r in Kind.every() for i in range(2)]
+        >>> [test1.path_available(Position(r, i), Position(None, 0)) for r in Kind for i in range(2)]
         [True, False, True, False, True, False, True, False]
-        >>> [test2.path_available(Position(r, i), Position(None, 0)) for r in Kind.every() for i in range(2)]
+        >>> [test2.path_available(Position(r, i), Position(None, 0)) for r in Kind for i in range(2)]
         [True, False, False, False, False, False, False, False]
-        >>> [test2.path_available(Position(r, i), Position(None, 9)) for r in Kind.every() for i in range(2)]
+        >>> [test2.path_available(Position(r, i), Position(None, 9)) for r in Kind for i in range(2)]
         [False, False, True, False, True, True, True, False]
-        >>> [test3.path_available(Position(r, i), Position(None, 3)) for r in Kind.every() for i in range(2)]
+        >>> [test3.path_available(Position(r, i), Position(None, 3)) for r in Kind for i in range(2)]
         [True, False, True, True, False, False, False, False]
-        >>> [test3.path_available(Position(None, 3), Position(r, i)) for r in Kind.every() for i in range(2)]
+        >>> [test3.path_available(Position(None, 3), Position(r, i)) for r in Kind for i in range(2)]
         [True, False, True, True, False, False, False, False]
         """
         if p.room is None:
@@ -223,17 +200,17 @@ class State:
     ) -> Iterable[Tuple[Position, Position]]:
         """Return all available moves.
 
-        >>> expected_moves = {(Position(k, 0), Position(None, h)) for k in Kind.every() for h in Position.valid_hallway_indices}
+        >>> expected_moves = {(Position(k, 0), Position(None, h)) for k in Kind for h in Position.valid_hallway_indices}
         >>> set(test1.available_moves(3)) == expected_moves
         True
-        >>> expected_moves =  {(Position(Kind('A'), 0),  Position(None, h)) for h in [0,1]}
-        >>> expected_moves |= {(Position(Kind('B'), 0),  Position(None, h)) for h in [5, 7, 9, 10]}
-        >>> expected_moves |= {(Position(Kind('D'), 0),  Position(None, h)) for h in [5, 7, 9, 10]}
+        >>> expected_moves =  {(Position(Kind.A, 0),  Position(None, h)) for h in [0,1]}
+        >>> expected_moves |= {(Position(Kind.B, 0),  Position(None, h)) for h in [5, 7, 9, 10]}
+        >>> expected_moves |= {(Position(Kind.D, 0),  Position(None, h)) for h in [5, 7, 9, 10]}
         >>> set(test2.available_moves(3)) == expected_moves
         True
-        >>> expected_moves = {(Position(None, 3), Position(Kind('B'), 1))}
-        >>> expected_moves |= {(Position(Kind('A'), 0),  Position(None, h)) for h in [0,1]}
-        >>> expected_moves |= {(Position(Kind('D'), 0),  Position(None, h)) for h in [7, 9, 10]}
+        >>> expected_moves = {(Position(None, 3), Position(Kind.B, 1))}
+        >>> expected_moves |= {(Position(Kind.A, 0),  Position(None, h)) for h in [0,1]}
+        >>> expected_moves |= {(Position(Kind.D, 0),  Position(None, h)) for h in [7, 9, 10]}
         >>> set(test3.available_moves(3)) == expected_moves
         True
         """
@@ -311,7 +288,7 @@ class State:
     def show(self) -> None:
         print(
             "".join(
-                self.mapping[Position(None, i)].kind.char
+                self.mapping[Position(None, i)].kind.name
                 if Position(None, i) in self.mapping
                 else "-"
                 for i in range(Position.hallway_size)
@@ -319,9 +296,9 @@ class State:
         )
         for room_index in range(self.room_size):
             row: str = ""
-            for kind in Kind.every():
+            for kind in Kind:
                 pod = self.mapping.get(Position(kind, room_index), None)
-                row += pod.kind.char if pod is not None else "-"
+                row += pod.kind.name if pod is not None else "-"
             print(" ", " ".join(row))
 
     def __hash__(self) -> int:
@@ -415,7 +392,7 @@ test1: State = State(
   #########
 
 """
-test2: State = test1.move(Position(Kind("C"), 0), Position(None, 3))
+test2: State = test1.move(Position(Kind.C, 0), Position(None, 3))
 
 """ test3 is an intermediate step shown from the example problem
 
@@ -427,10 +404,10 @@ test2: State = test1.move(Position(Kind("C"), 0), Position(None, 3))
 
 """
 test3: State = test2.copy()
-test3.mapping[Position(Kind("C"), 0)] = test3.mapping[Position(Kind("B"), 0)]
-test3.mapping[Position(None, 5)] = test3.mapping[Position(Kind("B"), 1)]
-del test3.mapping[Position(Kind("B"), 0)]
-del test3.mapping[Position(Kind("B"), 1)]
+test3.mapping[Position(Kind.C, 0)] = test3.mapping[Position(Kind.B, 0)]
+test3.mapping[Position(None, 5)] = test3.mapping[Position(Kind.B, 1)]
+del test3.mapping[Position(Kind.B, 0)]
+del test3.mapping[Position(Kind.B, 1)]
 
 
 # test_organized is a fully organized_state
@@ -438,14 +415,10 @@ test_organized: State = test1.copy()
 Amphipod.reset()
 test_organized.mapping = dict(
     zip(
-        [
-            Position(kind, i)
-            for kind in Kind.every()
-            for i in range(test_organized.room_size)
-        ],
+        [Position(kind, i) for kind in Kind for i in range(test_organized.room_size)],
         [
             Amphipod(test_organized.room_size, kind)
-            for kind in Kind.every()
+            for kind in Kind
             for _ in range(test_organized.room_size)
         ],
     )
@@ -468,18 +441,18 @@ class TestMove:
 # test1.show()
 # t = (
 #     TestMove(3)
-#     .move(Position(Kind("C"), 0), Position(None, 3))
-#     .move(Position(Kind("B"), 0), Position(None, 5))
-#     .move(Position(None, 5), Position(Kind("C"), 0))
-#     .move(Position(Kind("B"), 1), Position(None, 5))
-#     .move(Position(None, 3), Position(Kind("B"), 1))
-#     .move(Position(Kind("A"), 0), Position(None, 3))
-#     .move(Position(None, 3), Position(Kind("B"), 0))
-#     .move(Position(Kind("D"), 0), Position(None, 7))
-#     .move(Position(Kind("D"), 1), Position(None, 9))
-#     .move(Position(None, 7), Position(Kind("D"), 1))
-#     .move(Position(None, 5), Position(Kind("D"), 0))
-#     .move(Position(None, 9), Position(Kind("A"), 0))
+#     .move(Position(Kind.C, 0), Position(None, 3))
+#     .move(Position(Kind.B, 0), Position(None, 5))
+#     .move(Position(None, 5), Position(Kind.C, 0))
+#     .move(Position(Kind.B, 1), Position(None, 5))
+#     .move(Position(None, 3), Position(Kind.B, 1))
+#     .move(Position(Kind.A, 0), Position(None, 3))
+#     .move(Position(None, 3), Position(Kind.B, 0))
+#     .move(Position(Kind.D, 0), Position(None, 7))
+#     .move(Position(Kind.D, 1), Position(None, 9))
+#     .move(Position(None, 7), Position(Kind.D, 1))
+#     .move(Position(None, 5), Position(Kind.D, 0))
+#     .move(Position(None, 9), Position(Kind.A, 0))
 # )
 # assert t.state.organized
 # assert t.state.cost == 12521
