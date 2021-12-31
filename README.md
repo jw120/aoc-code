@@ -1,5 +1,9 @@
 # Advent of Code
 
+TODO:
+* Finish 2021
+* Repair aoc_2021_22.py
+
 My solutions to advent of code.  So far contains:
 
  * Ongoing 2021 in Python and Haskell (done in 2021 advent season)
