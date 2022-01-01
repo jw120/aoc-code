@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from doctest import testmod
 from enum import Enum, auto
-from itertools import combinations_with_replacement
+from itertools import product
 from operator import add, mod, mul
 from sys import stdin
 from typing import Callable, Iterable, Iterator, NoReturn, Optional, Tuple, Union
@@ -167,8 +167,14 @@ if __name__ == "__main__":
     testmod()
     monad_source = stdin.read().splitlines()
     alu = ALU(monad_source)
-    for model_number in combinations_with_replacement([1, 2, 3, 4, 5, 6, 7, 8, 9], 14):
+    count = 0
+    for model_number in product(range(9, 0, -1), repeat=14):
         alu.run(model_number)
-        # print(model_number, alu.reg[3])
+        count += 1
+        # if model_number[2:] == (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1):
+        #     print(model_number, alu.reg[3])
+        if count % 100_000 == 0:
+            print(count, model_number, flush=True)
         if alu.reg[3] == 0:
-            print(model_number)
+            print("WON", count, model_number)
+    print("End", count)
