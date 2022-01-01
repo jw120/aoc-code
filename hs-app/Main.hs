@@ -90,6 +90,7 @@ import AOC_2021_16 qualified (solvers)
 -- import AOC_2021_18 qualified (solvers)
 -- import AOC_2021_19 qualified (solvers)
 -- import AOC_2021_20 qualified (solvers)
+import AOC_2021_24 qualified (solvers)
 
 import Utilities (applySolvers)
 
@@ -173,7 +174,7 @@ parseProblem args = case args of
                 -- (2021, 18) -> Just AOC_2021_18.solvers
                 -- (2021, 19) -> Just AOC_2021_19.solvers
                 -- (2021, 20) -> Just AOC_2021_20.solvers
-
+                (2021, 24) -> Just AOC_2021_24.solvers
                 _ -> Nothing
          in case (valid, maybeSolvers) of
                 (True, Just solvers) -> Just (name, solvers)
