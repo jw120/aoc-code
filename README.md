@@ -100,9 +100,47 @@ Hints used - 2015/9 - ran web code to spot my error (missing a city)
 
 
 
+# Problem descriptions
+
+TODO - Check haskell files which are not included in stack test --test-arguments=--pattern=fast
+
+Time = Python execution time in
+Lines = number of python lines in solution (using pygount)
+Trick: 0 = just implement the instructions, 1 = needs some thought, 2 = depends on insight
+Done: Languages implements (p=python, j=julia, h=haskell)
+
+            Area            Description                             Data structures                     Time    Lines   Trick   Done
+
+2021-01     Sonar           Sequence differences and averaging      List                                60      11      0       hjp
+2021-02     Submarine       Command parsing                         List                                70      32      0       hjp
+2021-03     Binary          Most common bit n in a set of numbers   List, Binary strings                80      50      1       hjp
+2021-04     Bingo           First and last bingo card to win        Array (5x5)                         140     64      1       hjp
+2021-05     Vents           Coordinates covered by multiple lines   Dict (counts of coordinates)        230     55      1       hjp
+2021-06     Lanternfish     Number of fish with iteration rules     List                                60      17      2       hjp
+2021-07     Crabs           Minimize cost to align crabs            Binary search                       70      31      1       hjp
+2021-08     7 segment       Logical matching                        Dict, Set                           68      69      1       p
+2021-09     Smoke           Minima and basins                       Array (2d)                          87      69      1       p
+2021-10     Syntax          Bracket matching                        Stack                               61      50      1       p
+2021-11     Octopus flash   Life-like Grid with overloads           Array (10x10)                       304     59      1       p
 
 
+59	Python	python	python/aoc_2021_11.py
+87	Python	python	python/aoc_2021_12.py
+66	Python	python	python/aoc_2021_13.py
+60	Python	python	python/aoc_2021_14.py
+71	Python	python	python/aoc_2021_15.py
+64	Python	python	python/aoc_2021_17.py
+337	Python	python	python/aoc_2021_19.py
+97	Python	python	python/aoc_2021_20.py
+69	Python	python	python/aoc_2021_21.py
+182	Python	python	python/aoc_2021_22.py
+283	Python	python	python/aoc_2021_23.py
+118	Python	python	python/aoc_2021_24.py
+100	Python	python	python/aoc_2021_25.py
 
-
-
+2021 11: ok (304 ms)
+2021 12: ok (994 ms)
+2021 13: ok (69 ms)
+2021 14: ok (64 ms)
+2021 21: ok (424 ms)
 

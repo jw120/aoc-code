@@ -44,7 +44,7 @@ slow: Set[Tuple[int, int]] = {
 }
 
 
-def test(year: int, day: int) -> None:
+def test(year: int, day: int, times: bool) -> None:
     """Run test for given year and day. Compare output to known-good (or create a missing known-good file)."""
     source_fn = SOURCE_FILE_FORMAT.format(year=year, day=day)
     input_file = open(INPUT_FILE_FORMAT.format(year=year, day=day), mode="r")
@@ -58,7 +58,7 @@ def test(year: int, day: int) -> None:
         run([PYTHON_EXECUTABLE, source_fn], stdin=input_file, stdout=output_file)
         elapsed = round(1000 * (time() - start))
         print("ok" if cmp(output_file.name, good_filename) else "FAIL", end="")
-        print(f" ({elapsed} ms) " if elapsed > ELAPSED_MS_THRESHOLD else "")
+        print(f" ({elapsed} ms) " if times or elapsed > ELAPSED_MS_THRESHOLD else "")
         output_file.close()
     else:
         good_file = open(good_filename, mode="w")
@@ -67,12 +67,12 @@ def test(year: int, day: int) -> None:
         good_file.close()
 
 
-def all_tests(fast_only: bool) -> None:
+def all_tests(fast_only: bool, times: bool) -> None:
     """Run tests for all completed problems."""
     for year, days in completed:
         for day in days:
             if not fast_only or (year, day) not in slow:
-                test(year, day)
+                test(year, day, times)
 
 
 if __name__ == "__main__":
@@ -80,5 +80,10 @@ if __name__ == "__main__":
     parser.add_argument(
         "--fast", action="store_true", help="only run solutions which are not slow"
     )
+    parser.add_argument(
+        "--times",
+        action="store_true",
+        help="show execution times for all tests (not just those which are slow)",
+    )
     args = parser.parse_args()
-    all_tests(args.fast)
+    all_tests(args.fast, args.times)
