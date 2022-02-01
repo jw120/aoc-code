@@ -122,6 +122,11 @@ Done: Languages implements (p=python, j=julia, h=haskell)
 2021-09     Smoke           Minima and basins                       Array (2d)                          87      69      1       p
 2021-10     Syntax          Bracket matching                        Stack                               61      50      1       p
 2021-11     Octopus flash   Life-like Grid with overloads           Array (10x10)                       304     59      1       p
+2021-12     Caves           Path counting                           Dict (links between rooms)          994     87      1       p
+2021-13     Origami         Grid folding                            List, set                           69      66      1       p
+2021-14     Polymerization  Apply reaction rules to chain           Dict (counts)                       64      60      2       p
+
+
 
 
 59	Python	python	python/aoc_2021_11.py
