@@ -33,6 +33,7 @@
         "scanl",
         "Sigs",
         "snoc",
+        "testmod",
         "uncons",
         "unlines",
         "unparse",
