@@ -3,11 +3,7 @@
 from doctest import testmod
 from enum import Enum
 from sys import stdin
-from typing import NoReturn, Tuple
-
-
-def assert_never(value: NoReturn) -> NoReturn:
-    assert False, f"This code should never be reached, got: {value}"
+from typing import Tuple
 
 
 class Move(Enum):
@@ -61,14 +57,13 @@ def score_moves(moves: Tuple[Move, Move]) -> int:
 def score_result(game: Tuple[Move, Result]) -> int:
     """Score a game given the opponent moves and desired result."""
     opponent, result = game
-    if result == Result.lose:
-        player = beats[opponent]
-    elif result == Result.win:
-        player = beaten[opponent]
-    elif result == Result.draw:
-        player = opponent
-    else:
-        assert_never(result)
+    match result:
+        case Result.lose:
+            player = beats[opponent]
+        case Result.win:
+            player = beaten[opponent]
+        case Result.draw:
+            player = opponent
     return score_moves((opponent, player))
 
 

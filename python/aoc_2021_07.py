@@ -24,7 +24,7 @@ def fuel2(positions: list[int], target: int) -> int:
     """
 
     def sum_to(n: int) -> int:
-        """Sum of 1, 2, 3... n"""
+        """Sum of 1, 2, 3... n."""
         return n * (n + 1) // 2
 
     return sum(sum_to(abs(x - target)) for x in positions)

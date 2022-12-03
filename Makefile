@@ -19,6 +19,9 @@ aoc_2020: \
 	python_2020_16 python_2020_17 python_2020_18 python_2020_19 python_2020_20 \
 	python_2020_21 python_2020_22 python_2020_23 python_2020_24 python_2020_25
 
+aoc_2022: \
+	python_2022_01 python_2022_02 python_2022_03
+
 OUT_DIR = out
 
 # Python: run and show the runtime in seconds
