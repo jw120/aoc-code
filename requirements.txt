@@ -1,7 +1,7 @@
+numpy
 # These are all just for development
 black
-# We
-mypy >= 0.800
+mypy
 flake8
 flake8-docstrings
 flake8-builtins

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from sys import stdin
 from typing import Callable, Dict, List, Optional, Set, Tuple, TypeVar
 
-from Coord import Coord
+from Coord import Coord, Extent
 
 
 @dataclass(eq=True, frozen=True)
@@ -26,17 +26,17 @@ class Walker:
     def adjacents(self) -> List[Walker]:
         """Return the four adjacent positions."""
         return [
-            Walker(Coord(self.position.row - 1, self.position.col), self.keys),
-            Walker(Coord(self.position.row, self.position.col + 1), self.keys),
-            Walker(Coord(self.position.row + 1, self.position.col), self.keys),
-            Walker(Coord(self.position.row, self.position.col - 1), self.keys),
+            Walker(Coord(self.position.x - 1, self.position.y), self.keys),
+            Walker(Coord(self.position.x, self.position.y + 1), self.keys),
+            Walker(Coord(self.position.x + 1, self.position.y), self.keys),
+            Walker(Coord(self.position.x, self.position.y - 1), self.keys),
         ]
 
 
 class Maze:
     def __init__(self, lines: List[str]) -> None:
 
-        self._extent: Coord = Coord(len(lines), len(lines[0]))
+        self._extent: Extent = Extent(len(lines), len(lines[0]))
         self._doors: Dict[Coord, str] = {}
         self._keys: Dict[Coord, str] = {}
         self.start: Coord
@@ -47,8 +47,8 @@ class Maze:
         self._all_keys: Set[str] = set(self._keys.values())
 
         assert self.start is not None
-        assert len(self._walls) == self._extent.row
-        assert all(len(row) == self._extent.col for row in self._walls)
+        assert len(self._walls) == self._extent.x
+        assert all(len(row) == self._extent.y for row in self._walls)
         assert set(self._doors.values()) <= set(map(str.upper, self._keys.values()))
 
     def _add_char(self, x: str, row: int, col: int) -> bool:
@@ -94,7 +94,7 @@ class Maze:
 
     def wall(self, p: Coord) -> bool:
         """Is the coordinate a wall."""
-        return self._walls[p.row][p.col]
+        return self._walls[p.x][p.y]
 
     def _show_location(self, row: int, col: int) -> str:
         p = Coord(row, col)
@@ -107,10 +107,10 @@ class Maze:
         return "#" if self.wall(p) else "."
 
     def _show_row(self, row: int) -> str:
-        return "".join(self._show_location(row, col) for col in range(self._extent.col))
+        return "".join(self._show_location(row, col) for col in range(self._extent.y))
 
     def show(self) -> str:
-        return "\n".join(self._show_row(row) for row in range(self._extent.row))
+        return "\n".join(self._show_row(row) for row in range(self._extent.x))
 
 
 S = TypeVar("S")

@@ -44,7 +44,7 @@ class SeaFloor:
         assert all(
             len(row) == self._extent.x for row in row_data
         ), "Rows not equal length when making Seafloor"
-        self._a = np.empty((self._extent.x, self._extent.y), dtype=np.int)
+        self._a = np.empty((self._extent.x, self._extent.y), dtype=np.int_)
         self._moved: bool = False
         for y, row in enumerate(row_data):
             for x, ch in enumerate(row):

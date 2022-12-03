@@ -30,6 +30,7 @@
         "Newtype",
         "Octree",
         "octrees",
+        "popleft",
         "RSHIFT",
         "runhaskell",
         "scanl",
