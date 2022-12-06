@@ -32,6 +32,7 @@
         "octrees",
         "PDNZ",
         "popleft",
+        "PZND",
         "RSHIFT",
         "runhaskell",
         "scanl",
