@@ -16,6 +16,17 @@ test_input: list[str] = [
     "R 2",
 ]
 
+longer_test_input = [
+    "R 5",
+    "U 8",
+    "L 8",
+    "D 3",
+    "R 17",
+    "D 10",
+    "L 25",
+    "U 20",
+]
+
 
 def sign(x: int) -> int:
     """Return sign of an integer."""
@@ -26,39 +37,46 @@ def sign(x: int) -> int:
     return 0
 
 
-def new_tail(h: Coord, t: Coord) -> Coord:
-    """Return new tail position."""
+def update(linked_knot: Coord, knot: Coord) -> Coord:
+    """Update knot based on new position of linked knot."""
 
-    # Position of tail relative to head
-    d = t - h
+    # Position relative to linked knot
+    relative = knot - linked_knot
 
-    # If tail touches head, then tail stays where it is
-    if d.mag2() <= 2:
-        return t
+    # If linked knot is in touching distance, no move needed
+    if relative.mag2() <= 2:
+        return knot
 
-    # If tail two steps left/right/up/down of head, then move one step
-    if d.mag2() == 4:
-        return t - d // 2
+    # If linked knot two steps left/right/up/down of head, then move one step
+    if relative.mag2() == 4:
+        return knot - relative // 2
 
-    # If tail is a knights-move away, make a diagonal step
-    if d.mag2() == 5:
-        return t - Coord(sign(d.x), sign(d.y))
+    # If linked knot is a knights-move away, make a diagonal step
+    if relative.mag2() == 5:
+        return knot - Coord(sign(relative.x), sign(relative.y))
 
-    raise ValueError(f"Unexpected difference {h} {t} {d}")
+    # If linked knot is two diagonal steps away, move one step diagonally
+    if relative.mag2() == 8:
+        return knot - Coord(sign(relative.x), sign(relative.y))
+
+    raise ValueError(f"Unexpected difference {linked_knot} {knot}")
 
 
-def walk(steps: list[str]) -> int:
+def walk(steps: list[str], knot_count: int) -> int:
     """Return number of coordinates visited by the tail.
 
-    >>> walk(test_input)
+    >>> walk(test_input, 2)
     13
+    >>> walk(test_input, 10)
+    1
+    >>> walk(longer_test_input, 10)
+    36
     """
-    head = Coord(0, 0)
-    tail = Coord(0, 0)
-    visited: set[Coord] = {tail}
+    knots: list[Coord] = [Coord(0, 0)] * knot_count
+    visited: set[Coord] = {knots[knot_count - 1]}
 
     for step in steps:
-        match step.strip().split():
+        match step.split():
             case ["U", n] if n.isdigit():
                 head_move = Coord(0, 1)
             case ["D", n] if n.isdigit():
@@ -70,13 +88,16 @@ def walk(steps: list[str]) -> int:
             case _:
                 raise ValueError(f"Bad step: '{step}'")
         for _ in range(int(n)):
-            head += head_move
-            tail = new_tail(head, tail)
-            visited.add(tail)
+            knots[0] += head_move
+            for i in range(1, knot_count):
+                knots[i] = update(knots[i - 1], knots[i])
+            visited.add(knots[knot_count - 1])
 
     return len(visited)
 
 
 if __name__ == "__main__":
     testmod()
-    print(walk(stdin.readlines()))
+    moves = [line.strip() for line in stdin]
+    print(walk(moves, 2))
+    print(walk(moves, 10))
