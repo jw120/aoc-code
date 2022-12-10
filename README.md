@@ -32,25 +32,17 @@ stack test --test-arguments=--pattern=fast
 
 ## Python code
 
-Assumes modern python (tested with 3.9) installed as `python3` and `pip3`.
-
+Assumes Python 3.10 available. Uses poetry dependency manager (to align with repl.it)
 ```
-python python/aoc_2021_05.py <../aoc-data/input/2021_05.txt
-python python/golden_test.py --fast
-python python/golden_test.py
+pipx install poetry
 ```
 
-TODO - change golden_test to look at which files exist
-
-Doctest for tests
-
-Best run in a venv using the following (with this directory as the current directory). To set up the local environment (using `python3` to get the newest system installed version of python)
-
-```{sh}
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+Use poetry's virtual environment and install packages
 ```
+poetry shell
+poetry install
+```
+
 
 ## Comments
 

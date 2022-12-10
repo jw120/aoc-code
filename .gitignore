@@ -9,3 +9,4 @@ aoc-code.cabal
 stack.yaml
 stack.yaml.lock
 .vscode/*.log
+poetry.lock

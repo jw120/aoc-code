@@ -22,6 +22,13 @@ aoc_2020: \
 aoc_2022: \
 	python_2022_01 python_2022_02 python_2022_03
 
+python-test:
+	python python/golden_test.py
+
+python-test-fast:
+	python python/golden_test.py --fast
+
+
 OUT_DIR = out
 
 # Python: run and show the runtime in seconds
