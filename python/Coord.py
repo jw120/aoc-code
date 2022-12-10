@@ -63,9 +63,25 @@ class Coord:
             return possible_cells
         return (c for c in possible_cells if c.in_bounds(extent))
 
+    def mag2(self) -> int:
+        """Return magnitude-squared of the coordinate."""
+        return self.x * self.x + self.y * self.y
+
     def __add__(self, other: Any) -> Coord:
         if isinstance(other, Coord):
             return Coord(self.x + other.x, self.y + other.y)
+        else:
+            raise TypeError
+
+    def __sub__(self, other: Any) -> Coord:
+        if isinstance(other, Coord):
+            return Coord(self.x - other.x, self.y - other.y)
+        else:
+            raise TypeError
+
+    def __floordiv__(self, other: Any) -> Coord:
+        if isinstance(other, int):
+            return Coord(self.x // other, self.y // other)
         else:
             raise TypeError
 
