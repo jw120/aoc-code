@@ -51,8 +51,8 @@ $(OUT_DIR):
 check: python-check haskell-check
 
 python-check:
+	isort python/
 	black --quiet python/
-	flake8 python/
 	mypy python/
 
 haskell-check:

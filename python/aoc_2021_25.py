@@ -7,9 +7,8 @@ from enum import Enum, auto
 from sys import stdin
 from typing import Iterator
 
-from Coord import Coord, Extent
-
 import numpy as np
+from Coord import Coord, Extent
 
 # Works but slow - should avoid scanning over whole grid each step (add a list of mobile slugs?)
 

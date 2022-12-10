@@ -5,7 +5,6 @@ from doctest import testmod
 from sys import stdin
 from typing import Dict, Iterator, Set
 
-
 # cspell:disable
 test1: str = "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"
 test2: list[str] = [

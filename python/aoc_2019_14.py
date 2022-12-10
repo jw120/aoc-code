@@ -7,13 +7,9 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import (
-    Any,
-    Counter as Counter_t,
-    NoReturn,
-    Union,
-)
-
+from typing import Any
+from typing import Counter as Counter_t
+from typing import NoReturn, Union
 
 # Counter_t is a workaround as mypy does not support python 3.9, so we can't write Counter[str]
 

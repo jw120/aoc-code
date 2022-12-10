@@ -6,7 +6,6 @@ from re import Pattern
 from sys import stdin
 from typing import Dict
 
-
 Passport = Dict[str, str]
 
 

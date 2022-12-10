@@ -7,7 +7,6 @@ from functools import reduce
 from sys import stdin
 from typing import NewType, Optional, TypeVar
 
-
 # Ids for tiles (as assigned in the problem)
 TileId = NewType("TileId", int)
 

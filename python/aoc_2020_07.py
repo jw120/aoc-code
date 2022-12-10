@@ -6,7 +6,6 @@ from re import Match, Pattern
 from sys import stdin
 from typing import Optional
 
-
 rule_divider: Pattern[str] = re.compile(" bags?[,\\.] ?")
 bag_match: Pattern[str] = re.compile("([0-9]+) (.+)")
 

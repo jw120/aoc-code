@@ -5,7 +5,6 @@ from doctest import testmod
 from sys import stdin
 from typing import Tuple
 
-
 # We treat the polymers as counts of pairs and then the rules
 # change from AB -> X as AB -> AX, XB
 

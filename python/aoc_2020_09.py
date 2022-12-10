@@ -3,7 +3,6 @@
 from doctest import testmod
 from sys import stdin
 
-
 test_one: list[int] = [
     35,
     20,

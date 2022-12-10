@@ -78,5 +78,8 @@
         "uurcxstgmygtbstg",
         "xxyxx"
     ],
-    "editor.detectIndentation": false
+    "editor.detectIndentation": false,
+    "python.linting.flake8Enabled": false,
+    "python.linting.mypyEnabled": true,
+    "python.linting.enabled": true
 }

@@ -1,7 +1,5 @@
 """Advent of Code 2022 - Day 8."""
 
-# from __future__ import annotations
-
 from doctest import testmod
 from sys import stdin
 

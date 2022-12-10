@@ -4,7 +4,6 @@ from doctest import testmod
 from sys import stdin
 from typing import NewType
 
-
 Ingredient = NewType("Ingredient", str)
 Allergen = NewType("Allergen", str)
 

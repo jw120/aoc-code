@@ -7,9 +7,7 @@ from functools import reduce
 from sys import stdin
 from typing import Iterator, Optional
 
-
 from Coord import Coord
-
 
 Algorithm = list[bool]  # List of len 512
 

@@ -46,7 +46,9 @@ slow: Set[Tuple[int, int]] = {
 
 
 def test(year: int, day: int, times: bool) -> None:
-    """Run test for given year and day. Compare output to known-good (or create a missing known-good file)."""
+    """Run test for given year and day.
+
+    Compare output to known-good (or create a missing known-good file)."""
     source_fn = SOURCE_FILE_FORMAT.format(year=year, day=day)
     input_file = open(INPUT_FILE_FORMAT.format(year=year, day=day), mode="r")
     good_filename = GOOD_FILE_FORMAT.format(year=year, day=day)
