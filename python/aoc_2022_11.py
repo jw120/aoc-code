@@ -2,9 +2,10 @@
 
 from dataclasses import dataclass
 from doctest import testmod
+from functools import reduce
 from re import fullmatch
 from sys import stdin
-from typing import Callable
+from typing import Callable, Optional
 
 
 @dataclass
@@ -65,16 +66,19 @@ def read_monkey(expected_index: int, s: str) -> Monkey:
     )
 
 
-def step(monkeys: list[Monkey], steps: int) -> list[Monkey]:
+def step(monkeys: list[Monkey], steps: int, mode: Optional[int]) -> list[Monkey]:
     """
     Update (mutating) monkeys given number of times.
 
-    >>> show_items(step(build_monkeys(test_input), 1))
+    If mode is present then we take all items modules its value, if not
+    then all items are divided by 3 (for the first part of the problem).
+
+    >>> show_items(step(build_monkeys(test_input), 1, None))
     Monkey 0: 20, 23, 27, 26
     Monkey 1: 2080, 25, 167, 207, 401, 1046
     Monkey 2:
     Monkey 3:
-    >>> show_items(step(build_monkeys(test_input), 20))
+    >>> show_items(step(build_monkeys(test_input), 20, None))
     Monkey 0: 10, 12, 14, 26, 34
     Monkey 1: 245, 93, 53, 199, 115
     Monkey 2:
@@ -83,7 +87,11 @@ def step(monkeys: list[Monkey], steps: int) -> list[Monkey]:
     for _ in range(steps):
         for monkey in monkeys:
             for item in monkey.items:
-                new_item = monkey.update(item) // 3
+                new_item = monkey.update(item)
+                if mode is None:
+                    new_item = new_item // 3
+                else:
+                    new_item = new_item % mode
                 dest = (
                     monkey.dest_true
                     if new_item % monkey.divisor == 0
@@ -95,13 +103,22 @@ def step(monkeys: list[Monkey], steps: int) -> list[Monkey]:
     return monkeys
 
 
-def monkey_business(monkeys: list[Monkey], steps: int) -> int:
+def monkey_business(monkeys: list[Monkey], steps: int, simple_mode: bool) -> int:
     """Run number of steps and return most active monkeys.
 
-    >>> monkey_business(build_monkeys(test_input), 20)
+    Simple mode is for first part of the problem where items are divided by 3. For
+    non-simple mode we treat all numbers modulus the product of all the divisors.
+
+    >>> monkey_business(build_monkeys(test_input), 20, True)
     10605
+    >>> monkey_business(build_monkeys(test_input), 10000, False)
+    2713310158
     """
-    step(monkeys, steps)
+    if simple_mode:
+        mode = None
+    else:
+        mode = reduce(lambda x, y: x * y, (m.divisor for m in monkeys))
+    step(monkeys, steps, mode)
     counts = sorted([m.count for m in monkeys])
     return counts[-1] * counts[-2]
 
@@ -150,4 +167,6 @@ def build_monkeys(s: str) -> list[Monkey]:
 
 if __name__ == "__main__":
     testmod()
-    print(monkey_business(build_monkeys(stdin.read()), 20))
+    input = stdin.read()
+    print(monkey_business(build_monkeys(input), 20, True))
+    print(monkey_business(build_monkeys(input), 10000, False))
