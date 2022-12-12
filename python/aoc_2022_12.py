@@ -3,14 +3,10 @@
 from doctest import testmod
 
 from collections import deque
-from dataclasses import dataclass
 from sys import stdin
-from typing import Callable, Dict, List, Optional, Set, Tuple, TypeVar
+from typing import Callable, Optional, Tuple, TypeVar
 
 from Coord import Coord, Extent
-
-
-from Coord import Coord
 
 
 class HeightMap:
@@ -48,12 +44,30 @@ class HeightMap:
 
         return bfs(self.start, at_goal, available)
 
+    def shortest_path_from_any_length(self) -> Optional[int]:
+        """Return the length of shortest path from any a-height start to goal.
+
+        Computed as path from goal to any a-height point.
+
+        >>> HeightMap(test_input).shortest_path_from_any_length()
+        29
+        """
+
+        def at_goal(c: Coord) -> bool:
+            return self.h[c] == 1
+
+        def available(c: Coord) -> list[Coord]:
+            h_min = self.h[c] - 1
+            return [a for a in c.adjacents(self.extent) if self.h[a] >= h_min]
+
+        return bfs(self.goal, at_goal, available)
+
 
 S = TypeVar("S")
 
 
 def bfs(
-    start: S, at_goal: Callable[[S], bool], available: Callable[[S], List[S]]
+    start: S, at_goal: Callable[[S], bool], available: Callable[[S], list[S]]
 ) -> Optional[int]:
     """Conduct basic BFS search and return length of minimum path.
 
@@ -62,15 +76,13 @@ def bfs(
     # Queue of states to visit
     q: deque[Tuple[S, int]] = deque([(start, 0)])
     # Distances from start for states visited or in queue
-    distance: Dict[S, int] = {start: 0}
+    distance: dict[S, int] = {start: 0}
     while q:
         s, dist = q.popleft()
-        #        print("Dequeue", s, dist)
         if at_goal(s):
             return dist
         new_states = [(a, dist + 1) for a in available(s) if a not in distance]
         q.extend(new_states)
-        #       print("Enqueue", new_states)
         distance |= dict(new_states)
     return None
 
@@ -85,3 +97,4 @@ if __name__ == "__main__":
     testmod()
     height_map = HeightMap(stdin.read())
     print(height_map.shortest_path_length())
+    print(height_map.shortest_path_from_any_length())
