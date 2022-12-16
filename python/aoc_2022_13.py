@@ -2,11 +2,9 @@
 
 from doctest import testmod
 
-from collections import deque
 from re import match
 from sys import stdin
 
-from Coord import Coord, Extent
 
 
 def leading_int(s: str) -> tuple[int, int]:
