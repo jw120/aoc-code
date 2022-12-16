@@ -48,12 +48,12 @@ class Waterfall:
         """Initialize the waterfall from a list of rock paths."""
         self.rock: set[Coord] = set()
         self.sand: set[Coord] = set()
-        self.overflowing = False
+        self.finished = False
+        self.floor = False
         self.start = Coord(500, 0)
         self.bottom_left: Coord = self.start
         self.top_right: Coord = self.start
         for path in paths:
-            print(path)
             points: list[Coord] = [read_coord(s) for s in path.split(" -> ")]
             assert points, f"No points found: '{path}'"
             cursor: Coord = points[0]
@@ -68,6 +68,10 @@ class Waterfall:
                     )
                 cursor = next_point
 
+    def reset(self) -> None:
+        self.sand = set()
+        self.finished = False
+
     @property
     def sand_amount(self) -> int:
         """The amount of sand in the waterfall."""
@@ -75,14 +79,24 @@ class Waterfall:
 
     def show(self) -> None:
         """Print a image of the waterfall."""
-        for y in range(self.top_right.y, self.bottom_left.y + 1):
-            for x in range(self.bottom_left.x, self.top_right.x + 1):
-                if Coord(x, y) == self.start:
-                    c = "+"
-                elif Coord(x, y) in self.rock:
-                    c = "#"
-                elif Coord(x, y) in self.sand:
+        if self.floor:
+            x_min = min(c.x for c in self.sand) - 2
+            x_max = max(c.x for c in self.sand) + 2
+            y_min = self.start.y
+            y_max = self.bottom_left.y + 2
+        else:
+            x_min = self.bottom_left.x
+            x_max = self.top_right.x
+            y_min = self.start.y
+            y_max = self.bottom_left.y
+        for y in range(y_min, y_max + 1):
+            for x in range(x_min, x_max + 1):
+                if Coord(x, y) in self.sand:
                     c = "o"
+                elif Coord(x, y) == self.start:
+                    c = "+"
+                elif Coord(x, y) in self.rock or y == self.bottom_left.y + 2:
+                    c = "#"
                 else:
                     c = "."
                 print(c, end="")
@@ -90,15 +104,20 @@ class Waterfall:
 
     def empty(self, c: Coord) -> bool:
         """Is the coordinate empty?"""
-        return c not in self.rock and c not in self.sand
+        if c in self.rock or c in self.sand:
+            return False
+        if self.floor and c.y == self.bottom_left.y + 2:
+            return False
+        return True
 
     def add(self) -> None:
         """Add one unit of sand."""
         sand_coord = self.start
         while True:
-            if sand_coord.y >= self.bottom_left.y:
-                self.overflowing = True
-                return
+            if not self.floor:
+                if sand_coord.y >= self.bottom_left.y:
+                    self.finished = True
+                    return
             trial_coord = sand_coord + Coord(0, 1)
             if self.empty(trial_coord):
                 sand_coord = trial_coord
@@ -112,6 +131,10 @@ class Waterfall:
                 sand_coord = trial_coord
                 continue
             self.sand.add(sand_coord)
+            if self.floor:
+                if sand_coord == self.start:
+                    self.finished = True
+                    return
             return
 
     def add_until_overflowing(self) -> Waterfall:
@@ -119,8 +142,12 @@ class Waterfall:
 
         >>> Waterfall(test_data).add_until_overflowing().sand_amount
         24
+        >>> w = Waterfall(test_data)
+        >>> w.floor = True
+        >>> print(w.add_until_overflowing().sand_amount)
+        93
         """
-        while not self.overflowing:
+        while not self.finished:
             self.add()
         return self
 
@@ -128,7 +155,9 @@ class Waterfall:
 test_data = ["498,4 -> 498,6 -> 496,6", "503,4 -> 502,4 -> 502,9 -> 494,9"]
 
 if __name__ == "__main__":
-    #    testmod()
-    w = Waterfall(stdin.readlines()).add_until_overflowing()
-    w.show()
-    print(w.sand_amount)
+    testmod()
+    w = Waterfall(stdin.readlines())
+    print(w.add_until_overflowing().sand_amount)
+    w.reset()
+    w.floor = True
+    print(w.add_until_overflowing().sand_amount)
