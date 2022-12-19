@@ -86,6 +86,15 @@ class Coord:
             raise TypeError
 
 
+def manhattan(c1: Coord, c2: Coord) -> int:
+    """Return Manhattan distance between two coordinates.
+
+    >>> manhattan(Coord(1, 2), Coord(3, 0))
+    4
+    """
+    return abs(c1.x - c2.x) + abs(c1.y - c2.y)
+
+
 class Extent(Coord):
     @property
     def size(self) -> int:
