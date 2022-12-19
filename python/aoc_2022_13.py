@@ -6,7 +6,6 @@ from re import match
 from sys import stdin
 
 
-
 def leading_int(s: str) -> tuple[int, int]:
     """Read a leading integer returning it and the number of digits.
 
@@ -32,11 +31,12 @@ def compare(x: str, y: str, open_lists: int = 0) -> bool:
     """Q"""
     i = 0
     j = 0
+    # print(f"Comparing\n'{x}'\n'{y}'")
     while True:
         assert i < len(x) and j < len(
             y
         ), f"Unexpected end of string '{x}' '{y}' {i} {j}"
-        # print(f"Comparing '{x[i:]}', '{y[i:]}'")
+        # print(f"Comparing\n{x[i:]}\n{y[i:]}")
         match x[i], y[i]:
             case "[", "[":
                 i += 1
@@ -54,19 +54,22 @@ def compare(x: str, y: str, open_lists: int = 0) -> bool:
                     i += x_len
                     j += y_len
                 else:
+                    #                    if x_int > y_int:
+                    # print(f"Failed >\n'{x[i:]}'\n'{y[i:]}'")
                     return x_int < y_int
             case ",", ",":
                 i += 1
                 j += 1
-            case "]", _:
-                return True
-            case _, "]":
-                return False
             case "]", "]":
                 open_lists -= 1
                 assert open_lists >= 0
                 i += 1
                 j += 1
+            case "]", _:
+                return True
+            case _, "]":
+                # print(f"Failed _/]\n'{x[i:]}'\n'{y[i:]}'")
+                return False
             case _:
                 raise ValueError(f"Unexpected match {x[i]}, {y[i]} for\n{x}\n{y}")
 
@@ -78,7 +81,10 @@ def sum_correct_indices(s: str) -> int:
     13
     """
     pairs = [pair.split("\n") for pair in s.split("\n\n")]
-    return sum(i for i, (x, y) in enumerate(pairs, start=1) if compare(x, y))
+    x = [i for i, (x, y) in enumerate(pairs, start=1) if compare(x, y)]
+    # print(x)
+    # print(pairs[1 + 33])
+    return sum(x)
 
 
 test_data = """[1,1,3,1,1]
@@ -107,5 +113,6 @@ test_data = """[1,1,3,1,1]
 
 
 if __name__ == "__main__":
-    testmod()
+    # testmod()
     print(sum_correct_indices(stdin.read()))
+    # print(sum_correct_indices(test_data))
