@@ -1,9 +1,10 @@
 """Advent of Code 2022 - Day 13."""
 
 from doctest import testmod
-
+from functools import cmp_to_key
 from re import match
 from sys import stdin
+from typing import Literal
 
 
 def leading_int(s: str) -> tuple[int, int]:
@@ -27,16 +28,11 @@ def promote_to_list(s: str, n: int) -> str:
     return s[:n] + "[" + str(num) + "]" + s[n + num_len :]
 
 
-def compare(x: str, y: str, open_lists: int = 0) -> bool:
-    """Q"""
+def compare(x: str, y: str, open_lists: int = 0) -> Literal[-1, 0, 1]:
+    """Compare the two lists returning -1, 0 or 1."""
     i = 0
     j = 0
-    # print(f"Comparing\n'{x}'\n'{y}'")
     while True:
-        assert i < len(x) and j < len(
-            y
-        ), f"Unexpected end of string '{x}' '{y}' {i} {j}"
-        # print(f"Comparing\n{x[i:]}\n{y[i:]}")
         match x[i], y[i]:
             case "[", "[":
                 i += 1
@@ -49,14 +45,11 @@ def compare(x: str, y: str, open_lists: int = 0) -> bool:
             case p, q if p.isdigit() and q.isdigit():
                 x_int, x_len = leading_int(x[i:])
                 y_int, y_len = leading_int(y[i:])
-                # print("Comparing ints", x_int, y_int)
                 if x_int == y_int:
                     i += x_len
                     j += y_len
                 else:
-                    #                    if x_int > y_int:
-                    # print(f"Failed >\n'{x[i:]}'\n'{y[i:]}'")
-                    return x_int < y_int
+                    return -1 if x_int < y_int else 1
             case ",", ",":
                 i += 1
                 j += 1
@@ -66,10 +59,9 @@ def compare(x: str, y: str, open_lists: int = 0) -> bool:
                 i += 1
                 j += 1
             case "]", _:
-                return True
+                return -1
             case _, "]":
-                # print(f"Failed _/]\n'{x[i:]}'\n'{y[i:]}'")
-                return False
+                return 1
             case _:
                 raise ValueError(f"Unexpected match {x[i]}, {y[i]} for\n{x}\n{y}")
 
@@ -81,10 +73,21 @@ def sum_correct_indices(s: str) -> int:
     13
     """
     pairs = [pair.split("\n") for pair in s.split("\n\n")]
-    x = [i for i, (x, y) in enumerate(pairs, start=1) if compare(x, y)]
-    # print(x)
-    # print(pairs[1 + 33])
-    return sum(x)
+    return sum(i for i, (x, y) in enumerate(pairs, start=1) if compare(x, y) <= 0)
+
+
+def divider_positions(s: str) -> int:
+    """Return positions of divider packets after sorting.
+
+    >>> divider_positions(test_data)
+    140
+    """
+    divider_packets = ("[[2]]", "[[6]]")
+    packets = [packet for packet in s.split("\n") if packet] + list(divider_packets)
+    sorted_packets = sorted(packets, key=cmp_to_key(compare))
+    return (1 + sorted_packets.index(divider_packets[0])) * (
+        1 + sorted_packets.index(divider_packets[1])
+    )
 
 
 test_data = """[1,1,3,1,1]
@@ -113,6 +116,7 @@ test_data = """[1,1,3,1,1]
 
 
 if __name__ == "__main__":
-    # testmod()
-    print(sum_correct_indices(stdin.read()))
-    # print(sum_correct_indices(test_data))
+    testmod()
+    input_data = stdin.read()
+    print(sum_correct_indices(input_data))
+    print(divider_positions(input_data))
