@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from doctest import testmod
-from re import match
 from sys import stdin
 from typing import Iterable
 
@@ -44,6 +43,8 @@ def line_coords(c1: Coord, c2: Coord) -> list[Coord]:
 
 
 class Waterfall:
+    """Base object for day 14."""
+
     def __init__(self, paths: Iterable[str]):
         """Initialize the waterfall from a list of rock paths."""
         self.rock: set[Coord] = set()
@@ -69,6 +70,7 @@ class Waterfall:
                 cursor = next_point
 
     def reset(self) -> None:
+        """Reset waterfall configuration for second run."""
         self.sand = set()
         self.finished = False
 
@@ -140,9 +142,9 @@ class Waterfall:
     def add_until_overflowing(self) -> Waterfall:
         """Add sand until overflowing.
 
-        >>> Waterfall(test_data).add_until_overflowing().sand_amount
+        >>> Waterfall(TEST_DATA).add_until_overflowing().sand_amount
         24
-        >>> w = Waterfall(test_data)
+        >>> w = Waterfall(TEST_DATA)
         >>> w.floor = True
         >>> print(w.add_until_overflowing().sand_amount)
         93
@@ -152,7 +154,7 @@ class Waterfall:
         return self
 
 
-test_data = ["498,4 -> 498,6 -> 496,6", "503,4 -> 502,4 -> 502,9 -> 494,9"]
+TEST_DATA = ["498,4 -> 498,6 -> 496,6", "503,4 -> 502,4 -> 502,9 -> 494,9"]
 
 if __name__ == "__main__":
     testmod()

@@ -106,6 +106,6 @@ def scenic(m: list[list[int]], x: int, y: int) -> int:
 
 if __name__ == "__main__":
     testmod()
-    m = [[int(c) for c in line.strip()] for line in stdin]
-    print(sum(sum(b for b in row) for row in visible(m)))
-    print(most_scenic(m))
+    input_m = [[int(c) for c in line.strip()] for line in stdin]
+    print(sum(sum(b for b in row) for row in visible(input_m)))
+    print(most_scenic(input_m))

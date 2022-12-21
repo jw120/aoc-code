@@ -5,6 +5,8 @@ from sys import stdin
 
 
 class Assignment:
+    """Main class for day 4."""
+
     def __init__(self, s: str) -> None:
         """Initialize an assignment from a string.
 

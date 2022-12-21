@@ -7,24 +7,28 @@ from typing import Tuple
 
 
 class Move(Enum):
-    rock = "rock"
-    paper = "paper"
-    scissors = "scissors"
+    """Which move is being made."""
+
+    ROCK = "ROCK"
+    PAPER = "PAPER"
+    SCISSORS = "SCISSORS"
 
 
-beats = {Move.rock: Move.scissors, Move.paper: Move.rock, Move.scissors: Move.paper}
+beats = {Move.ROCK: Move.SCISSORS, Move.PAPER: Move.ROCK, Move.SCISSORS: Move.PAPER}
 beaten = {q: p for p, q in beats.items()}
-opponent_moves = {"A": Move.rock, "B": Move.paper, "C": Move.scissors}
-player_moves = {"X": Move.rock, "Y": Move.paper, "Z": Move.scissors}
+opponent_moves = {"A": Move.ROCK, "B": Move.PAPER, "C": Move.SCISSORS}
+player_moves = {"X": Move.ROCK, "Y": Move.PAPER, "Z": Move.SCISSORS}
 
 
 class Result(Enum):
-    lose = "lose"
-    draw = "draw"
-    win = "win"
+    """Result of a game."""
+
+    LOSE = "LOSE"
+    DRAW = "DRAW"
+    WIN = "WIN"
 
 
-results = {"X": Result.lose, "Y": Result.draw, "Z": Result.win}
+results = {"X": Result.LOSE, "Y": Result.DRAW, "Z": Result.WIN}
 
 
 def read_moves(s: str) -> Tuple[Move, Move]:
@@ -42,7 +46,7 @@ def read_result(s: str) -> Tuple[Move, Result]:
 def score_moves(moves: Tuple[Move, Move]) -> int:
     """Score a game given the two moves."""
     opponent, player = moves
-    shape_score = 1 if player == Move.rock else 2 if player == Move.paper else 3
+    shape_score = 1 if player == Move.ROCK else 2 if player == Move.PAPER else 3
     if beats[opponent] == player:
         win_score = 0
     elif beats[player] == opponent:
@@ -58,11 +62,11 @@ def score_result(game: Tuple[Move, Result]) -> int:
     """Score a game given the opponent moves and desired result."""
     opponent, result = game
     match result:
-        case Result.lose:
+        case Result.LOSE:
             player = beats[opponent]
-        case Result.win:
+        case Result.WIN:
             player = beaten[opponent]
-        case Result.draw:
+        case Result.DRAW:
             player = opponent
     return score_moves((opponent, player))
 

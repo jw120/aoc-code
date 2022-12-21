@@ -11,7 +11,7 @@ def run(instructions: Iterable[str], sample_cycles: set[int]) -> tuple[int, str]
     Returns the sum of the sample strengths for the given cycles and
     the crt pixels.
 
-    >>> n, pixels = run(test_long, sample_cycles=selected_samples)
+    >>> n, pixels = run(TEST_LONG, sample_cycles=selected_samples)
     >>> n
     13140
     >>> show_crt(pixels)
@@ -56,9 +56,9 @@ def show_crt(s: str) -> None:
         print(s[40 * i : 40 * (i + 1)])
 
 
-test_short = ["noop", "addx 3", "addx -5", "noop"]
+# TEST_SHORT = ["noop", "addx 3", "addx -5", "noop"]
 
-test_long_encoded = (
+TEST_LONG_ENCODED = (
     "a15a-11a6a-3a5a-1a-8a13a4na-1a5a-1a5a-1a5a-1a5a-1a-35a1a24"
     "a-19a1a16a-11nna21a-15nna-3a9a1a-3a8a1a5nnnnna-36na1a7nnna2"
     "a6nnnnna1nna7a1na-13a13a7na1a-33nnna2nnna8na-1a2a1na17a-9a1"
@@ -67,8 +67,8 @@ test_long_encoded = (
     "a-6a-11nnn"
 )
 
-test_long = (
-    test_long_encoded.replace("a", "\naddx ")
+TEST_LONG = (
+    TEST_LONG_ENCODED.replace("a", "\naddx ")
     .replace("n", "\nnoop")
     .removeprefix("\n")
     .split("\n")

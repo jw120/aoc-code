@@ -95,9 +95,9 @@ def walk_sizes(d: Dir) -> list[int]:
 
 
 if __name__ == "__main__":
-    terminal_output = [line.strip() for line in stdin]
-    dir_sizes = walk_sizes(build(terminal_output))
-    print(sum(size for size in dir_sizes if size <= 100000))
-    current_space = 70000000 - dir_sizes[-1]
+    input_terminal_output = [line.strip() for line in stdin]
+    input_dir_sizes = walk_sizes(build(input_terminal_output))
+    print(sum(size for size in input_dir_sizes if size <= 100000))
+    current_space = 70000000 - input_dir_sizes[-1]
     space_needed = 30000000 - current_space
-    print(min(size for size in dir_sizes if size >= space_needed))
+    print(min(size for size in input_dir_sizes if size >= space_needed))

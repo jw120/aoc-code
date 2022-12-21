@@ -10,6 +10,8 @@ from typing import Callable, Optional
 
 @dataclass
 class Monkey:
+    """Data class for a monkey."""
+
     items: list[int]
     update: Callable[[int], int]  # function old -> new
     divisor: int
@@ -46,6 +48,7 @@ def read_monkey(expected_index: int, s: str) -> Monkey:
             update: Callable[[int], int] = lambda x: x + int(d)
         case ["*", d] if d.isdigit():
             update = lambda x: x * int(d)
+
         case ["*", "old"]:
             update = lambda x: x * x
         case _:
@@ -73,12 +76,12 @@ def step(monkeys: list[Monkey], steps: int, mode: Optional[int]) -> list[Monkey]
     If mode is present then we take all items modules its value, if not
     then all items are divided by 3 (for the first part of the problem).
 
-    >>> show_items(step(build_monkeys(test_input), 1, None))
+    >>> show_items(step(build_monkeys(TEST_DATA), 1, None))
     Monkey 0: 20, 23, 27, 26
     Monkey 1: 2080, 25, 167, 207, 401, 1046
     Monkey 2:
     Monkey 3:
-    >>> show_items(step(build_monkeys(test_input), 20, None))
+    >>> show_items(step(build_monkeys(TEST_DATA), 20, None))
     Monkey 0: 10, 12, 14, 26, 34
     Monkey 1: 245, 93, 53, 199, 115
     Monkey 2:
@@ -109,9 +112,9 @@ def monkey_business(monkeys: list[Monkey], steps: int, simple_mode: bool) -> int
     Simple mode is for first part of the problem where items are divided by 3. For
     non-simple mode we treat all numbers modulus the product of all the divisors.
 
-    >>> monkey_business(build_monkeys(test_input), 20, True)
+    >>> monkey_business(build_monkeys(TEST_DATA), 20, True)
     10605
-    >>> monkey_business(build_monkeys(test_input), 10000, False)
+    >>> monkey_business(build_monkeys(TEST_DATA), 10000, False)
     2713310158
     """
     if simple_mode:
@@ -124,6 +127,7 @@ def monkey_business(monkeys: list[Monkey], steps: int, simple_mode: bool) -> int
 
 
 def show_items(monkeys: list[Monkey]) -> None:
+    """Provide debugging output."""
     for i, m in enumerate(monkeys):
         if m.items:
             print(f"Monkey {i}:", ", ".join(str(x) for x in m.items))
@@ -131,7 +135,7 @@ def show_items(monkeys: list[Monkey]) -> None:
             print(f"Monkey {i}:")
 
 
-test_input = """Monkey 0:
+TEST_DATA = """Monkey 0:
   Starting items: 79, 98
   Operation: new = old * 19
   Test: divisible by 23
@@ -167,6 +171,6 @@ def build_monkeys(s: str) -> list[Monkey]:
 
 if __name__ == "__main__":
     testmod()
-    input = stdin.read()
-    print(monkey_business(build_monkeys(input), 20, True))
-    print(monkey_business(build_monkeys(input), 10000, False))
+    txt = stdin.read()
+    print(monkey_business(build_monkeys(txt), 20, True))
+    print(monkey_business(build_monkeys(txt), 10000, False))

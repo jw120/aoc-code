@@ -1,8 +1,7 @@
 """Advent of Code 2022 - Day 12."""
 
-from doctest import testmod
-
 from collections import deque
+from doctest import testmod
 from sys import stdin
 from typing import Callable, Optional, Tuple, TypeVar
 
@@ -10,6 +9,8 @@ from Coord import Coord, Extent
 
 
 class HeightMap:
+    """Main class for day 12."""
+
     def __init__(self, s: str) -> None:
         s_lines = s.split("\n")
 
@@ -31,7 +32,7 @@ class HeightMap:
     def shortest_path_length(self) -> Optional[int]:
         """Return the length of the shortest path from start to goal.
 
-        >>> HeightMap(test_input).shortest_path_length()
+        >>> HeightMap(TEST_DATA).shortest_path_length()
         31
         """
 
@@ -49,7 +50,7 @@ class HeightMap:
 
         Computed as path from goal to any a-height point.
 
-        >>> HeightMap(test_input).shortest_path_from_any_length()
+        >>> HeightMap(TEST_DATA).shortest_path_from_any_length()
         29
         """
 
@@ -87,7 +88,7 @@ def bfs(
     return None
 
 
-test_input = """Sabqponm
+TEST_DATA = """Sabqponm
 abcryxxl
 accszExk
 acctuvwj

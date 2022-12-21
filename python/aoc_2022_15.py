@@ -5,12 +5,13 @@ from __future__ import annotations
 from doctest import testmod
 from re import fullmatch
 from sys import stdin
-from typing import Iterable
 
 from Coord import Coord, manhattan
 
 
 class Zone:
+    """Main object for day 15."""
+
     def __init__(self, lines: str) -> None:
         self.sensors: list[Coord] = []
         self.closest_beacons: list[Coord] = []
@@ -23,9 +24,8 @@ class Zone:
                 line,
             )
             assert m is not None
-            sx, sy, cx, cy = m.groups()
-            s = Coord(int(sx), int(sy))
-            c = Coord(int(cx), int(cy))
+            s = Coord(int(m.group(1)), int(m.group(2)))
+            c = Coord(int(m.group(3)), int(m.group(4)))
             self.sensors.append(s)
             self.closest_beacons.append(c)
             d = manhattan(s, c)
@@ -52,7 +52,7 @@ class Zone:
     def empty_in_row(self, y: int) -> int:
         """Return number of positions with given y coordinate that must be empty.
 
-        >>> z = Zone(test_data)
+        >>> z = Zone(TEST_DATA)
         >>> z.empty_in_row(10)
         26
         """
@@ -62,7 +62,7 @@ class Zone:
         return count
 
 
-test_data = """Sensor at x=2, y=18: closest beacon is at x=-2, y=15
+TEST_DATA = """Sensor at x=2, y=18: closest beacon is at x=-2, y=15
 Sensor at x=9, y=16: closest beacon is at x=10, y=16
 Sensor at x=13, y=2: closest beacon is at x=15, y=3
 Sensor at x=12, y=14: closest beacon is at x=10, y=16

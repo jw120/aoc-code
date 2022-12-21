@@ -7,11 +7,14 @@ from sys import stdin
 
 @dataclass(frozen=True)
 class Move:
+    """Class for a move."""
+
     number: int
     source: int
     destination: int
 
     def show(self) -> None:
+        """Provide debugging info."""
         print(f"{(self.number, self.source, self.destination)}")
 
 
@@ -33,7 +36,7 @@ Stacks = dict[int, list[str]]
 def read_problem(s: str) -> tuple[Stacks, list[Move]]:
     """Read problem and return initial stacks and moves.
 
-    >>> stacks, moves = read_problem(test_crates.replace('_', ' '))
+    >>> stacks, moves = read_problem(TEST_DATA.replace('_', ' '))
     >>> show_stacks(stacks)
     {1: ZN, 2: MCD, 3: P}
     >>> moves[2]
@@ -59,7 +62,7 @@ def read_problem(s: str) -> tuple[Stacks, list[Move]]:
 def apply_moves(stacks: Stacks, moves: list[Move], reverse: bool) -> Stacks:
     """Apply the moves (without mutating).
 
-    >>> stacks, moves = read_problem(test_crates.replace('_', ' '))
+    >>> stacks, moves = read_problem(TEST_DATA.replace('_', ' '))
     >>> show_stacks(apply_moves(stacks, moves, reverse=True))
     {1: C, 2: M, 3: PDNZ}
     >>> show_stacks(apply_moves(stacks, moves, reverse=False))
@@ -82,12 +85,13 @@ def tops(stacks: Stacks) -> str:
 
 
 def show_stacks(stacks: Stacks) -> None:
+    """Show stacks for debugging."""
     crates = ", ".join(f"{i}: {''.join(stacks[i])}" for i in range(1, len(stacks) + 1))
     print("{" + crates + "}")
 
 
 # Test data for doctest (underscores used to preserve trailing spaces)
-test_crates = """    [D]____
+TEST_DATA = """    [D]____
 [N] [C]____
 [Z] [M] [P]
  1   2   3
@@ -101,6 +105,6 @@ move 1 from 1 to 2
 
 if __name__ == "__main__":
     testmod()
-    stacks, moves = read_problem(stdin.read())
-    print(tops(apply_moves(stacks, moves, reverse=True)))
-    print(tops(apply_moves(stacks, moves, reverse=False)))
+    input_stacks, input_moves = read_problem(stdin.read())
+    print(tops(apply_moves(input_stacks, input_moves, reverse=True)))
+    print(tops(apply_moves(input_stacks, input_moves, reverse=False)))

@@ -69,7 +69,7 @@ def compare(x: str, y: str, open_lists: int = 0) -> Literal[-1, 0, 1]:
 def sum_correct_indices(s: str) -> int:
     """Return sum of indices for pairs which are in correct order.
 
-    >>> sum_correct_indices(test_data)
+    >>> sum_correct_indices(TEST_DATA)
     13
     """
     pairs = [pair.split("\n") for pair in s.split("\n\n")]
@@ -79,7 +79,7 @@ def sum_correct_indices(s: str) -> int:
 def divider_positions(s: str) -> int:
     """Return positions of divider packets after sorting.
 
-    >>> divider_positions(test_data)
+    >>> divider_positions(TEST_DATA)
     140
     """
     divider_packets = ("[[2]]", "[[6]]")
@@ -90,7 +90,7 @@ def divider_positions(s: str) -> int:
     )
 
 
-test_data = """[1,1,3,1,1]
+TEST_DATA = """[1,1,3,1,1]
 [1,1,5,1,1]
 
 [[1],[2,3,4]]
