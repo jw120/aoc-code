@@ -50,7 +50,7 @@ no_error_summary = true
 [tool.pylint]
 # Allow single character lower case names with optional digit for names
 enable = "all"
-good-names = ["up"]
+good-names = ["up", "op"]
 good-names-rgxs = [
   "^[a-z][0-9]?$",
   "^[a-z]s$",
