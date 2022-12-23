@@ -12,7 +12,7 @@ from Coord import Coord, Extent
 
 
 def assert_never(value: NoReturn) -> NoReturn:
-    # This also works at runtime as well
+    """Marker for unreachable code."""
     assert False, f"This code should never be reached, got: {value}"
 
 
@@ -87,6 +87,20 @@ WRAP_TOPOLOGY: Topology = {
     for (face, dir), next_face in WRAP_QUICK_TOPOLOGY.items()
 }
 
+# Offsets for each face
+FACE_BLOCK_TABLE: dict[Face, tuple[int, int]] = {
+    1: (2, 0),
+    2: (0, 1),
+    3: (1, 1),
+    4: (2, 1),
+    5: (2, 2),
+    6: (2, 3),
+}
+
+BLOCK_FACE_TABLE: dict[tuple[int, int], Face] = {
+    v: k for k, v in FACE_BLOCK_TABLE.items()
+}
+
 
 class MonkeyMap:
     """Basic class for Day 22, holds (immutable) board."""
@@ -120,12 +134,25 @@ class MonkeyMap:
         self.y_block_size = self.extent.y // 3
         assert (
             self.x_block_size * self.y_block_size * 12 == self.extent.x * self.extent.y
-        )
+        ), f"Bad size: {self.extent}"
         self.path: list[str] = findall(r"\d+|L|R", path_str)
 
     def to_coord(self, c: Coord, face: Face, edge: Direction) -> Coord:
         """Return the coordinate on the given face and edge."""
-        return Coord(0, 0)
+        c_relative = Coord(c.x % self.x_block_size, c.y % self.y_block_size)
+        match edge:
+            case Direction.UP:
+                c_relative = Coord(c_relative.x, 0)
+            case Direction.RIGHT:
+                c_relative = Coord(self.x_block_size - 1, c_relative.y)
+            case Direction.DOWN:
+                c_relative = Coord(c_relative.x, self.y_block_size - 1)
+            case Direction.LEFT:
+                c_relative = Coord(0, c_relative.y)
+        block_x, block_y = FACE_BLOCK_TABLE[face]
+        return (
+            Coord(block_x * self.x_block_size, block_y * self.y_block_size) + c_relative
+        )
 
     def face_if_at_edge(self, c: Coord, d: Direction) -> Optional[Face]:
         """Return the face the coordinate is on, if move in direction would go off the edge."""
@@ -146,21 +173,7 @@ class MonkeyMap:
                     return None
             case _:
                 assert_never(d)
-        match (c.x // self.x_block_size, c.y // self.y_block_size):
-            case (2, 0):
-                return 1
-            case (0, 1):
-                return 2
-            case (1, 1):
-                return 3
-            case (2, 1):
-                return 4
-            case (2, 2):
-                return 5
-            case (2, 3):
-                return 6
-            case _:
-                raise ValueError("Bad face")
+        return BLOCK_FACE_TABLE[(c.x // self.x_block_size, c.y // self.y_block_size)]
 
     def move(
         self, c: Coord, d: Direction, topology: Topology
@@ -169,6 +182,7 @@ class MonkeyMap:
 
         If path is blocked, then return the same Coord.
         """
+        # print("Move", c, d)
         match d:
             case Direction.UP:
                 c_new = c + Coord(0, -1)
@@ -186,23 +200,19 @@ class MonkeyMap:
             case int(face):
                 face_new, edge_new, d_new = topology[(face, d)]
                 c_new = self.to_coord(c_new, face_new, edge_new)
-
-        match self.board[c_new]:
-            case "#":
-                return c, d
-            case ".":
-                return c_new, d_new
-            case " ":
-                # print(f"Move {d} {r},{c} -> {r_new},{c_new} Error")
-                raise ValueError("Moved out of bounds!")
-            case _:
-                raise ValueError("Bad case")
+        # print(f"Testing move to {c_new} {d_new}, ", end="")
+        if self.board[c_new]:
+            # print("Blocked")
+            return c, d
+        else:
+            # print("OK")
+            return c_new, d_new
 
     def walk(self, topology: Topology) -> int:
         """Walk along given path, return final password.
 
         >>> m = MonkeyMap(TEST_DATA)
-        >>> m.walk()
+        >>> m.walk(WRAP_TOPOLOGY)
         6032
         """
         c = self.to_coord(Coord(0, 0), 1, Direction.UP)
@@ -248,8 +258,8 @@ TEST_DATA = """        ...#
 
 
 if __name__ == "__main__":
-    #    testmod()
-    #    m = MonkeyMap(stdin.read())
-    m = MonkeyMap(TEST_DATA)
+    testmod()
+    m = MonkeyMap(stdin.read())
+    # m = MonkeyMap(TEST_DATA)
     m.show()
     print(m.walk(WRAP_TOPOLOGY))
