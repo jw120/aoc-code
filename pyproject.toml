@@ -56,4 +56,8 @@ good-names-rgxs = [
   "^[a-z]s$",
 ]
 
-disable = ["unnecessary-lambda-assignment"]
+disable = [
+  "I0011", # don't report when we disable a check in the code
+  "I0020", # don't report when we suppress a message in the code
+  "unnecessary-lambda-assignment",
+]

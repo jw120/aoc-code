@@ -7,7 +7,7 @@ from doctest import testmod
 from enum import Enum
 from re import fullmatch
 from sys import stdin
-from typing import Optional, NewType
+from typing import NewType, Optional
 
 
 class Operation(Enum):

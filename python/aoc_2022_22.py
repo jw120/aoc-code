@@ -6,7 +6,14 @@ from doctest import testmod
 from enum import Enum
 from re import findall
 from sys import stdin
-from typing import Literal
+from typing import Optional, NoReturn
+
+from Coord import Coord, Extent
+
+
+def assert_never(value: NoReturn) -> NoReturn:
+    # This also works at runtime as well
+    assert False, f"This code should never be reached, got: {value}"
 
 
 class Direction(Enum):
@@ -25,123 +32,202 @@ class Direction(Enum):
         """Return direction after rotating 90 degrees right."""
         return Direction((self.value + 1) % 4)
 
+    def opposite(self) -> Direction:
+        """Return direction after rotating 180 degrees."""
+        return Direction((self.value + 2) % 4)
+
+
+# Faces are numbers 1-6 as in the rubric
+Face = int
+
+
+# WrapTopology: dict[tuple[Face, Direction], tuple[Face, Direction, Direction]] = {
+#     (1, Direction.UP): (5, Direction.DOWN, Direction.UP),
+#     (1, Direction.RIGHT): (1, Direction.LEFT, Direction.RIGHT),
+#     (1, Direction.DOWN): (4, Direction.UP, Direction.DOWN),
+#     (1, Direction.LEFT): (1, Direction.RIGHT, Direction.LEFT),
+# }
+
+
+# Topology specifies where we go if we move off a face in a given direction.
+# Value is he new face, the edge of that face and the new direction of travel
+Topology = dict[tuple[Face, Direction], tuple[Face, Direction, Direction]]
+
+# For part (a) we use a simpler wrapping topology
+
+WRAP_QUICK_TOPOLOGY: dict[tuple[Face, Direction], Face] = {
+    (1, Direction.UP): 5,
+    (1, Direction.RIGHT): 1,
+    (1, Direction.DOWN): 4,
+    (1, Direction.LEFT): 1,
+    (2, Direction.UP): 2,
+    (2, Direction.RIGHT): 3,
+    (2, Direction.DOWN): 2,
+    (2, Direction.LEFT): 4,
+    (3, Direction.UP): 3,
+    (3, Direction.RIGHT): 4,
+    (3, Direction.DOWN): 3,
+    (3, Direction.LEFT): 2,
+    (4, Direction.UP): 1,
+    (4, Direction.RIGHT): 2,
+    (4, Direction.DOWN): 5,
+    (4, Direction.LEFT): 3,
+    (5, Direction.UP): 4,
+    (5, Direction.RIGHT): 6,
+    (5, Direction.DOWN): 1,
+    (5, Direction.LEFT): 6,
+    (6, Direction.UP): 6,
+    (6, Direction.RIGHT): 5,
+    (6, Direction.DOWN): 6,
+    (6, Direction.LEFT): 5,
+}
+
+WRAP_TOPOLOGY: Topology = {
+    (face, dir): (next_face, dir.opposite(), dir)
+    for (face, dir), next_face in WRAP_QUICK_TOPOLOGY.items()
+}
+
 
 class MonkeyMap:
-    """Main class for Day 22."""
+    """Basic class for Day 22, holds (immutable) board."""
 
-    # Main board is a list of rows lists, each with cols elements
-    board: list[list[Literal["#", ".", " "]]]
-    rows: int
-    cols: int
-
-    # To facilitate wrapping we also hold the minimum and maximum non-space
-    # coordinate for each row and column
-    row_min: list[int]
-    row_max: list[int]
-    col_min: list[int]
-    col_max: list[int]
-
+    board: dict[Coord, bool]  # True for walls
+    extent: Extent
+    x_block_size: int
+    y_block_size: int
     path: list[str]
 
     def __init__(self, s: str) -> None:
         board_str, path_str = s.split("\n\n")
 
-        def parse_element(t: str) -> Literal["#", ".", " "]:
-            if t == "#":
-                return "#"
-            if t == ".":
-                return "."
-            if t == " ":
-                return " "
-            raise ValueError(f"Failed in parse_element '{t}'")
+        self.board = {}
+        self.extent = Extent(0, 0)
+        for y, row in enumerate(board_str.split("\n")):
+            for x, c in enumerate(row):
+                match c:
+                    case "#" | ".":
+                        self.board[Coord(x, y)] = c == "#"
+                        if x >= self.extent.x or y >= self.extent.y:
+                            self.extent = Extent(
+                                max(self.extent.x, x + 1), max(self.extent.y, y + 1)
+                            )
+                    case " ":
+                        pass
+                    case _:
+                        raise ValueError(f"Bad character in board input '{c}'")
 
-        self.board = [[parse_element(c) for c in row] for row in board_str.split("\n")]
-        self.rows = len(self.board)
-        self.cols = max(len(row) for row in self.board)
-
-        self.col_min = []
-        self.col_max = []
-        for row in self.board:
-            valid_tile_indices = [j for j, c in enumerate(row) if c != " "]
-            self.col_min.append(min(valid_tile_indices))
-            self.col_max.append(max(valid_tile_indices))
-
-        self.row_min = []
-        self.row_max = []
-        for j in range(self.cols):
-            valid_tile_indices = []
-            for i in range(self.rows):
-                if j <= self.col_max[i] and self.board[i][j] != " ":
-                    valid_tile_indices.append(i)
-            self.row_min.append(min(valid_tile_indices))
-            self.row_max.append(max(valid_tile_indices))
-
+        self.x_block_size = self.extent.x // 4
+        self.y_block_size = self.extent.y // 3
+        assert (
+            self.x_block_size * self.y_block_size * 12 == self.extent.x * self.extent.y
+        )
         self.path: list[str] = findall(r"\d+|L|R", path_str)
 
-    def walk(self) -> int:
-        """Walk along given path, return final password.
+    def to_coord(self, c: Coord, face: Face, edge: Direction) -> Coord:
+        """Return the coordinate on the given face and edge."""
+        return Coord(0, 0)
 
-        >>> m = MonkeyMap(TEST_DATA)
-        >>> m.walk()
-        6032
-        """
-        r = 0
-        c = self.col_min[r]
-        direction = Direction.RIGHT
-        for step in self.path:
-            # print("Step", step)
-            match step:
-                case s if s.isdigit():
-                    for _ in range(int(s)):
-                        r, c = self.move(r, c, direction)
-                case "L":
-                    direction = direction.left()
-                case "R":
-                    direction = direction.right()
-        return 1000 * (r + 1) + 4 * (c + 1) + direction.left().value
-
-    def move(self, r: int, c: int, d: Direction) -> tuple[int, int]:
-        """Try to move one step in given direction."""
+    def face_if_at_edge(self, c: Coord, d: Direction) -> Optional[Face]:
+        """Return the face the coordinate is on, if move in direction would go off the edge."""
+        x = c.x % self.x_block_size
+        y = c.y % self.y_block_size
         match d:
             case Direction.UP:
-                r_new = r - 1
-                c_new = c
-                if r_new < self.row_min[c]:
-                    r_new = self.row_max[c]
-            case Direction.DOWN:
-                r_new = r + 1
-                c_new = c
-                if r_new > self.row_max[c]:
-                    r_new = self.row_min[c]
+                if y != 0:
+                    return None
             case Direction.RIGHT:
-                r_new = r
-                c_new = c + 1
-                if c_new > self.col_max[r]:
-                    c_new = self.col_min[r]
+                if x != self.x_block_size - 1:
+                    return None
+            case Direction.DOWN:
+                if y != self.y_block_size - 1:
+                    return None
             case Direction.LEFT:
-                r_new = r
-                c_new = c - 1
-                if c_new < self.col_min[r]:
-                    c_new = self.col_max[r]
-        match self.board[r_new][c_new]:
+                if x != 0:
+                    return None
+            case _:
+                assert_never(d)
+        match (c.x // self.x_block_size, c.y // self.y_block_size):
+            case (2, 0):
+                return 1
+            case (0, 1):
+                return 2
+            case (1, 1):
+                return 3
+            case (2, 1):
+                return 4
+            case (2, 2):
+                return 5
+            case (2, 3):
+                return 6
+            case _:
+                raise ValueError("Bad face")
+
+    def move(
+        self, c: Coord, d: Direction, topology: Topology
+    ) -> tuple[Coord, Direction]:
+        """Move one step in given direction.
+
+        If path is blocked, then return the same Coord.
+        """
+        match d:
+            case Direction.UP:
+                c_new = c + Coord(0, -1)
+            case Direction.DOWN:
+                c_new = c + Coord(0, 1)
+            case Direction.RIGHT:
+                c_new = c + Coord(1, 0)
+            case Direction.LEFT:
+                c_new = c + Coord(-1, 0)
+            case _:
+                assert_never(d)
+        match self.face_if_at_edge(c, d):
+            case None:
+                d_new = d
+            case int(face):
+                face_new, edge_new, d_new = topology[(face, d)]
+                c_new = self.to_coord(c_new, face_new, edge_new)
+
+        match self.board[c_new]:
             case "#":
-                # print(f"Move {d} {r},{c} -> {r_new},{c_new} Blocked")
-                return r, c
+                return c, d
             case ".":
-                # print(f"Move {d} {r},{c} -> {r_new},{c_new} OK")
-                return r_new, c_new
+                return c_new, d_new
             case " ":
                 # print(f"Move {d} {r},{c} -> {r_new},{c_new} Error")
                 raise ValueError("Moved out of bounds!")
             case _:
                 raise ValueError("Bad case")
 
+    def walk(self, topology: Topology) -> int:
+        """Walk along given path, return final password.
+
+        >>> m = MonkeyMap(TEST_DATA)
+        >>> m.walk()
+        6032
+        """
+        c = self.to_coord(Coord(0, 0), 1, Direction.UP)
+        d = Direction.RIGHT
+        for step in self.path:
+            # print("Step", step)
+            match step:
+                case s if s.isdigit():
+                    for _ in range(int(s)):
+                        # pylint: disable=unpacking-non-sequence
+                        c, d = self.move(c, d, topology)
+                case "L":
+                    d = d.left()
+                case "R":
+                    d = d.right()
+        return 1000 * (c.y + 1) + 4 * (c.x + 1) + d.left().value
+
     def show(self) -> None:
         """Print debugging data."""
-        for i, row in enumerate(self.board):
-            for j, c in enumerate(row):
-                if j <= self.col_max[i]:
-                    print(c, end="")
+        for y in range(self.extent.y):
+            for x in range(self.extent.x):
+                if Coord(x, y) in self.board:
+                    print("#" if self.board[Coord(x, y)] else ".", end="")
+                else:
+                    print(" ", end="")
             print()
 
 
@@ -162,7 +248,8 @@ TEST_DATA = """        ...#
 
 
 if __name__ == "__main__":
-    testmod()
-    m = MonkeyMap(stdin.read())
+    #    testmod()
+    #    m = MonkeyMap(stdin.read())
+    m = MonkeyMap(TEST_DATA)
     m.show()
-    print(m.walk())
+    print(m.walk(WRAP_TOPOLOGY))
