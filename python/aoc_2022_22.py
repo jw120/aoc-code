@@ -6,7 +6,7 @@ from doctest import testmod
 from enum import Enum
 from re import findall
 from sys import stdin
-from typing import Optional, NoReturn
+from typing import NoReturn, Optional
 
 from Coord import Coord, Extent
 
