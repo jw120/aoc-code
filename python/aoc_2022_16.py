@@ -63,7 +63,7 @@ class Volcano:
 
         assert state.time_remaining > 0, f"Time up for move at {state}"
         if len(state.path) > 1 and tunnel == state.path[-2]:
-            print("Skipped double-back to", tunnel, "from", state.path)
+            # print("Skipped double-back to", tunnel, "from", state.path)
             return
         possible_score = state.score + (state.time_remaining - 1) * sum(
             self.valve_dict[v].flow_rate for v in state.unopened
@@ -90,14 +90,14 @@ class Volcano:
         possible_score = state.score + (state.time_remaining - 1) * sum(
             self.valve_dict[v].flow_rate for v in state.unopened
         )
-        print(
-            "Considering open",
-            state.current_valve_name,
-            state.score,
-            possible_score,
-            threshold_score,
-            state.unopened,
-        )
+        # print(
+        #     "Considering open",
+        #     state.current_valve_name,
+        #     state.score,
+        #     possible_score,
+        #     threshold_score,
+        #     state.unopened,
+        # )
         if possible_score > threshold_score:
             flow_rate = self.valve_dict[state.current_valve_name].flow_rate
             assert flow_rate > 0
@@ -132,12 +132,12 @@ class Volcano:
             if not self.stack:
                 break
             state = self.stack.pop()
-            print("Popped", state.score, state.path, state.unopened)
+            # print("Popped", state.score, state.path, state.unopened)
             if state.score > best_score:
                 best_score = state.score
                 print("Best", state.score, state.path)
             if state.time_remaining == 0 or not state.unopened:
-                print("End of path", state.score, state.path)
+                # print("End of path", state.score, state.path)
                 continue
             for tunnel in self.valve_dict[state.current_valve_name].tunnels:
                 self.push_move(state, tunnel, best_score)
