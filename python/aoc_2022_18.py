@@ -3,8 +3,7 @@
 # from __future__ import annotations
 
 from doctest import testmod
-
-# import fileinput
+import fileinput
 
 from Coord import Coord3
 
@@ -50,8 +49,5 @@ TEST_DATA = """2,2,2
 
 if __name__ == "__main__":
     testmod()
-    # test_cubes = [read_cube(line) for line in TEST_DATA.splitlines()]
-    # print(free_surface(test_cubes))
-    # # chamber = Chamber(stdin.read().strip())
-    # chamber.drop_multiple(2022)
-    # print(chamber.height)
+    input_cubes = [read_cube(line) for line in fileinput.input()]
+    print(free_surface(input_cubes))
