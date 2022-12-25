@@ -130,6 +130,21 @@ class Coord3:
     def as_tuple(self) -> Tuple[int, int, int]:
         return (self.x, self.y, self.z)
 
+    def adjacents(self) -> Iterable[Coord3]:
+        """Return all the cells adjacent to this one (excluding diagonals)."""
+        x, y, z = self.x, self.y, self.z
+        return (
+            Coord3(p, q, r)
+            for p, q, r in [
+                (x - 1, y, z),
+                (x, y - 1, z),
+                (x, y + 1, z),
+                (x + 1, y, z),
+                (x, y, z + 1),
+                (x, y, z - 1),
+            ]
+        )
+
     def __add__(self, other: Any) -> Coord3:
         if isinstance(other, Coord3):
             return Coord3(self.x + other.x, self.y + other.y, self.z + other.z)

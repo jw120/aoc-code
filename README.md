@@ -118,6 +118,14 @@ Done: Languages implements (p=python, j=julia, h=haskell)
 2021-13     Origami         Grid folding                            List, set                           69      66      1       p
 2021-14     Polymerization  Apply reaction rules to chain           Dict (counts)                       64      60      2       p
 
+2022-01     Calories        Add groups of numbers                   List
+2022-02     RPS             Rock, paper, scissors
+2022-03
+2022-15     Beacons         TODO B
+2022-16     Valves          Graph walk - TODO B: double walker
+2022-17     Pyroclastic     Tetris - TODO B: very long time
+2022-18     Boiling         TODO
+
 
 
 
