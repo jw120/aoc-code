@@ -3,13 +3,14 @@
 from __future__ import annotations
 
 # import fileinput
+from collections import deque
 from dataclasses import dataclass
 from doctest import testmod
 import re
-from typing import Any
+from typing import Any, Optional
 
 
-@dataclass
+@dataclass(frozen=True)
 class Amount:
     """Amount of each resource."""
 
@@ -25,6 +26,26 @@ class Amount:
                 clay=self.clay + other.clay,
                 obsidian=self.obsidian + other.obsidian,
                 geode=self.geode + other.geode,
+            )
+        raise TypeError
+
+    def __sub__(self, other: Any) -> Amount:
+        if isinstance(other, Amount):
+            return Amount(
+                ore=self.ore - other.ore,
+                clay=self.clay - other.clay,
+                obsidian=self.obsidian - other.obsidian,
+                geode=self.geode - other.geode,
+            )
+        raise TypeError
+
+    def __ge__(self, other: Any) -> bool:
+        if isinstance(other, Amount):
+            return (
+                self.ore >= other.ore
+                and self.clay >= other.clay
+                and self.obsidian >= other.obsidian
+                and self.geode >= other.geode
             )
         raise TypeError
 
@@ -44,7 +65,12 @@ def obsidian(x: int) -> Amount:
     return Amount(ore=0, clay=0, obsidian=x, geode=0)
 
 
-@dataclass
+def geode(x: int) -> Amount:
+    """Create an amount of geode."""
+    return Amount(ore=0, clay=0, obsidian=0, geode=x)
+
+
+@dataclass(frozen=True)
 class BluePrint:
     """Holds resource requirements."""
 
@@ -83,6 +109,66 @@ def read_blueprint(s: str) -> BluePrint:
     )
 
 
+@dataclass(frozen=True)
+class State:
+    """Track state for path search."""
+
+    resources: Amount
+    robots: Amount
+    path: list[str]
+    time: int
+
+    def buy(self, cost: Amount, robot: Amount, name: str) -> Optional[State]:
+        """Return a new state after buying the given robot if possible."""
+        if self.resources >= cost:
+            return State(
+                resources=self.resources + self.robots - cost,
+                robots=self.robots + robot,
+                path=self.path + [name],
+                time=self.time - 1,
+            )
+        return None
+
+    def wait(self) -> State:
+        """Return a new state after one step of waiting."""
+        return State(
+            resources=self.resources + self.robots,
+            robots=self.robots,
+            path=self.path + ["."],
+            time=self.time - 1,
+        )
+
+
+def best_path(b: BluePrint, time_available: int) -> int:
+    """Return maximum number of geodes obtainable."""
+    stack: deque[State] = deque(
+        [State(resources=ore(0), robots=ore(1), path=[], time=time_available)]
+    )
+
+    def push_if_possible(s: Optional[State]) -> None:
+        if s is not None:
+            stack.append(s)
+
+    most_geodes = 0
+    while True:
+        if not stack:
+            break
+        state = stack.pop()
+        # print("".join(state.path))
+        if state.time == 0:
+            if state.resources.geode > most_geodes:
+                print(state.resources.geode, "".join(state.path))
+                most_geodes = state.resources.geode
+            continue
+        push_if_possible(state.wait())
+        push_if_possible(state.buy(b.ore_robot, ore(1), "o"))
+        push_if_possible(state.buy(b.clay_robot, clay(1), "c"))
+        push_if_possible(state.buy(b.obsidian_robot, obsidian(1), "O"))
+        push_if_possible(state.buy(b.geode_robot, geode(1), "G"))
+
+    return most_geodes
+
+
 TEST_DATA = (
     "Blueprint 1: Each ore robot costs 4 ore. Each clay robot costs 2 ore. "
     "Each obsidian robot costs 3 ore and 14 clay. Each geode robot costs 2 ore and 7 obsidian.\n"
@@ -92,6 +178,5 @@ TEST_DATA = (
 
 if __name__ == "__main__":
     testmod()
-    # input_cubes = [read_cube(line) for line in fileinput.input()]
-    # print(free_surface(input_cubes))
-    # print(exterior_surface(input_cubes))
+    test_blueprints = [read_blueprint(line) for line in TEST_DATA.splitlines()]
+    print(best_path(test_blueprints[1], 24))
