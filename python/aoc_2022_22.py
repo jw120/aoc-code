@@ -8,7 +8,7 @@ from re import findall
 from sys import stdin
 from typing import NoReturn, Optional
 
-from Coord import Coord, Extent
+from coord import Coord, Extent
 
 
 def assert_never(value: NoReturn) -> NoReturn:
@@ -202,11 +202,8 @@ class MonkeyMap:
                 c_new = self.to_coord(c_new, face_new, edge_new)
         # print(f"Testing move to {c_new} {d_new}, ", end="")
         if self.board[c_new]:
-            # print("Blocked")
             return c, d
-        else:
-            # print("OK")
-            return c_new, d_new
+        return c_new, d_new
 
     def walk(self, topology: Topology) -> int:
         """Walk along given path, return final password.
@@ -222,7 +219,6 @@ class MonkeyMap:
             match step:
                 case s if s.isdigit():
                     for _ in range(int(s)):
-                        # pylint: disable=unpacking-non-sequence
                         c, d = self.move(c, d, topology)
                 case "L":
                     d = d.left()

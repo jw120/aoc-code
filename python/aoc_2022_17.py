@@ -6,7 +6,7 @@ from doctest import testmod
 from sys import stdin
 
 # Here we take x left-to-right and y down-to-up
-from Coord import Coord
+from coord import Coord
 
 # Characterize rocks by the offsets from its bottom-left corner
 Rock = list[Coord]
@@ -97,7 +97,7 @@ class Chamber:
         """Show debugging information."""
         for y in range(self.max_y + 2, -2, -1):
             for x in range(-1, 8):
-                if x == -1 or x == 7:
+                if x in (-1, 7):
                     print_char = "+" if y == -1 else "|"
                 elif y == -1:
                     print_char = "-"

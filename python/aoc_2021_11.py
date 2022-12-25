@@ -6,7 +6,7 @@ from doctest import testmod
 from sys import stdin
 from typing import Set
 
-from Coord import Coord, Extent
+from coord import Coord, Extent
 
 test: str = (
     "5483143223\n"

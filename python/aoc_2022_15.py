@@ -6,7 +6,7 @@ from doctest import testmod
 from re import fullmatch
 from sys import stdin
 
-from Coord import Coord, manhattan
+from coord import Coord, manhattan
 
 
 class Zone:

@@ -6,7 +6,7 @@ from doctest import testmod
 from sys import stdin
 from typing import Literal, Tuple
 
-from Coord import Coord
+from coord import Coord
 
 
 def read_dot(s: str) -> Coord:

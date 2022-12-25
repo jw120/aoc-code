@@ -3,7 +3,7 @@
 from doctest import testmod
 from sys import stdin
 
-from Coord import Coord
+from coord import Coord
 
 test_input: list[str] = [
     "R 4",

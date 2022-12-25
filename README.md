@@ -3,6 +3,8 @@
 TODO:
 * Finish 2021
 * Repair aoc_2021_22.py
+* Use file input for all python
+* Lint all python
 
 My solutions to advent of code.  So far contains:
 

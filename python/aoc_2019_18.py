@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from sys import stdin
 from typing import Callable, Dict, List, Optional, Set, Tuple, TypeVar
 
-from Coord import Coord, Extent
+from coord import Coord, Extent
 
 
 @dataclass(eq=True, frozen=True)

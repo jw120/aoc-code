@@ -6,7 +6,7 @@ from doctest import testmod
 from sys import stdin
 from typing import Iterable
 
-from Coord import Coord
+from coord import Coord
 
 
 def read_coord(s: str) -> Coord:

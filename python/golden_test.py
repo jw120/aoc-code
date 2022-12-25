@@ -22,7 +22,7 @@ completed: list[Tuple[int, Iterable[int]]] = [
     (2019, list(range(1, 12)) + [13, 14, 15]),
     (2020, range(1, 26)),
     (2021, list(range(1, 16)) + [17, 19, 20, 21, 22, 23, 25]),
-    (2022, range(1, 15)),
+    (2022, list(range(1, 15)) + [18, 21]),
 ]
 
 # With >3s execution time
@@ -42,6 +42,7 @@ slow: Set[Tuple[int, int]] = {
     (2021, 22),  # 2517s  (~=42 mins) FAILS
     (2021, 23),  # 284s (~=5 mins)
     (2021, 25),  # 53s
+    (2022, 14),  # 11s
 }
 
 
@@ -50,24 +51,38 @@ def test(year: int, day: int, times: bool) -> None:
 
     Compare output to known-good (or create a missing known-good file)."""
     source_fn = SOURCE_FILE_FORMAT.format(year=year, day=day)
-    input_file = open(INPUT_FILE_FORMAT.format(year=year, day=day), mode="r")
-    good_filename = GOOD_FILE_FORMAT.format(year=year, day=day)
+    with open(
+        INPUT_FILE_FORMAT.format(year=year, day=day), mode="r", encoding="utf8"
+    ) as input_file:
+        good_filename = GOOD_FILE_FORMAT.format(year=year, day=day)
 
-    print(f"{year} {day:2}: ", end="")
+        print(f"{year} {day:2}: ", end="")
 
-    if exists(good_filename):
-        output_file = NamedTemporaryFile()
-        start = time()
-        run([PYTHON_EXECUTABLE, source_fn], stdin=input_file, stdout=output_file)
-        elapsed = round(1000 * (time() - start))
-        print("ok" if cmp(output_file.name, good_filename) else "FAIL", end="")
-        print(f" ({elapsed} ms) " if times or elapsed > ELAPSED_MS_THRESHOLD else "")
-        output_file.close()
-    else:
-        good_file = open(good_filename, mode="w")
-        run([PYTHON_EXECUTABLE, source_fn], stdin=input_file, stdout=good_file)
-        print("Created", good_filename)
-        good_file.close()
+        if exists(good_filename):
+            with NamedTemporaryFile() as output_file:
+                start = time()
+                run(
+                    [PYTHON_EXECUTABLE, source_fn],
+                    stdin=input_file,
+                    stdout=output_file,
+                    check=True,
+                )
+                elapsed = round(1000 * (time() - start))
+                print("ok" if cmp(output_file.name, good_filename) else "FAIL", end="")
+                print(
+                    f" ({elapsed} ms) "
+                    if times or elapsed > ELAPSED_MS_THRESHOLD
+                    else ""
+                )
+        else:
+            with open(good_filename, mode="w", encoding="utf8") as good_file:
+                run(
+                    [PYTHON_EXECUTABLE, source_fn],
+                    stdin=input_file,
+                    stdout=good_file,
+                    check=True,
+                )
+                print("Created", good_filename)
 
 
 def all_tests(fast_only: bool, times: bool) -> None:

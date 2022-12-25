@@ -5,7 +5,7 @@ from doctest import testmod
 from sys import stdin
 from typing import Callable, Optional, Tuple, TypeVar
 
-from Coord import Coord, Extent
+from coord import Coord, Extent
 
 
 class HeightMap:

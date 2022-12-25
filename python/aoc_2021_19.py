@@ -7,7 +7,7 @@ from itertools import chain, combinations
 from sys import stdin
 from typing import Any, ClassVar, Iterable, Optional, Tuple
 
-from Coord import Coord3
+from coord import Coord3
 
 
 class Rotation:

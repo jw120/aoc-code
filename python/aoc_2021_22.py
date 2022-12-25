@@ -8,7 +8,7 @@ from itertools import chain, combinations
 from sys import stdin
 from typing import Iterable, Optional, Tuple
 
-from Coord import Coord3
+from coord import Coord3
 
 
 def disjoint(a0: int, a1: int, b0: int, b1: int) -> bool:

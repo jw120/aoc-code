@@ -2,10 +2,10 @@
 
 # from __future__ import annotations
 
-from doctest import testmod
 import fileinput
+from doctest import testmod
 
-from Coord import Coord3
+from coord import Coord3
 
 
 def read_cube(s: str) -> Coord3:

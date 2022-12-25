@@ -9,7 +9,7 @@ from re import fullmatch
 from sys import stdin
 from typing import Optional, Tuple
 
-from Coord import Coord
+from coord import Coord
 
 
 class Probe:

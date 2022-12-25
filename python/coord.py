@@ -19,14 +19,17 @@ class Coord:
 
         Extent is a coordinate that is just outside the grid's bounds
 
-        >>> [Coord(x, y).in_bounds(Coord(5, 5)) for x, y in [(0, 0), (-1, 0), (5, 0), (0, 6), (2, 3), (4, 4)]]
+        >>> test_coords = [(0, 0), (-1, 0), (5, 0), (0, 6), (2, 3), (4, 4)]
+        >>> [Coord(x, y).in_bounds(Coord(5, 5)) for x, y in test_coords]
         [True, False, False, False, True, True]
 
         """
         return self.x >= 0 and self.x < extent.x and self.y >= 0 and self.y < extent.y
 
     def adjacents(self, extent: Optional[Extent] = None) -> Iterable[Coord]:
-        """Return all the cells adjacent to this one given one (excluding diagonals), optionally checking bounds."""
+        """Return all the cells adjacent to this one given one (excluding diagonals).
+
+        Optionally checks bounds."""
         x, y = self.x, self.y
         possible_cells = (
             Coord(p, q)
@@ -44,7 +47,9 @@ class Coord:
     def adjacents_with_diagonals(
         self, extent: Optional[Extent] = None
     ) -> Iterable[Coord]:
-        """Return all the cells adjacent to this one given one (including diagonals), optionally checking bounds."""
+        """Return all the cells adjacent to this one given one (including diagonals).
+
+        Optionally checks bounds."""
         x, y = self.x, self.y
         possible_cells = (
             Coord(p, q)
@@ -70,20 +75,17 @@ class Coord:
     def __add__(self, other: Any) -> Coord:
         if isinstance(other, Coord):
             return Coord(self.x + other.x, self.y + other.y)
-        else:
-            raise TypeError
+        raise TypeError
 
     def __sub__(self, other: Any) -> Coord:
         if isinstance(other, Coord):
             return Coord(self.x - other.x, self.y - other.y)
-        else:
-            raise TypeError
+        raise TypeError
 
     def __floordiv__(self, other: Any) -> Coord:
         if isinstance(other, int):
             return Coord(self.x // other, self.y // other)
-        else:
-            raise TypeError
+        raise TypeError
 
 
 def manhattan(c1: Coord, c2: Coord) -> int:
@@ -96,8 +98,13 @@ def manhattan(c1: Coord, c2: Coord) -> int:
 
 
 class Extent(Coord):
+    """Class to track a range of coordinates from origin to give point.
+
+    Given point is not included."""
+
     @property
     def size(self) -> int:
+        """Return the number of coordinates covered by the extent."""
         return self.x * self.y
 
     def upto(self) -> Iterator[Coord]:
@@ -128,6 +135,7 @@ class Coord3:
         return abs(self.x - other.x) + abs(self.y - other.y) + abs(self.z - other.z)
 
     def as_tuple(self) -> Tuple[int, int, int]:
+        """Return a tuple-version of the coordinate."""
         return (self.x, self.y, self.z)
 
     def adjacents(self) -> Iterable[Coord3]:
@@ -148,14 +156,12 @@ class Coord3:
     def __add__(self, other: Any) -> Coord3:
         if isinstance(other, Coord3):
             return Coord3(self.x + other.x, self.y + other.y, self.z + other.z)
-        else:
-            raise TypeError
+        raise TypeError
 
     def __sub__(self, other: Any) -> Coord3:
         if isinstance(other, Coord3):
             return Coord3(self.x - other.x, self.y - other.y, self.z - other.z)
-        else:
-            raise TypeError
+        raise TypeError
 
     def __neg__(self) -> Coord3:
         return Coord3(-self.x, -self.y, -self.z)

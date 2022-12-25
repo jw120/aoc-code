@@ -7,7 +7,7 @@ from __future__ import annotations
 from doctest import testmod
 from sys import stdin
 
-from Coord import Coord, Extent
+from coord import Coord, Extent
 
 test_data: list[str] = [
     "1163751742",
