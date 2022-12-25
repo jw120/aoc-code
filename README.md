@@ -126,7 +126,8 @@ Done: Languages implements (p=python, j=julia, h=haskell)
 2022-15     Beacons         TODO B
 2022-16     Valves          Graph walk - TODO B: double walker
 2022-17     Pyroclastic     Tetris - TODO B: very long time
-2022-18     Boiling         TODO
+2022-18     Boiling         3-d flood fill                          Set
+2022-19
 
 
 
