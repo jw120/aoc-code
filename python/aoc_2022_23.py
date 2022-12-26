@@ -93,29 +93,48 @@ class Diffuser:
                 else:
                     assert char == ".", f"Unexpected input: '{char}'"
 
-    def step(self, n: int = 1) -> None:
-        """Update positions the given number of steps."""
+    def steps(self, n: int) -> None:
+        """Execute given number of steps."""
         for _ in range(n):
-            proposals: dict[Coord, Optional[Coord]] = {}
-            for elf in self.positions:
-                # Don't consider moving if all adjacent positions are empty
-                if all(x not in self.positions for x in elf.adjacents_with_diagonals()):
-                    continue
-                for d in self.first_direction.all_directions():
-                    if all(
-                        (elf + offset) not in self.positions for offset in d.offsets()
-                    ):
-                        elf_new = elf + d.coord()
-                        if elf_new in proposals:
-                            proposals[elf_new] = None
-                        else:
-                            proposals[elf_new] = elf
-                        break
-            for elf_to, elf_from in proposals.items():
-                if elf_from is not None:
-                    self.positions.add(elf_to)
-                    self.positions.remove(elf_from)
-            self.first_direction = self.first_direction.next()
+            self.step()
+
+    def step(self) -> bool:
+        """Update positions the given number of steps.
+
+        Return true if any elf moved."""
+        proposals: dict[Coord, Optional[Coord]] = {}
+        moved = False
+        for elf in self.positions:
+            # Don't consider moving if all adjacent positions are empty
+            if all(x not in self.positions for x in elf.adjacents_with_diagonals()):
+                continue
+            for d in self.first_direction.all_directions():
+                if all((elf + offset) not in self.positions for offset in d.offsets()):
+                    elf_new = elf + d.coord()
+                    if elf_new in proposals:
+                        proposals[elf_new] = None
+                    else:
+                        proposals[elf_new] = elf
+                    break
+        for elf_to, elf_from in proposals.items():
+            if elf_from is not None:
+                self.positions.add(elf_to)
+                self.positions.remove(elf_from)
+                moved = True
+        self.first_direction = self.first_direction.next()
+        return moved
+
+    def moves_until_no_move(self) -> int:
+        """Return number of moves until a step when no elf moves.
+
+        >>> test_diffuser = Diffuser(TEST_DATA2)
+        >>> test_diffuser.moves_until_no_move()
+        20
+        """
+        move_count = 1
+        while self.step():
+            move_count += 1
+        return move_count
 
     def rectangle(self) -> tuple[Coord, Coord]:
         """Return min and max corners of rectangle including all positions.
@@ -138,7 +157,7 @@ class Diffuser:
         >>> Diffuser(TEST_DATA1).score()
         3
         >>> test_diffuser = Diffuser(TEST_DATA2)
-        >>> test_diffuser.step(10)
+        >>> test_diffuser.steps(10)
         >>> test_diffuser.score()
         110
         """
@@ -187,6 +206,6 @@ TEST_DATA2: Final[
 if __name__ == "__main__":
     testmod()
     diffuser = Diffuser(fileinput.input())
-    diffuser.step(10)
+    diffuser.steps(10)
     print(diffuser.score())
-    diffuser.show()
+    print(diffuser.moves_until_no_move() - 10)

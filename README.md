@@ -131,7 +131,7 @@ Done: Languages implements (p=python, j=julia, h=haskell)
 2022-20     Groves          Circular list mixing                    List
 2022-21     Math            Tree of math operations
 2022-22     Map             Movement on cube surface
-2022-23     Diffusion       Life?
+2022-23     Diffusion       Life-like                               Set
 
 
 
