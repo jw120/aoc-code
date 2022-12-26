@@ -160,11 +160,14 @@ def best_path(b: BluePrint, time_available: int) -> int:
                 print(state.resources.geode, "".join(state.path))
                 most_geodes = state.resources.geode
             continue
-        push_if_possible(state.wait())
-        push_if_possible(state.buy(b.ore_robot, ore(1), "o"))
-        push_if_possible(state.buy(b.clay_robot, clay(1), "c"))
-        push_if_possible(state.buy(b.obsidian_robot, obsidian(1), "O"))
-        push_if_possible(state.buy(b.geode_robot, geode(1), "G"))
+        # If we have the resources to buy a geode robot, just buy it
+        if state.resources >= b.geode_robot:
+            push_if_possible(state.buy(b.geode_robot, geode(1), "G"))
+        else:
+            push_if_possible(state.wait())
+            push_if_possible(state.buy(b.ore_robot, ore(1), "o"))
+            push_if_possible(state.buy(b.clay_robot, clay(1), "c"))
+            push_if_possible(state.buy(b.obsidian_robot, obsidian(1), "O"))
 
     return most_geodes
 
@@ -179,4 +182,4 @@ TEST_DATA = (
 if __name__ == "__main__":
     testmod()
     test_blueprints = [read_blueprint(line) for line in TEST_DATA.splitlines()]
-    print(best_path(test_blueprints[1], 24))
+    print(best_path(test_blueprints[0], 24))
