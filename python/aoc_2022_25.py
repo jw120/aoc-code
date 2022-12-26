@@ -4,7 +4,7 @@
 from doctest import testmod
 from typing import Final
 
-# import fileinput
+import fileinput
 
 SNAFU_VALUES: Final[dict[str, int]] = {"2": 2, "1": 1, "0": 0, "-": -1, "=": -2}
 SNAFU_DIGITS: Final[dict[int, str]] = {v: k for k, v in SNAFU_VALUES.items()}
@@ -25,16 +25,19 @@ def snafu_to_decimal(s: str) -> int:
 
 
 def decimal_to_snafu(x: int) -> str:
-    """Convert decimal number to SNAFU."""
-    # Find highest base we will need
-    highest_base = 1
-    while x // highest_base >= 3:
-        highest_base *= 5
-    # Work out required digits
-    acc = 0
-    base = highest_base
-    while base > 1:
+    """Convert decimal number to SNAFU.
 
+    >>> decimal_to_snafu(4890)
+    '2=-1=0'
+    """
+    acc = ""
+    while x != 0:
+        digit = (x + 2) % 5 - 2
+        acc = SNAFU_DIGITS[digit] + acc
+        x = x - digit
+        assert x % 5 == 0
+        x //= 5
+    return acc
 
 
 TEST_DATA: Final[
@@ -56,3 +59,8 @@ TEST_DATA: Final[
 
 if __name__ == "__main__":
     testmod()
+    print(
+        decimal_to_snafu(
+            sum(snafu_to_decimal(line.strip()) for line in fileinput.input())
+        )
+    )
