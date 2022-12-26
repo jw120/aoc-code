@@ -128,6 +128,10 @@ Done: Languages implements (p=python, j=julia, h=haskell)
 2022-17     Pyroclastic     Tetris - TODO B: very long time
 2022-18     Boiling         3-d flood fill                          Set
 2022-19
+2022-20     Groves          Circular list mixing                    List
+2022-21     Math            Tree of math operations
+2022-22     Map             Movement on cube surface
+2022-23     Diffusion       Life?
 
 
 
