@@ -1,18 +1,16 @@
 """Advent of Code 2022 - Day 24."""
 
 
-from collections import deque
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-# from doctest import testmod
-from typing import Final, Iterable, Optional
+from doctest import testmod
+import fileinput
+from heapq import heappush, heappop
+from itertools import chain
+from typing import Final, Iterable
 
 # x runs left-ro-right, y runs top-to-bottom
-# (0, 0) is top-left inside the wall, (width -1, height -1) is bottom-right
-# (0, -1) is entrance (width -1, height) is exit
-from coord import Coord
-
-# import fileinput
+from coord import Coord, manhattan
 
 
 @dataclass(frozen=True)
@@ -23,13 +21,14 @@ class Blizzard:
     step: Coord
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, order=True)
 class State:
     """State for walk of available paths"""
 
-    location: Coord
-    time: int
-    visited: frozenset[Coord]
+    location: Coord = field(compare=False)
+    time: int = field(compare=False)
+    # visited: frozenset[Coord] = field(compare=False)
+    priority: int
 
 
 class Basin:
@@ -38,8 +37,11 @@ class Basin:
     def __init__(self, input_lines: Iterable[str]) -> None:
         self.blizzards: list[Blizzard] = []
         for row, line in enumerate(input_lines, start=-1):
+            line = line.strip()
             if row == -1:
-                assert all(c == "#" for c in (line[0:1] + line[2:]))
+                assert all(
+                    c == "#" for c in (line[0:1] + line[2:])
+                ), f"Bad initial line '{line}'"
                 assert line[1] == "."
                 self.width: int = len(line) - 2
             elif all(c == "#" for c in line[:-2]) and line[-2:] == ".#":
@@ -84,42 +86,58 @@ class Basin:
                 return False
         return True
 
+    def priority(self, c: Coord, t: int) -> int:
+        """Return the priority of the given coordinate.
+
+        Used by the A*-algorithm. Defined as distances from origin
+        plus distance to goal (manhattan distances)."""
+        return t + manhattan(c, self.goal)
+
     def find_path(self) -> int:
-        """Return length of shortest path to goal."""
-        stack: deque[State] = deque(
-            [State(location=self.start, time=0, visited=frozenset())]
+        """Return length of shortest path to goal.
+
+        >>> Basin(TEST_DATA2).find_path()
+        18
+        """
+        initial_state = State(
+            location=self.start,
+            time=0,
+            # visited=frozenset(),
+            priority=self.priority(self.start, 0),
         )
-        shortest_success: Optional[int] = None
+        heap: list[State] = []
+        heappush(heap, initial_state)
+        visited: set[tuple[Coord, int]] = set()
 
         while True:
-            if not stack:
-                break
-            state = stack.pop()
-            print(
-                f"{state.time}: ({state.location.x}, {state.location.y}), {len(state.visited)}"
-            )
+            if not heap:
+                raise ValueError("No path found")
+            state = heappop(heap)
+            visited.add((state.location, 0))
+            # print(
+            #     f"p={state.priority} t={state.time}: ({state.location.x}, {state.location.y}), {len(visited)} heap: {len(heap)}",
+            #     [(c.x, c.y, t) for c, t in visited],
+            # )
+            # print(
+            #     f"({state.location.x}, {state.location.y}), {len(visited)} heap: {len(heap)}"
+            # )
             if state.location == self.goal:
-                if shortest_success is None or state.time < shortest_success:
-                    shortest_success = state.time
-                continue
-            for adj in state.location.adjacents():
-                if adj not in state.visited and self.will_be_empty(adj, state.time + 1):
-                    stack.append(
+                return state.time
+            for adj in chain(state.location.adjacents(), [state.location]):
+                # print(f"Considering move from {state.location} to {adj}")
+                if (adj, state.time + 1) not in visited and self.will_be_empty(
+                    adj, state.time + 1
+                ):
+                    heappush(
+                        heap,
                         State(
                             location=adj,
                             time=state.time + 1,
-                            visited=state.visited | frozenset([state.location]),
-                        )
+                            # visited=state.visited | frozenset([state.location]),
+                            priority=self.priority(adj, state.time + 1),
+                        ),
                     )
-                stack.append(
-                    State(
-                        location=state.location,
-                        time=state.time + 1,
-                        visited=state.visited,
-                    )
-                )
-        assert shortest_success is not None, "No path found"
-        return shortest_success
+                    # print("added")
 
     def show(self, t: int) -> None:
         """Print debugging information for time t."""
@@ -132,7 +150,18 @@ class Basin:
         print("#" * self.width + ".#")
 
 
-TEST_DATA: Final[
+TEST_DATA1: Final[
+    list[str]
+] = """#.#####
+#.....#
+#>....#
+#.....#
+#...v.#
+#.....#
+#####.#""".splitlines()
+
+
+TEST_DATA2: Final[
     list[str]
 ] = """#.######
 #>>.<^<#
@@ -143,8 +172,7 @@ TEST_DATA: Final[
 
 
 if __name__ == "__main__":
-    # testmod()
-    basin = Basin(TEST_DATA)
-    basin.show(0)
-    basin.show(1)
+    testmod()
+    basin = Basin(fileinput.input())
+    # basin.show(0)
     print(basin.find_path())
