@@ -2,11 +2,12 @@
 
 from __future__ import annotations
 
+import re
+
 # import fileinput
 from collections import deque
 from dataclasses import dataclass
 from doctest import testmod
-import re
 from typing import Any, Optional
 
 

@@ -1,10 +1,9 @@
 """Advent of Code 2022 - Day 25."""
 
 
+import fileinput
 from doctest import testmod
 from typing import Final
-
-import fileinput
 
 SNAFU_VALUES: Final[dict[str, int]] = {"2": 2, "1": 1, "0": 0, "-": -1, "=": -2}
 SNAFU_DIGITS: Final[dict[int, str]] = {v: k for k, v in SNAFU_VALUES.items()}

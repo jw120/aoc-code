@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
+import fileinput
 from doctest import testmod
-
 from enum import Enum
 from typing import Final, Iterable, NoReturn, Optional
-
-import fileinput
 
 # We use x as left->right and y as top->bottom
 from coord import Coord
@@ -208,4 +206,4 @@ if __name__ == "__main__":
     diffuser = Diffuser(fileinput.input())
     diffuser.steps(10)
     print(diffuser.score())
-    print(diffuser.moves_until_no_move() - 10)
+    print(diffuser.moves_until_no_move() + 10)
