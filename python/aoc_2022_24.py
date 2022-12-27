@@ -23,11 +23,13 @@ class Blizzard:
 
 @dataclass(frozen=True, order=True)
 class State:
-    """State for walk of available paths"""
+    """State for walk of available paths.
+
+    Ordering (for A*) is on priority only
+    """
 
     location: Coord = field(compare=False)
     time: int = field(compare=False)
-    # visited: frozenset[Coord] = field(compare=False)
     priority: int
 
 
@@ -35,7 +37,8 @@ class Basin:
     """Main class for day 24."""
 
     def __init__(self, input_lines: Iterable[str]) -> None:
-        self.blizzards: list[Blizzard] = []
+        self.initial_blizzards: list[Blizzard] = []
+        self.cached_blizzards: dict[int, set[Coord]] = {}
         for row, line in enumerate(input_lines, start=-1):
             line = line.strip()
             if row == -1:
@@ -65,7 +68,7 @@ class Basin:
                             raise ValueError(
                                 f"Unknown character '{char}' in line '{line}'"
                             )
-                    self.blizzards.append(
+                    self.initial_blizzards.append(
                         Blizzard(start=Coord(x=col, y=row), step=step)
                     )
         self.start = Coord(0, -1)
@@ -79,12 +82,17 @@ class Basin:
             return False
         if c.x in (-1, self.width):  # Side walls
             return False
-        for blizzard in self.blizzards:
-            x = (blizzard.start.x + t * blizzard.step.x) % self.width
-            y = (blizzard.start.y + t * blizzard.step.y) % self.height
-            if Coord(x, y) == c:
-                return False
-        return True
+        if t in self.cached_blizzards:
+            b = self.cached_blizzards[t]
+        else:
+            print(t)
+            b = set()
+            for blizzard in self.initial_blizzards:
+                x = (blizzard.start.x + t * blizzard.step.x) % self.width
+                y = (blizzard.start.y + t * blizzard.step.y) % self.height
+                b.add(Coord(x, y))
+            self.cached_blizzards[t] = b
+        return c not in b
 
     def priority(self, c: Coord, t: int) -> int:
         """Return the priority of the given coordinate.
@@ -102,7 +110,6 @@ class Basin:
         initial_state = State(
             location=self.start,
             time=0,
-            # visited=frozenset(),
             priority=self.priority(self.start, 0),
         )
         heap: list[State] = []
@@ -113,7 +120,7 @@ class Basin:
             if not heap:
                 raise ValueError("No path found")
             state = heappop(heap)
-            visited.add((state.location, 0))
+            visited.add((state.location, state.time))
             # print(
             #     f"p={state.priority} t={state.time}: ({state.location.x}, {state.location.y}), {len(visited)} heap: {len(heap)}",
             #     [(c.x, c.y, t) for c, t in visited],
