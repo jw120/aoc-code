@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 from doctest import testmod
 from heapq import heappop, heappush
 from itertools import chain
-from math import lcm
 from typing import Final, Iterable
 
 # x runs left-ro-right, y runs top-to-bottom
@@ -41,8 +40,10 @@ class Basin:
     """Main class for day 24."""
 
     def __init__(self, input_lines: Iterable[str], debug: bool = False) -> None:
-        self.initial_blizzards: list[Blizzard] = []
-        self.cached: dict[State, bool] = {}
+        self.initial_h_blizzards: list[Blizzard] = []
+        self.initial_v_blizzards: list[Blizzard] = []
+        self.h_blizzard_cache: dict[State, bool] = {}
+        self.v_blizzard_cache: dict[State, bool] = {}
         for row, line in enumerate(input_lines, start=-1):
             line = line.strip()
             if row == -1:
@@ -59,57 +60,77 @@ class Basin:
                 for col, char in enumerate(line[1:-1]):
                     match char:
                         case "^":
-                            step = Coord(0, -1)
+                            self.initial_v_blizzards.append(
+                                Blizzard(start=Coord(x=col, y=row), step=Coord(0, -1))
+                            )
                         case ">":
-                            step = Coord(1, 0)
+                            self.initial_h_blizzards.append(
+                                Blizzard(start=Coord(x=col, y=row), step=Coord(1, 0))
+                            )
                         case "v":
-                            step = Coord(0, 1)
+                            self.initial_v_blizzards.append(
+                                Blizzard(start=Coord(x=col, y=row), step=Coord(0, 1))
+                            )
                         case "<":
-                            step = Coord(-1, 0)
+                            self.initial_h_blizzards.append(
+                                Blizzard(start=Coord(x=col, y=row), step=Coord(-1, 0))
+                            )
                         case ".":
                             continue
                         case _:
                             raise ValueError(
                                 f"Unknown character '{char}' in line '{line}'"
                             )
-                    self.initial_blizzards.append(
-                        Blizzard(start=Coord(x=col, y=row), step=step)
-                    )
-        self.start = Coord(0, -1)
-        self.goal = Coord(self.width - 1, self.height)
-        self.repeat = lcm(self.width, self.height)
+        self.initial_start = Coord(0, -1)
+        self.initial_goal = Coord(self.width - 1, self.height)
+        self.start = self.initial_start
+        self.goal = self.initial_goal
         self.debug = debug
         if self.debug:
-            print(
-                f"{self.width}x{self.height}: repeat: {self.repeat} max_cache {self.repeat*self.width*self.height}"
-            )
+            print(f"{self.width}x{self.height}")
 
     def will_be_empty(self, state: State) -> bool:
         """Test if state will be empty."""
-        if state.location.y <= -1 and state.location != self.start:
+        if state.location.y <= -1 and state.location not in (self.start, self.goal):
             return False  # Top wall
-        if state.location.y >= self.height and state.location != self.goal:
+        if state.location.y >= self.height and state.location not in (
+            self.start,
+            self.goal,
+        ):
             return False  # Bottom wall
         if state.location.x in (-1, self.width):
             return False  # Side walls
-        wrapped_state = State(location=state.location, time=state.time % self.repeat)
+
+        h_wrapped_state = State(location=state.location, time=state.time % self.width)
         try:
-            return self.cached[wrapped_state]
+            h_blizzard = self.h_blizzard_cache[h_wrapped_state]
         except KeyError:
-            to_cache = True
-            for blizzard in self.initial_blizzards:
-                if (
-                    blizzard.start.x != state.location.x
-                    and blizzard.start.y != state.location.y
-                ):
-                    continue  # Blizzards only move up/down/left/right
+            h_blizzard = False
+            for blizzard in self.initial_h_blizzards:
+                if blizzard.start.y != state.location.y:
+                    continue
                 x = (blizzard.start.x + state.time * blizzard.step.x) % self.width
-                y = (blizzard.start.y + state.time * blizzard.step.y) % self.height
-                if state.location == Coord(x, y):
-                    to_cache = False
+                if state.location == Coord(x, blizzard.start.y):
+                    h_blizzard = True
                     break
-            self.cached[wrapped_state] = to_cache
-            return to_cache
+            self.h_blizzard_cache[h_wrapped_state] = h_blizzard
+        if h_blizzard:
+            return False
+
+        v_wrapped_state = State(location=state.location, time=state.time % self.height)
+        try:
+            v_blizzard = self.v_blizzard_cache[v_wrapped_state]
+        except KeyError:
+            v_blizzard = False
+            for blizzard in self.initial_v_blizzards:
+                if blizzard.start.x != state.location.x:
+                    continue
+                y = (blizzard.start.y + state.time * blizzard.step.y) % self.height
+                if state.location == Coord(blizzard.start.x, y):
+                    v_blizzard = True
+                    break
+            self.v_blizzard_cache[v_wrapped_state] = v_blizzard
+        return not v_blizzard
 
     def add_priority(self, state: State) -> PrioritizedState:
         """Add priority to the state.
@@ -120,10 +141,10 @@ class Basin:
             state=state, priority=state.time + manhattan(state.location, self.goal)
         )
 
-    def path(self, start_location: Coord, goal_location: Coord, start_time: int) -> int:
+    def path(self, start_time: int) -> int:
         """Return length of shortest path with given start time."""
         initial_state: State = State(
-            location=start_location,
+            location=self.start,
             time=start_time,
         )
         heap: list[PrioritizedState] = []
@@ -135,17 +156,20 @@ class Basin:
             if not heap:
                 raise ValueError("No path found")
             state: State = heappop(heap).state
+            # if self.debug:
+            #     print(state)
             visited.add(state)
             if state.time > t_max:
                 t_max = state.time
                 if self.debug and t_max % 10 == 0:
                     print(
-                        f"t_max={t_max}, cache size={len(self.cached)}",
-                        f"{round(100 * len(self.cached)/(self.width * self.height * self.repeat), 1)}%",
+                        f"t_max={t_max},",
+                        f"{round(100 * len(self.h_blizzard_cache)/(self.width * self.height * self.width), 1)}%",
+                        f"{round(100 * len(self.v_blizzard_cache)/(self.width * self.height * self.height), 1)}%",
                     )
-                    if t_max == 100:
-                        return -1
-            if state.location == goal_location:
+                    # if t_max == 100:
+                    #     return -1
+            if state.location == self.goal:
                 return state.time
             for adj in chain(state.location.adjacents(), [state.location]):
                 # print(f"Considering move from {state.location} to {adj}")
@@ -163,15 +187,22 @@ class Basin:
         >>> basin.forward_path(41)
         54
         """
-        return self.path(self.start, self.goal, start_time)
+        self.start = self.initial_start
+        self.goal = self.initial_goal
+        return self.path(start_time)
 
     def backward_path(self, start_time: int) -> int:
         """Return length of path from goal to start with given start time.
 
-        >>> Basin(TEST_DATA2).backward_path(18)
+        >>> basin = Basin(TEST_DATA2)
+        >>> basin.forward_path(0)
+        18
+        >>> basin.backward_path(18)
         41
         """
-        return self.path(self.goal, self.start, start_time)
+        self.start = self.initial_goal
+        self.goal = self.initial_start
+        return self.path(start_time)
 
     def show(self, t: int) -> None:
         """Print debugging information for time t."""
@@ -208,10 +239,9 @@ TEST_DATA2: Final[
 
 if __name__ == "__main__":
     testmod()
-    basin = Basin(fileinput.input(), debug=True)
-    # basin.show(0)
+    basin = Basin(fileinput.input(), debug=False)
     TIME1 = basin.forward_path(0)
-    # print(TIME1)
-    # TIME2 = basin.backward_path(TIME1)
-    # TIME3 = basin.forward_path(TIME2)
-    # print(TIME3)
+    print(TIME1)
+    TIME2 = basin.backward_path(TIME1)
+    TIME3 = basin.forward_path(TIME2)
+    print(TIME3)
