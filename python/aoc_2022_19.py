@@ -4,8 +4,7 @@ from __future__ import annotations
 
 import re
 
-# import fileinput
-from collections import deque
+import fileinput
 from dataclasses import dataclass
 from doctest import testmod
 from typing import Any, Optional
@@ -81,6 +80,15 @@ class BluePrint:
     obsidian_robot: Amount
     geode_robot: Amount
 
+    def __str__(self) -> str:
+        return (
+            f"{self.number}: "
+            f"o: {self.ore_robot.ore}o "
+            f"c: {self.clay_robot.ore}o, "
+            f"Ob: {self.obsidian_robot.ore}o+{self.obsidian_robot.clay}c, "
+            f"G: {self.geode_robot.ore}o+{self.geode_robot.obsidian} Ob."
+        )
+
 
 BLUEPRINT_REGEX = re.compile(
     r"""Blueprint\ (\d+)+\:\ #
@@ -116,16 +124,16 @@ class State:
 
     resources: Amount
     robots: Amount
-    path: list[str]
+    # path: list[str]
     time: int
 
-    def buy(self, cost: Amount, robot: Amount, name: str) -> Optional[State]:
+    def buy(self, cost: Amount, robot: Amount, _name: str) -> Optional[State]:
         """Return a new state after buying the given robot if possible."""
         if self.resources >= cost:
             return State(
                 resources=self.resources + self.robots - cost,
                 robots=self.robots + robot,
-                path=self.path + [name],
+                # path=self.path + [name],
                 time=self.time - 1,
             )
         return None
@@ -135,42 +143,119 @@ class State:
         return State(
             resources=self.resources + self.robots,
             robots=self.robots,
-            path=self.path + ["."],
+            # path=self.path + ["."],
             time=self.time - 1,
         )
 
 
-def best_path(b: BluePrint, time_available: int) -> int:
-    """Return maximum number of geodes obtainable."""
-    stack: deque[State] = deque(
-        [State(resources=ore(0), robots=ore(1), path=[], time=time_available)]
-    )
+def initial_state(time: int) -> State:
+    """Create starting state."""
+    return State(resources=ore(0), robots=ore(1), time=time)
 
-    def push_if_possible(s: Optional[State]) -> None:
-        if s is not None:
-            stack.append(s)
 
-    most_geodes = 0
-    while True:
-        if not stack:
-            break
-        state = stack.pop()
-        # print("".join(state.path))
+# def best_path(b: BluePrint, time_available: int) -> int:
+#     """Return maximum number of geodes obtainable."""
+#     stack: deque[State] = deque(
+#         [State(resources=ore(0), robots=ore(1), path=[], time=time_available)]
+#     )
+
+#     def push_if_possible(s: Optional[State]) -> None:
+#         if s is not None:
+#             stack.append(s)
+
+#     most_geodes = 0
+#     while True:
+#         if not stack:
+#             break
+#         state = stack.pop()
+#         # print("".join(state.path))
+#         if state.time == 0:
+#             if state.resources.geode > most_geodes:
+#                 print(state.resources.geode, "".join(state.path))
+#                 most_geodes = state.resources.geode
+#             continue
+#         # If we have the resources to buy a geode robot, just buy it
+#         if state.resources >= b.geode_robot:
+#             push_if_possible(state.buy(b.geode_robot, geode(1), "G"))
+#         else:
+#             push_if_possible(state.wait())
+#             push_if_possible(state.buy(b.ore_robot, ore(1), "o"))
+#             push_if_possible(state.buy(b.clay_robot, clay(1), "c"))
+#             push_if_possible(state.buy(b.obsidian_robot, obsidian(1), "O"))
+
+#     return most_geodes
+
+
+class Dynamic:
+    """Dynamic programming solution."""
+
+    def __init__(self, blueprint: BluePrint):
+        self.cache: dict[State, Optional[int]] = {}
+        self.blueprint: BluePrint = blueprint
+        # self.max_resources = (
+        #     ore(
+        #         max(
+        #             blueprint.ore_robot.ore,
+        #             blueprint.clay_robot.ore,
+        #             blueprint.obsidian_robot.ore,
+        #             blueprint.geode_robot.ore,
+        #         )
+        #     )
+        #     + clay(blueprint.obsidian_robot.clay)
+        #     + obsidian(blueprint.geode_robot.obsidian)
+        # )
+        self.max_resources = Amount(ore=20, clay=100, obsidian=25, geode=1000)
+
+    def solution(self, state: Optional[State]) -> Optional[int]:
+        """Return number of geodes we can produce in time."""
+        if state is None:
+            return None
+        # print("Solving", state)
         if state.time == 0:
-            if state.resources.geode > most_geodes:
-                print(state.resources.geode, "".join(state.path))
-                most_geodes = state.resources.geode
-            continue
-        # If we have the resources to buy a geode robot, just buy it
-        if state.resources >= b.geode_robot:
-            push_if_possible(state.buy(b.geode_robot, geode(1), "G"))
-        else:
-            push_if_possible(state.wait())
-            push_if_possible(state.buy(b.ore_robot, ore(1), "o"))
-            push_if_possible(state.buy(b.clay_robot, clay(1), "c"))
-            push_if_possible(state.buy(b.obsidian_robot, obsidian(1), "O"))
+            return 0
+        if state in self.cache:
+            return self.cache[state]
+        if not state.resources <= self.max_resources:
+            return None
 
-    return most_geodes
+        # If we can build a geode robot, we always should do only this
+        if (
+            buy_geode := state.buy(self.blueprint.geode_robot, geode(1), "G")
+        ) is not None:
+            if (buy_geode_score := self.solution(buy_geode)) is not None:
+                return buy_geode.time + buy_geode_score
+
+        # Otherwise consider all possible moves
+        candidate_states: list[Optional[State]] = []
+        candidate_states = [
+            state.buy(self.blueprint.ore_robot, ore(1), "o"),
+            state.buy(self.blueprint.clay_robot, clay(1), "c"),
+            state.buy(self.blueprint.obsidian_robot, obsidian(1), "O"),
+            state.wait(),
+        ]
+        best_so_far = None
+        for next_state in candidate_states:
+            next_solution = self.solution(next_state)
+            if next_solution is not None and (
+                best_so_far is None or next_solution > best_so_far
+            ):
+                best_so_far = next_solution
+        self.cache[state] = best_so_far
+        # if best_so_far is not None and best_so_far > 0:
+        #     print("Added", best_so_far, state)
+        return best_so_far
+
+
+def qualities(blueprint_list: list[BluePrint], time: int) -> int:
+    """Return sum of qualities for a list of blueprints."""
+    acc = 0
+    for b in blueprint_list:
+        print(b)
+        b_solution = Dynamic(b).solution(initial_state(time))
+        assert b_solution is not None
+        acc += b.number * b_solution
+        print(b.number, b_solution, acc)
+    return acc
 
 
 TEST_DATA = (
@@ -183,4 +268,6 @@ TEST_DATA = (
 if __name__ == "__main__":
     testmod()
     test_blueprints = [read_blueprint(line) for line in TEST_DATA.splitlines()]
-    print(best_path(test_blueprints[0], 24))
+    print(qualities(test_blueprints, 24))
+    blueprints = [read_blueprint(line.strip()) for line in fileinput.input()]
+    print(qualities(blueprints, 24))
