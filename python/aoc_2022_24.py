@@ -1,12 +1,16 @@
 """Advent of Code 2022 - Day 24."""
 
+from __future__ import annotations
 
 import fileinput
 from dataclasses import dataclass, field
 from doctest import testmod
 from heapq import heappop, heappush
 from itertools import chain
+from math import lcm
 from typing import Final, Iterable
+
+import numpy as np
 
 # x runs left-ro-right, y runs top-to-bottom
 from coord import Coord, manhattan
@@ -27,6 +31,10 @@ class State:
     location: Coord
     time: int
 
+    def wrap_time(self, n: int) -> State:
+        """Return state with time modulus n."""
+        return State(location=self.location, time=self.time % n)
+
 
 @dataclass(frozen=True, order=True)
 class PrioritizedState:
@@ -40,10 +48,7 @@ class Basin:
     """Main class for day 24."""
 
     def __init__(self, input_lines: Iterable[str], debug: bool = False) -> None:
-        self.initial_h_blizzards: list[Blizzard] = []
-        self.initial_v_blizzards: list[Blizzard] = []
-        self.h_blizzard_cache: dict[State, bool] = {}
-        self.v_blizzard_cache: dict[State, bool] = {}
+        self.initial_blizzards: list[Blizzard] = []
         for row, line in enumerate(input_lines, start=-1):
             line = line.strip()
             if row == -1:
@@ -60,19 +65,19 @@ class Basin:
                 for col, char in enumerate(line[1:-1]):
                     match char:
                         case "^":
-                            self.initial_v_blizzards.append(
+                            self.initial_blizzards.append(
                                 Blizzard(start=Coord(x=col, y=row), step=Coord(0, -1))
                             )
                         case ">":
-                            self.initial_h_blizzards.append(
+                            self.initial_blizzards.append(
                                 Blizzard(start=Coord(x=col, y=row), step=Coord(1, 0))
                             )
                         case "v":
-                            self.initial_v_blizzards.append(
+                            self.initial_blizzards.append(
                                 Blizzard(start=Coord(x=col, y=row), step=Coord(0, 1))
                             )
                         case "<":
-                            self.initial_h_blizzards.append(
+                            self.initial_blizzards.append(
                                 Blizzard(start=Coord(x=col, y=row), step=Coord(-1, 0))
                             )
                         case ".":
@@ -81,56 +86,52 @@ class Basin:
                             raise ValueError(
                                 f"Unknown character '{char}' in line '{line}'"
                             )
+        self.repeat: int = lcm(self.width, self.height)
         self.initial_start = Coord(0, -1)
         self.initial_goal = Coord(self.width - 1, self.height)
         self.start = self.initial_start
         self.goal = self.initial_goal
         self.debug = debug
+        self.h_cache = np.full(
+            shape=(self.width, self.height, self.width),
+            fill_value=False,
+            dtype=np.bool_,
+        )
+        self.v_cache = np.full(
+            shape=(self.width, self.height, self.height),
+            fill_value=False,
+            dtype=np.bool_,
+        )
+        for b in self.initial_blizzards:
+            x = b.start.x
+            y = b.start.y
+            if b.step.y == 0:
+                for t in range(self.width):
+                    self.h_cache[(x, y, t)] = True
+                    x = (x + b.step.x) % self.width
+            else:
+                for t in range(self.height):
+                    self.v_cache[(x, y, t)] = True
+                    y = (y + b.step.y) % self.height
         if self.debug:
             print(f"{self.width}x{self.height}")
 
     def will_be_empty(self, state: State) -> bool:
         """Test if state will be empty."""
-        if state.location.y <= -1 and state.location not in (self.start, self.goal):
+        if state.location in (self.start, self.goal):
+            return True
+        if state.location.y <= -1:
             return False  # Top wall
-        if state.location.y >= self.height and state.location not in (
-            self.start,
-            self.goal,
-        ):
+        if state.location.y >= self.height:
             return False  # Bottom wall
         if state.location.x in (-1, self.width):
             return False  # Side walls
-
-        h_wrapped_state = State(location=state.location, time=state.time % self.width)
-        try:
-            h_blizzard = self.h_blizzard_cache[h_wrapped_state]
-        except KeyError:
-            h_blizzard = False
-            for blizzard in self.initial_h_blizzards:
-                if blizzard.start.y != state.location.y:
-                    continue
-                x = (blizzard.start.x + state.time * blizzard.step.x) % self.width
-                if state.location == Coord(x, blizzard.start.y):
-                    h_blizzard = True
-                    break
-            self.h_blizzard_cache[h_wrapped_state] = h_blizzard
-        if h_blizzard:
-            return False
-
-        v_wrapped_state = State(location=state.location, time=state.time % self.height)
-        try:
-            v_blizzard = self.v_blizzard_cache[v_wrapped_state]
-        except KeyError:
-            v_blizzard = False
-            for blizzard in self.initial_v_blizzards:
-                if blizzard.start.x != state.location.x:
-                    continue
-                y = (blizzard.start.y + state.time * blizzard.step.y) % self.height
-                if state.location == Coord(blizzard.start.x, y):
-                    v_blizzard = True
-                    break
-            self.v_blizzard_cache[v_wrapped_state] = v_blizzard
-        return not v_blizzard
+        return not (
+            self.h_cache[(state.location.x, state.location.y, state.time % self.width)]
+            or self.v_cache[
+                (state.location.x, state.location.y, state.time % self.height)
+            ]
+        )
 
     def add_priority(self, state: State) -> PrioritizedState:
         """Add priority to the state.
@@ -138,7 +139,8 @@ class Basin:
         Used by the A*-algorithm. Defined as distances from origin
         plus distance to goal (manhattan distances)."""
         return PrioritizedState(
-            state=state, priority=state.time + manhattan(state.location, self.goal)
+            state=state,
+            priority=state.time + manhattan(state.location, self.goal),
         )
 
     def path(self, start_time: int) -> int:
@@ -158,14 +160,12 @@ class Basin:
             state: State = heappop(heap).state
             # if self.debug:
             #     print(state)
-            visited.add(state)
+            visited.add(state.wrap_time(self.repeat))
             if state.time > t_max:
                 t_max = state.time
                 if self.debug and t_max % 10 == 0:
                     print(
                         f"t_max={t_max},",
-                        f"{round(100 * len(self.h_blizzard_cache)/(self.width * self.height * self.width), 1)}%",
-                        f"{round(100 * len(self.v_blizzard_cache)/(self.width * self.height * self.height), 1)}%",
                     )
                     # if t_max == 100:
                     #     return -1
@@ -174,7 +174,9 @@ class Basin:
             for adj in chain(state.location.adjacents(), [state.location]):
                 # print(f"Considering move from {state.location} to {adj}")
                 trial_state = State(location=adj, time=state.time + 1)
-                if trial_state not in visited and self.will_be_empty(trial_state):
+                if trial_state.wrap_time(
+                    self.repeat
+                ) not in visited and self.will_be_empty(trial_state):
                     heappush(heap, self.add_priority(trial_state))
                     # print("added")
 
@@ -239,7 +241,7 @@ TEST_DATA2: Final[
 
 if __name__ == "__main__":
     testmod()
-    basin = Basin(fileinput.input(), debug=False)
+    basin = Basin(fileinput.input(), debug=True)
     TIME1 = basin.forward_path(0)
     print(TIME1)
     TIME2 = basin.backward_path(TIME1)
