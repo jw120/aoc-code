@@ -153,64 +153,18 @@ def initial_state(time: int) -> State:
     return State(resources=ore(0), robots=ore(1), time=time)
 
 
-# def best_path(b: BluePrint, time_available: int) -> int:
-#     """Return maximum number of geodes obtainable."""
-#     stack: deque[State] = deque(
-#         [State(resources=ore(0), robots=ore(1), path=[], time=time_available)]
-#     )
-
-#     def push_if_possible(s: Optional[State]) -> None:
-#         if s is not None:
-#             stack.append(s)
-
-#     most_geodes = 0
-#     while True:
-#         if not stack:
-#             break
-#         state = stack.pop()
-#         # print("".join(state.path))
-#         if state.time == 0:
-#             if state.resources.geode > most_geodes:
-#                 print(state.resources.geode, "".join(state.path))
-#                 most_geodes = state.resources.geode
-#             continue
-#         # If we have the resources to buy a geode robot, just buy it
-#         if state.resources >= b.geode_robot:
-#             push_if_possible(state.buy(b.geode_robot, geode(1), "G"))
-#         else:
-#             push_if_possible(state.wait())
-#             push_if_possible(state.buy(b.ore_robot, ore(1), "o"))
-#             push_if_possible(state.buy(b.clay_robot, clay(1), "c"))
-#             push_if_possible(state.buy(b.obsidian_robot, obsidian(1), "O"))
-
-#     return most_geodes
-
-
 class Dynamic:
     """Dynamic programming solution."""
 
     def __init__(self, blueprint: BluePrint):
         self.cache: dict[State, Optional[int]] = {}
         self.blueprint: BluePrint = blueprint
-        # self.max_resources = (
-        #     ore(
-        #         max(
-        #             blueprint.ore_robot.ore,
-        #             blueprint.clay_robot.ore,
-        #             blueprint.obsidian_robot.ore,
-        #             blueprint.geode_robot.ore,
-        #         )
-        #     )
-        #     + clay(blueprint.obsidian_robot.clay)
-        #     + obsidian(blueprint.geode_robot.obsidian)
-        # )
         self.max_resources = Amount(ore=20, clay=100, obsidian=25, geode=1000)
 
     def solution(self, state: Optional[State]) -> Optional[int]:
         """Return number of geodes we can produce in time."""
         if state is None:
             return None
-        # print("Solving", state)
         if state.time == 0:
             return 0
         if state in self.cache:
@@ -220,9 +174,10 @@ class Dynamic:
 
         # If we can build a geode robot, we always should do only this
         if (
-            buy_geode := state.buy(self.blueprint.geode_robot, geode(1), "G")
+            buy_geode := state.buy(self.blueprint.geode_robot, geode(0), "G")
         ) is not None:
             if (buy_geode_score := self.solution(buy_geode)) is not None:
+                self.cache[state] = buy_geode.time + buy_geode_score
                 return buy_geode.time + buy_geode_score
 
         # Otherwise consider all possible moves
@@ -241,8 +196,6 @@ class Dynamic:
             ):
                 best_so_far = next_solution
         self.cache[state] = best_so_far
-        # if best_so_far is not None and best_so_far > 0:
-        #     print("Added", best_so_far, state)
         return best_so_far
 
 
@@ -250,11 +203,23 @@ def qualities(blueprint_list: list[BluePrint], time: int) -> int:
     """Return sum of qualities for a list of blueprints."""
     acc = 0
     for b in blueprint_list:
-        print(b)
+        # print(b)
         b_solution = Dynamic(b).solution(initial_state(time))
         assert b_solution is not None
         acc += b.number * b_solution
-        print(b.number, b_solution, acc)
+        # print(b.number, b_solution, acc)
+    return acc
+
+
+def score_product(blueprint_list: list[BluePrint], time: int) -> int:
+    """Return product of scores for a list of blueprints."""
+    acc = 1
+    for b in blueprint_list:
+        # print(b)
+        b_solution = Dynamic(b).solution(initial_state(time))
+        assert b_solution is not None
+        acc *= b_solution
+        # print(b.number, b_solution, acc)
     return acc
 
 
@@ -267,7 +232,9 @@ TEST_DATA = (
 
 if __name__ == "__main__":
     testmod()
-    test_blueprints = [read_blueprint(line) for line in TEST_DATA.splitlines()]
-    print(qualities(test_blueprints, 24))
+    # test_blueprints = [read_blueprint(line) for line in TEST_DATA.splitlines()]
+    # print(qualities(test_blueprints, 24))
+    # print(score_product(test_blueprints[:3], 32))
     blueprints = [read_blueprint(line.strip()) for line in fileinput.input()]
     print(qualities(blueprints, 24))
+    print(score_product(blueprints[:3], 32))
