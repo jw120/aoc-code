@@ -147,6 +147,8 @@ def solve(monkeys: dict[MonkeyName, Monkey]) -> int:
                 val = right_val
                 next_monkey_name = current_monkey.left
                 next_left = True
+            case _:
+                raise ValueError("Unexpected")
         if current_monkey.op == Operation.ADD:
             current_value = current_value - val
         elif current_monkey.op == Operation.SUB and next_left:

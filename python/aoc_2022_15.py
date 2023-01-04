@@ -1,12 +1,12 @@
 """Advent of Code 2022 - Day 15."""
 
-from __future__ import annotations
 
+import fileinput
 from doctest import testmod
 from itertools import combinations
 from re import fullmatch
-from typing import Optional, Iterable
-import fileinput
+from typing import Iterable
+
 from coord import Coord, manhattan
 
 
@@ -19,7 +19,6 @@ class Zone:
         x_minima: list[int] = []
         x_maxima: list[int] = []
         for line in lines:
-            # print(line)
             m = fullmatch(
                 r"Sensor at x=(-?\d+), y=(-?\d+): closest beacon is at x=(-?\d+), y=(-?\d+)",
                 line.strip(),
@@ -35,7 +34,6 @@ class Zone:
         self.n = len(self.sensors)
         self.x_min = min(x_minima)
         self.x_max = max(x_maxima)
-        # self.beacons: set[Coord] = set(self.closest_beacons)
 
     def must_be_empty(self, x: int, y: int) -> bool:
         """Test if the given cell must be empty."""
@@ -63,76 +61,73 @@ class Zone:
             count += self.must_be_empty(x, y)
         return count
 
-    # def find_in_row(self, y: int, x_max: int) -> Optional[int]:
-    #     """Return coordinate of beacon in row y if possible."""
-    #     for x in range(0, x_max + 1):
-    #         if Coord(x, y) in self.beacons:
-    #             continue
-    #         if not self.must_be_empty(x, y):
-    #             return x
-    #     return None
+    def find_beacon(self) -> Coord:
+        """Find the only possible beacon location.
 
-    # def find_in_any_row(self, x_max: int, y_max: int) -> int:
-    #     """Find beacon.
+        Uses the fact that this unique location must be just outside the
+        forbidden radius of two beacons.
 
-    #     >>> z = Zone(TEST_DATA)
-    #     >>> z.find_in_any_row(x_max = 20, y_max=20)
-    #     56000011
-    #     """
-    #     for y in range(0, y_max + 1):
-    #         # if y % 100 == 0 and y > 0:
-    #         print(y / 1_000_000)
-    #         x = self.find_in_row(y, x_max=x_max)
-    #         if x is not None:
-    #             return x * 4000000 + y
-    #     raise ValueError("Failed to find")
-
-    def valid_pairs(self) -> int:
-        """TODO."""
-        # Distance from each sensor to the closest beacon
+        >>> Zone(TEST_DATA).find_beacon()
+        Coord(x=14, y=11)
+        """
         sensor_radius: dict[Coord, int] = {
             s: manhattan(s, b) for s, b in zip(self.sensors, self.closest_beacons)
         }
+        x_plus_y_constraints: set[int] = set()
+        x_minus_y_constraints: set[int] = set()
         for s1, s2 in combinations(self.sensors, 2):
             d = manhattan(s1, s2)
             r1 = sensor_radius[s1]
             r2 = sensor_radius[s2]
             if d == (r1 + 1) + (r2 + 1):
-                print(
-                    s1,
-                    s2,
-                    r1,
-                    r2,
-                    d,
-                )
-                intersections(s1, s2, r1, r2)
-                # # if s2.x >= s1.x and s2.y >= s1.y:
-                # #     print("x+y=", s1.x + s1.y + r1 + 1, s2.x + s2.y - r2 - 1)
-                # if s1.x + s1.y <= s2.x + s2.y:
-                #     print("x+y=", s1.x + s1.y + r1 + 1, s2.x + s2.y - r2 - 1)
-                # else:
-                #     print("x+y=", s1.x + s1.y - r1 - 1, s2.x + s2.y + r2 + 1)
+                constraint_sign, constraint_value = get_constraint(s1, s2, r1, r2)
+                if constraint_sign:
+                    x_plus_y_constraints.add(constraint_value)
+                else:
+                    x_minus_y_constraints.add(constraint_value)
+        assert len(x_plus_y_constraints) > 0 and len(x_minus_y_constraints) > 0
+        solutions: set[Coord] = set()
+        for p_con in x_plus_y_constraints:
+            for m_con in x_minus_y_constraints:
+                if p_con + m_con % 2 == 1 or p_con - m_con % 2 == 1:
+                    continue
+                x = (p_con + m_con) // 2
+                y = (p_con - m_con) // 2
+                solutions.add(Coord(x, y))
+        for solution in solutions:
+            if all(
+                manhattan(solution, sensor) > sensor_radius[sensor]
+                for sensor in self.sensors
+            ):
+                return solution
+        raise ValueError("No valid solution found")
 
-                # min_xy = min(s1.x + s1.y, s2.x + s2.y)
-                # min_xy = min(s1.x + s1.y, s2.x + s2.y)
-                # print(r1 + 1 + s1.x + s1.y)
-                # print(r2 + 1 + s2.x + s2.y)
-        # for s in self.sensors:
-        #     print(s, sensor_radius[s], manhattan(s, Coord(14, 11)))
-        return 0
 
+def get_constraint(s1: Coord, s2: Coord, r1: int, r2: int) -> tuple[bool, int]:
+    """Return the constraint on x+y or x-y.
 
-def intersections(s1: Coord, s2: Coord, r1: int, r2: int) -> None:
-    """Doc."""
+    Points must have distance r1+1 from s1 and distance r2+1 from s2.
+    Returns (True, z) for x+y=z and (False, z) for x-y=z.
+    """
+    # Ignore degenerate cases
     assert s1.x != s2.x and s1.y != s2.y
+    # Wlg, flip so s1.x is less than s2.x
     if s1.x > s2.x:
         s1, s2 = s2, s1
         r1, r2 = r2, r1
     assert s1.x < s2.x
     if s1.y < s2.y:
-        print(f"x+y = {s1.x+s1.y+r1+1} = {s2.x+s2.y-r2-1}")
+        assert s1.x + s1.y + r1 + 1 == s2.x + s2.y - r2 - 1
+        return (True, s1.x + s1.y + r1 + 1)
+        # print(f"x+y = {s1.x+s1.y+r1+1} = {s2.x+s2.y-r2-1}")
     else:
-        print(f"x-y = {s1.x-s1.y+r1+1} = {s2.x-s2.y-r2-1}")
+        assert s1.x - s1.y + r1 + 1 == s2.x - s2.y - r2 - 1
+        return (False, s1.x - s1.y + r1 + 1)
+
+
+def encode(c: Coord) -> int:
+    """Encode the coordinate."""
+    return c.x * 4_000_000 + c.y
 
 
 TEST_DATA: list[
@@ -156,12 +151,7 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3""".split(
 
 
 if __name__ == "__main__":
-    # testmod()
-    # z = Zone(fileinput.input())
-    # print(z.empty_in_row(2_000_000))
-    # print(z.find_in_any_row(x_max=4_000_000, y_max=4_000_000))
+    testmod()
     z = Zone(fileinput.input())
-    z.valid_pairs()
-    print()
-    z = Zone(TEST_DATA)
-    z.valid_pairs()
+    print(z.empty_in_row(2_000_000))
+    print(encode(z.find_beacon()))

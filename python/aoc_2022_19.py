@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import re
-
 import fileinput
+import re
 from dataclasses import dataclass
 from doctest import testmod
 from typing import Any, Optional
@@ -169,7 +168,7 @@ class Dynamic:
             return 0
         if state in self.cache:
             return self.cache[state]
-        if not state.resources <= self.max_resources:
+        if not self.max_resources >= state.resources:
             return None
 
         # If we can build a geode robot, we always should do only this

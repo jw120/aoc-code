@@ -53,6 +53,7 @@ check: python-check haskell-check
 python-check:
 	isort python/
 	black --quiet python/
+	pyright python/
 	mypy python/
 	pylint python/aoc_2022_*.py python/golden_test.py python/coord.py
 

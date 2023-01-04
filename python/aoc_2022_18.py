@@ -99,7 +99,7 @@ def exterior_surface(cubes: list[Coord3]) -> int:
     exterior_frontier: set[Coord3] = cube_faces(cube_min, cube_max) - occupied
     exterior: set[Coord3] = exterior_frontier.copy()
     while exterior_frontier:
-        new_frontier = set()
+        new_frontier: set[Coord3] = set()
         for c in exterior_frontier:
             for p in c.adjacents():
                 if (

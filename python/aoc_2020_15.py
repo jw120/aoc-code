@@ -15,6 +15,7 @@ def run1(nums: list[int]) -> Iterator[int]:
     turn = 1
     last_spoken: dict[int, int] = {}
     prev_spoken: dict[int, int] = {}
+    last_num = 0
     for n in nums:
         last_spoken[n] = turn
         yield n

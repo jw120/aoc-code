@@ -81,7 +81,7 @@ def walk_sizes(d: Dir) -> list[int]:
     This directory is the last element of the list.
     """
     total_size = 0
-    dir_sizes = []
+    dir_sizes: list[int] = []
     for node in d.contents.values():
         match node:
             case File(size=size):

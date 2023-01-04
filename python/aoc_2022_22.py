@@ -224,6 +224,8 @@ class MonkeyMap:
                     d = d.left()
                 case "R":
                     d = d.right()
+                case _:
+                    raise ValueError("Bad in path")
         return 1000 * (c.y + 1) + 4 * (c.x + 1) + d.left().value
 
     def show(self) -> None:

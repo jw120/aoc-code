@@ -85,7 +85,7 @@ def append_cols(xs: list[list[T]], ys: list[list[T]]) -> list[list[T]]:
     return [x + y for x, y in zip(xs, ys)]
 
 
-def flip_matrix(xs: list[list[T]]) -> None:
+def flip_matrix(xs: list[list[bool]]) -> None:
     """Mutate the 2-d array to be a left/right flipped version."""
     for x in xs:
         x.reverse()
@@ -218,7 +218,7 @@ class Board:
 
     def next_right(self, cur: Orientation) -> Optional[Orientation]:
         """Return the tile to the right if any."""
-        cur_id, cur_flipped, cur_rot = cur  # type: TileId, bool, Direction
+        cur_id, cur_flipped, cur_rot = cur
         next_tile: Optional[Connection] = self.tile_connections[cur_id][
             right(cur_flipped, cur_rot)
         ]
@@ -228,7 +228,7 @@ class Board:
             next_id,
             next_incoming,
             connection_flipped,
-        ) = next_tile  # type: TileId, Direction, bool
+        ) = next_tile
         next_flipped = cur_flipped if connection_flipped else (not cur_flipped)
         if next_flipped:
             next_dir = Direction((next_incoming + 3) % 4)
@@ -238,7 +238,7 @@ class Board:
 
     def next_down(self, cur: Orientation) -> Optional[Orientation]:
         """Return the tile below if any."""
-        cur_id, cur_flipped, cur_rot = cur  # type: TileId, bool, Direction
+        cur_id, cur_flipped, cur_rot = cur
         next_tile: Optional[Connection] = self.tile_connections[cur_id][
             down(cur_flipped, cur_rot)
         ]
@@ -248,7 +248,7 @@ class Board:
             next_id,
             next_incoming,
             connection_flipped,
-        ) = next_tile  # type: TileId, Direction, bool
+        ) = next_tile
         next_flipped = cur_flipped if connection_flipped else (not cur_flipped)
         return (next_id, next_flipped, next_incoming)
 
@@ -315,7 +315,7 @@ class Board:
     def max_sea_monsters(self) -> int:
         """Return the number of sea monsters in the orientation with most monsters."""
         counts: list[int] = []
-        for d in range(4):
+        for _ in range(4):
             counts.append(self.sea_monsters())
             flip_matrix(self.image)
             counts.append(self.sea_monsters())

@@ -15,6 +15,8 @@ mypy = "^0.991"
 [tool.poetry.group.dev.dependencies]
 isort = "^5.10.1"
 pylint = "^2.15.9"
+pyright = "^1.1.286"
+ruff = "^0.0.209"
 
 [build-system]
 build-backend = "poetry.core.masonry.api"
@@ -61,3 +63,17 @@ disable = [
   "I0020", # don't report when we suppress a message in the code
   "unnecessary-lambda-assignment",
 ]
+
+[tool.pyright]
+include = ["python"]
+exclude = ["**/__pycache__"]
+strict = ["python"]
+typeCheckingMode = "strict"
+pythonVersion = "3.10"
+verboseOutput = false
+
+[tool.ruff]
+# Never enforce `E501` (line length violations) or synatx errors (mostly due to not
+# supporting match
+ignore = ["E501", "E999"]
+
