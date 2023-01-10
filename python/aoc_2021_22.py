@@ -78,32 +78,73 @@ class Cuboid:
             self._max.z,
         )
 
+    def merge(self, q: Cuboid) -> Optional[Cuboid]:
+        """Merge with another cuboid producing a single cuboid if possible.
 
-def merge(p: Cuboid, q: Cuboid) -> Optional[Cuboid]:
-    """Merge the two cuboids into a single cuboid if possible.
-
-    >>> merge(Cuboid(1, 3, 2, 4, 2, 4), Cuboid(3, 5, 2, 4, 2, 4)).as_tuple()
-    (1, 5, 2, 4, 2, 4)
-    """
-    x_match = p._min.x == q._min.x and p._max.x == q._max.x
-    y_match = p._min.y == q._min.y and p._max.y == q._max.y
-    z_match = p._min.z == q._min.z and p._max.z == q._max.z
-    if y_match and z_match:
-        if p._max.x == q._min.x:
-            return Cuboid(p._min.x, q._max.x, p._min.y, p._max.y, p._min.z, p._max.z)
-        if q._max.x == p._min.x:
-            return Cuboid(q._min.x, p._max.x, p._min.y, p._max.y, p._min.z, p._max.z)
-    if x_match and z_match:
-        if p._max.y == q._min.y:
-            return Cuboid(p._min.x, p._max.x, p._min.y, q._max.y, p._min.z, p._max.z)
-        if q._max.y == p._min.y:
-            return Cuboid(p._min.x, p._max.x, q._min.y, p._max.y, p._min.z, p._max.z)
-    if x_match and y_match:
-        if p._max.z == q._min.z:
-            return Cuboid(p._min.x, p._max.x, p._min.y, p._max.y, p._min.z, q._max.z)
-        if q._max.z == p._min.z:
-            return Cuboid(p._min.x, p._max.x, q._min.y, p._max.y, q._min.z, p._max.z)
-    return None
+        >>> merge(Cuboid(1, 3, 2, 4, 2, 4), Cuboid(3, 5, 2, 4, 2, 4)).as_tuple()
+        (1, 5, 2, 4, 2, 4)
+        """
+        x_match = self._min.x == q._min.x and self._max.x == q._max.x
+        y_match = self._min.y == q._min.y and self._max.y == q._max.y
+        z_match = self._min.z == q._min.z and self._max.z == q._max.z
+        if y_match and z_match:
+            if self._max.x == q._min.x:
+                return Cuboid(
+                    self._min.x,
+                    q._max.x,
+                    self._min.y,
+                    self._max.y,
+                    self._min.z,
+                    self._max.z,
+                )
+            if q._max.x == self._min.x:
+                return Cuboid(
+                    q._min.x,
+                    self._max.x,
+                    self._min.y,
+                    self._max.y,
+                    self._min.z,
+                    self._max.z,
+                )
+        if x_match and z_match:
+            if self._max.y == q._min.y:
+                return Cuboid(
+                    self._min.x,
+                    self._max.x,
+                    self._min.y,
+                    q._max.y,
+                    self._min.z,
+                    self._max.z,
+                )
+            if q._max.y == self._min.y:
+                return Cuboid(
+                    self._min.x,
+                    self._max.x,
+                    q._min.y,
+                    self._max.y,
+                    self._min.z,
+                    self._max.z,
+                )
+        if x_match and y_match:
+            if self._max.z == q._min.z:
+                return Cuboid(
+                    self._min.x,
+                    self._max.x,
+                    self._min.y,
+                    self._max.y,
+                    self._min.z,
+                    q._max.z,
+                )
+            if q._max.z == self._min.z:
+                return Cuboid(
+                    self._min.x,
+                    self._max.x,
+                    q._min.y,
+                    self._max.y,
+                    q._min.z,
+                    self._max.z,
+                )
+        return None
 
 
 def merge_adjacents(cs: list[Cuboid]) -> None:
@@ -118,7 +159,7 @@ def merge_adjacents(cs: list[Cuboid]) -> None:
         made_change = False
         for i in range(len(cs)):
             for j in range(i + 1, len(cs)):
-                ij = merge(cs[i], cs[j])
+                ij = cs[i].merge(cs[j])
                 if ij is not None:
                     del cs[j]
                     del cs[i]
@@ -164,15 +205,21 @@ def combine(cs: list[Cuboid], step: Tuple[bool, Cuboid]) -> list[Cuboid]:
     # )
     # Replace the cuboids that overlap with x with all possible cuboids
     x_coords = sorted(
-        chain.from_iterable((c._min.x, c._max.x) for c in overlapping_cuboids)
+        chain.from_iterable(
+            (c._min.x, c._max.x) for c in overlapping_cuboids
+        )  # pyright: ignore[reportPrivateUsage]
     )
     x_ranges = list(zip(x_coords, x_coords[1:]))
     y_coords = sorted(
-        chain.from_iterable((c._min.y, c._max.y) for c in overlapping_cuboids)
+        chain.from_iterable(
+            (c._min.y, c._max.y) for c in overlapping_cuboids
+        )  # pyright: ignore[reportPrivateUsage]
     )
     y_ranges = list(zip(y_coords, y_coords[1:]))
     z_coords = sorted(
-        chain.from_iterable((c._min.z, c._max.z) for c in overlapping_cuboids)
+        chain.from_iterable(
+            (c._min.z, c._max.z) for c in overlapping_cuboids
+        )  # pyright: ignore[reportPrivateUsage]
     )
     z_ranges = list(zip(z_coords, z_coords[1:]))
     new_cuboids = [

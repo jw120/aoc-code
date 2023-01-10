@@ -117,9 +117,9 @@ class ALU:
         return self
 
     def step(self, instruction: Instruction) -> None:
-        kind, target, source, text = instruction
+        kind, target, source, _text = instruction
 
-        # print(self.reg, text)
+        # print(self.reg, _text)
 
         w, x, y, z = self.reg
 
@@ -133,10 +133,8 @@ class ALU:
             input_value = y
         elif source == Register.z:
             input_value = z
-        elif isinstance(source, int):
-            input_value = source
         else:
-            raise ValueError("Internal failure, bad source")
+            input_value = source
 
         if target == Register.w:
             self.reg = (kind(w, input_value), x, y, z)

@@ -20,8 +20,10 @@ def apply(polymer: Polymer, rules: Rules, n: int) -> Polymer:
     (Counter({'NC': 1, 'CN': 1, 'NB': 1, 'BC': 1, 'CH': 1, 'HB': 1}), 'B')
     """
     polymer_counts, polymer_last = polymer
+    new_polymer_counts: Counter[Pair] = Counter()
+
     for _ in range(n):
-        new_polymer_counts: Counter[Pair] = Counter()
+        new_polymer_counts = Counter()
         for pair in polymer_counts:
             p, q = rules[pair]
             new_polymer_counts[p] += polymer_counts[pair]

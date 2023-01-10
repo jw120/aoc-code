@@ -40,7 +40,7 @@ def partA(start1: int, start2: int) -> int:
     player: int = 0
     while True:
         p = players[player]
-        die_total: int = sum(die.roll() for d in range(3))
+        die_total: int = sum(die.roll() for _ in range(3))
         p.advance(die_total)
         if p.score >= 1000:
             break
