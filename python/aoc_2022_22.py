@@ -6,7 +6,7 @@ from doctest import testmod
 from enum import Enum
 from re import findall
 from sys import stdin
-from typing import NoReturn, Optional
+from typing import NoReturn, Optional, TypeAlias, Final
 
 from coord import Coord, Extent
 
@@ -37,68 +37,35 @@ class Direction(Enum):
         return Direction((self.value + 2) % 4)
 
 
-# Faces are numbers 1-6 as in the rubric
-Face = int
+# We reference cube faces by their (x-right, y-down) offsets
+FaceOffset: TypeAlias = tuple[int, int]
+
+# We define cube topology by showing for each face, if we leave the face in the given direction
+# then we appear on the given face, its edge and heading in the given direction
+Topology: TypeAlias = dict[
+    FaceOffset, dict[Direction, tuple[FaceOffset, Direction, Direction]]
+]
 
 
-# WrapTopology: dict[tuple[Face, Direction], tuple[Face, Direction, Direction]] = {
-#     (1, Direction.UP): (5, Direction.DOWN, Direction.UP),
-#     (1, Direction.RIGHT): (1, Direction.LEFT, Direction.RIGHT),
-#     (1, Direction.DOWN): (4, Direction.UP, Direction.DOWN),
-#     (1, Direction.LEFT): (1, Direction.RIGHT, Direction.LEFT),
-# }
+# For the simple wrapping topology for the quesion example, we use a helper function
+def wrap(
+    u: FaceOffset, r: FaceOffset, d: FaceOffset, l: FaceOffset
+) -> dict[Direction, tuple[FaceOffset, Direction, Direction]]:
+    return {
+        Direction.UP: (u, Direction.DOWN, Direction.UP),
+        Direction.RIGHT: (r, Direction.LEFT, Direction.RIGHT),
+        Direction.DOWN: (d, Direction.UP, Direction.DOWN),
+        Direction.LEFT: (l, Direction.RIGHT, Direction.LEFT),
+    }
 
 
-# Topology specifies where we go if we move off a face in a given direction.
-# Value is he new face, the edge of that face and the new direction of travel
-Topology = dict[tuple[Face, Direction], tuple[Face, Direction, Direction]]
-
-# For part (a) we use a simpler wrapping topology
-
-WRAP_QUICK_TOPOLOGY: dict[tuple[Face, Direction], Face] = {
-    (1, Direction.UP): 5,
-    (1, Direction.RIGHT): 1,
-    (1, Direction.DOWN): 4,
-    (1, Direction.LEFT): 1,
-    (2, Direction.UP): 2,
-    (2, Direction.RIGHT): 3,
-    (2, Direction.DOWN): 2,
-    (2, Direction.LEFT): 4,
-    (3, Direction.UP): 3,
-    (3, Direction.RIGHT): 4,
-    (3, Direction.DOWN): 3,
-    (3, Direction.LEFT): 2,
-    (4, Direction.UP): 1,
-    (4, Direction.RIGHT): 2,
-    (4, Direction.DOWN): 5,
-    (4, Direction.LEFT): 3,
-    (5, Direction.UP): 4,
-    (5, Direction.RIGHT): 6,
-    (5, Direction.DOWN): 1,
-    (5, Direction.LEFT): 6,
-    (6, Direction.UP): 6,
-    (6, Direction.RIGHT): 5,
-    (6, Direction.DOWN): 6,
-    (6, Direction.LEFT): 5,
-}
-
-WRAP_TOPOLOGY: Topology = {
-    (face, dir): (next_face, dir.opposite(), dir)
-    for (face, dir), next_face in WRAP_QUICK_TOPOLOGY.items()
-}
-
-# Offsets for each face
-FACE_BLOCK_TABLE: dict[Face, tuple[int, int]] = {
-    1: (2, 0),
-    2: (0, 1),
-    3: (1, 1),
-    4: (2, 1),
-    5: (2, 2),
-    6: (2, 3),
-}
-
-BLOCK_FACE_TABLE: dict[tuple[int, int], Face] = {
-    v: k for k, v in FACE_BLOCK_TABLE.items()
+TEST_TOPOLOGY: Final[Topology] = {
+    (2, 0): wrap((2, 2), (2, 0), (2, 1), (2, 0)),
+    (0, 1): wrap((0, 1), (1, 1), (0, 1), (2, 1)),
+    (1, 1): wrap((1, 1), (2, 1), (1, 1), (0, 1)),
+    (2, 1): wrap((2, 0), (0, 1), (2, 2), (1, 1)),
+    (2, 2): wrap((2, 1), (3, 2), (2, 0), (3, 2)),
+    (3, 2): wrap((3, 2), (2, 2), (3, 2), (2, 2)),
 }
 
 
@@ -111,13 +78,17 @@ class MonkeyMap:
     y_block_size: int
     path: list[str]
 
-    def __init__(self, s: str) -> None:
+    def __init__(self, s: str, topology: Topology) -> None:
         board_str, path_str = s.split("\n\n")
 
         self.board = {}
         self.extent = Extent(0, 0)
+        self.topology = topology
+        self.x_start: int = -1
         for y, row in enumerate(board_str.split("\n")):
             for x, c in enumerate(row):
+                if self.x_start == -1 and c == ".":
+                    self.x_start = x
                 match c:
                     case "#" | ".":
                         self.board[Coord(x, y)] = c == "#"
@@ -137,7 +108,7 @@ class MonkeyMap:
         ), f"Bad size: {self.extent}"
         self.path: list[str] = findall(r"\d+|L|R", path_str)
 
-    def to_coord(self, c: Coord, face: Face, edge: Direction) -> Coord:
+    def to_coord(self, c: Coord, face: FaceOffset, edge: Direction) -> Coord:
         """Return the coordinate on the given face and edge."""
         c_relative = Coord(c.x % self.x_block_size, c.y % self.y_block_size)
         match edge:
@@ -149,12 +120,12 @@ class MonkeyMap:
                 c_relative = Coord(c_relative.x, self.y_block_size - 1)
             case Direction.LEFT:
                 c_relative = Coord(0, c_relative.y)
-        block_x, block_y = FACE_BLOCK_TABLE[face]
+        face_x, face_y = face
         return (
-            Coord(block_x * self.x_block_size, block_y * self.y_block_size) + c_relative
+            Coord(face_x * self.x_block_size, face_y * self.y_block_size) + c_relative
         )
 
-    def face_if_at_edge(self, c: Coord, d: Direction) -> Optional[Face]:
+    def face_if_at_edge(self, c: Coord, d: Direction) -> Optional[FaceOffset]:
         """Return the face the coordinate is on, if move in direction would go off the edge."""
         x = c.x % self.x_block_size
         y = c.y % self.y_block_size
@@ -173,11 +144,9 @@ class MonkeyMap:
                     return None
             case _:
                 assert_never(d)
-        return BLOCK_FACE_TABLE[(c.x // self.x_block_size, c.y // self.y_block_size)]
+        return (c.x // self.x_block_size, c.y // self.y_block_size)
 
-    def move(
-        self, c: Coord, d: Direction, topology: Topology
-    ) -> tuple[Coord, Direction]:
+    def move(self, c: Coord, d: Direction) -> tuple[Coord, Direction]:
         """Move one step in given direction.
 
         If path is blocked, then return the same Coord.
@@ -197,29 +166,31 @@ class MonkeyMap:
         match self.face_if_at_edge(c, d):
             case None:
                 d_new = d
-            case int(face):
-                face_new, edge_new, d_new = topology[(face, d)]
+            case (int(face_x), int(face_y)):
+                (face_new, edge_new, d_new) = self.topology[(face_x, face_y)][d]
                 c_new = self.to_coord(c_new, face_new, edge_new)
         # print(f"Testing move to {c_new} {d_new}, ", end="")
         if self.board[c_new]:
             return c, d
         return c_new, d_new
 
-    def walk(self, topology: Topology) -> int:
+    def walk(self) -> int:
         """Walk along given path, return final password.
 
         >>> m = MonkeyMap(TEST_DATA)
         >>> m.walk(WRAP_TOPOLOGY)
         6032
         """
-        c = self.to_coord(Coord(0, 0), 1, Direction.UP)
+        c = self.to_coord(
+            Coord(0, 0), (self.x_start // self.x_block_size, 0), Direction.UP
+        )
         d = Direction.RIGHT
         for step in self.path:
             # print("Step", step)
             match step:
                 case s if s.isdigit():
                     for _ in range(int(s)):
-                        c, d = self.move(c, d, topology)
+                        c, d = self.move(c, d)
                 case "L":
                     d = d.left()
                 case "R":
@@ -256,8 +227,8 @@ TEST_DATA = """        ...#
 
 
 if __name__ == "__main__":
-    testmod()
-    m = MonkeyMap(stdin.read())
-    # m = MonkeyMap(TEST_DATA)
-    m.show()
-    print(m.walk(WRAP_TOPOLOGY))
+    # testmod()
+    # m = MonkeyMap(stdin.read())
+    m = MonkeyMap(TEST_DATA, TEST_TOPOLOGY)
+    # m.show()
+    print(m.walk())
