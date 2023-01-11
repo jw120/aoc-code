@@ -2,18 +2,14 @@
 
 from __future__ import annotations
 
-from doctest import testmod
+# from doctest import testmod
 from enum import Enum
 from re import findall
 from sys import stdin
-from typing import NoReturn, Optional, TypeAlias, Final
+from typing import Optional, TypeAlias, Final
 
 from coord import Coord, Extent
-
-
-def assert_never(value: NoReturn) -> NoReturn:
-    """Marker for unreachable code."""
-    assert False, f"This code should never be reached, got: {value}"
+from utils import assert_never
 
 
 class Direction(Enum):
@@ -59,7 +55,7 @@ def wrap(
     }
 
 
-TEST_TOPOLOGY: Final[Topology] = {
+TEST_WRAP_TOPOLOGY: Final[Topology] = {
     (2, 0): wrap((2, 2), (2, 0), (2, 1), (2, 0)),
     (0, 1): wrap((0, 1), (1, 1), (0, 1), (2, 1)),
     (1, 1): wrap((1, 1), (2, 1), (1, 1), (0, 1)),
@@ -67,6 +63,33 @@ TEST_TOPOLOGY: Final[Topology] = {
     (2, 2): wrap((2, 1), (3, 2), (2, 0), (3, 2)),
     (3, 2): wrap((3, 2), (2, 2), (3, 2), (2, 2)),
 }
+
+MAIN_WRAP_TOPOLOGY: Final[Topology] = {
+    (1, 0): wrap((1, 2), (2, 0), (1, 1), (2, 0)),
+    (2, 0): wrap((2, 0), (1, 0), (2, 0), (1, 0)),
+    (1, 1): wrap((1, 0), (1, 1), (1, 2), (1, 1)),
+    (0, 2): wrap((0, 3), (1, 2), (0, 3), (1, 2)),
+    (1, 2): wrap((1, 1), (0, 2), (1, 0), (0, 2)),
+    (0, 3): wrap((0, 2), (0, 3), (0, 2), (0, 3)),
+}
+
+
+def assert_wrap(t: Topology) -> None:
+    """Check that a wrap-around topology connects properly."""
+    for f_from, m in t.items():
+        for d in [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT]:
+            f_to, e_to, d_to = m[d]
+            assert e_to == d.opposite()  # Arrive on edge opposite to exit direction
+            assert d_to == d  # Arrive going in same direction as leaving
+            # Check reverse connection
+            f_back, e_back, d_back = t[f_to][d.opposite()]
+            assert f_back == f_from  # Arrive back on starting face
+            assert e_back == d  # Arrive back on edge we left from
+            assert d_back == d.opposite()  # Arrive back in revese direction
+
+
+assert_wrap(TEST_WRAP_TOPOLOGY)
+assert_wrap(MAIN_WRAP_TOPOLOGY)
 
 
 class MonkeyMap:
@@ -84,6 +107,10 @@ class MonkeyMap:
         self.board = {}
         self.extent = Extent(0, 0)
         self.topology = topology
+        self.face_extent = Coord(
+            x=1 + max(x for x, _ in topology.keys()),
+            y=1 + max(y for _, y in topology.keys()),
+        )
         self.x_start: int = -1
         for y, row in enumerate(board_str.split("\n")):
             for x, c in enumerate(row):
@@ -101,11 +128,15 @@ class MonkeyMap:
                     case _:
                         raise ValueError(f"Bad character in board input '{c}'")
 
-        self.x_block_size = self.extent.x // 4
-        self.y_block_size = self.extent.y // 3
+        self.x_block_size = self.extent.x // self.face_extent.x
+        self.y_block_size = self.extent.y // self.face_extent.y
         assert (
-            self.x_block_size * self.y_block_size * 12 == self.extent.x * self.extent.y
-        ), f"Bad size: {self.extent}"
+            self.x_block_size
+            * self.y_block_size
+            * self.face_extent.x
+            * self.face_extent.y
+            == self.extent.x * self.extent.y
+        ), f"Bad size: {self.extent} {self.face_extent}"
         self.path: list[str] = findall(r"\d+|L|R", path_str)
 
     def to_coord(self, c: Coord, face: FaceOffset, edge: Direction) -> Coord:
@@ -229,6 +260,7 @@ TEST_DATA = """        ...#
 if __name__ == "__main__":
     # testmod()
     # m = MonkeyMap(stdin.read())
-    m = MonkeyMap(TEST_DATA, TEST_TOPOLOGY)
-    # m.show()
+    m = MonkeyMap(TEST_DATA, TEST_WRAP_TOPOLOGY)
+    print(m.walk())
+    m = MonkeyMap(stdin.read(), MAIN_WRAP_TOPOLOGY)
     print(m.walk())
