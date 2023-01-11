@@ -33,6 +33,9 @@ class Direction(Enum):
         return Direction((self.value + 2) % 4)
 
 
+# It would be better to derive the connections between faces from the input file
+# but that seems hard - we hard-wire them instead.
+    
 # We reference cube faces by their (x-right, y-down) offsets
 FaceOffset: TypeAlias = tuple[int, int]
 
@@ -111,6 +114,45 @@ TEST_FOLD_TOPOLOGY: Final[Topology] = {
          Direction.LEFT: ((2, 2), Direction.RIGHT, True)
     }}
 
+MAIN_FOLD_TOPOLOGY: Final[Topology] = {
+     (1, 0): {
+         Direction.UP: ((0, 3), Direction.LEFT, True),
+         Direction.RIGHT: ((2, 0), Direction.LEFT, True),
+         Direction.DOWN: ((1, 1), Direction.UP, True),
+         Direction.LEFT: ((0, 2), Direction.LEFT, False)
+         },
+     (2, 0): {
+         Direction.UP: ((0, 3), Direction.DOWN, True),
+         Direction.RIGHT: ((1, 2), Direction.RIGHT, False),
+         Direction.DOWN: ((1, 1), Direction.RIGHT, True),
+         Direction.LEFT: ((1, 0), Direction.RIGHT, True)
+         },
+     (1, 1): {
+         Direction.UP: ((1, 0), Direction.DOWN, True),
+         Direction.RIGHT: ((2, 0), Direction.DOWN, True),
+         Direction.DOWN: ((1, 2), Direction.UP, True),
+         Direction.LEFT: ((0, 2), Direction.UP, True)
+         },
+     (0, 2): {
+         Direction.UP: ((1, 1), Direction.LEFT, True),
+         Direction.RIGHT: ((1, 2), Direction.LEFT, True),
+         Direction.DOWN: ((0, 3), Direction.UP, True),
+         Direction.LEFT: ((1, 0), Direction.LEFT, False)
+         },
+     (1, 2): {
+         Direction.UP: ((1, 1), Direction.DOWN, True),
+         Direction.RIGHT: ((2, 0), Direction.RIGHT, False),
+         Direction.DOWN: ((0, 3), Direction.RIGHT, True),
+         Direction.LEFT: ((0, 2), Direction.RIGHT, True)
+         },
+     (0, 3): {
+         Direction.UP: ((0, 2), Direction.DOWN, True),
+         Direction.RIGHT: ((1, 2), Direction.DOWN, True),
+         Direction.DOWN: ((2, 0), Direction.UP, True),
+         Direction.LEFT: ((1,0), Direction.UP, True)
+         }}
+
+
 
 def assert_wrap(t: Topology, wrap: bool) -> None:
     """Check that a wrap-around topology connects properly."""
@@ -130,6 +172,7 @@ def assert_wrap(t: Topology, wrap: bool) -> None:
 assert_wrap(TEST_WRAP_TOPOLOGY, wrap=True)
 assert_wrap(MAIN_WRAP_TOPOLOGY, wrap=True)
 assert_wrap(TEST_FOLD_TOPOLOGY, wrap=False)
+assert_wrap(MAIN_FOLD_TOPOLOGY, wrap=False)
 
 
 class MonkeyMap:
@@ -178,7 +221,6 @@ class MonkeyMap:
             == self.extent.x * self.extent.y
         ), f"Bad size: {self.extent} {self.face_extent}"
         self.path: list[str] = findall(r"\d+|L|R", path_str)
-#        print(self.extent, self.face_extent, self.block_size)
 
     def to_coord(self, c: Coord, d: Direction, face: FaceOffset, edge: Direction, preserve: bool) -> Coord:
         """Return the coordinate on the given face and edge."""
@@ -266,7 +308,6 @@ class MonkeyMap:
             Coord(0, 0), d, (self.x_start // self.block_size, 0), Direction.UP, True
         )
         for step in self.path:
- #           print("Step", step, c, d, "->", end="")
             match step:
                 case s if s.isdigit():
                     for _ in range(int(s)):
@@ -277,7 +318,6 @@ class MonkeyMap:
                     d = d.right()
                 case _:
                     raise ValueError("Bad in path")
-#            print(c, d)
         return 1000 * (c.y + 1) + 4 * (c.x + 1) + d.left().value
 
     def show(self) -> None:
@@ -309,7 +349,6 @@ TEST_DATA = """        ...#
 
 if __name__ == "__main__":
     testmod()
-    # m = MonkeyMap(stdin.read())
-    #print(MonkeyMap(TEST_DATA, TEST_WRAP_TOPOLOGY).walk())
-    print(MonkeyMap(stdin.read(), MAIN_WRAP_TOPOLOGY).walk())
-    #print(MonkeyMap(TEST_DATA, TEST_FOLD_TOPOLOGY).walk())
+    input_data = stdin.read()
+    print(MonkeyMap(input_data, MAIN_WRAP_TOPOLOGY).walk())
+    print(MonkeyMap(input_data, MAIN_FOLD_TOPOLOGY).walk())
