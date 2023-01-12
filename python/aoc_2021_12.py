@@ -63,23 +63,29 @@ def read_maze(links: list[str]) -> Maze:
 
 
 class Path:
+    """Main class for day 12."""
+
     def __init__(self) -> None:
         self._final_cave: Optional[Cave] = None
         self._visited: frozenset[Cave] = frozenset()
         self._all_small_unique: bool = True
 
     def final_cave(self) -> Cave:
+        """Return final cave."""
         if self._final_cave is None:
             raise ValueError("Empty path!")
         return self._final_cave
 
     def includes(self, cave: Cave) -> bool:
+        """Test if the cave has been visited."""
         return cave in self._visited
 
     def all_small_unique(self) -> bool:
+        """Return all small unique."""
         return self._all_small_unique
 
     def extend(self, cave: Cave) -> Path:
+        """Extend the path to a new cave."""
         p = Path()
         p._final_cave = cave
         p._visited = self._visited | frozenset([cave])
@@ -128,6 +134,6 @@ def paths(maze: Maze, allow_one_revisit: bool) -> int:
 
 if __name__ == "__main__":
     testmod()
-    maze = read_maze(stdin.read().splitlines())
-    print(paths(maze, False))
-    print(paths(maze, True))
+    input_maze = read_maze(stdin.read().splitlines())
+    print(paths(input_maze, False))
+    print(paths(input_maze, True))

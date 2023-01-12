@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections import deque
 from dataclasses import dataclass
 from sys import stdin
-from typing import Callable, Dict, List, Optional, Set, Tuple, TypeVar
+from typing import Callable, Dict, List, Optional, Tuple, TypeVar
 
 from coord import Coord, Extent
 
@@ -44,7 +44,7 @@ class Maze:
             [self._add_char(x, row, col) for col, x in enumerate(line)]
             for row, line in enumerate(lines)
         ]
-        self._all_keys: Set[str] = set(self._keys.values())
+        self._all_keys: frozenset[str] = frozenset(self._keys.values())
 
         assert self.start is not None
         assert len(self._walls) == self._extent.x

@@ -4,6 +4,8 @@ from doctest import testmod
 from sys import stdin
 from typing import Optional, TypeVar
 
+from utils import set_union
+
 K = TypeVar("K")
 
 
@@ -35,7 +37,7 @@ def build_tree(
         forward[k_from].add(k_to)
         backward[k_to] = k_from
     forward_out_nodes: set[K] = set(forward.keys())
-    forward_in_nodes: set[K] = set.union(*forward.values())
+    forward_in_nodes: set[K] = set_union(forward.values())
     roots = forward_out_nodes - forward_in_nodes
     return (forward, backward, list(roots))
 

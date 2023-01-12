@@ -125,12 +125,13 @@ def solve(line: str) -> int:
 
 
 def digits_to_int(xs: Iterator[int]) -> int:
+    """Convert digits into an int."""
     a, b, c, d = xs
     return 1000 * a + 100 * b + 10 * c + d
 
 
 if __name__ == "__main__":
     testmod()
-    lines: list[str] = stdin.read().splitlines()
-    print(num_output_1478(lines))
-    print(sum(solve(line) for line in lines))
+    input_lines: list[str] = stdin.read().splitlines()
+    print(num_output_1478(input_lines))
+    print(sum(solve(line) for line in input_lines))

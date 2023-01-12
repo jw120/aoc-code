@@ -103,6 +103,6 @@ def part2(numbers: list[str]) -> int:
 
 if __name__ == "__main__":
     testmod()
-    numbers: list[str] = stdin.read().splitlines()
-    print(part1(numbers))
-    print(part2(numbers))
+    input_numbers: list[str] = stdin.read().splitlines()
+    print(part1(input_numbers))
+    print(part2(input_numbers))

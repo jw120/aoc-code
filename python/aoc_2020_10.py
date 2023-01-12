@@ -78,7 +78,7 @@ def count_ways(xs: list[int]) -> int:
     >>> count_ways(prep_list(test2))
     19208
     """
-    counts: list[int] = [0 for x in xs]
+    counts: list[int] = [0 for _ in xs]
 
     last_i = len(xs) - 1
     counts[last_i] = 1

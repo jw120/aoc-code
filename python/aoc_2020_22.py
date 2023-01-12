@@ -127,8 +127,10 @@ class Combat:
                 print(f"Player 1's deck:{self._show_deck(self.p1)}")
                 print(f"Player 2's deck:{self._show_deck(self.p2)}")
 
-            top_player_1: int = self.p1.pop(0)
-            top_player_2: int = self.p2.pop(0)
+            top_player_1 = self.p1.pop(0)
+            assert isinstance(top_player_1, int)
+            top_player_2 = self.p2.pop(0)
+            assert isinstance(top_player_2, int)
             winner: Player
 
             if debug:

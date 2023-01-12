@@ -31,7 +31,7 @@ python-test-fast:
 
 
 OUT_DIR = out
-		
+
 # Python: run and show the runtime in seconds
 python_%: | $(OUT_DIR)
 	@/bin/echo -n "$@: "
@@ -55,7 +55,7 @@ python-check:
 	isort python/
 	black --quiet python/
 	pyright python/
-	pylint python/aoc_2022_*.py python/golden_test.py python/coord.py
+	pylint python/aoc_2022_*.py python/golden_test.py python/coord.py python/utils.py
 
 haskell-check:
 	hlint haskell/

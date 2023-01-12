@@ -102,7 +102,7 @@ class Floor:
         return len(self.g[self.active()])
 
     def update(self) -> Floor:
-        self.g[self.inactive()] = set()
+        self.g[self.inactive()].clear()
         # Update black cells
         for black_cell in self.g[self.active()]:
             n = self.count_black_neighbours(black_cell)

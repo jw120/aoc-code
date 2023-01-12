@@ -74,6 +74,6 @@ def multiples(segments: list[Segment], use_diagonals: bool) -> int:
 
 if __name__ == "__main__":
     testmod()
-    segments: list[Segment] = [read_segment(s) for s in stdin.read().splitlines()]
-    print(multiples(segments, False))
-    print(multiples(segments, True))
+    input_segments: list[Segment] = [read_segment(s) for s in stdin.read().splitlines()]
+    print(multiples(input_segments, False))
+    print(multiples(input_segments, True))

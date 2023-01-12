@@ -23,6 +23,8 @@ test: str = (
 
 
 class Grid:
+    """Main class for day 11."""
+
     def __init__(self, s: str) -> None:
         self.energy: list[list[int]] = [
             [int(c) for c in line] for line in s.splitlines()
@@ -56,10 +58,10 @@ class Grid:
                     flashed.add(c)
                     self.flash_count += 1
                     self.energy[c.x][c.y] = 0
-                    for nc in c.adjacents_with_diagonals(self.extent):
-                        self.energy[nc.x][nc.y] += 1
-                        if self.energy[nc.x][nc.y] > 9:
-                            to_flash.append(nc)
+                    for n_c in c.adjacents_with_diagonals(self.extent):
+                        self.energy[n_c.x][n_c.y] += 1
+                        if self.energy[n_c.x][n_c.y] > 9:
+                            to_flash.append(n_c)
             for c in flashed:
                 self.energy[c.x][c.y] = 0
             self.step_count += 1

@@ -99,8 +99,8 @@ def part2(numbers: list[int], boards: list[Board]) -> int:
 
 if __name__ == "__main__":
     testmod()
-    blocks: list[str] = stdin.read().split("\n\n")
-    numbers: list[int] = [int(x) for x in blocks[0].split(",")]
-    boards: list[Board] = [Board(x) for x in blocks[1:]]
-    print(part1(numbers, boards))
-    print(part2(numbers, boards))
+    input_blocks: list[str] = stdin.read().split("\n\n")
+    input_numbers: list[int] = [int(x) for x in input_blocks[0].split(",")]
+    input_boards: list[Board] = [Board(x) for x in input_blocks[1:]]
+    print(part1(input_numbers, input_boards))
+    print(part2(input_numbers, input_boards))

@@ -98,7 +98,7 @@ def run2(valids: list[ValidField], your: list[int], tickets: list[list[int]]) ->
                 found_position: int = field_positions[0]
                 allocated_fields.append((field_name, found_position))
                 field_fit.remove((field_name, field_positions))
-                for other_field_name, other_field_positions in field_fit:
+                for _other_field_name, other_field_positions in field_fit:
                     other_field_positions.remove(found_position)
                 break
     departure_field_positions = [

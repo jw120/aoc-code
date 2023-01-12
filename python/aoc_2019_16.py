@@ -30,7 +30,7 @@ def fft(xs: list[int], reps: int) -> list[int]:
     """
     n: int = len(xs)
     patterns: list[list[int]] = [pattern(i, n) for i in range(1, n + 1)]
-    for j in range(reps):
+    for _ in range(reps):
         xs = [combine(xs, p) for p in patterns]
     return xs
 

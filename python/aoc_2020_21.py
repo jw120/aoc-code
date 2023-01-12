@@ -4,6 +4,8 @@ from doctest import testmod
 from sys import stdin
 from typing import NewType
 
+from utils import set_union
+
 Ingredient = NewType("Ingredient", str)
 Allergen = NewType("Allergen", str)
 
@@ -48,7 +50,7 @@ def part_one(foods: list[tuple[list[Ingredient], list[Allergen]]]) -> int:
     """
     possible: dict[Allergen, set[Ingredient]] = possible_ingredients(foods)
     # Combine these together to find list of ingredients that could contain allergens
-    suspect_ingredients: set[Ingredient] = set.union(*possible.values())
+    suspect_ingredients: set[Ingredient] = set_union(possible.values())
     # Count non-suspect ingredients in all the food lists
     count = 0
     for ingredients, _ in foods:
@@ -76,7 +78,7 @@ def part_two(foods: list[tuple[list[Ingredient], list[Allergen]]]) -> str:
                 matched_ingredients.append((ingredient, allergen))
                 # Remove the matched allergen and ingredient from the dictionary
                 del possible[allergen]
-                for a, i_set in possible.items():
+                for a, _i_set in possible.items():
                     possible[a] = possible[a] - {ingredient}
                 break
     return ",".join(

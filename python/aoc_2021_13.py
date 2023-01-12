@@ -63,7 +63,7 @@ test_folds: list[Fold] = [read_fold(s) for s in ["fold along y=7", "fold along x
 Fold = Tuple[Literal["x", "y"], int]
 
 
-def fold(dot: Coord, fold: Fold) -> Coord:
+def fold_dot(dot: Coord, fold: Fold) -> Coord:
     """Apply a fold to the dot."""
     fold_axis, fold_value = fold
     if fold_axis == "x":
@@ -86,11 +86,12 @@ def apply_folds(dots: set[Coord], folds: list[Fold]) -> set[Coord]:
     16
     """
     for f in folds:
-        dots = {fold(d, f) for d in dots}
+        dots = {fold_dot(d, f) for d in dots}
     return dots
 
 
 def print_dots(dots: set[Coord]) -> None:
+    """Print the dots in output form."""
     x_max = max(d.x for d in dots)
     y_max = max(d.y for d in dots)
     for y in range(0, y_max + 1):
@@ -102,7 +103,7 @@ def print_dots(dots: set[Coord]) -> None:
 if __name__ == "__main__":
     testmod()
     dots_str, folds_str = stdin.read().split("\n\n")
-    dots = {read_dot(s) for s in dots_str.splitlines()}
-    folds = [read_fold(s) for s in folds_str.splitlines()]
-    print(len(apply_folds(dots, folds[:1])))
-    print_dots(apply_folds(dots, folds))
+    input_dots = {read_dot(s) for s in dots_str.splitlines()}
+    input_folds = [read_fold(s) for s in folds_str.splitlines()]
+    print(len(apply_folds(input_dots, input_folds[:1])))
+    print_dots(apply_folds(input_dots, input_folds))

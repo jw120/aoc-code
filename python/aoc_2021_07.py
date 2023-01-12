@@ -56,7 +56,7 @@ def find_minimum(f: Callable[[int], int], bounds: Tuple[int, int]) -> int:
 
 if __name__ == "__main__":
     testmod()
-    crabs: list[int] = [int(x) for x in stdin.read().split(",")]
-    bounds = (min(crabs), max(crabs))
-    print(find_minimum(lambda x: fuel1(crabs, x), bounds))
-    print(find_minimum(lambda x: fuel2(crabs, x), bounds))
+    input_crabs: list[int] = [int(x) for x in stdin.read().split(",")]
+    input_bounds = (min(input_crabs), max(input_crabs))
+    print(find_minimum(lambda x: fuel1(input_crabs, x), input_bounds))
+    print(find_minimum(lambda x: fuel2(input_crabs, x), input_bounds))

@@ -67,7 +67,9 @@ def flip(e: EdgeValue) -> EdgeValue:
 T = TypeVar("T")
 
 
-def len_skip_none(xs: list[Optional[T]]) -> int:
+def len_skip_none(
+    xs: list[Optional[T]],  # pyright: ignore [reportInvalidTypeVarUse]
+) -> int:
     """Length of a list of optionals exclduing the Nones.
 
     >>> len_skip_none([1, None, 2])

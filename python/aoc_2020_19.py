@@ -7,8 +7,6 @@ from doctest import testmod
 from sys import stdin
 from typing import Optional, Union
 
-from utils import assert_never
-
 
 @dataclass(frozen=True)
 class Terminal:
@@ -88,14 +86,12 @@ class MessageValidator:
             if (remainder := self.valid_remains(s, r.a)) is not None:
                 return remainder
             return self.valid_remains(s, r.b)
-        if isinstance(r, Series):
-            for i in r.rule_indices:
-                remainder = self.valid_remains(s, self.rules[i])
-                if remainder is None:
-                    return None
-                s = remainder
+        for i in r.rule_indices:
+            remainder = self.valid_remains(s, self.rules[i])
+            if remainder is None:
+                return None
+            s = remainder
             return s
-        assert_never(r)
 
     def valid_part_two(self, s: str) -> bool:
         """Match starting with special part two rules.

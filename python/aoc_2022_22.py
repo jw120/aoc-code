@@ -78,81 +78,82 @@ MAIN_WRAP_TOPOLOGY: Final[Topology] = {
 }
 
 TEST_FOLD_TOPOLOGY: Final[Topology] = {
-     (2, 0): {
-         Direction.UP: ((0, 1), Direction.UP, False),
-         Direction.RIGHT: ((3, 2), Direction.RIGHT, False),
-         Direction.DOWN: ((2, 1), Direction.UP, True),
-         Direction.LEFT: ((1, 1), Direction.UP, True)
-         },
+    (2, 0): {
+        Direction.UP: ((0, 1), Direction.UP, False),
+        Direction.RIGHT: ((3, 2), Direction.RIGHT, False),
+        Direction.DOWN: ((2, 1), Direction.UP, True),
+        Direction.LEFT: ((1, 1), Direction.UP, True),
+    },
     (0, 1): {
-         Direction.UP: ((2, 0), Direction.UP, False),
-         Direction.RIGHT: ((1, 1), Direction.LEFT, True),
-         Direction.DOWN: ((2,2 ), Direction.DOWN, False),
-         Direction.LEFT: ((3,2 ), Direction.DOWN, False)
-         },
+        Direction.UP: ((2, 0), Direction.UP, False),
+        Direction.RIGHT: ((1, 1), Direction.LEFT, True),
+        Direction.DOWN: ((2, 2), Direction.DOWN, False),
+        Direction.LEFT: ((3, 2), Direction.DOWN, False),
+    },
     (1, 1): {
-         Direction.UP: ((2, 0), Direction.LEFT, True),
-         Direction.RIGHT: ((2,1 ), Direction.LEFT, True),
-         Direction.DOWN: ((2, 2), Direction.LEFT, False),
-         Direction.LEFT: ((0, 1), Direction.RIGHT, True)
-        },
+        Direction.UP: ((2, 0), Direction.LEFT, True),
+        Direction.RIGHT: ((2, 1), Direction.LEFT, True),
+        Direction.DOWN: ((2, 2), Direction.LEFT, False),
+        Direction.LEFT: ((0, 1), Direction.RIGHT, True),
+    },
     (2, 1): {
-         Direction.UP: ((2, 0), Direction.DOWN, True),
-         Direction.RIGHT: ((3, 2), Direction.UP, False),
-         Direction.DOWN: ((2, 2), Direction.UP, True),
-         Direction.LEFT: ((1, 1), Direction.RIGHT, True)
-        },
+        Direction.UP: ((2, 0), Direction.DOWN, True),
+        Direction.RIGHT: ((3, 2), Direction.UP, False),
+        Direction.DOWN: ((2, 2), Direction.UP, True),
+        Direction.LEFT: ((1, 1), Direction.RIGHT, True),
+    },
     (2, 2): {
-         Direction.UP: ((2, 1), Direction.DOWN, True),
-         Direction.RIGHT: ((3, 2), Direction.LEFT, True),
-         Direction.DOWN: ((0, 1), Direction.DOWN, False),
-         Direction.LEFT: ((1, 1), Direction.DOWN, False)
-        },
+        Direction.UP: ((2, 1), Direction.DOWN, True),
+        Direction.RIGHT: ((3, 2), Direction.LEFT, True),
+        Direction.DOWN: ((0, 1), Direction.DOWN, False),
+        Direction.LEFT: ((1, 1), Direction.DOWN, False),
+    },
     (3, 2): {
-         Direction.UP: ((2, 1), Direction.RIGHT, False),
-         Direction.RIGHT: ((2, 0), Direction.RIGHT, False),
-         Direction.DOWN: ((0, 1), Direction.LEFT, False),
-         Direction.LEFT: ((2, 2), Direction.RIGHT, True)
-    }}
+        Direction.UP: ((2, 1), Direction.RIGHT, False),
+        Direction.RIGHT: ((2, 0), Direction.RIGHT, False),
+        Direction.DOWN: ((0, 1), Direction.LEFT, False),
+        Direction.LEFT: ((2, 2), Direction.RIGHT, True),
+    },
+}
 
 MAIN_FOLD_TOPOLOGY: Final[Topology] = {
-     (1, 0): {
-         Direction.UP: ((0, 3), Direction.LEFT, True),
-         Direction.RIGHT: ((2, 0), Direction.LEFT, True),
-         Direction.DOWN: ((1, 1), Direction.UP, True),
-         Direction.LEFT: ((0, 2), Direction.LEFT, False)
-         },
-     (2, 0): {
-         Direction.UP: ((0, 3), Direction.DOWN, True),
-         Direction.RIGHT: ((1, 2), Direction.RIGHT, False),
-         Direction.DOWN: ((1, 1), Direction.RIGHT, True),
-         Direction.LEFT: ((1, 0), Direction.RIGHT, True)
-         },
-     (1, 1): {
-         Direction.UP: ((1, 0), Direction.DOWN, True),
-         Direction.RIGHT: ((2, 0), Direction.DOWN, True),
-         Direction.DOWN: ((1, 2), Direction.UP, True),
-         Direction.LEFT: ((0, 2), Direction.UP, True)
-         },
-     (0, 2): {
-         Direction.UP: ((1, 1), Direction.LEFT, True),
-         Direction.RIGHT: ((1, 2), Direction.LEFT, True),
-         Direction.DOWN: ((0, 3), Direction.UP, True),
-         Direction.LEFT: ((1, 0), Direction.LEFT, False)
-         },
-     (1, 2): {
-         Direction.UP: ((1, 1), Direction.DOWN, True),
-         Direction.RIGHT: ((2, 0), Direction.RIGHT, False),
-         Direction.DOWN: ((0, 3), Direction.RIGHT, True),
-         Direction.LEFT: ((0, 2), Direction.RIGHT, True)
-         },
-     (0, 3): {
-         Direction.UP: ((0, 2), Direction.DOWN, True),
-         Direction.RIGHT: ((1, 2), Direction.DOWN, True),
-         Direction.DOWN: ((2, 0), Direction.UP, True),
-         Direction.LEFT: ((1,0), Direction.UP, True)
-         }}
-
+    (1, 0): {
+        Direction.UP: ((0, 3), Direction.LEFT, True),
+        Direction.RIGHT: ((2, 0), Direction.LEFT, True),
+        Direction.DOWN: ((1, 1), Direction.UP, True),
+        Direction.LEFT: ((0, 2), Direction.LEFT, False),
+    },
+    (2, 0): {
+        Direction.UP: ((0, 3), Direction.DOWN, True),
+        Direction.RIGHT: ((1, 2), Direction.RIGHT, False),
+        Direction.DOWN: ((1, 1), Direction.RIGHT, True),
+        Direction.LEFT: ((1, 0), Direction.RIGHT, True),
+    },
+    (1, 1): {
+        Direction.UP: ((1, 0), Direction.DOWN, True),
+        Direction.RIGHT: ((2, 0), Direction.DOWN, True),
+        Direction.DOWN: ((1, 2), Direction.UP, True),
+        Direction.LEFT: ((0, 2), Direction.UP, True),
+    },
+    (0, 2): {
+        Direction.UP: ((1, 1), Direction.LEFT, True),
+        Direction.RIGHT: ((1, 2), Direction.LEFT, True),
+        Direction.DOWN: ((0, 3), Direction.UP, True),
+        Direction.LEFT: ((1, 0), Direction.LEFT, False),
+    },
+    (1, 2): {
+        Direction.UP: ((1, 1), Direction.DOWN, True),
+        Direction.RIGHT: ((2, 0), Direction.RIGHT, False),
+        Direction.DOWN: ((0, 3), Direction.RIGHT, True),
+        Direction.LEFT: ((0, 2), Direction.RIGHT, True),
+    },
+    (0, 3): {
+        Direction.UP: ((0, 2), Direction.DOWN, True),
+        Direction.RIGHT: ((1, 2), Direction.DOWN, True),
+        Direction.DOWN: ((2, 0), Direction.UP, True),
+        Direction.LEFT: ((1, 0), Direction.UP, True),
+    },
+}
 
 
 def assert_wrap(t: Topology, is_wrap: bool) -> None:
@@ -200,30 +201,26 @@ class MonkeyMap:
             for x, c in enumerate(row):
                 if self.x_start == -1 and c == ".":
                     self.x_start = x
-                match c:
-                    case "#" | ".":
-                        self.board[Coord(x, y)] = c == "#"
-                        if x >= self.extent.x or y >= self.extent.y:
-                            self.extent = Extent(
-                                max(self.extent.x, x + 1), max(self.extent.y, y + 1)
-                            )
-                    case " ":
-                        pass
-                    case _:
-                        raise ValueError(f"Bad character in board input '{c}'")
+                if c in "#.":
+                    self.board[Coord(x, y)] = c == "#"
+                    if x >= self.extent.x or y >= self.extent.y:
+                        self.extent = Extent(
+                            max(self.extent.x, x + 1), max(self.extent.y, y + 1)
+                        )
+                else:
+                    assert c == " "
 
         self.block_size = self.extent.x // self.face_extent.x
-        assert  self.extent.y // self.face_extent.y == self.block_size
+        assert self.extent.y // self.face_extent.y == self.block_size
         assert (
-            self.block_size
-            * self.block_size
-            * self.face_extent.x
-            * self.face_extent.y
+            self.block_size * self.block_size * self.face_extent.x * self.face_extent.y
             == self.extent.x * self.extent.y
         ), f"Bad size: {self.extent} {self.face_extent}"
         self.path: list[str] = findall(r"\d+|L|R", path_str)
 
-    def to_coord(self, c: Coord, d: Direction, face: FaceOffset, edge: Direction, preserve: bool) -> Coord:
+    def to_coord(
+        self, c: Coord, d: Direction, face: FaceOffset, edge: Direction, preserve: bool
+    ) -> Coord:
         """Return the coordinate on the given face and edge."""
         c_relative = Coord(c.x % self.block_size, c.y % self.block_size)
         if d in (Direction.UP, Direction.DOWN):
@@ -242,9 +239,7 @@ class MonkeyMap:
             case Direction.LEFT:
                 c_relative = Coord(0, offset)
         face_x, face_y = face
-        return (
-            Coord(face_x * self.block_size, face_y * self.block_size) + c_relative
-        )
+        return Coord(face_x * self.block_size, face_y * self.block_size) + c_relative
 
     def face_if_at_edge(self, c: Coord, d: Direction) -> Optional[FaceOffset]:
         """Return the face the coordinate is on, if move in direction would go off the edge."""

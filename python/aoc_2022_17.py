@@ -4,7 +4,6 @@
 
 # from doctest import testmod
 from math import lcm
-
 from sys import stdin
 from typing import Optional
 

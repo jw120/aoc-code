@@ -3,11 +3,13 @@
 from doctest import testmod
 from sys import stdin
 
+from utils import set_intersection, set_union
+
 
 def part_one(group: list[list[str]]) -> int:
     def union_of_letters(xs: list[str]) -> set[str]:
         xs_as_sets: list[set[str]] = [set(x) for x in xs]
-        return set.union(*xs_as_sets)
+        return set_union(xs_as_sets)
 
     return sum(len(union_of_letters(g)) for g in groups)
 
@@ -15,7 +17,7 @@ def part_one(group: list[list[str]]) -> int:
 def part_two(group: list[list[str]]) -> int:
     def intersection_of_letters(xs: list[str]) -> set[str]:
         xs_as_sets: list[set[str]] = [set(x) for x in xs]
-        return set.intersection(*xs_as_sets)
+        return set_intersection(xs_as_sets)
 
     return sum(len(intersection_of_letters(g)) for g in groups)
 

@@ -95,11 +95,11 @@ def basins(heights: list[list[int]]) -> int:
 
 if __name__ == "__main__":
     testmod()
-    heights: list[list[int]] = [
+    input_heights: list[list[int]] = [
         [int(c) for c in line] for line in stdin.read().splitlines()
     ]
-    for row in heights[1:]:
-        assert len(row) == len(heights[0])
-    assert len(heights) == len(heights[0])
-    print(risk(heights))
-    print(basins(heights))
+    for row in input_heights[1:]:
+        assert len(row) == len(input_heights[0])
+    assert len(input_heights) == len(input_heights[0])
+    print(risk(input_heights))
+    print(basins(input_heights))

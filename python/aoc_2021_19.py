@@ -30,6 +30,7 @@ class Rotation:
 
     @staticmethod
     def all_rotations() -> Iterable[Rotation]:
+        """Generate all rotaions."""
 
         dirs = [Coord3(1, 0, 0), Coord3(0, 1, 0), Coord3(0, 0, 1)]
 
@@ -50,6 +51,7 @@ class Rotation:
 
 
 class Scanner:
+    """Main class for day 19."""
 
     scanner_prefix: ClassVar[str] = "--- scanner "
     scanner_suffix: ClassVar[str] = " ---"
@@ -113,7 +115,7 @@ class Scanner:
     def find_match(
         self, other: Scanner, min_match: int
     ) -> Optional[Tuple[Coord3, Rotation]]:
-        """Return relative position of other scanner if a match with at least `min_match` beacons found.
+        """Return relative position of other scanner if match with `min_match` beacons found.
 
         >>> test1[0].find_match(test1[1], 3)[0]
         Coord3(x=5, y=2, z=0)
@@ -161,7 +163,7 @@ def locate(
     def first_match() -> Tuple[Scanner, Scanner, Coord3, Rotation]:
         match: Optional[Tuple[Coord3, Rotation]] = None
         s_index: int = 0
-        while match is None:
+        while True:
             s = input_scanners[s_index]
             for t in input_scanners[s_index + 1 :]:
                 match = (
@@ -172,11 +174,10 @@ def locate(
                 if match is None:
                     pairs_failed.add((s.number, t.number))
                 else:
-                    break
+                    return (s, t, match[0], match[1])
             s_index += 1
             if s_index >= len(input_scanners):
                 raise ValueError("No first match found")
-        return (s, t, match[0], match[1])
 
     base_scanner, second_scanner, second_offset, second_rotation = first_match()
     # Unmatched scanners (in their original orientations and positions)
@@ -198,7 +199,7 @@ def locate(
     # Now match the other scanners
     while unmatched_scanners:
         match_found: bool = False
-        for s in matched_scanners.keys():
+        for s, s_coord in matched_scanners.items():
             for t in unmatched_scanners:
                 if (s.number, t.number) not in pairs_failed:
                     match = (
@@ -212,7 +213,7 @@ def locate(
                         t_offset, t_rotation = match
                         unmatched_scanners.remove(t)
                         t_rotated = t.rotated(t_rotation)
-                        t_base_offset = matched_scanners[s] + t_offset
+                        t_base_offset = s_coord + t_offset
                         matched_scanners[t_rotated] = t_base_offset
                         located_beacons |= {
                             b + t_base_offset for b in t_rotated.beacons

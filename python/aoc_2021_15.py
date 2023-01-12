@@ -24,6 +24,8 @@ test_data: list[str] = [
 
 
 class Grid:
+    """Main class for day 15."""
+
     def __init__(self, rows: list[str]) -> None:
         self._extent = Extent(len(rows), len(rows[0]))
         self._risk: list[list[int]] = [[int(d) for d in row] for row in rows]
@@ -33,25 +35,27 @@ class Grid:
         self._expanded: bool = False
 
     def expand(self) -> Grid:
+        """Expand the grid."""
         self._expanded = True
         self._total_risk = [[0] * self._extent.x * 5 for _ in range(self._extent.y * 5)]
         return self
 
     @property
     def extent(self) -> Extent:
+        """Provide extent of the grid."""
         if self._expanded:
             return Extent(self._extent.x * 5, self._extent.y * 5)
         return self._extent
 
     def risk(self, c: Coord) -> int:
+        """Return risk of the grid."""
         if self._expanded:
             offset = c.x // self._extent.x + c.y // self._extent.y
             return (
                 (self._risk[c.x % self._extent.x][c.y % self._extent.y] + offset - 1)
                 % 9
             ) + 1
-        else:
-            return self._risk[c.x][c.y]
+        return self._risk[c.x][c.y]
 
     def walk(self) -> int:
         """Return risk of lowest risk path to destination.
@@ -90,7 +94,7 @@ class Grid:
 
 if __name__ == "__main__":
     testmod()
-    rows = stdin.read().splitlines()
-    g = Grid(rows)
+    input_rows = stdin.read().splitlines()
+    g = Grid(input_rows)
     print(g.walk())
     print(g.expand().walk())

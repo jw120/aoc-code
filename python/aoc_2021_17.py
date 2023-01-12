@@ -13,11 +13,14 @@ from coord import Coord
 
 
 class Probe:
-    def __init__(self, vx: int, vy: int) -> None:
+    """Probe for day 17."""
+
+    def __init__(self, v_x: int, v_y: int) -> None:
         self.position = Coord(0, 0)
-        self.velocity = Coord(vx, vy)
+        self.velocity = Coord(v_x, v_y)
 
     def step(self) -> None:
+        """Perform one step."""
         self.position += self.velocity
         if self.velocity.x > 0:
             x_change = -1
@@ -29,6 +32,8 @@ class Probe:
 
 
 class Target:
+    """Target for day 17."""
+
     def __init__(self, s: str) -> None:
         match = fullmatch(r"target area: x=(-?\d+)\.\.(-?\d+), y=(-?\d+)\.\.(-?\d+)", s)
         if match is None:
@@ -42,7 +47,7 @@ class Target:
         assert self.x_min > 0  # Assume target to right of start
         assert self.y_max < 0  # Assume target below start
 
-    def launch(self, vx: int, vy: int) -> Optional[int]:
+    def launch(self, v_x: int, v_y: int) -> Optional[int]:
         """Launch the probe and return the maximum height if it hits the target.
 
         >>> Target("target area: x=20..30, y=-10..-5").launch(7, 2)
@@ -55,7 +60,7 @@ class Target:
         >>> Target("target area: x=20..30, y=-10..-5").launch(6, 9)
         45
         """
-        probe = Probe(vx, vy)
+        probe = Probe(v_x, v_y)
         max_height = 0
         while True:
             if probe.position.y > max_height:
@@ -79,20 +84,20 @@ class Target:
         (45, 112)
         """
         best_height = 0
-        count = 0
-        for vx in range(0, self.x_max + 1):
-            for vy in range(self.y_min, 200):
-                result = self.launch(vx, vy)
+        success_count = 0
+        for v_x in range(0, self.x_max + 1):
+            for v_y in range(self.y_min, 200):
+                result = self.launch(v_x, v_y)
                 if result is not None:
-                    count += 1
+                    success_count += 1
                     if result > best_height:
                         best_height = result
-        return (best_height, count)
+        return (best_height, success_count)
 
 
 if __name__ == "__main__":
     testmod()
-    target = Target(stdin.read().strip())
-    highest, count = target.scan()
+    input_target = Target(stdin.read().strip())
+    highest, count = input_target.scan()
     print(highest)
     print(count)

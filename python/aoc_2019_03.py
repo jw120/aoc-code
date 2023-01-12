@@ -79,7 +79,7 @@ def trace(wire: Wire) -> set[Offset]:
     pos: Offset = Offset(0, 0)
     visited: set[Offset] = set()
     for direction, distance in wire:
-        for i in range(1, distance + 1):
+        for _ in range(1, distance + 1):
             pos = pos + direction.offset
             visited.add(pos)
     return visited
@@ -95,7 +95,7 @@ def trace_steps(wire: Wire) -> dict[Offset, int]:
     steps: int = 0
     visited: dict[Offset, int] = {}
     for direction, distance in wire:
-        for i in range(1, distance + 1):
+        for _ in range(1, distance + 1):
             steps += 1
             pos = pos + direction.offset
             if pos not in visited:

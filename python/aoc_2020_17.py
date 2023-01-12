@@ -77,7 +77,7 @@ class Grid3d:
     def iterate(self) -> None:
         """Iterate the grid."""
         # Clear the inactive grid
-        self.g[self.inactive()] = set()
+        self.g[self.inactive()].clear()
         for cube in self.g[self.active()]:
             # Keep the cube alive if it has 2 or 3 neighbours
             if self.neighbours(cube) in [2, 3]:
@@ -158,8 +158,7 @@ class Grid4d:
 
     def iterate(self) -> None:
         """Iterate the grid."""
-        # Clear the inactive grid
-        self.g[self.inactive()] = set()
+        self.g[self.inactive()].clear()
         for cube in self.g[self.active()]:
             # Keep the cube alive if it has 2 or 3 neighbours
             if self.neighbours(cube) in [2, 3]:

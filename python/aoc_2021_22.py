@@ -1,5 +1,8 @@
 """Advent of Code 2021 - Day 22."""
 
+# We (ab)use private members - tell pyright not to complain
+# pyright: reportPrivateUsage=false
+
 from __future__ import annotations
 
 from doctest import testmod

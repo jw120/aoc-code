@@ -107,10 +107,8 @@ def run1(commands: list[Command]) -> int:
     for cmd in commands:
         if isinstance(cmd, UpdateBitmaskCommand):
             mask = cmd.mask
-        elif isinstance(cmd, WriteCommand):
-            memory[cmd.address] = apply_mask1(cmd.value, mask)
         else:
-            raise RuntimeError("Bad command", cmd)
+            memory[cmd.address] = apply_mask1(cmd.value, mask)
 
     return sum(memory.values())
 
@@ -137,11 +135,9 @@ def run2(commands: list[Command]) -> int:
     for cmd in commands:
         if isinstance(cmd, UpdateBitmaskCommand):
             mask = cmd.mask
-        elif isinstance(cmd, WriteCommand):
+        else:
             for address in apply_mask2(cmd.address, mask):
                 memory[address] = cmd.value
-        else:
-            raise RuntimeError("Bad command", cmd)
 
     return sum(memory.values())
 

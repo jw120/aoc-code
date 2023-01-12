@@ -68,10 +68,8 @@ class NanoFactory:
         for chemical, recipe in [parse_recipe(s.strip()) for s in inputs]:
             if isinstance(recipe, BasicRecipe):
                 self.basic_recipes[chemical] = recipe
-            elif isinstance(recipe, CompositeRecipe):
-                self.composite_recipes[chemical] = recipe
             else:
-                raise RuntimeError("Bad parse type")
+                self.composite_recipes[chemical] = recipe
 
     def _basics_required(self, target: str, number: int) -> Counter_t[str]:
         """Return the number of basic chemcials required to make one of the given composite chemical.
