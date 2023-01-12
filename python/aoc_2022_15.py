@@ -120,9 +120,8 @@ def get_constraint(s1: Coord, s2: Coord, r1: int, r2: int) -> tuple[bool, int]:
         assert s1.x + s1.y + r1 + 1 == s2.x + s2.y - r2 - 1
         return (True, s1.x + s1.y + r1 + 1)
         # print(f"x+y = {s1.x+s1.y+r1+1} = {s2.x+s2.y-r2-1}")
-    else:
-        assert s1.x - s1.y + r1 + 1 == s2.x - s2.y - r2 - 1
-        return (False, s1.x - s1.y + r1 + 1)
+    assert s1.x - s1.y + r1 + 1 == s2.x - s2.y - r2 - 1
+    return (False, s1.x - s1.y + r1 + 1)
 
 
 def encode(c: Coord) -> int:

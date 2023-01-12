@@ -1,3 +1,4 @@
+
 all: aoc_2018 aoc_2019 aoc_2020
 
 aoc_2018: \
@@ -30,7 +31,7 @@ python-test-fast:
 
 
 OUT_DIR = out
-
+		
 # Python: run and show the runtime in seconds
 python_%: | $(OUT_DIR)
 	@/bin/echo -n "$@: "
@@ -54,7 +55,6 @@ python-check:
 	isort python/
 	black --quiet python/
 	pyright python/
-	mypy python/
 	pylint python/aoc_2022_*.py python/golden_test.py python/coord.py
 
 haskell-check:

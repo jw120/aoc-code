@@ -35,7 +35,7 @@ class Direction(Enum):
 
 # It would be better to derive the connections between faces from the input file
 # but that seems hard - we hard-wire them instead.
-    
+
 # We reference cube faces by their (x-right, y-down) offsets
 FaceOffset: TypeAlias = tuple[int, int]
 
@@ -50,6 +50,7 @@ Topology: TypeAlias = dict[
 def wrap(
     u: FaceOffset, r: FaceOffset, d: FaceOffset, l: FaceOffset
 ) -> dict[Direction, tuple[FaceOffset, Direction, bool]]:
+    """Helper funtion to build topology when wrapping toroidally."""
     return {
         Direction.UP: (u, Direction.DOWN, True),
         Direction.RIGHT: (r, Direction.LEFT, True),
@@ -154,12 +155,12 @@ MAIN_FOLD_TOPOLOGY: Final[Topology] = {
 
 
 
-def assert_wrap(t: Topology, wrap: bool) -> None:
+def assert_wrap(t: Topology, is_wrap: bool) -> None:
     """Check that a wrap-around topology connects properly."""
     for f_from, m in t.items():
         for d in [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT]:
             f_to, e_to, preserve = m[d]
-            if wrap:
+            if is_wrap:
                 assert e_to == d.opposite()  # Arrive on edge opposite to exit direction
                 assert preserve
             # Check reverse connection
@@ -169,10 +170,10 @@ def assert_wrap(t: Topology, wrap: bool) -> None:
             assert preserve_back == preserve
 
 
-assert_wrap(TEST_WRAP_TOPOLOGY, wrap=True)
-assert_wrap(MAIN_WRAP_TOPOLOGY, wrap=True)
-assert_wrap(TEST_FOLD_TOPOLOGY, wrap=False)
-assert_wrap(MAIN_FOLD_TOPOLOGY, wrap=False)
+assert_wrap(TEST_WRAP_TOPOLOGY, is_wrap=True)
+assert_wrap(MAIN_WRAP_TOPOLOGY, is_wrap=True)
+assert_wrap(TEST_FOLD_TOPOLOGY, is_wrap=False)
+assert_wrap(MAIN_FOLD_TOPOLOGY, is_wrap=False)
 
 
 class MonkeyMap:
