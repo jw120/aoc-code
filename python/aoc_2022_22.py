@@ -6,7 +6,7 @@ from doctest import testmod
 from enum import Enum
 from re import findall
 from sys import stdin
-from typing import Optional, TypeAlias, Final
+from typing import Final, Optional, TypeAlias
 
 from coord import Coord, Extent
 from utils import assert_never

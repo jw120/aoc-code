@@ -5,15 +5,11 @@ from __future__ import annotations
 import fileinput
 from doctest import testmod
 from enum import Enum
-from typing import Final, Iterable, NoReturn, Optional
+from typing import Final, Iterable, Optional
 
 # We use x as left->right and y as top->bottom
 from coord import Coord
-
-
-def assert_never(value: NoReturn) -> NoReturn:
-    """Marker for unreachable code."""
-    assert False, f"This code should never be reached, got: {value}"
+from utils import assert_never
 
 
 class Direction(Enum):

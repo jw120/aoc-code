@@ -7,11 +7,7 @@ from enum import Enum, auto
 from itertools import product
 from operator import add, mod, mul
 from sys import stdin
-from typing import Callable, Iterable, Iterator, NoReturn, Optional, Tuple, Union
-
-
-def assert_never(value: NoReturn) -> NoReturn:
-    assert False, f"Unhandled value: {value} ({type(value).__name__})"
+from typing import Callable, Iterable, Iterator, Optional, Tuple, Union
 
 
 class Register(Enum):

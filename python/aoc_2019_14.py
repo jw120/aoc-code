@@ -9,13 +9,9 @@ from doctest import testmod
 from sys import stdin
 from typing import Any
 from typing import Counter as Counter_t
-from typing import NoReturn, Union
+from typing import Union
 
 # Counter_t is a workaround as mypy does not support python 3.9, so we can't write Counter[str]
-
-
-def assert_never(value: NoReturn) -> NoReturn:
-    assert False, f"Unhandled value: {value} ({type(value).__name__})"
 
 
 @dataclass(eq=True, frozen=True)

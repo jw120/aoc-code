@@ -5,11 +5,9 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import NoReturn, Optional, Union
+from typing import Optional, Union
 
-
-def assert_never(value: NoReturn) -> NoReturn:
-    assert False, f"Unhandled value: {value} ({type(value).__name__})"
+from utils import assert_never
 
 
 @dataclass(frozen=True)

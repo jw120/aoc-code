@@ -5,13 +5,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 from sys import stdin
-from typing import NoReturn, Optional
+from typing import Optional
 
 from IntCode import Machine
-
-
-def assert_never(value: NoReturn) -> NoReturn:
-    assert False, f"Unhandled value: {value} ({type(value).__name__})"
+from utils import assert_never
 
 
 @dataclass(eq=True, frozen=True)
