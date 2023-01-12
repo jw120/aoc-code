@@ -5,7 +5,7 @@
 # from doctest import testmod
 from math import lcm
 
-# from sys import stdin
+from sys import stdin
 from typing import Optional
 
 # Here we take x left-to-right and y down-to-up
@@ -31,7 +31,7 @@ ROCKS: list[Rock] = [
     # @
     [Coord(0, 0), Coord(0, 1), Coord(0, 2), Coord(0, 3)],
     # @@
-    # @@
+    # @@g
     [Coord(0, 0), Coord(1, 0), Coord(0, 1), Coord(1, 1)],
 ]
 
@@ -49,7 +49,11 @@ class Chamber:
         self.jen_length: int = len(self.jet_pattern)
         self.jet_count: int = 0
         self.jet_period = lcm(len(ROCKS), len(self.jet_pattern))
-        self.memory: dict[int, int] = {}
+        self.rock_count: int = 0
+        # Memory holds rock count and max_y for hashes of pattern
+        self.memory: dict[int, tuple[int, int]] = {}
+        # Once we detect a loop set this to rock count and max_y for first occurence
+        self.repeat: Optional[tuple[int, int]] = None
 
     @property
     def height(self) -> int:
@@ -65,9 +69,35 @@ class Chamber:
         3068
         """
         for r in range(n):
-            self.drop(r % 5)
+            self.drop(r % 5, False)
 
-    def drop(self, rock_index: int) -> None:
+    def drop_multiple_via_cycles(self, n: int) -> None:
+        """Simulate dropping given number of rocks by cycle detection.
+
+        >>> chamber = Chamber(TEST_DATA)
+        >>> chamber.drop_multiple_via_cycles(1_000_000_000_000)
+        >>> chamber.height
+        1514285714288
+        """
+        r = 0
+        while self.repeat is None:
+            self.drop(r % 5, True)
+            r += 1
+        r0, max_y0 = self.repeat
+        print("Found repeat at", r, "back to", r0)
+        period = r - r0
+        y_delta = self.max_y - max_y0
+        print("Period", period, "y_delta", y_delta)
+        cycles = (n - r) // period
+        r += period * cycles
+        print("Advanced", cycles, "cycles, now at", r)
+        print("Remaining", n - r)
+        while r < n:
+            self.drop(r % 5, False)
+            r += 1
+        self.max_y += y_delta * cycles
+
+    def drop(self, rock_index: int, use_memory: bool) -> None:
         """Drop the given rock."""
         start_position: Coord = Coord(2, self.max_y + 4)
         rock: Rock = [c + start_position for c in ROCKS[rock_index]]
@@ -92,13 +122,13 @@ class Chamber:
                     self.occupied.add(c)
                 break
             rock = new_rock
-            if self.jet_count % self.jet_period == 0:
+            if use_memory and self.jet_count % self.jet_period == 0:
                 h = self.make_hash()
-                print(self.jet_count // self.jet_period, h)
                 if h in self.memory:
-                    print("Repeat", self.memory[h])
-                    return
-                self.memory[h] = self.jet_count // self.jet_period
+                    self.repeat = self.memory[h]
+                else:
+                    self.memory[h] = (self.rock_count + 1, self.max_y)
+        self.rock_count += 1
 
     def valid(self, c: Coord) -> bool:
         """Test if the coordinate a valid unoccupied space."""
@@ -117,9 +147,9 @@ class Chamber:
         return res
 
     def make_hash(self) -> int:
-        """Return a hash of top 10 rows of the chamber."""
+        """Return a hash of top rows of the chamber."""
         return hash(
-            tuple(self.row_value(y) for y in range(self.max_y, self.max_y - 20, -1))
+            tuple(self.row_value(y) for y in range(self.max_y, self.max_y - 40, -1))
         )
 
     def show(self, max_rows: Optional[int] = None) -> None:
@@ -144,4 +174,14 @@ if __name__ == "__main__":
     # chamber = Chamber(stdin.read().strip())
     chamber = Chamber(TEST_DATA)
     chamber.drop_multiple(2022)
+    print(chamber.height)
+    chamber = Chamber(TEST_DATA)
+    chamber.drop_multiple_via_cycles(1_000_000_000_000)
+    print(chamber.height)
+    main_input = stdin.read().strip()
+    chamber = Chamber(main_input)
+    chamber.drop_multiple(2022)
+    print(chamber.height)
+    chamber = Chamber(main_input)
+    chamber.drop_multiple_via_cycles(1_000_000_000_000)
     print(chamber.height)
