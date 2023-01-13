@@ -7,32 +7,38 @@ from typing import Tuple
 
 
 class Player:
+    """Class for each player."""
+
     def __init__(self, square: int):
         self.square = square
         self.score = 0
 
     def advance(self, dies: int) -> None:
+        """Advance."""
         self.square = (self.square + dies - 1) % 10 + 1
         self.score += self.square
 
 
 class DeterministicDie:
+    """Class for a die."""
+
     def __init__(self, sides: int):
         self.sides = sides
         self.nxt = 1
         self.count = 0
 
     def roll(self) -> int:
+        """Roll the die."""
         nxt: int = self.nxt
         self.nxt = 1 if self.nxt == self.sides else self.nxt + 1
         self.count += 1
         return nxt
 
 
-def partA(start1: int, start2: int) -> int:
+def part_a(start1: int, start2: int) -> int:
     """Run part A using deterministic dice.
 
-    >>> partA(4, 8)
+    >>> part_a(4, 8)
     739785
     """
     players: list[Player] = [Player(start1), Player(start2)]
@@ -48,7 +54,7 @@ def partA(start1: int, start2: int) -> int:
     return players[(player + 1) % 2].score * die.count
 
 
-def partB(start1: int, start2: int) -> int:
+def part_b(start1: int, start2: int) -> int:
     """Simulate universe splitting on each roll.
 
     Return number of universes in which the player with more wins wins.
@@ -64,7 +70,7 @@ def partB(start1: int, start2: int) -> int:
                        1,2,5,2,5  1,3,5,3,5  1,4,5,4,5
     Then record 3 wins for player 2 and continue with the 6 universes
 
-    >>> partB(4, 8)
+    >>> part_b(4, 8)
     444356092776315
     """
     State = Tuple[bool, int, int, int, int]
@@ -102,6 +108,8 @@ def partB(start1: int, start2: int) -> int:
 
 if __name__ == "__main__":
     testmod()
-    start1, start2 = [int(line.split(": ")[1]) for line in stdin.read().splitlines()]
-    print(partA(start1, start2))
-    print(partB(start1, start2))
+    input_start1, input_start2 = [
+        int(line.split(": ")[1]) for line in stdin.read().splitlines()
+    ]
+    print(part_a(input_start1, input_start2))
+    print(part_b(input_start1, input_start2))

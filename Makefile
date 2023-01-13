@@ -55,7 +55,7 @@ python-check:
 	isort python/
 	black --quiet python/
 	pyright python/
-	pylint python/aoc_2022_*.py python/golden_test.py python/coord.py python/utils.py
+	pylint python/aoc_2022_*.py python/aoc_2021_*.py python/golden_test.py python/coord.py python/utils.py
 
 haskell-check:
 	hlint haskell/

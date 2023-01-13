@@ -1,5 +1,8 @@
 """Advent of Code 2021 - Day 12."""
 
+# We (ab)use private members - don't complain
+# pylint: disable=protected-access
+
 from __future__ import annotations
 
 from collections import deque

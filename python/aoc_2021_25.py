@@ -14,11 +14,14 @@ from coord import Coord, Extent
 
 
 class Item(Enum):
+    """Item class."""
+
     EMPTY = auto()
     EAST = auto()
     SOUTH = auto()
 
     def show(self) -> str:
+        """Provide string form."""
         if self == Item.EAST:
             return ">"
         if self == Item.SOUTH:
@@ -27,6 +30,7 @@ class Item(Enum):
 
     @staticmethod
     def parse(s: str) -> Item:
+        """Read from a string."""
         if s == ">":
             return Item.EAST
         if s == "v":
@@ -37,6 +41,8 @@ class Item(Enum):
 
 
 class SeaFloor:
+    """Main class for day 25."""
+
     def __init__(self, row_data: list[str]) -> None:
         assert len(row_data) > 0, "No row data to make SeaFloor"
         self._extent = Extent(len(row_data[0]), len(row_data))
@@ -46,8 +52,8 @@ class SeaFloor:
         self._a = np.empty((self._extent.x, self._extent.y), dtype=np.int_)
         self._moved: bool = False
         for y, row in enumerate(row_data):
-            for x, ch in enumerate(row):
-                self._a[x, y] = Item.parse(ch).value
+            for x, char in enumerate(row):
+                self._a[x, y] = Item.parse(char).value
 
     def show(self) -> None:
         """Print a visual representation of the sea floor for debugging."""

@@ -13,6 +13,8 @@ Algorithm = list[bool]  # List of len 512
 
 
 class Image:
+    """Main class for day 20."""
+
     def __init__(self, lines: Optional[list[str]] = None):
         if lines is None:
             self.lit_pixels: frozenset[Coord] = frozenset()
@@ -56,6 +58,7 @@ class Image:
                 yield Coord(x, y)
 
     def is_lit(self, c: Coord) -> bool:
+        """Test if coordinate is lit."""
         distance_beyond_extent = max(
             max(self.min_extent.x - c.x, 0),
             max(c.x - self.max_extent.x + 1, 0),
@@ -64,8 +67,7 @@ class Image:
         )
         if distance_beyond_extent == 0:
             return c in self.lit_pixels
-        else:
-            return self.distant_pixel
+        return self.distant_pixel
 
     def value_around(self, c: Coord) -> int:
         """Return the integer made from the bits around the given coordinate.
@@ -110,6 +112,7 @@ class Image:
 
     @property
     def number_lit(self) -> int:
+        """Count number of lit pixels."""
         assert not self.distant_pixel, "Infinitely many pixels lit"
         return len(self.lit_pixels)
 
@@ -123,6 +126,7 @@ class Image:
 
 
 def read_algo(s: str) -> Algorithm:
+    """Read an algorithm from a string."""
     assert len(s) == 512, "Wrong length for algorithm (" + str(s) + ")"
     assert all(c in "#." for c in s), "Bad char in algorithm"
     return [c == "#" for c in s]
@@ -132,6 +136,7 @@ test1: Image = Image(["#..#.", "#....", "##..#", "..#..", "..###"])
 
 test_algo1: Algorithm = [
     c == "#"
+    # pylint: disable-next=line-too-long
     for c in "..#.#..#####.#.#.#.###.##.....###.##.#..###.####..#####..#....#..#..##..###..######.###...####..#..#####..##..#.#####...##.#.#..#.##..#.#......#.###.######.###.####...#.##.##..#..#..#####.....#.#....###..#.##......#.....#..#..#..##..#...##.######.####.####.#.#...#.......#..#.#.#...####.##.#......#..#...##.#.##..#...##.#.##..###.#......#.#.......#.#.#.####.###.##...#.....####.#..#..#.##.#....##..#.####....##...##..#...#......#.#.......#.......##..####..#...#.#.#...##..#.#..###..#####........#..####......#..#"
 ]
 assert len(test_algo1) == 512
@@ -141,10 +146,10 @@ if __name__ == "__main__":
     # test1.show()
     # test1.enhanced_copy(test_algo1).show()
     algo_block, image_block = stdin.read().split("\n\n")
-    algo = read_algo(algo_block)
-    image = Image(image_block.splitlines())
+    input_algo = read_algo(algo_block)
+    input_image = Image(image_block.splitlines())
     # image.show()
     # image.enhanced_copy(algo).show()
     # image.enhanced_copy(algo).enhanced_copy(algo).show()
-    print(image.enhanced_copy(algo).enhanced_copy(algo).number_lit)
-    print(image.enhanced_repeated_copy(algo, 50).number_lit)
+    print(input_image.enhanced_copy(input_algo).enhanced_copy(input_algo).number_lit)
+    print(input_image.enhanced_repeated_copy(input_algo, 50).number_lit)

@@ -1,7 +1,8 @@
 """Advent of Code 2021 - Day 22."""
 
-# We (ab)use private members - tell pyright not to complain
+# We (ab)use private members - don't complain
 # pyright: reportPrivateUsage=false
+# pylint: disable=protected-access
 
 from __future__ import annotations
 
@@ -28,6 +29,8 @@ def disjoint(a0: int, a1: int, b0: int, b1: int) -> bool:
 
 
 class Cuboid:
+    """Main class for day 22."""
+
     def __init__(self, x0: int, x1: int, y0: int, y1: int, z0: int, z1: int) -> None:
         self._min = Coord3(x0, y0, z0)  # Cuboid includes x0 <= x < x1 etc
         self._max = Coord3(x1, y1, z1)
@@ -44,12 +47,15 @@ class Cuboid:
         )
 
     def overlap(self, other: Cuboid) -> bool:
+        """Test for overlap with the other cuboid."""
         return not self.disjoint(other)
 
     def overlap_any(self, others: Iterable[Cuboid]) -> bool:
+        """Test for overlap with any of the other cuboids."""
         return any(self.overlap(c) for c in others)
 
     def includes(self, other: Cuboid) -> bool:
+        """Test if other cuboid is included."""
         return (
             self._min.x <= other._min.x
             and self._max.x >= other._max.x
@@ -72,6 +78,7 @@ class Cuboid:
         )
 
     def as_tuple(self) -> Tuple[int, int, int, int, int, int]:
+        """Convert to tuple form."""
         return (
             self._min.x,
             self._max.x,
@@ -160,13 +167,13 @@ def merge_adjacents(cs: list[Cuboid]) -> None:
     while made_change:
         #        print("merged", [c.as_tuple() for c in cs])
         made_change = False
-        for i in range(len(cs)):
+        for i in range(len(cs)):  # pylint: disable=consider-using-enumerate
             for j in range(i + 1, len(cs)):
-                ij = cs[i].merge(cs[j])
-                if ij is not None:
+                i_j = cs[i].merge(cs[j])
+                if i_j is not None:
                     del cs[j]
                     del cs[i]
-                    cs.append(ij)
+                    cs.append(i_j)
                     made_change = True
                     break
             if made_change:
@@ -241,15 +248,14 @@ def combine(cs: list[Cuboid], step: Tuple[bool, Cuboid]) -> list[Cuboid]:
         )
         merge_adjacents(new_on)
         return disjoint_cuboids + new_on
-    else:
-        new_off = list(
-            filter(
-                lambda c: c.overlap_any(overlapping_cuboids) and not c.overlap(x),
-                new_cuboids,
-            )
+    new_off = list(
+        filter(
+            lambda c: c.overlap_any(overlapping_cuboids) and not c.overlap(x),
+            new_cuboids,
         )
-        merge_adjacents(new_off)
-        return disjoint_cuboids + new_off
+    )
+    merge_adjacents(new_off)
+    return disjoint_cuboids + new_off
 
 
 def combine_steps(steps: list[Tuple[bool, Cuboid]]) -> list[Cuboid]:
@@ -264,10 +270,12 @@ def combine_steps(steps: list[Tuple[bool, Cuboid]]) -> list[Cuboid]:
 
 
 def total_volume(cs: Iterable[Cuboid]) -> int:
+    """Return total volume of the cuboids."""
     return sum(c.volume() for c in cs)
 
 
 def read_step(s: str) -> Tuple[bool, Cuboid]:
+    """Read from a string."""
     on_off, coords = s.split(" ")
     assert on_off in ["on", "off"], f"Bad switch '{on_off}'"
     x_coords, y_coords, z_coords = coords.split(",")
@@ -318,8 +326,8 @@ test2 = [
 
 if __name__ == "__main__":
     testmod()
-    steps = [read_step(line) for line in stdin.read().splitlines()]
+    input_steps = [read_step(line) for line in stdin.read().splitlines()]
     scope = Cuboid(-50, 51, -50, 51, -50, 51)
-    small_steps = [s for s in steps if scope.overlap(s[1])]
+    small_steps = [s for s in input_steps if scope.overlap(s[1])]
     print(total_volume(combine_steps(small_steps)))
-    print(total_volume(combine_steps(steps)))
+    print(total_volume(combine_steps(input_steps)))

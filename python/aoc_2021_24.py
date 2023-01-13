@@ -9,8 +9,12 @@ from operator import add, mod, mul
 from sys import stdin
 from typing import Callable, Iterable, Iterator, Optional, Tuple, Union
 
+from utils import sign
+
 
 class Register(Enum):
+    """Register."""
+
     w = auto()
     x = auto()
     y = auto()
@@ -22,20 +26,14 @@ InstructionSource = Union[Register, int, None]
 Instruction = Tuple[InstructionKind, Register, InstructionSource, str]
 
 
-def replace(reg: int, val: int) -> int:
+def replace(_reg: int, val: int) -> int:
+    """Replace register value."""
     return val
 
 
 def equal(reg: int, val: int) -> int:
+    """Test if register is equal to value."""
     return int(reg == val)
-
-
-def sign(x: int) -> int:
-    if x > 0:
-        return 1
-    if x < 0:
-        return -1
-    return 0
 
 
 def divide(reg: int, val: int) -> int:
@@ -54,6 +52,8 @@ def divide(reg: int, val: int) -> int:
 
 
 def parse_instruction(s: str) -> Instruction:
+    """Read instruction from a string."""
+
     parts = s.split()
     assert (len(parts) == 3 and parts[0] != "inp") or (
         len(parts) == 2 and parts[0] == "inp"
@@ -85,14 +85,14 @@ def parse_instruction(s: str) -> Instruction:
 
     return (kind, target, source, s)
 
-    pass
-
 
 class ALU:
-    def __init__(self, program: list[str], inputs: list[int] = []) -> None:
+    """ALU class."""
+
+    def __init__(self, program: list[str], inputs: Optional[list[int]] = None) -> None:
         self.reg: Tuple[int, int, int, int] = (0, 0, 0, 0)
         self.program = [parse_instruction(s) for s in program]
-        self.inputs: Iterator[int] = iter(inputs)
+        self.inputs: Iterator[int] = iter([] if inputs is None else inputs)
 
     def run(self, inputs: Optional[Iterable[int]] = None) -> ALU:
         """
@@ -113,6 +113,7 @@ class ALU:
         return self
 
     def step(self, instruction: Instruction) -> None:
+        """Run one step."""
         kind, target, source, _text = instruction
 
         # print(self.reg, _text)
@@ -161,7 +162,7 @@ if __name__ == "__main__":
     testmod()
     monad_source = stdin.read().splitlines()
     alu = ALU(monad_source)
-    count = 0
+    count: int = 0
     for model_number in product(range(9, 0, -1), repeat=14):
         alu.run(model_number)
         count += 1

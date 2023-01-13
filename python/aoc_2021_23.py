@@ -1,5 +1,7 @@
 """Advent of Code 2021 - Day 23."""
 
+# pylint
+
 from __future__ import annotations
 
 from collections import Counter
@@ -30,6 +32,7 @@ class Kind(Enum):
 
 
 class Amphipod:
+    """Main class for day 23."""
 
     _kind_counts: ClassVar[Counter[Kind]] = Counter()
     _room_size: ClassVar[int] = 0
@@ -59,6 +62,7 @@ class Amphipod:
 
     @classmethod
     def reset(cls) -> None:
+        """Reset the amphipod."""
         assert not cls._kind_counts or all(
             cls._kind_counts[kind] == cls._room_size for kind in Kind
         ), ("Wrong number of pod kinds" + str(cls._kind_counts) + str(cls._room_size))
@@ -66,6 +70,7 @@ class Amphipod:
 
 
 class Position:
+    """Position class."""
 
     hallway_size: ClassVar[int] = 11
     valid_hallway_indices: ClassVar[list[int]] = [0, 1, 3, 5, 7, 9, 10]
@@ -120,16 +125,16 @@ class State:
             assert len(s) == len(
                 State.template
             ), f"Wrong length {len(s)} vs. {len(State.template)}"
-            for ch, template in zip(s, State.template):
-                if ch in "ABCD" and template in "AaBbCcDd":
+            for char, template in zip(s, State.template):
+                if char in "ABCD" and template in "AaBbCcDd":
                     position = Position(
                         Kind[template.upper()],
                         0 if template.isupper() else (room_size - 1),
                     )
-                    self.mapping[position] = Amphipod(room_size, Kind[ch])
+                    self.mapping[position] = Amphipod(room_size, Kind[char])
                 else:
-                    assert ch in "#.\n " and ch == template, (
-                        "Bad character: '" + ch + template + "'"
+                    assert char in "#.\n " and char == template, (
+                        "Bad character: '" + char + template + "'"
                     )
             if room_size == 4:
                 self.mapping[Position(Kind.A, 1)] = Amphipod(room_size, Kind.D)
@@ -174,6 +179,7 @@ class State:
         return sum(position.room is None for position in self.mapping.keys())
 
     def path_available(self, p: Position, q: Position) -> bool:
+        # pylint: disable=line-too-long
         """Is a path available between two positions (no blocking amphipods).
 
         Does not test if either end-state is occupied. Only considers paths from a room to a hallway
@@ -208,6 +214,7 @@ class State:
     def available_moves(
         self: State, max_hallway_number: int
     ) -> Iterable[Tuple[Position, Position]]:
+        # pylint: disable=line-too-long
         """Return all available moves.
 
         >>> expected_moves = {(Position(k, 0), Position(None, h)) for k in Kind for h in Position.valid_hallway_indices}
@@ -266,8 +273,7 @@ class State:
             """Return the hallway index of the position and extra moves need in the room."""
             if x.room is None:
                 return x.index, 0
-            else:
-                return x.room.hallway_exit, x.index + 1
+            return x.room.hallway_exit, x.index + 1
 
         p_hallway, p_extra = hallway_and_extra(p)
         q_hallway, q_extra = hallway_and_extra(q)
@@ -296,6 +302,7 @@ class State:
         return True
 
     def show(self) -> None:
+        """Print debugging information."""
         print(
             "".join(
                 self.mapping[Position(None, i)].kind.name
@@ -321,7 +328,10 @@ class State:
 
 
 class QueuedState:
-    """Wrapped version of state with an ordering provided to allow use in a priority queue based only on cost."""
+    """Wrapped version of state with an ordering.
+
+    Provided to  allow use in a priority queue based only on cost.
+    """
 
     def __init__(self, state: State):
         self.state = state
@@ -345,46 +355,37 @@ def solve(start_state: State, max_hallway_number: int) -> int:
     # take care of that we also keep track of the costs of queued items in a dictionary
     # and adjust the pq when we find a state with a lower cost.
     # Also note we used 'Any' as heapq is an untyped module
-    pq: Any = []  # heapq is an untyped module
-    heappush(pq, QueuedState(start_state))
-    # Costs of everything in the pq
-    pq_costs: dict[State, int] = {start_state: 0}
+    p_q: Any = []  # heapq is an untyped module
+    heappush(p_q, QueuedState(start_state))
+    # Costs of everything in the p_q
+    p_q_costs: dict[State, int] = {start_state: 0}
     # We also keep track of all states either visited or in the queue
     explored: set[State] = {start_state}
-    while pq:
-        queued_state: QueuedState = heappop(pq)
+    while p_q:
+        queued_state: QueuedState = heappop(p_q)
         state = queued_state.state
-        del pq_costs[state]
+        del p_q_costs[state]
         if state.organized:
             return state.cost
         for from_position, to_position in state.available_moves(max_hallway_number):
             new_state = state.move(from_position, to_position)
             if new_state not in explored:  # First time seeing this state
-                heappush(pq, QueuedState(new_state))
-                assert new_state not in pq_costs
-                pq_costs[new_state] = new_state.cost
+                heappush(p_q, QueuedState(new_state))
+                assert new_state not in p_q_costs
+                p_q_costs[new_state] = new_state.cost
                 explored.add(new_state)
-            elif new_state in pq_costs and new_state.cost < pq_costs[new_state]:
+            elif new_state in p_q_costs and new_state.cost < p_q_costs[new_state]:
                 # State already in priority queue but now found with a lower cost
-                pq_removed: list[QueuedState] = []
-                while (qs := heappop(pq)).state != new_state:
-                    pq_removed.append(qs)
-                heappush(pq, QueuedState(new_state))
-                for qs in pq_removed:
-                    heappush(pq, qs)
-                pq_costs[new_state] = new_state.cost
+                p_q_removed: list[QueuedState] = []
+                while (qs := heappop(p_q)).state != new_state:
+                    p_q_removed.append(qs)
+                heappush(p_q, QueuedState(new_state))
+                for qs in p_q_removed:
+                    heappush(p_q, qs)
+                p_q_costs[new_state] = new_state.cost
     raise RuntimeError("No solution found")
 
 
-""" test1 is the starting state for the example problem
-
-#############
-#...........#
-###B#C#B#D###
-  #A#D#C#A#
-  #########
-
-"""
 test1: State = State(
     2, "#############\n#...........#\n###B#C#B#D###\n  #A#D#C#A#\n  #########"
 )
@@ -437,11 +438,14 @@ test1_4: State = State(
 
 
 class TestMove:
+    """Test move class."""
+
     def __init__(self, max_hallway_number: int) -> None:
         self.state = test1
         self.max_hallway_number = max_hallway_number
 
     def move(self, a: Position, b: Position) -> TestMove:
+        """Move."""
         assert (a, b) in self.state.available_moves(self.max_hallway_number)
         self.state = self.state.move(a, b)
         print(self.state.cost)

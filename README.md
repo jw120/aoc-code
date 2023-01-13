@@ -1,14 +1,11 @@
 # Advent of Code
 
 TODO:
-* Finish 2022:
-* Python
-    + Try ruff instead of pylint
-    + Try pyright instead of mypy
+* Finish 2022
+* Python- all pylint clean
+* Python - emacs spell checker
 * Finish 2021
-* Repair aoc_2021_22.py
 * Use file input for all python
-* Lint all python
 
 My solutions to advent of code.  So far contains:
 

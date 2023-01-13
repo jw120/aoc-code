@@ -27,3 +27,12 @@ def set_intersection(xs: Iterable[set[T]]) -> set[T]:
     """
     x: set[T] = set()
     return x.intersection(*xs)
+
+
+def sign(x: int) -> int:
+    """Return the sign of an integer -1, 0, or 1."""
+    if x > 0:
+        return 1
+    if x < 0:
+        return -1
+    return 0
