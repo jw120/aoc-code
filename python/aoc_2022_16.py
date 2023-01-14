@@ -1,5 +1,8 @@
 """Advent of Code 2022 - Day 16."""
 
+# TODO
+# Only consider moves which open a valve immediately
+
 from __future__ import annotations
 
 from collections import deque
@@ -47,17 +50,6 @@ class WalkState:
     score: int  # Flow released over all available time from valves opened so far
 
 
-@dataclass(frozen=True)
-class WalkState2:
-    """State for depth-first walk of available paths with two walkers"""
-
-    current_valve_name: tuple[str, str]  # Current positions
-    unopened: frozenset[str]  # Valves (with non-zero flow) still to be opened
-    path: list[str]
-    time_remaining: int
-    score: int  # Flow released over all available time from valves opened so far
-
-
 class Volcano:
     """Main state for day 16."""
 
@@ -69,15 +61,28 @@ class Volcano:
         )
         self.start_valve = self.valves[start_valve_name]
         self.stack: deque[WalkState] = deque()
-        # Remove all zero flow valves with only two tunnels
-        assert len(self.start_valve.tunnels) > 2
-        for v in self.valves.values():
-            if v.flow_rate == 0 and len(v.tunnels) == 2:
-                [(from_name, from_dist), (to_name, to_dist)] = v.tunnels.items()
-                del self.valves[from_name].tunnels[v.name]
-                self.valves[from_name].tunnels[to_name] = from_dist + to_dist
-                del self.valves[to_name].tunnels[v.name]
-                self.valves[to_name].tunnels[from_name] = from_dist + to_dist
+        self.distances: dict[tuple[str, str], int] = {}
+        updated = True
+        while updated:
+            updated = False
+            for v_name in self.valves.keys():
+                self.distances[(v_name, v_name)] = 0
+                for t_name, t_distance in self.valves[v_name].tunnels.items():
+                    for in_name in self.valves.keys():
+                        if (in_name, v_name) in self.distances:
+                            new_distance: int = (
+                                self.distances[(in_name, v_name)] + t_distance
+                            )
+                            if (in_name, t_name) in self.distances:
+                                old_distance = self.distances[(in_name, t_name)]
+                                if old_distance <= new_distance:
+                                    continue
+                            updated = True
+                            self.distances[(in_name, t_name)] = new_distance
+                            self.distances[(t_name, in_name)] = new_distance
+        for v1 in self.valves.keys():
+            for v2 in self.valves.keys():
+                print(v1, v2, self.distances[(v1, v2)])
 
     def push_move(
         self, state: WalkState, tunnel: str, distance: int, threshold_score: int
@@ -85,9 +90,9 @@ class Volcano:
         """Push state that would be reached after moving to given tunnel from state."""
 
         assert state.time_remaining >= distance, f"Time up for move at {state}"
-        if len(state.path) > 1 and tunnel == state.path[-2]:
-            # print("Skipped double-back to", tunnel, "from", state.path)
-            return
+        #        if len(state.path) > 1 and tunnel == state.path[-2]:
+        # print("Skipped double-back to", tunnel, "from", state.path)
+        #            return
         possible_score = state.score + (state.time_remaining - distance) * sum(
             self.valves[v].flow_rate for v in state.unopened
         )
@@ -159,15 +164,12 @@ class Volcano:
             if state.score > best_score:
                 best_score = state.score
                 print("Best", state.score, state.path)
-            if not state.unopened:
-                # print("End of path", state.score, state.path)
-                continue
-            for tunnel, distance in self.valves[
-                state.current_valve_name
-            ].tunnels.items():
+            for destination in state.unopened:
+                if destination == state.current_valve_name:
+                    continue
+                distance = self.distances[state.current_valve_name, destination]
                 if distance < state.time_remaining:
-                    self.push_move(state, tunnel, distance, best_score)
-            # Explore opening the current valve
+                    self.push_move(state, destination, distance, best_score)
             self.push_open(state, best_score)
         return best_score
 
@@ -186,6 +188,6 @@ Valve JJ has flow rate=21; tunnel leads to valve II"""
 
 if __name__ == "__main__":
     testmod()
-    # v = Volcano(TEST_DATA)
+    # v = Volcano(TEST_DATA, "AA")
     v = Volcano(stdin.read(), "AA")
     print(v.generate_paths(30))
