@@ -4,6 +4,7 @@ from doctest import testmod
 from sys import stdin
 
 from coord import Coord
+from utils import sign
 
 test_input: list[str] = [
     "R 4",
@@ -26,15 +27,6 @@ longer_test_input = [
     "L 25",
     "U 20",
 ]
-
-
-def sign(x: int) -> int:
-    """Return sign of an integer."""
-    if x > 0:
-        return 1
-    if x < 0:
-        return -1
-    return 0
 
 
 def update(linked_knot: Coord, knot: Coord) -> Coord:

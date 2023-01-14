@@ -2,7 +2,8 @@
 
 # from __future__ import annotations
 
-# from doctest import testmod
+from dataclasses import dataclass
+from doctest import testmod
 from math import lcm
 from sys import stdin
 from typing import Optional
@@ -37,6 +38,15 @@ ROCKS: list[Rock] = [
 WIDTH: int = 7
 
 
+@dataclass(frozen=True)
+class MemState:
+    """State used to test for looping."""
+
+    blocks: tuple[tuple[bool]]
+    rock: int
+    jet: int
+
+
 class Chamber:
     """Main class for day 17."""
 
@@ -50,7 +60,7 @@ class Chamber:
         self.jet_period = lcm(len(ROCKS), len(self.jet_pattern))
         self.rock_count: int = 0
         # Memory holds rock count and max_y for hashes of pattern
-        self.memory: dict[int, tuple[int, int]] = {}
+        self.memory: dict[MemState, tuple[int, int]] = {}
         # Once we detect a loop set this to rock count and max_y for first occurence
         self.repeat: Optional[tuple[int, int]] = None
 
@@ -58,6 +68,17 @@ class Chamber:
     def height(self) -> int:
         """Current height of the tower."""
         return self.max_y + 1
+
+    def mem_state(self) -> MemState:
+        """Generate state for loop testing."""
+        return MemState(
+            blocks=tuple(
+                tuple(Coord(x, y) in self.occupied for x in range(WIDTH))
+                for y in range(self.max_y, self.max_y - 10, -1)
+            ),
+            rock=self.rock_count % len(ROCKS),
+            jet=self.jet_count % self.jet_period,
+        )
 
     def drop_multiple(self, n: int) -> None:
         """Drop the given number of rocks.
@@ -83,14 +104,10 @@ class Chamber:
             self.drop(r % 5, True)
             r += 1
         r0, max_y0 = self.repeat
-        print("Found repeat at", r, "back to", r0)
         period = r - r0
         y_delta = self.max_y - max_y0
-        print("Period", period, "y_delta", y_delta)
         cycles = (n - r) // period
         r += period * cycles
-        print("Advanced", cycles, "cycles, now at", r)
-        print("Remaining", n - r)
         while r < n:
             self.drop(r % 5, False)
             r += 1
@@ -107,10 +124,8 @@ class Chamber:
                 if self.jet_pattern[self.jet_count % self.jen_length]
                 else Coord(-1, 0)
             )
-            # print(rock, horizontal_move)
             new_rock: Rock = [c + horizontal_move for c in rock]
             if self.all_valid(new_rock):
-                # print("Moved horizontally")
                 rock = new_rock
             self.jet_count += 1
             # Move down
@@ -121,12 +136,12 @@ class Chamber:
                     self.occupied.add(c)
                 break
             rock = new_rock
-            if use_memory and self.jet_count % self.jet_period == 0:
-                h = self.make_hash()
-                if h in self.memory:
-                    self.repeat = self.memory[h]
-                else:
-                    self.memory[h] = (self.rock_count + 1, self.max_y)
+        if use_memory:
+            m = self.mem_state()
+            if m in self.memory:
+                self.repeat = self.memory[m]
+            else:
+                self.memory[m] = (self.rock_count + 1, self.max_y)
         self.rock_count += 1
 
     def valid(self, c: Coord) -> bool:
@@ -136,20 +151,6 @@ class Chamber:
     def all_valid(self, coords: list[Coord]) -> bool:
         """Test if all of the coordinates are valid unoccupied spaces."""
         return all(self.valid(c) for c in coords)
-
-    def row_value(self, y: int) -> int:
-        """Return the value of row y interpreting booleans as binary."""
-        bin_values = [Coord(x, y) in self.occupied for x in range(WIDTH)]
-        res = 0
-        for bit in bin_values:
-            res = (res << 1) | bit
-        return res
-
-    def make_hash(self) -> int:
-        """Return a hash of top rows of the chamber."""
-        return hash(
-            tuple(self.row_value(y) for y in range(self.max_y, self.max_y - 40, -1))
-        )
 
     def show(self, max_rows: Optional[int] = None) -> None:
         """Show debugging information."""
@@ -169,14 +170,7 @@ class Chamber:
 TEST_DATA = ">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>"
 
 if __name__ == "__main__":
-    # testmod()
-    # chamber = Chamber(stdin.read().strip())
-    chamber = Chamber(TEST_DATA)
-    chamber.drop_multiple(2022)
-    print(chamber.height)
-    chamber = Chamber(TEST_DATA)
-    chamber.drop_multiple_via_cycles(1_000_000_000_000)
-    print(chamber.height)
+    testmod()
     main_input = stdin.read().strip()
     chamber = Chamber(main_input)
     chamber.drop_multiple(2022)

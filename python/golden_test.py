@@ -22,7 +22,7 @@ completed: list[Tuple[int, Iterable[int]]] = [
     (2019, list(range(1, 12)) + [13, 14, 15]),
     (2020, range(1, 26)),
     (2021, list(range(1, 16)) + [17, 19, 20, 21, 22, 23, 25]),
-    (2022, list(range(1, 15)) + [18, 21]),
+    (2022, list(range(1, 15)) + [17, 18, 21]),
 ]
 
 # With >3s execution time
