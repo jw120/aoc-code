@@ -1,8 +1,10 @@
 # Advent of Code
 
 TODO:
+* Repair emacs
 * Finish 2022
 * Python- all pylint clean
+* Stop using fileinput
 * Python - emacs spell checker
 * Finish 2021
 * Use file input for all python

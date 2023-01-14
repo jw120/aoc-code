@@ -1,7 +1,5 @@
 """Advent of Code 2022 - Day 17."""
 
-# from __future__ import annotations
-
 from dataclasses import dataclass
 from doctest import testmod
 from math import lcm
