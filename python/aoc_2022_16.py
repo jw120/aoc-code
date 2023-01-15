@@ -94,10 +94,10 @@ def graph_adj_to_dist(adj: dict[T, Iterable[T]]) -> dict[tuple[T, T], int]:
 class WalkState:
     """State for depth-first walk of available paths"""
 
-    current_valve_name: ValveName  # Current position
+    current_valve_name: list[ValveName]
+    time_remaining: list[int]  # for each walker
+    path: list[list[ValveName]]  # for each walker (for debugging)
     unopened: frozenset[ValveName]  # Valves (with non-zero flow) still to be opened
-    path: list[ValveName]
-    time_remaining: int
     score: int  # Flow released over all available time from valves opened so far
 
 
@@ -115,27 +115,29 @@ class Volcano:
         )
         self.start_valve_name: str = start_valve_name
 
-    def solve(self, time_available: int) -> int:
+    def solve(self, time_available: int, walkers: int) -> int:
         """Find best scoring path.
 
-        Depth-first search using th adjacency matrix.
+        Depth-first search using the adjacency matrix.
 
-        >>> Volcano(TEST_DATA, "AA").solve(30)
+        >>> v = Volcano(TEST_DATA, "AA")
+        >>> v.solve(30, 1)
         1651
+        >>> v.solve(26, 2)
+        1707
         """
         stack: deque[WalkState] = deque([])
 
         stack.append(
             WalkState(
-                current_valve_name=self.start_valve_name,
+                current_valve_name=[self.start_valve_name] * walkers,
+                time_remaining=[time_available] * walkers,
+                path=[[] for _ in range(walkers)],
                 unopened=self.non_zero_valve_names,
-                path=[],
-                time_remaining=time_available,
                 score=0,
             )
         )
         best_score: int = 0
-        count: int = 0
 
         while True:
             if not stack:
@@ -143,31 +145,41 @@ class Volcano:
             state = stack.pop()
             if state.score > best_score:
                 best_score = state.score
-            #                print("Best", state.score, state.path)
+                print(best_score, state.path)
             possible_flow_rate = sum(self.valves[v].flow_rate for v in state.unopened)
-            for destination in state.unopened:
-                if destination == state.current_valve_name:
-                    continue
-                distance = self.distances[state.current_valve_name, destination]
-                new_time_remaining = state.time_remaining - distance - 1
-                if new_time_remaining > 0:
-                    flow_rate = self.valves[destination].flow_rate
-                    new_score = state.score + flow_rate * new_time_remaining
-                    possible_score = (
-                        state.score + possible_flow_rate * new_time_remaining
+            for walker in range(walkers):
+                #                print(state)
+                assert set(state.path[walker]).isdisjoint(state.unopened)
+                for destination in state.unopened:
+                    if destination == state.current_valve_name[walker]:
+                        continue
+                    distance = self.distances[
+                        state.current_valve_name[walker], destination
+                    ]
+                    walker_new_time_remaining = (
+                        state.time_remaining[walker] - distance - 1
                     )
-                    if possible_score > best_score:
-                        stack.append(
-                            WalkState(
-                                current_valve_name=destination,
-                                unopened=state.unopened - frozenset([destination]),
-                                path=state.path + [destination],
+                    if walker_new_time_remaining > 0:
+                        flow_rate = self.valves[destination].flow_rate
+                        new_score = state.score + flow_rate * walker_new_time_remaining
+                        possible_score = state.score + possible_flow_rate * max(
+                            t - distance - 1 for t in state.time_remaining
+                        )
+                        if possible_score > best_score:
+                            new_current_valve_name = state.current_valve_name.copy()
+                            new_current_valve_name[walker] = destination
+                            new_time_remaining = state.time_remaining.copy()
+                            new_time_remaining[walker] = walker_new_time_remaining
+                            new_path = [p.copy() for p in state.path]
+                            new_path[walker].append(destination)
+                            new_state = WalkState(
+                                current_valve_name=new_current_valve_name,
                                 time_remaining=new_time_remaining,
+                                path=new_path,
+                                unopened=state.unopened - frozenset([destination]),
                                 score=new_score,
                             )
-                        )
-                        count += 1
-        #        print("States", count)
+                            stack.append(new_state)
         return best_score
 
 
@@ -184,6 +196,8 @@ Valve JJ has flow rate=21; tunnel leads to valve II"""
 
 
 if __name__ == "__main__":
-    testmod()
+    #    testmod()
+    # v = Volcano(TEST_DATA, "AA")
     v = Volcano(stdin.read(), "AA")
-    print(v.solve(30))
+    print(v.solve(30, 1))
+    print(v.solve(26, 2))
