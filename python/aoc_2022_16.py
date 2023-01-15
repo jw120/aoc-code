@@ -135,6 +135,7 @@ class Volcano:
             )
         )
         best_score: int = 0
+        count: int = 0
 
         while True:
             if not stack:
@@ -142,25 +143,31 @@ class Volcano:
             state = stack.pop()
             if state.score > best_score:
                 best_score = state.score
-                print("Best", state.score, state.path)
+            #                print("Best", state.score, state.path)
+            possible_flow_rate = sum(self.valves[v].flow_rate for v in state.unopened)
             for destination in state.unopened:
                 if destination == state.current_valve_name:
                     continue
                 distance = self.distances[state.current_valve_name, destination]
-                new_time = state.time_remaining - distance - 1
-                if new_time > 0:
-                    new_score = (
-                        state.score + self.valves[destination].flow_rate * new_time
+                new_time_remaining = state.time_remaining - distance - 1
+                if new_time_remaining > 0:
+                    flow_rate = self.valves[destination].flow_rate
+                    new_score = state.score + flow_rate * new_time_remaining
+                    possible_score = (
+                        state.score + possible_flow_rate * new_time_remaining
                     )
-                    stack.append(
-                        WalkState(
-                            current_valve_name=destination,
-                            unopened=state.unopened - frozenset([destination]),
-                            path=state.path + [destination],
-                            time_remaining=state.time_remaining - distance - 1,
-                            score=new_score,
+                    if possible_score > best_score:
+                        stack.append(
+                            WalkState(
+                                current_valve_name=destination,
+                                unopened=state.unopened - frozenset([destination]),
+                                path=state.path + [destination],
+                                time_remaining=new_time_remaining,
+                                score=new_score,
+                            )
                         )
-                    )
+                        count += 1
+        #        print("States", count)
         return best_score
 
 
