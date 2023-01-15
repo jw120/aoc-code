@@ -1,16 +1,17 @@
 # Advent of Code
 
 TODO:
-* Repair emacs
-* Finish 2022
-* Python- all pylint clean
+* Python- all pylint clean (2019 and 2022)
+* Fix failing
+  - 2020/6 fails
+  - 2020/19 fails
 * Stop using fileinput
 * Python - emacs spell checker
 * Finish 2021
-* Use file input for all python
 
 My solutions to advent of code.  So far contains:
 
+ * Complete 2022 in Python (done in 2022 advent season)
  * Ongoing 2021 in Python and Haskell (done in 2021 advent season)
  * Complete 2020 in Python (done in 2020 advent season)
  * Partial 2019 in Python (started in 2020 advent season)

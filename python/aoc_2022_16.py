@@ -12,8 +12,7 @@ from dataclasses import dataclass
 from doctest import testmod
 from re import fullmatch
 from sys import stdin
-from typing import cast, Iterable, TypeVar, TypeAlias
-
+from typing import Iterable, TypeAlias, TypeVar, cast
 
 ValveName: TypeAlias = str
 
@@ -145,7 +144,7 @@ class Volcano:
             state = stack.pop()
             if state.score > best_score:
                 best_score = state.score
-                print(best_score, state.path)
+            #                print(best_score, state.path)
             possible_flow_rate = sum(self.valves[v].flow_rate for v in state.unopened)
             for walker in range(walkers):
                 #                print(state)
@@ -196,8 +195,7 @@ Valve JJ has flow rate=21; tunnel leads to valve II"""
 
 
 if __name__ == "__main__":
-    #    testmod()
-    # v = Volcano(TEST_DATA, "AA")
+    testmod()
     v = Volcano(stdin.read(), "AA")
     print(v.solve(30, 1))
     print(v.solve(26, 2))
