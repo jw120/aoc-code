@@ -1,5 +1,7 @@
 """Advent of Code 2019 - Day 8."""
 
+# pylint: disable=missing-function-docstring, missing-class-docstring
+
 from collections import Counter
 from sys import stdin
 
@@ -41,6 +43,6 @@ def part_two(i: Image) -> None:
 
 
 if __name__ == "__main__":
-    i = Image(stdin.read().strip(), 6, 25)
-    print(part_one(i))
-    part_two(i)
+    input_i = Image(stdin.read().strip(), 6, 25)
+    print(part_one(input_i))
+    part_two(input_i)

@@ -1,5 +1,7 @@
 """Advent of Code 2019 - Day 4."""
 
+# pylint: disable=missing-function-docstring
+
 from collections.abc import Callable
 from sys import stdin
 
@@ -27,7 +29,7 @@ def valid_two(
 def count(
     valid: Callable[[int, int, int, int, int, int, int, int], bool], low: int, high: int
 ) -> int:
-    count: int = 0
+    n: int = 0
     for a in range(0, 10):
         for b in range(a, 10):
             for c in range(b, 10):
@@ -35,11 +37,11 @@ def count(
                     for e in range(d, 10):
                         for f in range(e, 10):
                             if valid(a, b, c, d, e, f, low, high):
-                                count += 1
-    return count
+                                n += 1
+    return n
 
 
 if __name__ == "__main__":
-    low, high = [int(s) for s in stdin.read().strip().split("-")]
-    print(count(valid_one, low, high))
-    print(count(valid_two, low, high))
+    input_low, input_high = [int(s) for s in stdin.read().strip().split("-")]
+    print(count(valid_one, input_low, input_high))
+    print(count(valid_two, input_low, input_high))

@@ -1,5 +1,7 @@
 """Advent of Code 2019 - Day 9."""
 
+# pylint: disable=missing-function-docstring
+
 from sys import stdin
 
 import IntCode
@@ -8,11 +10,11 @@ import IntCode
 def run(code: list[int], x: int) -> int:
     machine: IntCode.Machine = IntCode.Machine(code, [x])
     machine.run()
-    [ans] = machine.output_vals
-    return ans
+    assert len(machine.output_vals) == 1
+    return machine.output_vals[0]
 
 
 if __name__ == "__main__":
-    code: list[int] = [int(s) for s in stdin.read().split(",")]
-    print(run(code, 1))
-    print(run(code, 2))
+    input_code: list[int] = [int(s) for s in stdin.read().split(",")]
+    print(run(input_code, 1))
+    print(run(input_code, 2))

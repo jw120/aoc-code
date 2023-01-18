@@ -1,5 +1,7 @@
 """Advent of Code 2019 - Day 3."""
 
+# pylint: disable=missing-class-docstring
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -51,6 +53,7 @@ Direction = Union[Up, Right, Down, Left]
 
 
 def parse_direction(s: str) -> Direction:
+    """Read a direction from a string."""
     if s == Up.name:
         return Up()
     if s == Right.name:
@@ -66,6 +69,8 @@ Wire = list[tuple[Direction, int]]
 
 
 def parse_wire(line: str) -> Wire:
+    """Read a wire from a string."""
+
     def parse_segment(s: str) -> tuple[Direction, int]:
         direction: Direction = parse_direction(s[0])
         distance = int(s[1:])

@@ -43,6 +43,7 @@ def build_tree(
 
 
 def parse_link(s: str) -> tuple[str, str]:
+    """Read links from a string."""
     [x, y] = s.split(")")
     return (x, y)
 
@@ -77,15 +78,15 @@ def label_root_distance(root: K, forward: dict[K, set[K]]) -> dict[K, int]:
     4
     """
     labels: dict[K, int] = {}
-    distance: int = 0
+    dist: int = 0
     frontier: set[K] = {root}
     while len(frontier) > 0:
         new_frontier: set[K] = set()
         for x in frontier:
-            labels[x] = distance
+            labels[x] = dist
             new_frontier |= forward[x]
         frontier = new_frontier
-        distance += 1
+        dist += 1
     return labels
 
 
@@ -122,7 +123,7 @@ def distance(
 if __name__ == "__main__":
     testmod()
     orbits: list[tuple[str, str]] = [parse_link(line.strip()) for line in stdin]
-    (forward, backward, [root]) = build_tree(orbits)
-    root_dist: dict[str, int] = label_root_distance(root, forward)
-    print(sum(root_dist.values()))
-    print(distance("SAN", "YOU", backward, root_dist))
+    (input_forward, input_backward, [input_root]) = build_tree(orbits)
+    input_root_dist: dict[str, int] = label_root_distance(input_root, input_forward)
+    print(sum(input_root_dist.values()))
+    print(distance("SAN", "YOU", input_backward, input_root_dist))

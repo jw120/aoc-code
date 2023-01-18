@@ -1,5 +1,7 @@
 """Advent of Code 2019 - Day 5."""
 
+# pylint: disable=missing-function-docstring
+
 from sys import stdin
 
 import IntCode
@@ -21,6 +23,6 @@ def part_two(code: list[int]) -> None:
 
 
 if __name__ == "__main__":
-    code: list[int] = [int(s) for s in stdin.read().split(",")]
-    part_one(code)
-    part_two(code)
+    input_code: list[int] = [int(s) for s in stdin.read().split(",")]
+    part_one(input_code)
+    part_two(input_code)

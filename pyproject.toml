@@ -57,7 +57,7 @@ max-locals = 25
 min-public-methods = 1
 
 # Maximum number of nested blocks for function / method body (default is 5)
-max-nested-blocks = 6
+max-nested-blocks = 7
 
 # Maximum number of return / yield for function / method body. (default is 6)
 max-returns = 7

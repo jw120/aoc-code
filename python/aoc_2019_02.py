@@ -1,5 +1,7 @@
 """Advent of Code 2019 - Day 2."""
 
+# pylint: disable=missing-function-docstring
+
 from doctest import testmod
 from sys import stdin
 
@@ -24,6 +26,6 @@ def search_noun_verb(code: list[int], target: int) -> int:
 
 if __name__ == "__main__":
     testmod()
-    code: list[int] = [int(s) for s in stdin.read().split(",")]
-    print(run_with_noun_verb(code, 12, 2))
-    print(search_noun_verb(code, 19690720))
+    input_code: list[int] = [int(s) for s in stdin.read().split(",")]
+    print(run_with_noun_verb(input_code, 12, 2))
+    print(search_noun_verb(input_code, 19690720))
