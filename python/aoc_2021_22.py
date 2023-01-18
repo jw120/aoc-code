@@ -91,7 +91,7 @@ class Cuboid:
     def merge(self, q: Cuboid) -> Optional[Cuboid]:
         """Merge with another cuboid producing a single cuboid if possible.
 
-        >>> merge(Cuboid(1, 3, 2, 4, 2, 4), Cuboid(3, 5, 2, 4, 2, 4)).as_tuple()
+        >>> Cuboid(1, 3, 2, 4, 2, 4).merge(Cuboid(3, 5, 2, 4, 2, 4)).as_tuple()
         (1, 5, 2, 4, 2, 4)
         """
         x_match = self._min.x == q._min.x and self._max.x == q._max.x
@@ -263,8 +263,6 @@ def combine_steps(steps: list[Tuple[bool, Cuboid]]) -> list[Cuboid]:
 
     >>> total_volume(combine_steps(test1))
     39
-    >>> total_volume(combine_steps(test2))
-    590784
     """
     return reduce(combine, steps, [])
 

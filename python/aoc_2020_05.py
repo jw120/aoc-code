@@ -23,7 +23,8 @@ def seat_id(code: str) -> int:
 
 
 def empty_seat(seats: list[int]) -> int:
-    sorted_seats: list[int] = sorted(ids)
+    """Return index of first empty seat."""
+    sorted_seats: list[int] = sorted(seats)
     prev_seat: int = sorted_seats[0]
     for seat in sorted_seats[1:]:
         if seat != prev_seat + 1:

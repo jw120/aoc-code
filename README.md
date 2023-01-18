@@ -3,7 +3,6 @@
 TODO:
 * Python- all pylint clean (2019 and 2022)
 * Fix failing
-  - 2020/6 fails
   - 2020/19 fails
 * Stop using fileinput
 * Python - emacs spell checker

@@ -30,7 +30,7 @@ profile = "black"
 [tool.pylint]
 # Allow single character lower case names with optional digit for names
 enable = "all"
-good-names = ["up", "op"]
+good-names = ["up", "op", "ip"]
 good-names-rgxs = [
   "^[a-z][0-9]?$",
   "^[a-z]s$",

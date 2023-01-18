@@ -1,5 +1,7 @@
 """Advent of Code 2020 - Day 8."""
 
+from __future__ import annotations
+
 from doctest import testmod
 from enum import Enum, auto
 from sys import stdin
@@ -7,36 +9,43 @@ from typing import Optional, Tuple
 
 
 class Operation(Enum):
+    """Operation class."""
+
     NOP = auto()
     ACC = auto()
     JMP = auto()
 
-
-def parse_opcode(s: str) -> Operation:
-    if s == "nop":
-        return Operation.NOP
-    elif s == "acc":
-        return Operation.ACC
-    elif s == "jmp":
-        return Operation.JMP
-    raise RuntimeError("Unknown opcode in parse_opcode", s)
+    @staticmethod
+    def parse(s: str) -> Operation:
+        """Read an operation from a string."""
+        if s == "nop":
+            return Operation.NOP
+        if s == "acc":
+            return Operation.ACC
+        if s == "jmp":
+            return Operation.JMP
+        raise RuntimeError("Unknown opcode in parse()", s)
 
 
 Instruction = Tuple[Operation, int]
 
 
 def parse_instruction(s: str) -> Instruction:
+    """Read an instruction from a string."""
     [s1, s2] = s.split()
-    return (parse_opcode(s1), int(s2))
+    return (Operation.parse(s1), int(s2))
 
 
 class Machine:
+    """Main class for day 8."""
+
     def __init__(self, code: list[Instruction]) -> None:
         self.code: list[Instruction] = code.copy()
         self.acc: int = 0
         self.ip: int = 0
 
     def step(self) -> None:
+        """Step the machine."""
         (operation, argument) = self.code[self.ip]
         if operation == Operation.NOP:
             self.ip += 1
@@ -128,6 +137,6 @@ def mutate_until_end(original_code: list[Instruction]) -> int:
 
 if __name__ == "__main__":
     testmod()
-    code: list[Instruction] = [parse_instruction(line) for line in stdin]
-    print(run_until_loop(code))
-    print(mutate_until_end(code))
+    input_code: list[Instruction] = [parse_instruction(line) for line in stdin]
+    print(run_until_loop(input_code))
+    print(mutate_until_end(input_code))

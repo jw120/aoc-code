@@ -56,6 +56,8 @@ python-check:
 	black --quiet python/
 	pyright python/
 	pylint python/aoc_2022_*.py python/aoc_2021_*.py python/golden_test.py python/coord.py python/utils.py
+	python -m doctest python/*.py
+	python python/golden_test.py --fast
 
 haskell-check:
 	hlint haskell/

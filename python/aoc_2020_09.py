@@ -29,9 +29,9 @@ test_one: list[int] = [
 
 def can_be_sum(xs: list[int], y: int) -> bool:
     """Test if y be written as the sum of two distinct values in xs."""
-    for i1 in range(0, len(xs)):
-        for i2 in range(i1 + 1, len(xs)):
-            if xs[i1] + xs[i2] == y and xs[i1] != xs[i2]:
+    for i1, x1 in enumerate(xs):
+        for x2 in xs[i1 + 1 :]:
+            if x1 + x2 == y and x1 != x2:
                 return True
     return False
 
@@ -71,6 +71,6 @@ def find_contig_sum(xs: list[int], target: int) -> int:
 if __name__ == "__main__":
     testmod()
     nums: list[int] = [int(line) for line in stdin]
-    target = test_sequence(nums, 25)
-    print(target)
-    print(find_contig_sum(nums, target))
+    input_target = test_sequence(nums, 25)
+    print(input_target)
+    print(find_contig_sum(nums, input_target))

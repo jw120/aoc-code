@@ -109,6 +109,6 @@ def part_two(rules: list[Rule], target: str) -> int:
 
 if __name__ == "__main__":
     testmod()
-    rules: list[Rule] = [parse_rule(line) for line in stdin]
-    print(part_one(rules, "shiny gold"))
-    print(part_two(rules, "shiny gold"))
+    input_rules: list[Rule] = [parse_rule(line) for line in stdin]
+    print(part_one(input_rules, "shiny gold"))
+    print(part_two(input_rules, "shiny gold"))

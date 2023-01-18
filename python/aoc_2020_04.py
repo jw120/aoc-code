@@ -15,7 +15,7 @@ def parse_passport(block: str) -> Passport:
     >>> parse_passport("eyr:2023 ecl:amb\niyr:2020")
     {'eyr': '2023', 'ecl': 'amb', 'iyr': '2020'}
     """
-    return {k: v for (k, v) in [item.split(":") for item in block.split()]}
+    return dict(item.split(":") for item in block.split())
 
 
 tests_one: list[str] = [
@@ -80,10 +80,9 @@ def valid_hgt(s: str) -> bool:
     """
     if not (m := hgt_pattern.fullmatch(s)):
         return False
-    elif m.group(2) == "cm":
+    if m.group(2) == "cm":
         return 150 <= int(m.group(1)) <= 193
-    else:
-        return 59 <= int(m.group(1)) <= 76
+    return 59 <= int(m.group(1)) <= 76
 
 
 def valid_two(p: Passport) -> bool:

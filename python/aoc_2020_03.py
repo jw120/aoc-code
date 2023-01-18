@@ -9,6 +9,7 @@ Grid = List[Line]
 
 
 def parse_line(s: str) -> Line:
+    """Read a Line from the string."""
     return [ch == "#" for ch in s.strip()]
 
 
@@ -50,12 +51,12 @@ def tree_count(grid: Grid, right: int, down: int) -> int:
 
 if __name__ == "__main__":
     testmod()
-    grid: Grid = [parse_line(s) for s in stdin]
-    print(tree_count(grid, 3, 1))
+    input_grid: Grid = [parse_line(s) for s in stdin]
+    print(tree_count(input_grid, 3, 1))
     print(
-        tree_count(grid, 1, 1)
-        * tree_count(grid, 3, 1)
-        * tree_count(grid, 5, 1)
-        * tree_count(grid, 7, 1)
-        * tree_count(grid, 1, 2)
+        tree_count(input_grid, 1, 1)
+        * tree_count(input_grid, 3, 1)
+        * tree_count(input_grid, 5, 1)
+        * tree_count(input_grid, 7, 1)
+        * tree_count(input_grid, 1, 2)
     )

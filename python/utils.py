@@ -36,7 +36,7 @@ def set_intersection(xs: Iterable[set[T]]) -> set[T]:
     set()
     """
     try:
-        x: set[T] = next(xs.__iter__())
+        x: set[T] = next(iter(xs))
         return x.intersection(*xs)
     except StopIteration:
         return set()
