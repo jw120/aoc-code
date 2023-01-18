@@ -1,16 +1,18 @@
 """Advent of Code 2020 - Day 16."""
 
-
 from doctest import testmod
 from functools import reduce
-from re import Pattern, compile
 from sys import stdin
 
+import re
+
 ValidField = tuple[str, tuple[int, int], tuple[int, int]]
-valid_pattern: Pattern[str] = compile(r"([a-z ]+): (\d+)-(\d+) or (\d+)-(\d+)")
+valid_pattern: re.Pattern[str] = re.compile(r"([a-z ]+): (\d+)-(\d+) or (\d+)-(\d+)")
 
 
 def parse_input(s: str) -> tuple[list[ValidField], list[int], list[list[int]]]:
+    """Read input from string."""
+
     def parse_valid(line: str) -> ValidField:
         if m := valid_pattern.fullmatch(line):
             return (
@@ -92,13 +94,19 @@ def run2(valids: list[ValidField], your: list[int], tickets: list[list[int]]) ->
     allocated_fields: list[tuple[str, int]] = []
     while field_fit:
         for field_name, field_positions in field_fit:
+            # pylint: disable=modified-iterating-list
             if not field_positions:
                 raise RuntimeError("No position found for", field_name)
             if len(field_positions) == 1:
+
                 found_position: int = field_positions[0]
                 allocated_fields.append((field_name, found_position))
                 field_fit.remove((field_name, field_positions))
-                for _other_field_name, other_field_positions in field_fit:
+
+                for (
+                    _other_field_name,
+                    other_field_positions,
+                ) in field_fit:
                     other_field_positions.remove(found_position)
                 break
     departure_field_positions = [

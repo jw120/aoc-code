@@ -58,8 +58,10 @@ def part_two(buses: list[Optional[int]]) -> int:
 if __name__ == "__main__":
     testmod()
     start_time: int = int(stdin.readline())
-    buses: list[str] = next(stdin).split(",")
-    running_buses: list[int] = [int(x) for x in buses if x != "x"]
+    input_buses: list[str] = next(stdin).split(",")
+    running_buses: list[int] = [int(x) for x in input_buses if x != "x"]
     print(part_one(running_buses, start_time))
-    bus_constraints: list[Optional[int]] = [None if x == "x" else int(x) for x in buses]
+    bus_constraints: list[Optional[int]] = [
+        None if x == "x" else int(x) for x in input_buses
+    ]
     print(part_two(bus_constraints))

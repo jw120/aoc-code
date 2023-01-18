@@ -1,5 +1,7 @@
 """Advent of Code 2020 - Day 11."""
 
+# pylint: disable=chained-comparison
+
 from collections.abc import Callable, Iterable
 from sys import stdin
 

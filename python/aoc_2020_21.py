@@ -11,6 +11,7 @@ Allergen = NewType("Allergen", str)
 
 
 def parse_food(s: str) -> tuple[list[Ingredient], list[Allergen]]:
+    """Read a food from string."""
     before, after = s.strip()[:-1].split(" (contains ")
     ingredients = [Ingredient(i) for i in before.split()]
     allergens = [Allergen(a) for a in after.split(", ")]
@@ -88,6 +89,6 @@ def part_two(foods: list[tuple[list[Ingredient], list[Allergen]]]) -> str:
 
 if __name__ == "__main__":
     testmod()
-    foods = [parse_food(line) for line in stdin]
-    print(part_one(foods))
-    print(part_two(foods))
+    input_foods = [parse_food(line) for line in stdin]
+    print(part_one(input_foods))
+    print(part_two(input_foods))

@@ -46,11 +46,10 @@ def right(flipped: bool, rotation: Direction) -> Direction:
     """Return the edge which is to the right for given tile orientation."""
     if flipped:
         return Direction((rotation + 3) % 4)
-    else:
-        return Direction((rotation + 1) % 4)
+    return Direction((rotation + 1) % 4)
 
 
-def down(flipped: bool, rotation: Direction) -> Direction:
+def down(_flipped: bool, rotation: Direction) -> Direction:
     """Return the edge which is down for given tile orientation."""
     return Direction((rotation + 2) % 4)
 
@@ -121,7 +120,6 @@ def count_trues(xs: list[list[bool]]) -> int:
     return count
 
 
-"""The sea monster we are looking for"""
 monster: list[list[bool]] = [
     [c == "#" for c in line]
     for line in ["                  # ", "#    ##    ##    ###", " #  #  #  #  #  #   "]
@@ -129,6 +127,8 @@ monster: list[list[bool]] = [
 
 
 class Tile:
+    """Tile class."""
+
     def __init__(self, lines: list[str]) -> None:
         def str_to_edge(s: str) -> EdgeValue:
             return EdgeValue(int(s.replace(".", "0").replace("#", "1"), 2))
@@ -148,13 +148,14 @@ class Tile:
     def __str__(self) -> str:
         return f"{self.id}: {self.edges}"
 
-    def oriented_image(self, flip: bool, direction: Direction) -> list[list[bool]]:
-        im = deepcopy(self.image)
+    def oriented_image(self, do_flip: bool, direction: Direction) -> list[list[bool]]:
+        """Produce an oriented image."""
+        i_m = deepcopy(self.image)
         for _ in range(direction):
-            im = rotate_matrix(im)
-        if flip:
-            flip_matrix(im)
-        return im
+            i_m = rotate_matrix(i_m)
+        if do_flip:
+            flip_matrix(i_m)
+        return i_m
 
 
 class Board:
@@ -209,10 +210,12 @@ class Board:
         raise RuntimeError("No suitable starting corner found")
 
     def show_connections(self) -> None:
+        """Print connections for debugging."""
         for tile_id in sorted(self.tiles.keys()):
             print(f"Tile id {tile_id} {self.tile_connections[tile_id]}")
 
     def show_image(self) -> None:
+        """Print image for debugging."""
         for row in self.image:
             for col in row:
                 print("#" if col else ".", end="")
@@ -284,9 +287,9 @@ class Board:
         self.image = []
         for row in grid:
             new_rows: list[list[bool]] = [[] for _ in range(self.tile_size)]
-            for tile_id, flip, direction in row:
+            for tile_id, do_flip, direction in row:
                 new_rows = append_cols(
-                    new_rows, self.tiles[tile_id].oriented_image(flip, direction)
+                    new_rows, self.tiles[tile_id].oriented_image(do_flip, direction)
                 )
             self.image = self.image + new_rows
 

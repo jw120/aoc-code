@@ -1,5 +1,7 @@
 """Advent of Code 2020 - Day 19."""
 
+# pylint: disable=missing-class-docstring
+
 import re
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -46,7 +48,7 @@ def parse_rule(s: str) -> tuple[int, Rule]:
     index = int(index_str)
     if m := re.fullmatch(r'"(.)"', rule_str):
         return (index, Terminal(m.group(1)))
-    elif m := re.fullmatch(r"([0-9 ]+)\|([0-9 ]+)", rule_str):
+    if m := re.fullmatch(r"([0-9 ]+)\|([0-9 ]+)", rule_str):
         return (
             index,
             Alternate(Series(parse_ints(m.group(1))), Series(parse_ints(m.group(2)))),
@@ -65,15 +67,15 @@ def parse_ints(s: str) -> list[int]:
 
 class MessageValidator:
     def __init__(self, rules: Iterable[str]) -> None:
-        self.rules: dict[int, Rule] = {
-            i: rule for (i, rule) in [parse_rule(r) for r in rules]
-        }
+        self.rules: dict[int, Rule] = dict(parse_rule(r) for r in rules)
 
     def show(self) -> None:
+        """Print debugging information."""
         for i, r in self.rules.items():
             print(f"{i}: {r}")
 
     def valid(self, s: str) -> bool:
+        """Test validity."""
         return self.valid_remains(s, self.rules[0]) == ""
 
     def valid_remains(self, s: str, r: Rule) -> Optional[str]:
@@ -130,7 +132,7 @@ class MessageValidator:
 
 if __name__ == "__main__":
     testmod()
-    rules, messages = stdin.read().split("\n\n")
-    mv = MessageValidator(rules.splitlines())
-    print(sum(mv.valid(message) for message in messages.splitlines()))
-    print(sum(mv.valid_part_two(message) for message in messages.splitlines()))
+    input_rules, input_messages = stdin.read().split("\n\n")
+    mv = MessageValidator(input_rules.splitlines())
+    print(sum(mv.valid(message) for message in input_messages.splitlines()))
+    print(sum(mv.valid_part_two(message) for message in input_messages.splitlines()))

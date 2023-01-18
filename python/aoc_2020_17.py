@@ -1,5 +1,7 @@
 """Advent of Code 2020 - Day 17."""
 
+# pylint: disable=missing-function-docstring, invalid-name
+
 from collections.abc import Iterable
 from sys import stdin
 from typing import Tuple
@@ -204,12 +206,12 @@ if __name__ == "__main__":
     # #        test4.show()
     # #       print()
     # print(test4.count_cubes())
-    lines = list(stdin)
-    grid3 = Grid3d(lines)
+    input_lines = list(stdin)
+    grid3 = Grid3d(input_lines)
     for _ in range(0, 6):
         grid3.iterate()
     print(grid3.count_cubes())
-    grid4 = Grid4d(lines)
+    grid4 = Grid4d(input_lines)
     for _ in range(0, 6):
         grid4.iterate()
     print(grid4.count_cubes())

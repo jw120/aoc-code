@@ -22,14 +22,17 @@ class History:
 
 
 class Player(Enum):
-    One = auto()
-    Two = auto()
+    """Class to hold current player."""
+
+    ONE = auto()
+    TWO = auto()
 
 
 test1: str = "Player 1:\n9\n2\n6\n3\n1\n\nPlayer 2:\n5\n8\n4\n7\n10\n"
 
 
 class Combat:
+    """Main class for day 22."""
 
     _last_game: ClassVar[int] = 0
 
@@ -54,15 +57,14 @@ class Combat:
     def winner(self) -> Player:
         """Determine which player is the winner."""
         if self.p1 and not self.p2:
-            return Player.One
-        elif not self.p1 and self.p2:
-            return Player.Two
-        else:
-            raise RuntimeError("No winner")
+            return Player.ONE
+        if not self.p1 and self.p2:
+            return Player.TWO
+        raise RuntimeError("No winner")
 
     def score(self) -> int:
         """Return the score based on the winner's hand."""
-        winner_deck: list[int] = self.p1 if self.winner() == Player.One else self.p2
+        winner_deck: list[int] = self.p1 if self.winner() == Player.ONE else self.p2
         return sum(x * y for x, y in enumerate(reversed(winner_deck), start=1))
 
     @classmethod
@@ -102,8 +104,7 @@ class Combat:
         """Return list as a comma-separated string with a leading-space if non-empty."""
         if xs:
             return " " + ", ".join([str(x) for x in xs])
-        else:
-            return ""
+        return ""
 
     def play_recursive_game(self, debug: bool = False) -> Combat:
         """Play recursive rounds until the game is over.
@@ -161,17 +162,17 @@ class Combat:
             # Otherwise regular game
             else:
                 if top_player_1 > top_player_2:
-                    winner = Player.One
+                    winner = Player.ONE
                 elif top_player_2 > top_player_1:
-                    winner = Player.Two
+                    winner = Player.TWO
                 else:
                     raise RuntimeError("Unexpected tie", top_player_1)
 
             # Resolve round winner
             if debug:
-                print(f"Player {'1' if winner == Player.One else '2'} wins ", end="")
+                print(f"Player {'1' if winner == Player.ONE else '2'} wins ", end="")
                 print(f"round {round_num} of game {game_num}!")
-            if winner == Player.One:
+            if winner == Player.ONE:
                 self.p1 += [top_player_1, top_player_2]
             else:
                 self.p2 += [top_player_2, top_player_1]
@@ -179,7 +180,7 @@ class Combat:
             if not self.p1 or not self.p2:
                 if debug:
                     print(f"The winner of game {game_num} is ", end="")
-                    print(f"player {'1' if self.winner() == Player.One else '2'}!")
+                    print(f"player {'1' if self.winner() == Player.ONE else '2'}!")
                     print()
                     if game_num == 1:
                         print()

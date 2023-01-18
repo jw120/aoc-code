@@ -10,9 +10,10 @@ item: Pattern[str] = re.compile(r"[0-9]+|[+*()]|\s+")
 
 
 def apply(op: str, x: int, y: int) -> int:
+    """Apply the operator to two integers."""
     if op == "+":
         return x + y
-    elif op == "*":
+    if op == "*":
         return x * y
     raise RuntimeError("Unknown operator", op)
 

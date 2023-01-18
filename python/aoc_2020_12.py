@@ -20,6 +20,7 @@ def rotate(s: str, rotation: int) -> str:
 
 
 def parse_command(s: str) -> tuple[str, int]:
+    """Read a command from string."""
     return (s[0], int(s[1:]))
 
 
@@ -81,8 +82,7 @@ class ShipWithWaypoint(Ship):
     """Part two ship."""
 
     def __init__(self) -> None:
-        self.x = 0
-        self.y = 0
+        super().__init__()
         self.wp_x = 10
         self.wp_y = 1
 
@@ -103,11 +103,11 @@ class ShipWithWaypoint(Ship):
         elif com == "F":
             self.x += self.wp_x * param
             self.y += self.wp_y * param
-        elif (com == "L" and param == 90) or (com == "R" and param == 270):
+        elif (com, param) in {("L", 90), ("R", 270)}:
             self.wp_x, self.wp_y = -self.wp_y, self.wp_x
-        elif (com == "L" or com == "R") and param == 180:
+        elif (com, param) in {("L", 180), ("R", 180)}:
             self.wp_x, self.wp_y = -self.wp_x, -self.wp_y
-        elif (com == "R" and param == 90) or (com == "L" and param == 270):
+        elif (com, param) in {("L", 2700), ("R", 90)}:
             self.wp_x, self.wp_y = self.wp_y, -self.wp_x
         else:
             raise RuntimeError("Bad command for action", com, param)
@@ -116,6 +116,6 @@ class ShipWithWaypoint(Ship):
 
 if __name__ == "__main__":
     testmod()
-    commands: list[tuple[str, int]] = [(line[0], int(line[1:])) for line in stdin]
-    print(Ship().actions(commands).manhattan)
-    print(ShipWithWaypoint().actions(commands).manhattan)
+    input_commands: list[tuple[str, int]] = [(line[0], int(line[1:])) for line in stdin]
+    print(Ship().actions(input_commands).manhattan)
+    print(ShipWithWaypoint().actions(input_commands).manhattan)

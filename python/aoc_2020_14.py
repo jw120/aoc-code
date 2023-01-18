@@ -3,18 +3,23 @@
 
 from dataclasses import dataclass
 from doctest import testmod
-from re import Pattern, compile
 from sys import stdin
 from typing import Union
+
+import re
 
 
 @dataclass(frozen=True)
 class UpdateBitmaskCommand:
+    """Command to update bit mask."""
+
     mask: str
 
 
 @dataclass(frozen=True)
 class WriteCommand:
+    """Command to write to an address."""
+
     address: int
     value: int
 
@@ -23,9 +28,10 @@ Command = Union[UpdateBitmaskCommand, WriteCommand]
 
 
 def parse_command(s: str) -> Command:
+    """Read a command from a string."""
 
-    update_pattern: Pattern[str] = compile(r"mask = ([01X]+)\s*")
-    write_pattern: Pattern[str] = compile(r"mem\[(\d+)\] = (\d+)\s*")
+    update_pattern: re.Pattern[str] = re.compile(r"mask = ([01X]+)\s*")
+    write_pattern: re.Pattern[str] = re.compile(r"mem\[(\d+)\] = (\d+)\s*")
 
     if m := update_pattern.fullmatch(s):
         return UpdateBitmaskCommand(mask=m.group(1))
@@ -43,8 +49,7 @@ def set_bit(x: int, n: int, val: bool) -> int:
     target_bit: int = 1 << n
     if bool(x & target_bit) == val:
         return x
-    else:
-        return x ^ target_bit
+    return x ^ target_bit
 
 
 def apply_mask1(value: int, mask: str) -> int:
@@ -102,6 +107,7 @@ def apply_mask2(address: int, mask: str) -> list[int]:
 
 
 def run1(commands: list[Command]) -> int:
+    """Run a list of commands."""
     memory: dict[int, int] = {}
     mask: str = "X" * 36
     for cmd in commands:
@@ -144,6 +150,6 @@ def run2(commands: list[Command]) -> int:
 
 if __name__ == "__main__":
     testmod()
-    commands: list[Command] = [parse_command(line) for line in stdin]
-    print(run1(commands))
-    print(run2(commands))
+    input_commands: list[Command] = [parse_command(line) for line in stdin]
+    print(run1(input_commands))
+    print(run2(input_commands))
