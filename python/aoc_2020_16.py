@@ -1,10 +1,9 @@
 """Advent of Code 2020 - Day 16."""
 
+import re
 from doctest import testmod
 from functools import reduce
 from sys import stdin
-
-import re
 
 ValidField = tuple[str, tuple[int, int], tuple[int, int]]
 valid_pattern: re.Pattern[str] = re.compile(r"([a-z ]+): (\d+)-(\d+) or (\d+)-(\d+)")

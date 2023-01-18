@@ -8,6 +8,8 @@ from typing import Optional
 
 
 class CrabCups:
+    """Main class for day 23."""
+
     def __init__(self, xs: list[int], extend: Optional[int] = None) -> None:
         self.current_value: int = xs[0]
         self.next: dict[int, int] = {}
@@ -24,11 +26,12 @@ class CrabCups:
             self.next[extend] = xs[0]
 
     def print_cups(self) -> None:
+        """Show debugging information."""
+
         def cup(x: int) -> str:
             if x == self.current_value:
                 return "(" + str(x) + ")"
-            else:
-                return " " + str(x) + " "
+            return " " + str(x) + " "
 
         print("cups: ", end="")
         val: int = self.current_value

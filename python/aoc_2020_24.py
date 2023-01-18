@@ -18,6 +18,7 @@ class HexCoord:
     # "Odd-r" layout from https://www.redblobgames.com/grids/hexagons/
 
     def move(self, s: str) -> HexCoord:
+        """Generate new coordinate after a move."""
         if s == "e":
             return HexCoord(self.x + 1, self.y)
         if s == "w":
@@ -32,10 +33,12 @@ class HexCoord:
         return HexCoord(next_x, next_y)
 
     def adjoining(self) -> set[HexCoord]:
+        """Return set of adjoining coordinates."""
         return {self.move(d) for d in ["e", "w", "ne", "se", "nw", "sw"]}
 
 
 def split_moves(s: str) -> list[str]:
+    """Split input string into a list of moves."""
     return [m[0] for m in re.finditer("[ns]?[ew]", s)]
 
 
@@ -85,28 +88,35 @@ def walk(path_lists: list[list[str]]) -> set[HexCoord]:
 
 
 class Floor:
+    """Floor class."""
+
     def __init__(self, starting_black_tiles: set[HexCoord]) -> None:
         self.days: int = 0
         self.g: list[set[HexCoord]] = [starting_black_tiles, set()]
 
     def active(self) -> int:
+        """Return the active index."""
         return self.days % 2
 
     def inactive(self) -> int:
+        """Return the inactive index."""
         return (self.days + 1) % 2
 
     def count_black_neighbours(self, t: HexCoord) -> int:
+        """Return number of black neighbours."""
         return len(t.adjoining() & self.g[self.active()])
 
     def count_black_cells(self) -> int:
+        """Return number of black cells."""
         return len(self.g[self.active()])
 
     def update(self) -> Floor:
+        """Update the floor."""
         self.g[self.inactive()].clear()
         # Update black cells
         for black_cell in self.g[self.active()]:
             n = self.count_black_neighbours(black_cell)
-            if n == 1 or n == 2:
+            if n in (1, 2):
                 self.g[self.inactive()].add(black_cell)
         # Find all white cells that neighbour a black cell
         white_cells: set[HexCoord] = set()
