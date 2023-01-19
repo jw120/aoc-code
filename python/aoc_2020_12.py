@@ -107,7 +107,7 @@ class ShipWithWaypoint(Ship):
             self.wp_x, self.wp_y = -self.wp_y, self.wp_x
         elif (com, param) in {("L", 180), ("R", 180)}:
             self.wp_x, self.wp_y = -self.wp_x, -self.wp_y
-        elif (com, param) in {("L", 2700), ("R", 90)}:
+        elif (com, param) in {("L", 270), ("R", 90)}:
             self.wp_x, self.wp_y = self.wp_y, -self.wp_x
         else:
             raise RuntimeError("Bad command for action", com, param)

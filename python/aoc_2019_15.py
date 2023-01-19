@@ -28,15 +28,20 @@ def move(c: Coord, d: CompassDirection) -> Coord:
 
 def closest(c: Coord, pts: Iterable[Coord]) -> Coord:
     """Return the closest points (or one of them if more than one)."""
-    closest_dist: Optional[int] = None
-    closest_point: Optional[Coord] = None
+    closest_so_far: Optional[tuple[int, Coord]] = None
     for p in pts:
         dist = c.dist(p)
-        if closest_dist is None or dist < closest_dist:
-            closest_point = p
-    if closest_point is not None:
-        return closest_point
-    raise RuntimeError("closest failed")
+        match closest_so_far:
+            case closest_dist, _closest_point:
+                if dist < closest_dist:
+                    closest_so_far = (dist, p)
+            case None:
+                closest_so_far = (dist, p)
+    match closest_so_far:
+        case _closest_dist, closest_point:
+            return closest_point
+        case None:
+            raise RuntimeError("closest failed")
 
 
 class CompassDirection(Enum):
@@ -91,7 +96,7 @@ class Controller:
         """Generate a path to the given cell through open cells."""
         if self.debug:
             print("Routing from", self.loc, "to", target)
-        # Flood fill with backlinks
+        # Flood fill with back links
         frontier: dict[Coord, Coord] = {self.loc: self.loc}
         visited: dict[Coord, Coord] = {}
         while target not in frontier:
@@ -108,7 +113,11 @@ class Controller:
         path: list[Coord] = []
         while x != self.loc:
             path.append(x)
-            x = frontier.get(x, visited[x])
+            # pylint: disable=consider-using-get
+            if x in frontier:
+                x = frontier[x]
+            else:
+                x = visited[x]
         if self.debug:
             print("Path", path)
         return path

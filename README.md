@@ -1,11 +1,9 @@
 # Advent of Code
 
 TODO:
-* Python- all pylint clean (2019 and 2022)
 * Fix failing
   - 2020/19 fails
 * Stop using fileinput
-* Python - emacs spell checker
 * Finish 2021
 
 My solutions to advent of code.  So far contains:
