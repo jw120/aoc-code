@@ -2,57 +2,38 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 from enum import Enum
 from sys import stdin
 
-from IntCode import Machine
+from coord import Coord
+from direction import Direction
+from int_code import Machine
 from utils import assert_never
 
 
-@dataclass(eq=True, frozen=True)
-class Coord:
-    x: int
-    y: int
-
-    @staticmethod
-    def origin() -> Coord:
-        return Coord(0, 0)
-
-    def move(self, d: Direction) -> Coord:
-        if d is Direction.UP:
-            return Coord(self.x, self.y + 1)
-        elif d is Direction.RIGHT:
-            return Coord(self.x + 1, self.y)
-        if d is Direction.DOWN:
-            return Coord(self.x, self.y - 1)
-        elif d is Direction.LEFT:
-            return Coord(self.x - 1, self.y)
-        else:
-            assert_never(d)
+def move(c: Coord, d: Direction) -> Coord:
+    """Generate a new coordinate after a move in given direction."""
+    if d is Direction.UP:
+        return c + Coord(0, 1)
+    if d is Direction.RIGHT:
+        return c + Coord(1, 0)
+    if d is Direction.DOWN:
+        return c + Coord(0, -1)
+    if d is Direction.LEFT:
+        return c + Coord(-1, 0)
+    assert_never(d)
 
 
 class Colour(Enum):
+    """Colours."""
+
     BLACK = 0
     WHITE = 1
 
 
-class Direction(Enum):
-    UP = 0
-    RIGHT = 1
-    DOWN = 2
-    LEFT = 3
-
-    def rotate(self, rot: int) -> Direction:
-        if rot == 1:
-            return Direction((self.value + 1) % 4)
-        elif rot == 0:
-            return Direction((self.value - 1) % 4)
-        else:
-            raise RuntimeError("Unknown direction to rotate")
-
-
 class Robot:
+    """Main class for day 11."""
+
     def __init__(self, prog: list[int]) -> None:
         self.painted: set[Coord] = set()
         self.white: set[Coord] = set()
@@ -62,6 +43,7 @@ class Robot:
         self.machine.pause_after_output = True
 
     def paint(self, colour: Colour) -> Robot:
+        """Paint in given colour."""
         self.painted.add(self.pos)
         if colour == Colour.WHITE:
             self.white.add(self.pos)
@@ -71,6 +53,7 @@ class Robot:
         return self
 
     def run(self) -> Robot:
+        """Run the robot."""
         while True:
             if self.machine.input_vals:
                 raise RuntimeError("Expected empty input")
@@ -83,13 +66,20 @@ class Robot:
                 self.machine.run()
                 if self.machine.halted:
                     return self
-            colour, rot = self.machine.output_vals
-            self.machine.output_vals = []
-            self.paint(Colour(colour))
-            self.direction = self.direction.rotate(rot)
-            self.pos = self.pos.move(self.direction)
+            match self.machine.output_vals:
+                case colour, rot:
+                    self.machine.output_vals = []
+                    self.paint(Colour(colour))
+                    if rot:
+                        self.direction = self.direction.right()
+                    else:
+                        self.direction = self.direction.left()
+                    self.pos = move(self.pos, self.direction)
+                case _:
+                    raise ValueError("Unexpected output values.")
 
     def show(self) -> Robot:
+        """Print for debugging."""
         xs = [pt.x for pt in self.white]
         ys = [pt.y for pt in self.white]
         x_min = min(xs)

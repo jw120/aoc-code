@@ -5,7 +5,7 @@ from doctest import testmod
 from sys import stdin
 from typing import TypeVar
 
-from IntCode import Machine
+from int_code import Machine
 
 PhaseSettings = list[int]
 

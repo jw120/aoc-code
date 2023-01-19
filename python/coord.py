@@ -72,6 +72,15 @@ class Coord:
         """Return magnitude-squared of the coordinate."""
         return self.x * self.x + self.y * self.y
 
+    def dist(self, other: Coord) -> int:
+        """Manhattan distance to another point."""
+        return abs(self.x - other.x) + abs(self.y - other.y)
+
+    @staticmethod
+    def origin() -> Coord:
+        """Return the (0, 0) coordinate."""
+        return Coord(0, 0)
+
     def __add__(self, other: Any) -> Coord:
         if isinstance(other, Coord):
             return Coord(self.x + other.x, self.y + other.y)

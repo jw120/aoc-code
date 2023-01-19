@@ -2,57 +2,43 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Enum
 from sys import stdin
 from typing import Optional
 
-from IntCode import Machine
+from coord import Coord
+from direction import Direction
+from int_code import Machine
 from utils import assert_never
 
 
-@dataclass(eq=True, frozen=True)
-class Coord:
-    x: int
-    y: int
-
-    @staticmethod
-    def origin() -> Coord:
-        return Coord(0, 0)
-
-    def move(self, d: Direction) -> Coord:
-        if d is Direction.UP:
-            return Coord(self.x - 1, self.y)
-        elif d is Direction.RIGHT:
-            return Coord(self.x, self.y + 1)
-        if d is Direction.DOWN:
-            return Coord(self.x + 1, self.y)
-        elif d is Direction.LEFT:
-            return Coord(self.x, self.y - 1)
-        else:
-            assert_never(d)
+def move(c: Coord, d: Direction) -> Coord:
+    """Return coordinate after moving."""
+    if d is Direction.UP:
+        return c + Coord(-1, 0)
+    if d is Direction.RIGHT:
+        return c + Coord(0, 1)
+    if d is Direction.DOWN:
+        return c + Coord(1, 0)
+    if d is Direction.LEFT:
+        return c + Coord(0, -1)
+    assert_never(d)
 
 
-class Direction(Enum):
-    UP = 0
-    RIGHT = 1
-    DOWN = 2
-    LEFT = 3
+def direction_from_char(c: str) -> Optional[Direction]:
+    """Read direction from a character string."""
+    if i := "^>v<".find(c) >= 0:
+        return Direction(i)
+    return None
 
-    @staticmethod
-    def from_char(c: str) -> Optional[Direction]:
-        if i := "^>v<".find(c) >= 0:
-            return Direction(i)
-        return None
 
-    def to_char(self) -> str:
-        return "^>v<"[self.value]
-
-    def opposite(self) -> Direction:
-        return Direction((self.value + 2) % 4)
+def direction_to_char(d: Direction) -> str:
+    """Convert to a character string."""
+    return "^>v<"[d.value]
 
 
 class Scaffolding:
+    """Main class for day 17."""
+
     def __init__(self, code: list[int]) -> None:
         self.m = Machine(code)
         self.scaffold: set[Coord] = set()
@@ -71,7 +57,7 @@ class Scaffolding:
             for col, char in enumerate(line):
                 if char != ".":
                     self.scaffold.add(Coord(row, col))
-                if (d := Direction.from_char(char)) is not None:
+                if (d := direction_from_char(char)) is not None:
                     self.robot_loc = Coord(row, col)
                     self.robot_dir = d
                 if col > self.max.y:
@@ -88,28 +74,30 @@ class Scaffolding:
             available_dirs = [
                 d
                 for d in Direction
-                if current_loc.move(d) in self.scaffold and d != current_dir.opposite()
+                if move(current_loc, d) in self.scaffold and d != current_dir.opposite()
             ]
             if not available_dirs:  # Dead-end means we have finished
                 break
-            elif len(available_dirs) == 1:  # Just keep going
+            if len(available_dirs) == 1:  # Just keep going
                 current_dir = available_dirs[0]
             elif len(available_dirs) == 3:  # Cross-roads
                 self.intersections.add(current_loc)
             else:
                 raise RuntimeError("Unexpected branch in scaffold")
-            current_loc = current_loc.move(current_dir)
+            current_loc = move(current_loc, current_dir)
         return len(self.intersections)
 
     def tally_intersections(self) -> int:
+        """Return tally of intersections."""
         return sum(c.x * c.y for c in self.intersections)
 
     def show(self) -> None:
+        """Print debugging information."""
         for row in range(self.max.x):
             for col in range(self.max.y):
                 c: Coord = Coord(row, col)
                 if c == self.robot_loc:
-                    print(self.robot_dir.to_char(), end="")
+                    print(direction_to_char(self.robot_dir), end="")
                 elif c in self.intersections:
                     print("O", end="")
                 else:
@@ -118,7 +106,7 @@ class Scaffolding:
 
 
 if __name__ == "__main__":
-    code = [int(x) for x in stdin.read().split(",")]
-    scaffolding = Scaffolding(code)
+    input_code = [int(x) for x in stdin.read().split(",")]
+    scaffolding = Scaffolding(input_code)
     print(scaffolding.tally_intersections())
     scaffolding.show()

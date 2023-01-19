@@ -3,35 +3,13 @@
 from __future__ import annotations
 
 from doctest import testmod
-from enum import Enum
 from re import findall
 from sys import stdin
 from typing import Final, Optional, TypeAlias
 
 from coord import Coord, Extent
+from direction import Direction
 from utils import assert_never
-
-
-class Direction(Enum):
-    """Directions for walking."""
-
-    UP = 0
-    RIGHT = 1
-    DOWN = 2
-    LEFT = 3
-
-    def left(self) -> Direction:
-        """Return direction after rotating 90 degrees left."""
-        return Direction((self.value - 1) % 4)
-
-    def right(self) -> Direction:
-        """Return direction after rotating 90 degrees right."""
-        return Direction((self.value + 1) % 4)
-
-    def opposite(self) -> Direction:
-        """Return direction after rotating 180 degrees."""
-        return Direction((self.value + 2) % 4)
-
 
 # It would be better to derive the connections between faces from the input file
 # but that seems hard - we hard-wire them instead.

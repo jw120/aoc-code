@@ -5,11 +5,11 @@
 from doctest import testmod
 from sys import stdin
 
-import IntCode
+import int_code
 
 
 def run_with_noun_verb(code: list[int], noun: int, verb: int) -> int:
-    machine: IntCode.Machine = IntCode.Machine(code)
+    machine: int_code.Machine = int_code.Machine(code)
     machine.code[1] = noun
     machine.code[2] = verb
     machine.run()

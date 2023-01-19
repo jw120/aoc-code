@@ -4,11 +4,11 @@
 
 from sys import stdin
 
-import IntCode
+from int_code import Machine
 
 
 def run(code: list[int], x: int) -> int:
-    machine: IntCode.Machine = IntCode.Machine(code, [x])
+    machine = Machine(code, [x])
     machine.run()
     assert len(machine.output_vals) == 1
     return machine.output_vals[0]

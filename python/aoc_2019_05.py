@@ -4,11 +4,11 @@
 
 from sys import stdin
 
-import IntCode
+import int_code
 
 
 def part_one(code: list[int]) -> None:
-    machine: IntCode.Machine = IntCode.Machine(code, [1])
+    machine: int_code.Machine = int_code.Machine(code, [1])
     machine.run()
     if any(machine.output_vals[:-1]):
         print(f"Failed tests: {machine.output_vals}")
@@ -17,7 +17,7 @@ def part_one(code: list[int]) -> None:
 
 
 def part_two(code: list[int]) -> None:
-    machine: IntCode.Machine = IntCode.Machine(code, [5])
+    machine: int_code.Machine = int_code.Machine(code, [5])
     machine.run()
     print(machine.output_vals[-1])
 

@@ -6,13 +6,13 @@ import re
 from dataclasses import dataclass
 from re import Pattern
 
-
-def sign(a: int) -> int:
-    return (a > 0) - (a < 0)
+from utils import sign
 
 
 @dataclass(eq=True)
 class Vector:
+    """3-d vector class."""
+
     x: int
     y: int
     z: int
@@ -24,9 +24,11 @@ class Vector:
         return Vector(self.x - other.x, self.y - other.y, self.z - other.z)
 
     def sign(self) -> Vector:
+        """Return vector with sign of each vector component."""
         return Vector(sign(self.x), sign(self.y), sign(self.z))
 
     def l1_norm(self) -> int:
+        """Return L1 norm of the vector."""
         return abs(self.x) + abs(self.y) + abs(self.z)
 
     def __hash__(self) -> int:
@@ -35,11 +37,14 @@ class Vector:
 
 @dataclass(eq=True)
 class Moon:
+    """Moon position and veloity."""
+
     r: Vector
     v: Vector
 
     @property
     def energy(self) -> int:
+        """Return moon's 'energy'."""
         return self.r.l1_norm() * self.v.l1_norm()
 
     def __hash__(self) -> int:
@@ -74,9 +79,11 @@ class Jupiter:
 
     @property
     def energy(self) -> int:
+        """Return the 'energy' of all the moons."""
         return sum(m.energy for m in self.moons)
 
     def show(self) -> Jupiter:
+        """Print debugging information."""
         for moon in self.moons:
             print(
                 f"pos=<x={moon.r.x}, y={moon.r.y}, z={moon.r.z}>,",
@@ -94,6 +101,7 @@ class Jupiter:
         return self
 
     def step(self) -> Jupiter:
+        """Update moon positions by one step."""
         for i, m1 in enumerate(self.moons):
             for m2 in self.moons[i + 1 :]:
                 r_diff: Vector = (m2.r - m1.r).sign()
@@ -105,6 +113,7 @@ class Jupiter:
         return self
 
     def run(self, n: int) -> Jupiter:
+        """Update moon positions by given number of steps."""
         for _ in range(n):
             self.step()
         return self

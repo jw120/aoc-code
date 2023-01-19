@@ -1,11 +1,11 @@
 """Advent of Code 2022 - Day 12."""
 
-from collections import deque
 from doctest import testmod
 from sys import stdin
-from typing import Callable, Optional, Tuple, TypeVar
+from typing import Optional
 
 from coord import Coord, Extent
+from search import bfs
 
 
 class HeightMap:
@@ -62,30 +62,6 @@ class HeightMap:
             return [a for a in c.adjacents(self.extent) if self.h[a] >= h_min]
 
         return bfs(self.goal, at_goal, available)
-
-
-S = TypeVar("S")
-
-
-def bfs(
-    start: S, at_goal: Callable[[S], bool], available: Callable[[S], list[S]]
-) -> Optional[int]:
-    """Conduct basic BFS search and return length of minimum path.
-
-    Recycled from 2019 Day 18.
-    """
-    # Queue of states to visit
-    q: deque[Tuple[S, int]] = deque([(start, 0)])
-    # Distances from start for states visited or in queue
-    distance: dict[S, int] = {start: 0}
-    while q:
-        s, dist = q.popleft()
-        if at_goal(s):
-            return dist
-        new_states = [(a, dist + 1) for a in available(s) if a not in distance]
-        q.extend(new_states)
-        distance |= dict(new_states)
-    return None
 
 
 TEST_DATA = """Sabqponm

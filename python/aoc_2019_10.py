@@ -11,6 +11,8 @@ from sys import stdin
 
 @dataclass(frozen=True)
 class Vec:
+    """Two-d vector class."""
+
     x: int
     y: int
 
@@ -38,6 +40,8 @@ class Vec:
 
 
 class Grid:
+    """Main class for day 10."""
+
     def __init__(self, s: str) -> None:
         self._m: list[list[bool]] = [
             [s == "#" for s in row.strip()] for row in s.split()
@@ -52,6 +56,7 @@ class Grid:
                 yield Vec(x, y)
 
     def m(self, v: Vec) -> bool:
+        """Test if given location contains an asteroid."""
         return self._m[v.y][v.x]
 
     def visible(self, ast: Vec, source: Vec) -> bool:
@@ -108,8 +113,7 @@ class Grid:
             base_angle = atan2(x[0].x, -x[0].y)
             if base_angle < 0:
                 return base_angle + 2 * pi
-            else:
-                return base_angle
+            return base_angle
 
         # Group all the asteroids by their primitive vector from the laser
         ast_groups: dict[Vec, list[Vec]] = {}
@@ -237,6 +241,6 @@ test_six: Grid = Grid(
 
 if __name__ == "__main__":
     testmod()
-    grid: Grid = Grid(stdin.read())
-    print(grid.best()[1])
-    print(part_two(grid))
+    input_grid: Grid = Grid(stdin.read())
+    print(input_grid.best()[1])
+    print(part_two(input_grid))

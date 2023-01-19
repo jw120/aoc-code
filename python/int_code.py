@@ -87,11 +87,11 @@ class Machine:
         8: lambda x, y: x == y,
     }
 
-    def __init__(self, code: List[int], input_vals: List[int] = []) -> None:
+    def __init__(self, code: List[int], input_vals: Optional[List[int]] = None) -> None:
         self.code: Dict[int, int] = dict(enumerate(code))
         self.ip: int = 0
         self.relative_base: int = 0
-        self.input_vals: List[int] = input_vals
+        self.input_vals: List[int] = [] if input_vals is None else input_vals
         self.output_vals: List[int] = []
         self.pause_after_output = False
         self.pause_before_input = False
@@ -141,7 +141,7 @@ class Machine:
         elif opcode == self.Input_opcode:
             modes = "_" + Mode.tag(Mode.mode(instruction_code))
             args = str(self._code(self.ip + 1))
-        elif opcode == self.RelBaseOffset_opcode or opcode == self.Output_opcode:
+        elif opcode in (self.RelBaseOffset_opcode, opcode == self.Output_opcode):
             modes = "_" + Mode.tag(Mode.mode(instruction_code))
             args = str(self._code(self.ip + 1))
         else:
@@ -245,28 +245,3 @@ class Machine:
 
 if __name__ == "__main__":
     testmod()
-    print("Day 2 code")
-    with open("input/2019_02.txt", "r") as f:
-        code: List[int] = [int(s) for s in f.read().split(",")]
-        Machine(code).run(True)
-
-    print("Day 5 code")
-    with open("input/2019_05.txt", "r") as f:
-        code = [int(s) for s in f.read().split(",")]
-        Machine(code, [1]).run(True)
-
-    print("Day 9 tests")
-    code = [109, 1, 204, -1, 1001, 100, 1, 100, 1008, 100, 16, 101, 1006, 101, 0, 99]
-    m = Machine(code)
-    m.run(True)
-    print("Test 1 OK" if m.output_vals == code else "Test 1 failed")
-    code = [1102, 34915192, 34915192, 7, 4, 7, 99, 0]
-    m = Machine(code)
-    m.run(True)
-    [ans] = m.output_vals
-    print("Test 2 OK" if len(str(ans)) == 16 else "Test 2 failed")
-    code = [104, 1125899906842624, 99]
-    m = Machine(code)
-    m.run(True)
-    [ans] = m.output_vals
-    print("Test 3 OK" if ans == 1125899906842624 else "Test 3 failed")

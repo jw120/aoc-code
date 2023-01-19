@@ -12,62 +12,62 @@ from coord import Coord
 from utils import assert_never
 
 
-class Direction(Enum):
-    """Directions for elves to move."""
+class MoveDirection(Enum):
+    """MoveDirections for elves to move."""
 
     N = 0
     S = 1
     W = 2
     E = 3
 
-    def next(self) -> Direction:
+    def next(self) -> MoveDirection:
         """Return next direction.
 
-        >>> Direction.S.next()
-        <Direction.W: 2>
+        >>> MoveDirection.S.next()
+        <MoveDirection.W: 2>
         """
-        return Direction((self.value + 1) % 4)
+        return MoveDirection((self.value + 1) % 4)
 
     def coord(self) -> Coord:
         """Return coordinate form.
 
-        >>> Direction.S.coord()
+        >>> MoveDirection.S.coord()
         Coord(x=0, y=1)
         """
         match self:
-            case Direction.N:
+            case MoveDirection.N:
                 return Coord(0, -1)
-            case Direction.S:
+            case MoveDirection.S:
                 return Coord(0, 1)
-            case Direction.W:
+            case MoveDirection.W:
                 return Coord(-1, 0)
-            case Direction.E:
+            case MoveDirection.E:
                 return Coord(1, 0)
             case _:
                 assert_never(self)
 
-    def all_directions(self) -> Iterable[Direction]:
+    def all_directions(self) -> Iterable[MoveDirection]:
         """Return all four directions in order starting from this one.
 
-        >>> list(Direction.E.all_directions())
-        [<Direction.E: 3>, <Direction.N: 0>, <Direction.S: 1>, <Direction.W: 2>]
+        >>> list(MoveDirection.E.all_directions())
+        [<MoveDirection.E: 3>, <MoveDirection.N: 0>, <MoveDirection.S: 1>, <MoveDirection.W: 2>]
         """
-        return (Direction((self.value + i) % 4) for i in range(4))
+        return (MoveDirection((self.value + i) % 4) for i in range(4))
 
     def offsets(self) -> Iterable[Coord]:
         """Return the three adjacent coordinates in the given direction.
 
-        >>> list(Direction.E.offsets())
+        >>> list(MoveDirection.E.offsets())
         [Coord(x=1, y=-1), Coord(x=1, y=0), Coord(x=1, y=1)]
         """
         match self:
-            case Direction.N:
+            case MoveDirection.N:
                 return (Coord(x, -1) for x in range(-1, 2))
-            case Direction.S:
+            case MoveDirection.S:
                 return (Coord(x, 1) for x in range(-1, 2))
-            case Direction.W:
+            case MoveDirection.W:
                 return (Coord(-1, y) for y in range(-1, 2))
-            case Direction.E:
+            case MoveDirection.E:
                 return (Coord(1, y) for y in range(-1, 2))
             case _:
                 assert_never(self)
@@ -78,7 +78,7 @@ class Diffuser:
 
     def __init__(self, lines: Iterable[str]) -> None:
         self.positions: set[Coord] = set()  # Elf positions
-        self.first_direction: Direction = Direction.N
+        self.first_direction: MoveDirection = MoveDirection.N
 
         for row, line in enumerate(lines):
             for col, char in enumerate(line.strip()):

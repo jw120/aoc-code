@@ -7,11 +7,7 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import Any
-from typing import Counter as Counter_t
-from typing import Union
-
-# Counter_t is a workaround as mypy does not support python 3.9, so we can't write Counter[str]
+from typing import Any, Final, Union
 
 
 @dataclass(eq=True, frozen=True)
@@ -26,7 +22,7 @@ class BasicRecipe:
 class CompositeRecipe:
     """Recipe to make a composite chemical."""
 
-    components: Counter_t[str]
+    components: Counter[str]
     produced: int
 
 
@@ -62,6 +58,8 @@ def all_zero(d: Mapping[Any, int]) -> bool:
 
 
 class NanoFactory:
+    """Main class for day 14."""
+
     def __init__(self, inputs: Iterable[str]) -> None:
         self.composite_recipes: dict[str, CompositeRecipe] = {}
         self.basic_recipes: dict[str, BasicRecipe] = {}
@@ -71,20 +69,20 @@ class NanoFactory:
             else:
                 self.composite_recipes[chemical] = recipe
 
-    def _basics_required(self, target: str, number: int) -> Counter_t[str]:
-        """Return the number of basic chemcials required to make one of the given composite chemical.
+    def _basics_required(self, target: str, number: int) -> Counter[str]:
+        """Return number of basic chemcials required to make one of the given composite chemical.
 
         Returns the required basic chemicals and the leftovers
         """
         # What we need to reduce to basics
-        needed: Counter_t[str] = Counter({target: number})
+        needed: Counter[str] = Counter({target: number})
         # Build up the list of basic chemicals
-        required: Counter_t[str] = Counter()
+        required: Counter[str] = Counter()
         # Keep track of leftovers
-        on_hand: Counter_t[str] = Counter()
+        on_hand: Counter[str] = Counter()
         # Loop until we need nothing else
         while not all_zero(needed):
-            new_needed: Counter_t[str] = Counter()
+            new_needed: Counter[str] = Counter()
             for composite, composite_needed in needed.items():
                 recipe: CompositeRecipe = self.composite_recipes[composite]
                 reactions: int = max(
@@ -99,7 +97,7 @@ class NanoFactory:
             needed = new_needed
         return required
 
-    def _ore_needed(self, targets: Counter_t[str]) -> int:
+    def _ore_needed(self, targets: Counter[str]) -> int:
         """Return the amount of ore needed to make these basic chemicals."""
         total: int = 0
         for target, needed in targets.items():
@@ -111,15 +109,15 @@ class NanoFactory:
     def required(self, target: str, number: int = 1) -> int:
         r"""Return the amount of ore needed to make the given composite chemical.
 
-        >>> NanoFactory(test1.split('\n')).required("FUEL")
+        >>> NanoFactory(TEST1.split('\n')).required("FUEL")
         31
-        >>> NanoFactory(test2.split('\n')).required("FUEL")
+        >>> NanoFactory(TEST2.split('\n')).required("FUEL")
         165
-        >>> NanoFactory(test3.split("\n")).required("FUEL")
+        >>> NanoFactory(TEST3.split("\n")).required("FUEL")
         13312
-        >>> NanoFactory(test4.split('\n')).required("FUEL")
+        >>> NanoFactory(TEST4.split('\n')).required("FUEL")
         180697
-        >>> NanoFactory(test5.split('\n')).required("FUEL")
+        >>> NanoFactory(TEST5.split('\n')).required("FUEL")
         2210736
         """
         return self._ore_needed(self._basics_required(target, number))
@@ -127,11 +125,11 @@ class NanoFactory:
     def possible(self, target: str, available_ore: int) -> int:
         r"""Return the amount of the target chemical that can be made from the given amount of ore.
 
-        >>> NanoFactory(test3.split('\n')).possible("FUEL", 1_000_000_000_000)
+        >>> NanoFactory(TEST3.split('\n')).possible("FUEL", 1_000_000_000_000)
         82892753
-        >>> NanoFactory(test4.split('\n')).possible("FUEL", 1_000_000_000_000)
+        >>> NanoFactory(TEST4.split('\n')).possible("FUEL", 1_000_000_000_000)
         5586022
-        >>> NanoFactory(test5.split('\n')).possible("FUEL", 1_000_000_000_000)
+        >>> NanoFactory(TEST5.split('\n')).possible("FUEL", 1_000_000_000_000)
         460664
         """
 
@@ -170,21 +168,25 @@ def parse_recipe(s: str) -> tuple[str, Recipe]:
             out_name,
             BasicRecipe(ore=int(in_quantity), produced=produced),
         )
-    components: Counter_t[str] = Counter()
+    components: Counter[str] = Counter()
     for component_str in in_str.split(", "):
         component_quantity, component_name = component_str.split(" ")
         components[component_name] += int(component_quantity)
     return (out_name, CompositeRecipe(components=components, produced=produced))
 
 
-test1 = """10 ORE => 10 A
+TEST1: Final[
+    str
+] = """10 ORE => 10 A
     1 ORE => 1 B
     7 A, 1 B => 1 C
     7 A, 1 C => 1 D
     7 A, 1 D => 1 E
     7 A, 1 E => 1 FUEL"""
 
-test2 = """9 ORE => 2 A
+TEST2: Final[
+    str
+] = """9 ORE => 2 A
     8 ORE => 3 B
     7 ORE => 5 C
     3 A, 4 B => 1 AB
@@ -192,7 +194,9 @@ test2 = """9 ORE => 2 A
     4 C, 1 A => 1 CA
     2 AB, 3 BC, 4 CA => 1 FUEL"""
 
-test3 = """157 ORE => 5 NZVS
+TEST3: Final[
+    str
+] = """157 ORE => 5 NZVS
     165 ORE => 6 DCFZ
     44 XJWVT, 5 KHKGT, 1 QDVJ, 29 NZVS, 9 GPVTF, 48 HKGWZ => 1 FUEL
     12 HKGWZ, 1 GPVTF, 8 PSHF => 9 QDVJ
@@ -202,7 +206,9 @@ test3 = """157 ORE => 5 NZVS
     165 ORE => 2 GPVTF
     3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT"""
 
-test4 = """2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG
+TEST4: Final[
+    str
+] = """2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG
     17 NVRVD, 3 JNWZP => 8 VPVL
     53 STKFG, 6 MNCFX, 46 VJHF, 81 HVMC, 68 CXFTF, 25 GNMV => 1 FUEL
     22 VJHF, 37 MNCFX => 5 FWMGM
@@ -215,7 +221,9 @@ test4 = """2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG
     1 VJHF, 6 MNCFX => 4 RFSQX
     176 ORE => 6 VJHF"""
 
-test5 = """171 ORE => 8 CNZTR
+TEST5: Final[
+    str
+] = """171 ORE => 8 CNZTR
     7 ZLQW, 3 BMBT, 9 XCVML, 26 XMNCP, 1 WPTQ, 2 MZWV, 1 RJRHP => 4 PLWSL
     114 ORE => 4 BHXH
     14 VRPVC => 6 BMBT

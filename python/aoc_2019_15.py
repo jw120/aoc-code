@@ -3,76 +3,67 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
-from dataclasses import dataclass
 from enum import Enum
 from random import randrange
 from sys import stdin
 from typing import Optional
 
-from IntCode import Machine
+from coord import Coord
+from int_code import Machine
 from utils import assert_never
 
 
-@dataclass(eq=True, frozen=True)
-class Coord:
-    x: int
-    y: int
-
-    @staticmethod
-    def origin() -> Coord:
-        return Coord(0, 0)
-
-    def move(self, d: Direction) -> Coord:
-        if d is Direction.NORTH:
-            return Coord(self.x, self.y + 1)
-        elif d is Direction.EAST:
-            return Coord(self.x + 1, self.y)
-        if d is Direction.SOUTH:
-            return Coord(self.x, self.y - 1)
-        elif d is Direction.WEST:
-            return Coord(self.x - 1, self.y)
-        else:
-            assert_never(d)
-
-    def neighbours(self) -> set[Coord]:
-        """Return the four neighbours."""
-        return {self.move(d) for d in Direction}
-
-    def dist(self, other: Coord) -> int:
-        """Manhattan distance to another point."""
-        return abs(self.x - other.x) + abs(self.y - other.y)
-
-    def closest(self, pts: Iterable[Coord]) -> Coord:
-        """Return the closest points (or one of them if more than one)."""
-        closest_dist: Optional[int] = None
-        closest: Optional[Coord] = None
-        for p in pts:
-            dist = self.dist(p)
-            if closest_dist is None or dist < closest_dist:
-                closest = p
-        if closest is not None:
-            return closest
-        raise RuntimeError("closest failed")
+def move(c: Coord, d: CompassDirection) -> Coord:
+    """Return new coordinate reflecting a move in given direction."""
+    if d is CompassDirection.NORTH:
+        return c + Coord(0, 1)
+    if d is CompassDirection.EAST:
+        return c + Coord(1, 0)
+    if d is CompassDirection.SOUTH:
+        return c + Coord(0, -1)
+    if d is CompassDirection.WEST:
+        return c + Coord(-1, 0)
+    assert_never(d)
 
 
-class Direction(Enum):
+def closest(c: Coord, pts: Iterable[Coord]) -> Coord:
+    """Return the closest points (or one of them if more than one)."""
+    closest_dist: Optional[int] = None
+    closest_point: Optional[Coord] = None
+    for p in pts:
+        dist = c.dist(p)
+        if closest_dist is None or dist < closest_dist:
+            closest_point = p
+    if closest_point is not None:
+        return closest_point
+    raise RuntimeError("closest failed")
+
+
+class CompassDirection(Enum):
+    """CompassDirection of movement."""
+
     NORTH = 1
     SOUTH = 2
     WEST = 3
     EAST = 4
 
     @staticmethod
-    def random() -> Direction:
-        return Direction(randrange(1, 5))
+    def random() -> CompassDirection:
+        """Generate a random direction."""
+        return CompassDirection(randrange(1, 5))
 
 
 class Response(Enum):
+    """Responses."""
+
     WALL = 0
     MOVED = 1
     MOVED_OXYGEN = 2
 
 
 class Controller:
+    """Main class for day 15."""
+
     def __init__(self, code: list[int], debug: bool = False) -> None:
         self.m = Machine(code)
         self.m.pause_after_output = True
@@ -83,7 +74,7 @@ class Controller:
         self.oxygen: Optional[Coord] = None  # Location of oxygen if known
         self.debug: bool = debug
 
-    def try_move(self, d: Direction) -> Response:
+    def try_move(self, d: CompassDirection) -> Response:
         """Try and move to an adjacent cell following the given direction."""
         self.m.input_vals = [d.value]
         self.m.run()
@@ -91,8 +82,8 @@ class Controller:
 
     def try_move_to_adj(self, c: Coord) -> Response:
         """Try and move to a given adjacent cell."""
-        for d in Direction:
-            if self.loc.move(d) == c:
+        for d in CompassDirection:
+            if move(self.loc, d) == c:
                 return self.try_move(d)
         raise RuntimeError("Adjacent move not found", self.loc, c)
 
@@ -106,8 +97,8 @@ class Controller:
         while target not in frontier:
             visited.update(frontier)
             new_frontier: dict[Coord, Coord] = {}
-            for f in frontier.keys():
-                for n in f.neighbours():
+            for f in frontier:
+                for n in f.adjacents():
                     if n == target or (n in self.open and n not in visited):
                         new_frontier[n] = f
             frontier = new_frontier
@@ -117,10 +108,7 @@ class Controller:
         path: list[Coord] = []
         while x != self.loc:
             path.append(x)
-            if x in frontier:
-                x = frontier[x]
-            else:
-                x = visited[x]
+            x = frontier.get(x, visited[x])
         if self.debug:
             print("Path", path)
         return path
@@ -154,7 +142,7 @@ class Controller:
         while self.open - filled:
             additional: set[Coord] = set()
             for f in filled:
-                for n in f.neighbours():
+                for n in f.adjacents():
                     if n in self.open and n not in filled:
                         additional.add(n)
             filled |= additional
@@ -164,13 +152,13 @@ class Controller:
     def explore(self) -> Controller:
         """Explore the grid, completing the controllers knowledge of it."""
         # Frontier is all unknown locations adjacent to places we have visited
-        frontier: set[Coord] = self.loc.neighbours()
+        frontier: set[Coord] = set(self.loc.adjacents())
 
         while frontier:
             if self.debug:
                 print("Loc:", self.loc)
                 print("Fr:", "  ".join([f"{c.x},{c.y}" for c in frontier]))
-            target = self.loc.closest(frontier)
+            target = closest(self.loc, frontier)
             frontier.discard(target)
             if self.debug:
                 print("Going to", target)
@@ -184,21 +172,18 @@ class Controller:
                     print("Open at", target)
                 self.loc = target
                 self.open.add(target)
-                frontier |= target.neighbours() - (self.open | self.walls)
+                frontier |= set(target.adjacents()) - (self.open | self.walls)
                 if response == Response.MOVED_OXYGEN:
                     self.oxygen = target
 
         return self
 
     def show(self) -> Controller:
+        """Provinde debugging information."""
         xs = [w.x for w in self.walls]
         ys = [w.y for w in self.walls]
-        x_min = min(xs)
-        x_max = max(xs)
-        y_min = min(ys)
-        y_max = max(ys)
-        for y in range(y_max, y_min - 1, -1):
-            for x in range(x_min, x_max + 1):
+        for y in range(max(ys), min(ys) - 1, -1):
+            for x in range(min(xs), max(xs) + 1):
                 if Coord(x, y) == Coord.origin():
                     print("X", end="")
                 elif Coord(x, y) == self.oxygen:
@@ -214,10 +199,10 @@ class Controller:
 
 
 if __name__ == "__main__":
-    code = [int(x) for x in stdin.read().split(",")]
-    debug = False
-    controller = Controller(code, debug).explore()
-    if debug:
+    input_code = [int(x) for x in stdin.read().split(",")]
+    INPUT_DEBUG = False
+    controller = Controller(input_code, INPUT_DEBUG).explore()
+    if INPUT_DEBUG:
         controller.show()
     print(controller.steps_to_oxygen())
     print(controller.oxygen_fill())

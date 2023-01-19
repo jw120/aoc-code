@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from collections import deque
 from dataclasses import dataclass
 from sys import stdin
-from typing import Callable, Dict, List, Optional, Tuple, TypeVar
+from typing import Dict, List, Optional
 
 from coord import Coord, Extent
+from search import bfs
 
 
 @dataclass(eq=True, frozen=True)
@@ -34,6 +34,8 @@ class Walker:
 
 
 class Maze:
+    """Main class for day 18."""
+
     def __init__(self, lines: List[str]) -> None:
 
         self._extent: Extent = Extent(len(lines), len(lines[0]))
@@ -110,40 +112,18 @@ class Maze:
         return "".join(self._show_location(row, col) for col in range(self._extent.y))
 
     def show(self) -> str:
+        """Return debugging information."""
         return "\n".join(self._show_row(row) for row in range(self._extent.x))
 
 
-S = TypeVar("S")
-
-
-def bfs(
-    start: S, at_goal: Callable[[S], bool], available: Callable[[S], List[S]]
-) -> Optional[int]:
-    """Conduct basic BFS search and return length of minimum path."""
-    # Queue of states to visit
-    q: deque[Tuple[S, int]] = deque([(start, 0)])
-    # Distances from start for states visited or in queue
-    distance: Dict[S, int] = {start: 0}
-    while q:
-        s, dist = q.popleft()
-        #        print("Dequeue", s, dist)
-        if at_goal(s):
-            return dist
-        new_states = [(a, dist + 1) for a in available(s) if a not in distance]
-        q.extend(new_states)
-        #       print("Enqueue", new_states)
-        distance |= dict(new_states)
-    return None
-
-
-test1 = """
+TEST1 = """
 #########
 #b.A.@.a#
 #########"""[
     1:
 ]
 
-test2 = """
+TEST2 = """
 ########################
 #f.D.E.e.C.b.A.@.a.B.c.#
 ######################.#
@@ -152,7 +132,7 @@ test2 = """
     1:
 ]
 
-test3 = """
+TEST3 = """
 ########################
 #...............b.C.D.f#
 #.######################
@@ -161,7 +141,7 @@ test3 = """
     1:
 ]
 
-test4 = """
+TEST4 = """
 #################
 #i.G..c...e..H.p#
 ########.########
@@ -174,7 +154,7 @@ test4 = """
     1:
 ]
 
-test5 = """
+TEST5 = """
 ########################
 #@..............ac.GI.b#
 ###d#e#f################
@@ -185,9 +165,8 @@ test5 = """
 ]
 
 if __name__ == "__main__":
-    maze = Maze(stdin.read().splitlines())
-    # maze = Maze(test5.splitlines())
-    print(maze.show())
-    start = Walker(maze.start, frozenset())
-    solution = bfs(start, lambda s: maze.has_all_keys(s), lambda s: maze.available(s))
+    input_maze = Maze(stdin.read().splitlines())
+    print(input_maze.show())
+    input_start = Walker(input_maze.start, frozenset())
+    solution = bfs(input_start, input_maze.has_all_keys, input_maze.available)
     print(solution)
