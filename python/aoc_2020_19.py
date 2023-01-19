@@ -66,6 +66,14 @@ def parse_ints(s: str) -> list[int]:
 
 
 class MessageValidator:
+    """Main class for day 19
+
+    >>> mv = MessageValidator(test_rules.splitlines())
+    >>> inputs = ["abz", "aaww", "baqq", "bby", "", "cz"]
+    >>> [mv.valid_remains(s, mv.rules[3]) for s in inputs]
+    ['z', None, 'qq', None, None, None]
+    """
+
     def __init__(self, rules: Iterable[str]) -> None:
         self.rules: dict[int, Rule] = dict(parse_rule(r) for r in rules)
 
@@ -89,11 +97,12 @@ class MessageValidator:
                 return remainder
             return self.valid_remains(s, r.b)
         for i in r.rule_indices:
+            #            print("Series", s, i)
             remainder = self.valid_remains(s, self.rules[i])
             if remainder is None:
                 return None
             s = remainder
-            return s
+        return s
 
     def valid_part_two(self, s: str) -> bool:
         """Match starting with special part two rules.
@@ -128,6 +137,21 @@ class MessageValidator:
                     return True
                 remainder = remainder_31
                 count_31 += 1
+
+
+TEST_DATA = """0: 4 1 5
+1: 2 3 | 3 2
+2: 4 4 | 5 5
+3: 4 5 | 5 4
+4: "a"
+5: "b"
+
+ababbb
+bababa
+abbbab
+aaabbb
+aaaabbb"""
+test_rules, test_messages = TEST_DATA.split("\n\n")
 
 
 if __name__ == "__main__":
