@@ -1,8 +1,8 @@
 """Advent of Code 2022 - Day 20."""
 
 
-import fileinput
 from doctest import testmod
+from sys import stdin
 from typing import Final
 
 
@@ -48,7 +48,7 @@ TEST_DATA: Final[
 
 if __name__ == "__main__":
     testmod()
-    input_numbers = [int(line) for line in fileinput.input()]
+    input_numbers = [int(line) for line in stdin.readlines()]
     print(mix(input_numbers))
     decrypt_numbers = [x * 811589153 for x in input_numbers]
     print(mix(decrypt_numbers, 10))

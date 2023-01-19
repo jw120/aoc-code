@@ -2,12 +2,13 @@
 
 from __future__ import annotations
 
-import fileinput
+
 from dataclasses import dataclass, field
 from doctest import testmod
 from heapq import heappop, heappush
 from itertools import chain
 from math import lcm
+from sys import stdin
 from typing import Final, Iterable
 
 import numpy as np
@@ -241,7 +242,7 @@ TEST_DATA2: Final[
 
 if __name__ == "__main__":
     testmod()
-    basin = Basin(fileinput.input(), debug=True)
+    basin = Basin(stdin.readlines(), debug=True)
     TIME1 = basin.forward_path(0)
     print(TIME1)
     TIME2 = basin.backward_path(TIME1)

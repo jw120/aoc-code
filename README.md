@@ -1,11 +1,5 @@
 # Advent of Code
 
-TODO:
-* Fix failing
-  - 2020/19 fails
-* Stop using fileinput
-* Finish 2021
-
 My solutions to advent of code.  So far contains:
 
  * Complete 2022 in Python (done in 2022 advent season)
@@ -65,7 +59,8 @@ Try 2021-03 in numpy
 
 Can we make solvers have type: (Show a, Show b) => Text -> (a, b) without having string output printed within quotes
 
-Hints used - 2015/9 - ran web code to spot my error (missing a city)
+Hints used
+    + 2015/9 - ran web code to spot my error (missing a city)
     + 2018/19 googled a hint before disassembling
 
 * 2021

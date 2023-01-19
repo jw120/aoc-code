@@ -1,8 +1,8 @@
 """Advent of Code 2022 - Day 25."""
 
 
-import fileinput
 from doctest import testmod
+from sys import stdin
 from typing import Final
 
 SNAFU_VALUES: Final[dict[str, int]] = {"2": 2, "1": 1, "0": 0, "-": -1, "=": -2}
@@ -60,6 +60,6 @@ if __name__ == "__main__":
     testmod()
     print(
         decimal_to_snafu(
-            sum(snafu_to_decimal(line.strip()) for line in fileinput.input())
+            sum(snafu_to_decimal(line.strip()) for line in stdin.readlines())
         )
     )

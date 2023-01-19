@@ -1,10 +1,10 @@
 """Advent of Code 2022 - Day 15."""
 
 
-import fileinput
 from doctest import testmod
 from itertools import combinations
 from re import fullmatch
+from sys import stdin
 from typing import Iterable
 
 from coord import Coord, manhattan
@@ -151,6 +151,6 @@ Sensor at x=20, y=1: closest beacon is at x=15, y=3""".split(
 
 if __name__ == "__main__":
     testmod()
-    z = Zone(fileinput.input())
+    z = Zone(stdin.readlines())
     print(z.empty_in_row(2_000_000))
     print(encode(z.find_beacon()))

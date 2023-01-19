@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-import fileinput
 from doctest import testmod
 from enum import Enum
+from sys import stdin
 from typing import Final, Iterable, Optional
 
 # We use x as left->right and y as top->bottom
@@ -199,7 +199,7 @@ TEST_DATA2: Final[
 
 if __name__ == "__main__":
     testmod()
-    diffuser = Diffuser(fileinput.input())
+    diffuser = Diffuser(stdin.readlines())
     diffuser.steps(10)
     print(diffuser.score())
     print(diffuser.moves_until_no_move() + 10)

@@ -2,8 +2,8 @@
 
 # from __future__ import annotations
 
-import fileinput
 from doctest import testmod
+from sys import stdin
 
 from coord import Coord3
 
@@ -137,6 +137,6 @@ TEST_DATA = """2,2,2
 
 if __name__ == "__main__":
     testmod()
-    input_cubes = [read_cube(line) for line in fileinput.input()]
+    input_cubes = [read_cube(line) for line in stdin.readlines()]
     print(free_surface(input_cubes))
     print(exterior_surface(input_cubes))

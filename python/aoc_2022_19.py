@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-import fileinput
 import re
 from dataclasses import dataclass
 from doctest import testmod
+from sys import stdin
 from typing import Any, Optional
 
 
@@ -234,6 +234,6 @@ if __name__ == "__main__":
     # test_blueprints = [read_blueprint(line) for line in TEST_DATA.splitlines()]
     # print(qualities(test_blueprints, 24))
     # print(score_product(test_blueprints[:3], 32))
-    blueprints = [read_blueprint(line.strip()) for line in fileinput.input()]
+    blueprints = [read_blueprint(line.strip()) for line in stdin.readlines()]
     print(qualities(blueprints, 24))
     print(score_product(blueprints[:3], 32))
