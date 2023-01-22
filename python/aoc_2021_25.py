@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from doctest import testmod
 from enum import Enum, auto
 from sys import stdin
-from typing import Iterator
 
 import numpy as np
 from coord import Coord, Extent

@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from doctest import testmod
 from sys import stdin
-from typing import Set
 
 from coord import Coord, Extent
 
@@ -51,7 +50,7 @@ class Grid:
                 self.energy[c.x][c.y] += 1
                 if self.energy[c.x][c.y] > 9:
                     to_flash.append(c)
-            flashed: Set[Coord] = set()
+            flashed: set[Coord] = set()
             while to_flash:
                 c = to_flash.pop()
                 if c not in flashed:

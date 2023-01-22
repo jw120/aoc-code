@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from doctest import testmod
 from itertools import chain, combinations
 from sys import stdin
-from typing import Any, ClassVar, Iterable, Optional, Tuple
+from typing import Any, ClassVar
 
 from coord import Coord3
 
@@ -56,7 +57,7 @@ class Scanner:
     scanner_prefix: ClassVar[str] = "--- scanner "
     scanner_suffix: ClassVar[str] = " ---"
 
-    def __init__(self, ss: Optional[list[str]] = None):
+    def __init__(self, ss: list[str] | None = None):
         if ss is None:
             self.number: int = -1
             self.beacons: list[Coord3] = []
@@ -114,7 +115,7 @@ class Scanner:
 
     def find_match(
         self, other: Scanner, min_match: int
-    ) -> Optional[Tuple[Coord3, Rotation]]:
+    ) -> tuple[Coord3, Rotation] | None:
         """Return relative position of other scanner if match with `min_match` beacons found.
 
         >>> test1[0].find_match(test1[1], 3)[0]
@@ -136,7 +137,7 @@ class Scanner:
 
 def locate(
     input_scanners: list[Scanner], min_match: int
-) -> Tuple[list[Coord3], list[Coord3]]:
+) -> tuple[list[Coord3], list[Coord3]]:
     """Return all the scanners and beacons found from combining the scanners.
 
     >>> scanners, beacons = locate(test3, 12)
@@ -146,11 +147,11 @@ def locate(
     3621
     """
     # We keep a cache of pairs of scanner numbers that we have found don't match
-    pairs_failed: set[Tuple[int, int]] = set()
+    pairs_failed: set[tuple[int, int]] = set()
 
     # also keep track of which scanner pairs are feasible (i.e., have at least min_match common
     # internal distances between beacons)
-    feasible_matches: set[Tuple[int, int]] = set()
+    feasible_matches: set[tuple[int, int]] = set()
     for s, t in combinations(input_scanners, 2):
         if (
             len(s.beacon_distances & t.beacon_distances)
@@ -160,8 +161,8 @@ def locate(
             feasible_matches.add((t.number, s.number))
 
     # Find first match to set base_scanner and start matched_scanners
-    def first_match() -> Tuple[Scanner, Scanner, Coord3, Rotation]:
-        match: Optional[Tuple[Coord3, Rotation]] = None
+    def first_match() -> tuple[Scanner, Scanner, Coord3, Rotation]:
+        match: tuple[Coord3, Rotation] | None = None
         s_index: int = 0
         while True:
             s = input_scanners[s_index]

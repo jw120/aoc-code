@@ -5,12 +5,12 @@ solution does not exist, then we create the file
 """
 
 import argparse
+from collections.abc import Iterable
 from filecmp import cmp
 from os.path import exists
 from subprocess import run
 from tempfile import NamedTemporaryFile
 from time import time
-from typing import Iterable, Set, Tuple
 
 PYTHON_EXECUTABLE: str = "python"
 SOURCE_FILE_FORMAT: str = "python/aoc_{year}_{day:02}.py"
@@ -18,7 +18,7 @@ INPUT_FILE_FORMAT: str = "../aoc-data/input/{year}_{day:02}.txt"
 GOOD_FILE_FORMAT: str = "../aoc-data/good/{year}_{day:02}.txt"
 ELAPSED_MS_THRESHOLD: int = 500  # Show time taken if reaches this
 
-completed: list[Tuple[int, Iterable[int]]] = [
+completed: list[tuple[int, Iterable[int]]] = [
     (2019, list(range(1, 12)) + [13, 14, 15]),
     (2020, range(1, 26)),
     (2021, list(range(1, 16)) + [17, 19, 20, 21, 22, 23, 25]),
@@ -26,7 +26,7 @@ completed: list[Tuple[int, Iterable[int]]] = [
 ]
 
 # With >3s execution time
-slow: Set[Tuple[int, int]] = {
+slow: set[tuple[int, int]] = {
     (2020, 11),  # 7s
     (2020, 15),  # 16s
     (2020, 17),  # 7s
@@ -56,7 +56,7 @@ def test(year: int, day: int, times: bool) -> None:
     Compare output to known-good (or create a missing known-good file)."""
     source_fn = SOURCE_FILE_FORMAT.format(year=year, day=day)
     with open(
-        INPUT_FILE_FORMAT.format(year=year, day=day), mode="r", encoding="utf8"
+        INPUT_FILE_FORMAT.format(year=year, day=day), encoding="utf8"
     ) as input_file:
         good_filename = GOOD_FILE_FORMAT.format(year=year, day=day)
 

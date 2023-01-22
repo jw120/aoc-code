@@ -4,7 +4,6 @@ from collections import Counter
 from doctest import testmod
 from math import prod
 from sys import stdin
-from typing import Set, Tuple
 
 test1: list[list[int]] = [
     [int(c) for c in line]
@@ -17,7 +16,7 @@ test1: list[list[int]] = [
     ]
 ]
 
-Coord = Tuple[int, int]
+Coord = tuple[int, int]
 
 
 def find_minima(heights: list[list[int]]) -> list[Coord]:
@@ -28,7 +27,7 @@ def find_minima(heights: list[list[int]]) -> list[Coord]:
     """
     i_size = len(heights)
     j_size = len(heights[0])
-    minima: list[Tuple[int, int]] = []
+    minima: list[tuple[int, int]] = []
     for i in range(i_size):
         for j in range(j_size):
             z = heights[i][j]
@@ -62,7 +61,7 @@ def basins(heights: list[list[int]]) -> int:
     >>> basins(test1)
     1134
     """
-    minima: Set[Coord] = set(find_minima(heights))
+    minima: set[Coord] = set(find_minima(heights))
     minima_counts: Counter[Coord] = Counter()
     i_size = len(heights)
     j_size = len(heights[0])

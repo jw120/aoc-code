@@ -4,13 +4,12 @@ from __future__ import annotations
 
 from doctest import testmod
 from sys import stdin
-from typing import Optional
 
 
 class CrabCups:
     """Main class for day 23."""
 
-    def __init__(self, xs: list[int], extend: Optional[int] = None) -> None:
+    def __init__(self, xs: list[int], extend: int | None = None) -> None:
         self.current_value: int = xs[0]
         self.next: dict[int, int] = {}
         for i in range(len(xs) - 1):

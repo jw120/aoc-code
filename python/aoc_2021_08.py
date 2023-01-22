@@ -1,9 +1,9 @@
 """Advent of Code 2021 - Day 8."""
 
 from collections import Counter
+from collections.abc import Iterator
 from doctest import testmod
 from sys import stdin
-from typing import Dict, Iterator, Set
 
 # cspell:disable
 test1: str = "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"
@@ -45,7 +45,7 @@ test2: list[str] = [
 # Mapping from segments to digits in which the are present
 # seg_dig = {'a': set([0, 2, 3, 5, 6, 7, 8, 9]), 'b': set([0, 4])
 
-segments_to_digit: Dict[str, int] = {
+segments_to_digit: dict[str, int] = {
     "abcefg": 0,
     "cf": 1,
     "acdeg": 2,
@@ -83,7 +83,7 @@ def solve(line: str) -> int:
     signals, outputs = (part.split() for part in line.split(" | "))
 
     # To start with every wire could be any segment
-    wire_to_segment: Dict[str, Set[str]] = {x: set("abcdefg") for x in "abcdefg"}
+    wire_to_segment: dict[str, set[str]] = {x: set("abcdefg") for x in "abcdefg"}
 
     def match_wires(signal: str, segments: str) -> None:
         """Match the wires in the signal to the given segments.

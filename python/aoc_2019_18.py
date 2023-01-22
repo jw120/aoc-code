@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from sys import stdin
-from typing import Dict, List, Optional
 
 from coord import Coord, Extent
 from search import bfs
@@ -17,13 +16,13 @@ class Walker:
     position: Coord
     keys: frozenset[str]
 
-    def add_key(self, k: Optional[str]) -> Walker:
+    def add_key(self, k: str | None) -> Walker:
         """Return a new walker if the key is new."""
         if k is None or k in self.keys:
             return self
         return Walker(self.position, self.keys | {k})
 
-    def adjacents(self) -> List[Walker]:
+    def adjacents(self) -> list[Walker]:
         """Return the four adjacent positions."""
         return [
             Walker(Coord(self.position.x - 1, self.position.y), self.keys),
@@ -36,13 +35,13 @@ class Walker:
 class Maze:
     """Main class for day 18."""
 
-    def __init__(self, lines: List[str]) -> None:
+    def __init__(self, lines: list[str]) -> None:
 
         self._extent: Extent = Extent(len(lines), len(lines[0]))
-        self._doors: Dict[Coord, str] = {}
-        self._keys: Dict[Coord, str] = {}
+        self._doors: dict[Coord, str] = {}
+        self._keys: dict[Coord, str] = {}
         self.start: Coord
-        self._walls: List[List[bool]] = [
+        self._walls: list[list[bool]] = [
             [self._add_char(x, row, col) for col, x in enumerate(line)]
             for row, line in enumerate(lines)
         ]
@@ -67,7 +66,7 @@ class Maze:
             assert x == "."
         return False
 
-    def available(self, w: Walker) -> List[Walker]:
+    def available(self, w: Walker) -> list[Walker]:
         """Return the states which can be moved to."""
         return [
             x.add_key(self._keys.get(x.position))

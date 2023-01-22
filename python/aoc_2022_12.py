@@ -2,7 +2,6 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import Optional
 
 from coord import Coord, Extent
 from search import bfs
@@ -29,7 +28,7 @@ class HeightMap:
                 x = "z"
             self.h[c] = ord(x) - ord("a") + 1
 
-    def shortest_path_length(self) -> Optional[int]:
+    def shortest_path_length(self) -> int | None:
         """Return the length of the shortest path from start to goal.
 
         >>> HeightMap(TEST_DATA).shortest_path_length()
@@ -45,7 +44,7 @@ class HeightMap:
 
         return bfs(self.start, at_goal, available)
 
-    def shortest_path_from_any_length(self) -> Optional[int]:
+    def shortest_path_from_any_length(self) -> int | None:
         """Return the length of shortest path from any a-height start to goal.
 
         Computed as path from goal to any a-height point.

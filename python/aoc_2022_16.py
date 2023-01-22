@@ -8,11 +8,12 @@ Key insight - dfs where only consider moving to open a valve
 from __future__ import annotations
 
 from collections import deque
+from collections.abc import Iterable
 from dataclasses import dataclass
 from doctest import testmod
 from re import fullmatch
 from sys import stdin
-from typing import Iterable, TypeAlias, TypeVar, cast
+from typing import TypeAlias, TypeVar, cast
 
 ValveName: TypeAlias = str
 

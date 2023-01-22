@@ -7,7 +7,6 @@ from __future__ import annotations
 from doctest import testmod
 from re import fullmatch
 from sys import stdin
-from typing import Optional, Tuple
 
 from coord import Coord
 
@@ -47,7 +46,7 @@ class Target:
         assert self.x_min > 0  # Assume target to right of start
         assert self.y_max < 0  # Assume target below start
 
-    def launch(self, v_x: int, v_y: int) -> Optional[int]:
+    def launch(self, v_x: int, v_y: int) -> int | None:
         """Launch the probe and return the maximum height if it hits the target.
 
         >>> Target("target area: x=20..30, y=-10..-5").launch(7, 2)
@@ -77,7 +76,7 @@ class Target:
                 return None
             probe.step()
 
-    def scan(self) -> Tuple[int, int]:
+    def scan(self) -> tuple[int, int]:
         """Return maximum possible height and number of successful velocities.
 
         >>> Target("target area: x=20..30, y=-10..-5").scan()

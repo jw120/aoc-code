@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterator
 from doctest import testmod
 from functools import reduce
 from sys import stdin
-from typing import Iterator, Optional
 
 from coord import Coord
 
@@ -15,7 +15,7 @@ Algorithm = list[bool]  # List of len 512
 class Image:
     """Main class for day 20."""
 
-    def __init__(self, lines: Optional[list[str]] = None):
+    def __init__(self, lines: list[str] | None = None):
         if lines is None:
             self.lit_pixels: frozenset[Coord] = frozenset()
         else:

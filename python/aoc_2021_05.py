@@ -4,10 +4,9 @@ import re
 from collections import Counter
 from doctest import testmod
 from sys import stdin
-from typing import Tuple
 
-Coord = Tuple[int, int]
-Segment = Tuple[Coord, Coord]
+Coord = tuple[int, int]
+Segment = tuple[Coord, Coord]
 
 
 segment_pattern = re.compile(r"(\d+),(\d+) -> (\d+),(\d+)")

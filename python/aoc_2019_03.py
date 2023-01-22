@@ -153,6 +153,6 @@ def solve_two(w1: Wire, w2: Wire) -> int:
 
 if __name__ == "__main__":
     testmod()
-    wire1, wire2 = [parse_wire(line) for line in stdin]
+    wire1, wire2 = (parse_wire(line) for line in stdin)
     print(solve_one(wire1, wire2))
     print(solve_two(wire1, wire2))

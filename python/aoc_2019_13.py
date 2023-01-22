@@ -4,15 +4,15 @@ from __future__ import annotations
 
 import curses
 from sys import stdin
-from typing import Any, Optional
+from typing import Any
 
 from int_code import Machine
 
 
-def count_blocks(xs: list[int]) -> tuple[int, Optional[int]]:
+def count_blocks(xs: list[int]) -> tuple[int, int | None]:
     """Count the remaining blocks and extract any score from machine output."""
     screen: dict[tuple[int, int], int] = {}
-    score: Optional[int] = None
+    score: int | None = None
     for x, y, tile_id in [xs[i : i + 3] for i in range(0, len(xs), 3)]:
         if (x, y) == (-1, 0):
             score = tile_id

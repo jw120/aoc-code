@@ -42,6 +42,6 @@ def count(
 
 
 if __name__ == "__main__":
-    input_low, input_high = [int(s) for s in stdin.read().strip().split("-")]
+    input_low, input_high = (int(s) for s in stdin.read().strip().split("-"))
     print(count(valid_one, input_low, input_high))
     print(count(valid_two, input_low, input_high))

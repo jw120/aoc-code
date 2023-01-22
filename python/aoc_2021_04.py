@@ -2,7 +2,7 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 
 class Board:
@@ -20,7 +20,7 @@ class Board:
         self.marked: list[list[bool]] = [
             [False for _ in range(Board.SIZE)] for _ in range(Board.SIZE)
         ]
-        self.last_called: Optional[int] = None
+        self.last_called: int | None = None
 
     def call(self, x: int) -> bool:
         """Call the given number. Mark it if it is present. Return true if board is won."""

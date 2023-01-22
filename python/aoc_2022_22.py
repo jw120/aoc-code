@@ -5,7 +5,7 @@ from __future__ import annotations
 from doctest import testmod
 from re import findall
 from sys import stdin
-from typing import Final, Optional, TypeAlias
+from typing import Final, TypeAlias
 
 from coord import Coord, Extent
 from direction import Direction
@@ -219,7 +219,7 @@ class MonkeyMap:
         face_x, face_y = face
         return Coord(face_x * self.block_size, face_y * self.block_size) + c_relative
 
-    def face_if_at_edge(self, c: Coord, d: Direction) -> Optional[FaceOffset]:
+    def face_if_at_edge(self, c: Coord, d: Direction) -> FaceOffset | None:
         """Return the face the coordinate is on, if move in direction would go off the edge."""
         x = c.x % self.block_size
         y = c.y % self.block_size

@@ -82,7 +82,7 @@ def filter_string(ss: list[str], least: bool) -> str:
     """
     b = 0
     while len(ss) > 1:
-        counts: Counter[str] = Counter((s[b] for s in ss))
+        counts: Counter[str] = Counter(s[b] for s in ss)
         selected_value: str = "1" if (counts["1"] >= len(ss) / 2) ^ least else "0"
         ss = [s for s in ss if s[b] == selected_value]
         b += 1

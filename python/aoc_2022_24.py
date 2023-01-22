@@ -2,14 +2,14 @@
 
 from __future__ import annotations
 
-
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from doctest import testmod
 from heapq import heappop, heappush
 from itertools import chain
 from math import lcm
 from sys import stdin
-from typing import Final, Iterable
+from typing import Final
 
 import numpy as np
 

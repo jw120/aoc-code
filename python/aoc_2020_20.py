@@ -5,7 +5,7 @@ from copy import deepcopy
 from doctest import testmod
 from functools import reduce
 from sys import stdin
-from typing import NewType, Optional, TypeVar
+from typing import NewType, TypeVar
 
 # Ids for tiles (as assigned in the problem)
 TileId = NewType("TileId", int)
@@ -67,7 +67,7 @@ T = TypeVar("T")
 
 
 def len_skip_none(
-    xs: list[Optional[T]],  # pyright: ignore [reportInvalidTypeVarUse]
+    xs: list[T | None],  # pyright: ignore [reportInvalidTypeVarUse]
 ) -> int:
     """Length of a list of optionals exclduing the Nones.
 
@@ -179,7 +179,7 @@ class Board:
                 self._add_to_edge_to_tile(edge, (tile.id, Direction(i), False))
                 self._add_to_edge_to_tile(flip(edge), (tile.id, Direction(i), True))
         # For each tile its connections
-        self.tile_connections: dict[TileId, list[Optional[Connection]]] = {}
+        self.tile_connections: dict[TileId, list[Connection | None]] = {}
         for tile in self.tiles.values():
             self.tile_connections[tile.id] = []
             for edge in tile.edges:
@@ -221,10 +221,10 @@ class Board:
                 print("#" if col else ".", end="")
             print()
 
-    def next_right(self, cur: Orientation) -> Optional[Orientation]:
+    def next_right(self, cur: Orientation) -> Orientation | None:
         """Return the tile to the right if any."""
         cur_id, cur_flipped, cur_rot = cur
-        next_tile: Optional[Connection] = self.tile_connections[cur_id][
+        next_tile: Connection | None = self.tile_connections[cur_id][
             right(cur_flipped, cur_rot)
         ]
         if next_tile is None:
@@ -241,10 +241,10 @@ class Board:
             next_dir = Direction((next_incoming + 1) % 4)
         return (next_id, next_flipped, next_dir)
 
-    def next_down(self, cur: Orientation) -> Optional[Orientation]:
+    def next_down(self, cur: Orientation) -> Orientation | None:
         """Return the tile below if any."""
         cur_id, cur_flipped, cur_rot = cur
-        next_tile: Optional[Connection] = self.tile_connections[cur_id][
+        next_tile: Connection | None = self.tile_connections[cur_id][
             down(cur_flipped, cur_rot)
         ]
         if next_tile is None:
@@ -261,7 +261,7 @@ class Board:
         """Assemble images into a grid of orientations."""
 
         def tile_row(start: Orientation) -> list[Orientation]:
-            cur: Optional[Orientation] = start
+            cur: Orientation | None = start
             row: list[Orientation] = []
             while True:
                 if cur is None:
@@ -270,7 +270,7 @@ class Board:
                 cur = self.next_right(cur)
 
         def tile_col(start: Orientation) -> list[Orientation]:
-            cur: Optional[Orientation] = start
+            cur: Orientation | None = start
             col: list[Orientation] = []
             while True:
                 if cur is None:

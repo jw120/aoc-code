@@ -2,9 +2,8 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import Tuple
 
-Entry = Tuple[int, int, str, str]
+Entry = tuple[int, int, str, str]
 
 
 def parse_entry(entry_string: str) -> Entry:

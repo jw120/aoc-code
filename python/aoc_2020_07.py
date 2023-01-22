@@ -4,7 +4,6 @@ import re
 from doctest import testmod
 from re import Match, Pattern
 from sys import stdin
-from typing import Optional
 
 rule_divider: Pattern[str] = re.compile(" bags?[,\\.] ?")
 bag_match: Pattern[str] = re.compile("([0-9]+) (.+)")
@@ -35,7 +34,7 @@ def parse_content(s: str) -> tuple[str, int]:
     >>> parse_content('2 plaid gold')
     ('plaid gold', 2)
     """
-    m: Optional[Match[str]] = re.match(bag_match, s)
+    m: Match[str] | None = re.match(bag_match, s)
     if not m:
         raise RuntimeError("Cannot parse contents", s)
     return (m.group(2), int(m.group(1)))

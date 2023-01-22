@@ -1,11 +1,11 @@
 """Advent of Code 2022 - Day 11."""
 
+from collections.abc import Callable
 from dataclasses import dataclass
 from doctest import testmod
 from functools import reduce
 from re import fullmatch
 from sys import stdin
-from typing import Callable, Optional
 
 
 @dataclass
@@ -69,7 +69,7 @@ def read_monkey(expected_index: int, s: str) -> Monkey:
     )
 
 
-def step(monkeys: list[Monkey], steps: int, mode: Optional[int]) -> list[Monkey]:
+def step(monkeys: list[Monkey], steps: int, mode: int | None) -> list[Monkey]:
     """
     Update (mutating) monkeys given number of times.
 

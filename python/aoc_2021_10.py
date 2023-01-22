@@ -4,7 +4,6 @@ from collections import deque
 from doctest import testmod
 from enum import Enum, auto
 from sys import stdin
-from typing import Dict, Set, Tuple
 
 
 class Result(Enum):
@@ -14,7 +13,7 @@ class Result(Enum):
     INCOMPLETE = auto()
 
 
-test: list[Tuple[str, Tuple[Result, str]]] = [
+test: list[tuple[str, tuple[Result, str]]] = [
     ("[({(<(())[]>[[{[]{<()<>>", (Result.INCOMPLETE, "}}]])})]")),
     ("[(()[<>])]({[<{<<[]>>(", (Result.INCOMPLETE, ")}>]})")),
     ("{([(<{}[<>[]}>{[]{[(<()>", (Result.ILLEGAL, "}")),
@@ -27,13 +26,13 @@ test: list[Tuple[str, Tuple[Result, str]]] = [
     ("<{([{{}}[<[[[<>{}]]]>[]]", (Result.INCOMPLETE, "])}>")),
 ]
 
-pairs: Dict[str, str] = {"(": ")", "[": "]", "{": "}", "<": ">"}
-closes: Set[str] = set(pairs.values())
-illegal_scores: Dict[str, int] = {")": 3, "]": 57, "}": 1197, ">": 25137}
-completion_scores: Dict[str, int] = {")": 1, "]": 2, "}": 3, ">": 4}
+pairs: dict[str, str] = {"(": ")", "[": "]", "{": "}", "<": ">"}
+closes: set[str] = set(pairs.values())
+illegal_scores: dict[str, int] = {")": 3, "]": 57, "}": 1197, ">": 25137}
+completion_scores: dict[str, int] = {")": 1, "]": 2, "}": 3, ">": 4}
 
 
-def scan(s: str) -> Tuple[Result, str]:
+def scan(s: str) -> tuple[Result, str]:
     """Return ILLEGAL and the first illegal character or INCOMPLETE and the completion.
 
     >>> [scan(s) == r for s, r in test]
@@ -72,7 +71,7 @@ def completion_score(s: str) -> int:
 if __name__ == "__main__":
     testmod()
     lines: list[str] = stdin.read().splitlines()
-    scans: list[Tuple[Result, str]] = [scan(s) for s in lines]
+    scans: list[tuple[Result, str]] = [scan(s) for s in lines]
     print(sum(illegal_score(c) for r, c in scans if r == Result.ILLEGAL))
     scores: list[int] = [
         completion_score(s) for r, s in scans if r == Result.INCOMPLETE

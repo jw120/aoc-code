@@ -3,7 +3,6 @@
 from collections import Counter
 from doctest import testmod
 from sys import stdin
-from typing import Tuple
 
 
 class Player:
@@ -73,7 +72,7 @@ def part_b(start1: int, start2: int) -> int:
     >>> part_b(4, 8)
     444356092776315
     """
-    State = Tuple[bool, int, int, int, int]
+    State = tuple[bool, int, int, int, int]
     active_states: Counter[State] = Counter([(True, start1, start2, 0, 0)])
     wins1: int = 0
     wins2: int = 0
@@ -108,8 +107,8 @@ def part_b(start1: int, start2: int) -> int:
 
 if __name__ == "__main__":
     testmod()
-    input_start1, input_start2 = [
+    input_start1, input_start2 = (
         int(line.split(": ")[1]) for line in stdin.read().splitlines()
-    ]
+    )
     print(part_a(input_start1, input_start2))
     print(part_b(input_start1, input_start2))

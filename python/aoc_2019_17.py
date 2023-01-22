@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from sys import stdin
-from typing import Optional
 
 from coord import Coord
 from direction import Direction
@@ -24,7 +23,7 @@ def move(c: Coord, d: Direction) -> Coord:
     assert_never(d)
 
 
-def direction_from_char(c: str) -> Optional[Direction]:
+def direction_from_char(c: str) -> Direction | None:
     """Read direction from a character string."""
     if i := "^>v<".find(c) >= 0:
         return Direction(i)

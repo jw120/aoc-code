@@ -3,10 +3,9 @@
 from doctest import testmod
 from functools import reduce
 from sys import stdin
-from typing import Tuple
 
 
-def change(s: str) -> Tuple[int, int]:
+def change(s: str) -> tuple[int, int]:
     """Return distance and depth changes for a given command."""
     ws = s.strip().split()
     if len(ws) != 2 or not ws[1].isnumeric():
@@ -33,8 +32,8 @@ def run1(cs: list[str]) -> int:
 
 
 def apply2(
-    current: Tuple[int, int, int], command: Tuple[int, int]
-) -> Tuple[int, int, int]:
+    current: tuple[int, int, int], command: tuple[int, int]
+) -> tuple[int, int, int]:
     """Apply the distance and depth changes of a complex command."""
     horiz, depth, aim = current
     return (horiz + command[0], depth + command[0] * aim, aim + command[1])

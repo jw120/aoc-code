@@ -4,7 +4,6 @@ import re
 from doctest import testmod
 from re import Pattern
 from sys import stdin
-from typing import Union
 
 item: Pattern[str] = re.compile(r"[0-9]+|[+*()]|\s+")
 
@@ -30,7 +29,7 @@ def expression1(s: str) -> int:
     >>> expression1("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2")
     13632
     """
-    stack: list[Union[str, int]] = []
+    stack: list[str | int] = []
     for term in re.findall(item, re.sub(r"\s+", "", s)):
         # Add term to our stack
         stack.append(int(term) if term.isdigit() else term)
@@ -67,7 +66,7 @@ def expression2(s: str) -> int:
     >>> expression2("((2 + 4 * 9) * (6 + 9 * 8 + 6) + 6) + 2 + 4 * 2")
     23340
     """
-    term_list: list[Union[str, int]] = [
+    term_list: list[str | int] = [
         int(x) if x.isdigit() else x for x in re.findall(item, re.sub(r"\s+", "", s))
     ]
 

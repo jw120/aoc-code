@@ -3,14 +3,13 @@
 from collections import Counter
 from doctest import testmod
 from sys import stdin
-from typing import Tuple
 
 # We treat the polymers as counts of pairs and then the rules
 # change from AB -> X as AB -> AX, XB
 
 Pair = str
-Polymer = Tuple[Counter[Pair], str]  # Counts of pairs plus the last monomer
-Rules = dict[Pair, Tuple[Pair, Pair]]
+Polymer = tuple[Counter[Pair], str]  # Counts of pairs plus the last monomer
+Rules = dict[Pair, tuple[Pair, Pair]]
 
 
 def apply(polymer: Polymer, rules: Rules, n: int) -> Polymer:

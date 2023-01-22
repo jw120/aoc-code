@@ -2,7 +2,7 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import Optional, TypeVar
+from typing import TypeVar
 
 from utils import set_union
 
@@ -11,7 +11,7 @@ K = TypeVar("K")
 
 def build_tree(
     links: list[tuple[K, K]]
-) -> tuple[dict[K, set[K]], dict[K, Optional[K]], list[K]]:
+) -> tuple[dict[K, set[K]], dict[K, K | None], list[K]]:
     """Build a representation of a tree.
 
     Given a list of key->key links, construct dicts of all forward (one->many)
@@ -25,7 +25,7 @@ def build_tree(
     [1, 5]
     """
     forward: dict[K, set[K]] = {}
-    backward: dict[K, Optional[K]] = {}
+    backward: dict[K, K | None] = {}
     k_from: K
     k_to: K
     for (k_from, k_to) in links:
@@ -90,9 +90,7 @@ def label_root_distance(root: K, forward: dict[K, set[K]]) -> dict[K, int]:
     return labels
 
 
-def distance(
-    a: K, b: K, backward: dict[K, Optional[K]], root_dist: dict[K, int]
-) -> int:
+def distance(a: K, b: K, backward: dict[K, K | None], root_dist: dict[K, int]) -> int:
     """Return distance between two nodes along the tree.
 
     Walk backwards from each node until we find an overlapping node. Distance
@@ -106,8 +104,8 @@ def distance(
     a_walk: K = a
     b_walk: K = b
     while (overlap := a_visited & b_visited) == set():
-        a_back: Optional[K] = backward[a_walk]
-        b_back: Optional[K] = backward[b_walk]
+        a_back: K | None = backward[a_walk]
+        b_back: K | None = backward[b_walk]
         if a_back is None or b_back is None:
             raise RuntimeError("No route found")
         a_walk = a_back

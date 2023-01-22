@@ -2,10 +2,9 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import List
 
-Line = List[bool]  # Horizontal row of trees (true = a tree)
-Grid = List[Line]
+Line = list[bool]  # Horizontal row of trees (true = a tree)
+Grid = list[Line]
 
 
 def parse_line(s: str) -> Line:

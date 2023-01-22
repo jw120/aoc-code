@@ -2,7 +2,6 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import Dict
 
 test_data: list[int] = [3, 4, 3, 1, 2]
 
@@ -13,7 +12,7 @@ def fish(initial_timers: list[int], number_of_steps: int) -> int:
     >>> [fish(test_data, i) for i in [1, 2, 18, 256]]
     [5, 6, 26, 26984457539]
     """
-    f: Dict[int, int] = {}  # number of fish after n steps from one timer-0 fish
+    f: dict[int, int] = {}  # number of fish after n steps from one timer-0 fish
     for i in range(-8, number_of_steps):
         if i <= 0:
             f[i] = 1

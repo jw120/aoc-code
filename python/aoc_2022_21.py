@@ -7,7 +7,7 @@ from doctest import testmod
 from enum import Enum
 from re import fullmatch
 from sys import stdin
-from typing import NewType, Optional
+from typing import NewType
 
 
 class Operation(Enum):
@@ -78,7 +78,7 @@ def read_monkey(s: str) -> tuple[MonkeyName, Monkey]:
 
 def eval_monkey(
     name: MonkeyName, monkeys: dict[MonkeyName, Monkey], stop_on_humn: bool
-) -> Optional[int]:
+) -> int | None:
     """Evaluate the value of the given monkey.
 
     Flag makes the eval return None if evaluation leads to a "humn" node.

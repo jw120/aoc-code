@@ -8,7 +8,6 @@ from __future__ import annotations
 from collections import deque
 from doctest import testmod
 from sys import stdin
-from typing import Optional
 
 Cave = str
 Maze = dict[Cave, list[Cave]]
@@ -69,7 +68,7 @@ class Path:
     """Main class for day 12."""
 
     def __init__(self) -> None:
-        self._final_cave: Optional[Cave] = None
+        self._final_cave: Cave | None = None
         self._visited: frozenset[Cave] = frozenset()
         self._all_small_unique: bool = True
 

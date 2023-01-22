@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from doctest import testmod
 from enum import Enum
-from typing import Callable, ClassVar, Dict, List, Optional, Tuple
+from typing import ClassVar
 
 
 class Mode(Enum):
@@ -25,7 +26,7 @@ class Mode(Enum):
         raise RuntimeError("Unknown mode", self.value)
 
     @staticmethod
-    def modes(instruction_code: int) -> Tuple[Mode, Mode, Mode]:
+    def modes(instruction_code: int) -> tuple[Mode, Mode, Mode]:
         """Return three addressing modes associated with the instruction code.
 
         >>> Mode.modes(21002)
@@ -60,7 +61,7 @@ class Machine:
     Halt_opcode: ClassVar[int] = 99
 
     # Opcode names (used for disassembly)
-    Opcode_names: ClassVar[Dict[int, str]] = {
+    Opcode_names: ClassVar[dict[int, str]] = {
         1: "add",
         2: "mul",
         Input_opcode: "input",
@@ -74,25 +75,25 @@ class Machine:
     }
 
     # Jump opcodes
-    Jump_instructions: ClassVar[Dict[int, Callable[[int, int], Optional[int]]]] = {
+    Jump_instructions: ClassVar[dict[int, Callable[[int, int], int | None]]] = {
         5: lambda x, y: y if x != 0 else None,
         6: lambda x, y: y if x == 0 else None,
     }
 
     # Arithmetic opcodes
-    Arithmetic_instructions: ClassVar[Dict[int, Callable[[int, int], int]]] = {
+    Arithmetic_instructions: ClassVar[dict[int, Callable[[int, int], int]]] = {
         1: lambda x, y: x + y,
         2: lambda x, y: x * y,
         7: lambda x, y: x < y,
         8: lambda x, y: x == y,
     }
 
-    def __init__(self, code: List[int], input_vals: Optional[List[int]] = None) -> None:
-        self.code: Dict[int, int] = dict(enumerate(code))
+    def __init__(self, code: list[int], input_vals: list[int] | None = None) -> None:
+        self.code: dict[int, int] = dict(enumerate(code))
         self.ip: int = 0
         self.relative_base: int = 0
-        self.input_vals: List[int] = [] if input_vals is None else input_vals
-        self.output_vals: List[int] = []
+        self.input_vals: list[int] = [] if input_vals is None else input_vals
+        self.output_vals: list[int] = []
         self.pause_after_output = False
         self.pause_before_input = False
         self.paused = False
@@ -216,7 +217,7 @@ class Machine:
         arg2: int = self._fetch(mode2, self._code(self.ip + 2))
 
         if opcode in self.Jump_instructions:
-            jump_value: Optional[int] = self.Jump_instructions[opcode](arg1, arg2)
+            jump_value: int | None = self.Jump_instructions[opcode](arg1, arg2)
             if print_instructions:
                 self._print(f"Jump to {jump_value}" if jump_value else "Jump skipped")
             self.ip = self.ip + 3 if jump_value is None else jump_value

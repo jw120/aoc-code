@@ -7,7 +7,7 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import Optional, Union
+from typing import Union
 
 
 @dataclass(frozen=True)
@@ -86,7 +86,7 @@ class MessageValidator:
         """Test validity."""
         return self.valid_remains(s, self.rules[0]) == ""
 
-    def valid_remains(self, s: str, r: Rule) -> Optional[str]:
+    def valid_remains(self, s: str, r: Rule) -> str | None:
         """Return the remaining string if the rule matches."""
         if isinstance(r, Terminal):
             if s.startswith(r.val):

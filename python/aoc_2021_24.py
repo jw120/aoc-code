@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable, Iterator
 from doctest import testmod
 from enum import Enum, auto
 from itertools import product
 from operator import add, mod, mul
 from sys import stdin
-from typing import Callable, Iterable, Iterator, Optional, Tuple, Union
 
 from utils import sign
 
@@ -22,8 +22,8 @@ class Register(Enum):
 
 
 InstructionKind = Callable[[int, int], int]
-InstructionSource = Union[Register, int, None]
-Instruction = Tuple[InstructionKind, Register, InstructionSource, str]
+InstructionSource = Register | int | None
+Instruction = tuple[InstructionKind, Register, InstructionSource, str]
 
 
 def replace(_reg: int, val: int) -> int:
@@ -89,12 +89,12 @@ def parse_instruction(s: str) -> Instruction:
 class ALU:
     """ALU class."""
 
-    def __init__(self, program: list[str], inputs: Optional[list[int]] = None) -> None:
-        self.reg: Tuple[int, int, int, int] = (0, 0, 0, 0)
+    def __init__(self, program: list[str], inputs: list[int] | None = None) -> None:
+        self.reg: tuple[int, int, int, int] = (0, 0, 0, 0)
         self.program = [parse_instruction(s) for s in program]
         self.inputs: Iterator[int] = iter([] if inputs is None else inputs)
 
-    def run(self, inputs: Optional[Iterable[int]] = None) -> ALU:
+    def run(self, inputs: Iterable[int] | None = None) -> ALU:
         """
         Run the program with given inputs.
 

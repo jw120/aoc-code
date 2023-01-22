@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from doctest import testmod
 from enum import Enum, auto
 from sys import stdin
-from typing import ClassVar, Union
+from typing import ClassVar
 
 
 @dataclass(frozen=True)
@@ -44,7 +44,7 @@ class Combat:
             raise RuntimeError("Can't find", header, "in", lines[0])
         return [int(x) for x in lines[1:]]
 
-    def __init__(self, s: Union[str, tuple[list[int], list[int]]]) -> None:
+    def __init__(self, s: str | tuple[list[int], list[int]]) -> None:
         self.p1: list[int]
         self.p2: list[int]
         if isinstance(s, str):

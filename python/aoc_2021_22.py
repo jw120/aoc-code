@@ -6,11 +6,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from doctest import testmod
 from functools import reduce
 from itertools import chain, combinations
 from sys import stdin
-from typing import Iterable, Optional, Tuple
 
 from coord import Coord3
 
@@ -77,7 +77,7 @@ class Cuboid:
             * (self._max.z - self._min.z)
         )
 
-    def as_tuple(self) -> Tuple[int, int, int, int, int, int]:
+    def as_tuple(self) -> tuple[int, int, int, int, int, int]:
         """Convert to tuple form."""
         return (
             self._min.x,
@@ -88,7 +88,7 @@ class Cuboid:
             self._max.z,
         )
 
-    def merge(self, q: Cuboid) -> Optional[Cuboid]:
+    def merge(self, q: Cuboid) -> Cuboid | None:
         """Merge with another cuboid producing a single cuboid if possible.
 
         >>> Cuboid(1, 3, 2, 4, 2, 4).merge(Cuboid(3, 5, 2, 4, 2, 4)).as_tuple()
@@ -184,7 +184,7 @@ def merge_adjacents(cs: list[Cuboid]) -> None:
         ), f"Overlapping cuboids leaving merge_adjacents: {c.as_tuple()} {d.as_tuple()}"
 
 
-def combine(cs: list[Cuboid], step: Tuple[bool, Cuboid]) -> list[Cuboid]:
+def combine(cs: list[Cuboid], step: tuple[bool, Cuboid]) -> list[Cuboid]:
     """Add a new cuboid (which can be on or off) to an existing list of disjoint lit cuboids.
 
     >>> total_volume(combine([], test1[0]))
@@ -258,7 +258,7 @@ def combine(cs: list[Cuboid], step: Tuple[bool, Cuboid]) -> list[Cuboid]:
     return disjoint_cuboids + new_off
 
 
-def combine_steps(steps: list[Tuple[bool, Cuboid]]) -> list[Cuboid]:
+def combine_steps(steps: list[tuple[bool, Cuboid]]) -> list[Cuboid]:
     """Run a series of steps.
 
     >>> total_volume(combine_steps(test1))
@@ -272,7 +272,7 @@ def total_volume(cs: Iterable[Cuboid]) -> int:
     return sum(c.volume() for c in cs)
 
 
-def read_step(s: str) -> Tuple[bool, Cuboid]:
+def read_step(s: str) -> tuple[bool, Cuboid]:
     """Read from a string."""
     on_off, coords = s.split(" ")
     assert on_off in ["on", "off"], f"Bad switch '{on_off}'"

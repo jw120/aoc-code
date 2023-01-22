@@ -1,8 +1,8 @@
 """Advent of Code 2021 - Day 7."""
 
+from collections.abc import Callable
 from doctest import testmod
 from sys import stdin
-from typing import Callable, Tuple
 
 test_data: list[int] = [16, 1, 2, 0, 4, 2, 7, 1, 2, 14]
 
@@ -30,7 +30,7 @@ def fuel2(positions: list[int], target: int) -> int:
     return sum(sum_to(abs(x - target)) for x in positions)
 
 
-def find_minimum(f: Callable[[int], int], bounds: Tuple[int, int]) -> int:
+def find_minimum(f: Callable[[int], int], bounds: tuple[int, int]) -> int:
     """Find the minimum value of f(x) within the given bounds x_min <= x <= x_max.
 
     >>> find_minimum(lambda x: fuel1(test_data, x), (0, 16))

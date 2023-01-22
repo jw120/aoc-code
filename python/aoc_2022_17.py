@@ -4,7 +4,6 @@ from dataclasses import dataclass
 from doctest import testmod
 from math import lcm
 from sys import stdin
-from typing import Optional
 
 # Here we take x left-to-right and y down-to-up
 from coord import Coord
@@ -60,7 +59,7 @@ class Chamber:
         # Memory holds rock count and max_y for hashes of pattern
         self.memory: dict[MemState, tuple[int, int]] = {}
         # Once we detect a loop set this to rock count and max_y for first occurence
-        self.repeat: Optional[tuple[int, int]] = None
+        self.repeat: tuple[int, int] | None = None
 
     @property
     def height(self) -> int:
@@ -150,7 +149,7 @@ class Chamber:
         """Test if all of the coordinates are valid unoccupied spaces."""
         return all(self.valid(c) for c in coords)
 
-    def show(self, max_rows: Optional[int] = None) -> None:
+    def show(self, max_rows: int | None = None) -> None:
         """Show debugging information."""
         min_y = -1 if max_rows is None else self.max_y - max_rows + 1
         for y in range(self.max_y + 2, min_y - 1, -1):

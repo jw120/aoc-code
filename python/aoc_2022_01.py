@@ -2,10 +2,9 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import Optional
 
 
-def sum_groups(xs: list[Optional[int]]) -> list[int]:
+def sum_groups(xs: list[int | None]) -> list[int]:
     """Return sums of groups of lines separated by None.
 
     >>> sum_groups([1, 2, 3, None, 4, None, 5, 7])
@@ -29,7 +28,7 @@ def sum_groups(xs: list[Optional[int]]) -> list[int]:
 
 if __name__ == "__main__":
     testmod()
-    calories: list[Optional[int]] = [
+    calories: list[int | None] = [
         (int(line) if line.strip() else None) for line in stdin
     ]
     elves = sorted(sum_groups(calories), reverse=True)

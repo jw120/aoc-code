@@ -1,11 +1,11 @@
 """Advent of Code 2022 - Day 15."""
 
 
+from collections.abc import Iterable
 from doctest import testmod
 from itertools import combinations
 from re import fullmatch
 from sys import stdin
-from typing import Iterable
 
 from coord import Coord, manhattan
 

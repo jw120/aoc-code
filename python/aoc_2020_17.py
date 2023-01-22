@@ -4,9 +4,8 @@
 
 from collections.abc import Iterable
 from sys import stdin
-from typing import Tuple
 
-Coord3 = Tuple[int, int, int]
+Coord3 = tuple[int, int, int]
 
 
 def min_coord3(p: Coord3, q: Coord3) -> Coord3:
@@ -17,7 +16,7 @@ def max_coord3(p: Coord3, q: Coord3) -> Coord3:
     return (max(p[0], q[0]), max(p[1], q[1]), max(p[2], q[2]))
 
 
-Coord4 = Tuple[int, int, int, int]
+Coord4 = tuple[int, int, int, int]
 
 
 def min_coord4(p: Coord4, q: Coord4) -> Coord4:

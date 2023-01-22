@@ -3,7 +3,6 @@
 from doctest import testmod
 from enum import Enum
 from sys import stdin
-from typing import Tuple
 
 
 class Move(Enum):
@@ -31,19 +30,19 @@ class Result(Enum):
 results = {"X": Result.LOSE, "Y": Result.DRAW, "Z": Result.WIN}
 
 
-def read_moves(s: str) -> Tuple[Move, Move]:
+def read_moves(s: str) -> tuple[Move, Move]:
     """Read a line as a pair of moves."""
     [opponent, player] = s.split()
     return (opponent_moves[opponent], player_moves[player])
 
 
-def read_result(s: str) -> Tuple[Move, Result]:
+def read_result(s: str) -> tuple[Move, Result]:
     """Read a line as a move and a result."""
     [opponent, result] = s.split()
     return (opponent_moves[opponent], results[result])
 
 
-def score_moves(moves: Tuple[Move, Move]) -> int:
+def score_moves(moves: tuple[Move, Move]) -> int:
     """Score a game given the two moves."""
     opponent, player = moves
     shape_score = 1 if player == Move.ROCK else 2 if player == Move.PAPER else 3
@@ -58,7 +57,7 @@ def score_moves(moves: Tuple[Move, Move]) -> int:
     return win_score + shape_score
 
 
-def score_result(game: Tuple[Move, Result]) -> int:
+def score_result(game: tuple[Move, Result]) -> int:
     """Score a game given the opponent moves and desired result."""
     opponent, result = game
     match result:

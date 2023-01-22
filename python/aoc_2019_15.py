@@ -6,7 +6,6 @@ from collections.abc import Iterable
 from enum import Enum
 from random import randrange
 from sys import stdin
-from typing import Optional
 
 from coord import Coord
 from int_code import Machine
@@ -28,7 +27,7 @@ def move(c: Coord, d: CompassDirection) -> Coord:
 
 def closest(c: Coord, pts: Iterable[Coord]) -> Coord:
     """Return the closest points (or one of them if more than one)."""
-    closest_so_far: Optional[tuple[int, Coord]] = None
+    closest_so_far: tuple[int, Coord] | None = None
     for p in pts:
         dist = c.dist(p)
         match closest_so_far:
@@ -76,7 +75,7 @@ class Controller:
         self.loc: Coord = Coord.origin()
         self.walls: set[Coord] = set()  # Locations we know are walls
         self.open: set[Coord] = {self.loc}  # Locations we know are space
-        self.oxygen: Optional[Coord] = None  # Location of oxygen if known
+        self.oxygen: Coord | None = None  # Location of oxygen if known
         self.debug: bool = debug
 
     def try_move(self, d: CompassDirection) -> Response:

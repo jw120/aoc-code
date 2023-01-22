@@ -6,7 +6,7 @@ import re
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass(frozen=True)
@@ -126,7 +126,7 @@ class State:
     # path: list[str]
     time: int
 
-    def buy(self, cost: Amount, robot: Amount, _name: str) -> Optional[State]:
+    def buy(self, cost: Amount, robot: Amount, _name: str) -> State | None:
         """Return a new state after buying the given robot if possible."""
         if self.resources >= cost:
             return State(
@@ -156,11 +156,11 @@ class Dynamic:
     """Dynamic programming solution."""
 
     def __init__(self, blueprint: BluePrint):
-        self.cache: dict[State, Optional[int]] = {}
+        self.cache: dict[State, int | None] = {}
         self.blueprint: BluePrint = blueprint
         self.max_resources = Amount(ore=20, clay=100, obsidian=25, geode=1000)
 
-    def solution(self, state: Optional[State]) -> Optional[int]:
+    def solution(self, state: State | None) -> int | None:
         """Return number of geodes we can produce in time."""
         if state is None:
             return None
@@ -180,7 +180,7 @@ class Dynamic:
                 return buy_geode.time + buy_geode_score
 
         # Otherwise consider all possible moves
-        candidate_states: list[Optional[State]] = []
+        candidate_states: list[State | None] = []
         candidate_states = [
             state.buy(self.blueprint.ore_robot, ore(1), "o"),
             state.buy(self.blueprint.clay_robot, clay(1), "c"),

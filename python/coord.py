@@ -2,9 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from doctest import testmod
-from typing import Any, Iterable, Iterator, Optional, Tuple
+from typing import Any
 
 
 @dataclass(eq=True, frozen=True)
@@ -26,7 +27,7 @@ class Coord:
         """
         return self.x >= 0 and self.x < extent.x and self.y >= 0 and self.y < extent.y
 
-    def adjacents(self, extent: Optional[Extent] = None) -> Iterable[Coord]:
+    def adjacents(self, extent: Extent | None = None) -> Iterable[Coord]:
         """Return all the cells adjacent to this one given one (excluding diagonals).
 
         Optionally checks bounds."""
@@ -44,9 +45,7 @@ class Coord:
             return possible_cells
         return (c for c in possible_cells if c.in_bounds(extent))
 
-    def adjacents_with_diagonals(
-        self, extent: Optional[Extent] = None
-    ) -> Iterable[Coord]:
+    def adjacents_with_diagonals(self, extent: Extent | None = None) -> Iterable[Coord]:
         """Return all the cells adjacent to this one given one (including diagonals).
 
         Optionally checks bounds."""
@@ -143,7 +142,7 @@ class Coord3:
         """Return Manhattan distance to the other coordinate."""
         return abs(self.x - other.x) + abs(self.y - other.y) + abs(self.z - other.z)
 
-    def as_tuple(self) -> Tuple[int, int, int]:
+    def as_tuple(self) -> tuple[int, int, int]:
         """Return a tuple-version of the coordinate."""
         return (self.x, self.y, self.z)
 

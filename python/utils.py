@@ -1,6 +1,7 @@
 """Utility functions for Advent of Code."""
 
-from typing import Iterable, NoReturn, TypeVar
+from collections.abc import Iterable
+from typing import NoReturn, TypeVar
 
 
 def assert_never(value: NoReturn) -> NoReturn:

@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from doctest import testmod
 from enum import Enum
 from sys import stdin
-from typing import Final, Iterable, Optional
+from typing import Final
 
 # We use x as left->right and y as top->bottom
 from coord import Coord
@@ -96,7 +97,7 @@ class Diffuser:
         """Update positions the given number of steps.
 
         Return true if any elf moved."""
-        proposals: dict[Coord, Optional[Coord]] = {}
+        proposals: dict[Coord, Coord | None] = {}
         moved = False
         for elf in self.positions:
             # Don't consider moving if all adjacent positions are empty

@@ -54,5 +54,5 @@ def solve(public_key_1: int, public_key_2: int) -> int:
 
 if __name__ == "__main__":
     testmod()
-    input_public_key_1, input_public_key_2 = [int(line) for line in stdin.readlines()]
+    input_public_key_1, input_public_key_2 = (int(line) for line in stdin.readlines())
     print(solve(input_public_key_1, input_public_key_2))

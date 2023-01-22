@@ -4,9 +4,8 @@ import re
 from doctest import testmod
 from re import Pattern
 from sys import stdin
-from typing import Dict
 
-Passport = Dict[str, str]
+Passport = dict[str, str]
 
 
 def parse_passport(block: str) -> Passport:

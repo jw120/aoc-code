@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from doctest import testmod
 from sys import stdin
-from typing import Literal, Tuple
+from typing import Literal
 
 from coord import Coord
 
@@ -15,7 +15,7 @@ def read_dot(s: str) -> Coord:
     >>> read_dot("1,10")
     Coord(x=1, y=10)
     """
-    row, col = [int(x) for x in s.split(",")]
+    row, col = (int(x) for x in s.split(","))
     return Coord(row, col)
 
 
@@ -60,7 +60,7 @@ test_dots: set[Coord] = {
 
 test_folds: list[Fold] = [read_fold(s) for s in ["fold along y=7", "fold along x=5"]]
 
-Fold = Tuple[Literal["x", "y"], int]
+Fold = tuple[Literal["x", "y"], int]
 
 
 def fold_dot(dot: Coord, fold: Fold) -> Coord:

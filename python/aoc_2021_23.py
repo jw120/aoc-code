@@ -5,11 +5,12 @@
 from __future__ import annotations
 
 from collections import Counter
+from collections.abc import Iterable
 from doctest import testmod
 from enum import Enum
 from heapq import heappop, heappush
 from sys import stdin
-from typing import Any, ClassVar, Iterable, Optional, Tuple
+from typing import Any, ClassVar
 
 
 class Kind(Enum):
@@ -75,7 +76,7 @@ class Position:
     hallway_size: ClassVar[int] = 11
     valid_hallway_indices: ClassVar[list[int]] = [0, 1, 3, 5, 7, 9, 10]
 
-    def __init__(self, room: Optional[Kind], room_index: int) -> None:
+    def __init__(self, room: Kind | None, room_index: int) -> None:
         self.room = room
         self.index = room_index
 
@@ -107,7 +108,7 @@ class State:
     def __init__(
         self,
         room_size: int,
-        s: Optional[str],
+        s: str | None,
     ) -> None:
         """Initialize a state (all amphipods in rooms).
 
@@ -147,7 +148,7 @@ class State:
                 self.mapping[Position(Kind.D, 2)] = Amphipod(room_size, Kind.C)
             assert len(self.mapping) == 4 * room_size, "Wrong number of items in state"
 
-    def room_available(self, target_kind: Kind) -> Optional[Position]:
+    def room_available(self, target_kind: Kind) -> Position | None:
         """If the target room available for an amphipod to move into, return the open position.
 
         Available if only occupied by amphipods of the same kind.
@@ -213,7 +214,7 @@ class State:
 
     def available_moves(
         self: State, max_hallway_number: int
-    ) -> Iterable[Tuple[Position, Position]]:
+    ) -> Iterable[tuple[Position, Position]]:
         # pylint: disable=line-too-long
         """Return all available moves.
 
@@ -269,7 +270,7 @@ class State:
         pod = self.mapping[p]
         assert q not in self.mapping, "Can't move to a non-empty position"
 
-        def hallway_and_extra(x: Position) -> Tuple[int, int]:
+        def hallway_and_extra(x: Position) -> tuple[int, int]:
             """Return the hallway index of the position and extra moves need in the room."""
             if x.room is None:
                 return x.index, 0

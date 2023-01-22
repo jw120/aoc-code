@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from doctest import testmod
 from sys import stdin
-from typing import Iterable
 
 from coord import Coord
 

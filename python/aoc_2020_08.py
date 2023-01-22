@@ -5,7 +5,6 @@ from __future__ import annotations
 from doctest import testmod
 from enum import Enum, auto
 from sys import stdin
-from typing import Optional, Tuple
 
 
 class Operation(Enum):
@@ -27,7 +26,7 @@ class Operation(Enum):
         raise RuntimeError("Unknown opcode in parse()", s)
 
 
-Instruction = Tuple[Operation, int]
+Instruction = tuple[Operation, int]
 
 
 def parse_instruction(s: str) -> Instruction:
@@ -93,7 +92,7 @@ def run_until_loop(code: list[Instruction]) -> int:
         m.step()
 
 
-def run_until_loop_or_end(code: list[Instruction]) -> Optional[int]:
+def run_until_loop_or_end(code: list[Instruction]) -> int | None:
     """Run the machine until a loop is found or the program ends.
 
     Returns the value of the if the programs ends normally.
