@@ -52,7 +52,7 @@ $(OUT_DIR):
 check: python-check haskell-check
 
 python-check:
-	poetry run pyupgrade python/*.py
+	pyupgrade python/*.py
 	isort python/
 	black --quiet python/
 	pyright python/
