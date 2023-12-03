@@ -1,4 +1,4 @@
-// Advent of Code, 2022 day XX
+// Advent of Code, 2023 day XX
 
 use aoc_rust::stdin_lines;
 

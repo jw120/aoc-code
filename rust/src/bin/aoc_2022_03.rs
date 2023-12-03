@@ -72,6 +72,7 @@ mod tests {
         char_score('5');
     }
 
+    // cspell: disable
     const BACKPACK_EXAMPLES: [&str; 6] = [
         "vJrwpWtwJgWrhcsFMMfFFhFp",
         "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL",
@@ -80,8 +81,9 @@ mod tests {
         "ttgJtRGJQctTZtZT",
         "CrZsJsPPZsGzwwsLwLmpwMDw",
     ];
-
     const BACKPACK_EXPECTED: [u32; 6] = [16, 38, 42, 22, 20, 19];
+    // cspell: enable
+
 
     #[test]
     fn test_backpack_score() {
