@@ -2,14 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from enum import Enum
 from random import randrange
 from sys import stdin
+from typing import TYPE_CHECKING, assert_never
 
 from coord import Coord
 from int_code import Machine
-from utils import assert_never
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def move(c: Coord, d: CompassDirection) -> Coord:
@@ -68,7 +70,7 @@ class Response(Enum):
 class Controller:
     """Main class for day 15."""
 
-    def __init__(self, code: list[int], debug: bool = False) -> None:
+    def __init__(self, code: list[int], *, debug: bool = False) -> None:
         self.m = Machine(code)
         self.m.pause_after_output = True
         self.m.pause_before_input = True
@@ -113,10 +115,7 @@ class Controller:
         while x != self.loc:
             path.append(x)
             # pylint: disable=consider-using-get
-            if x in frontier:
-                x = frontier[x]
-            else:
-                x = visited[x]
+            x = frontier[x] if x in frontier else visited[x]
         if self.debug:
             print("Path", path)
         return path
@@ -187,7 +186,7 @@ class Controller:
         return self
 
     def show(self) -> Controller:
-        """Provinde debugging information."""
+        """Provide debugging information."""
         xs = [w.x for w in self.walls]
         ys = [w.y for w in self.walls]
         for y in range(max(ys), min(ys) - 1, -1):
@@ -209,7 +208,7 @@ class Controller:
 if __name__ == "__main__":
     input_code = [int(x) for x in stdin.read().split(",")]
     INPUT_DEBUG = False
-    controller = Controller(input_code, INPUT_DEBUG).explore()
+    controller = Controller(input_code, debug=INPUT_DEBUG).explore()
     if INPUT_DEBUG:
         controller.show()
     print(controller.steps_to_oxygen())

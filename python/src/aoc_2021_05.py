@@ -47,7 +47,7 @@ test_data: list[Segment] = [
 ]
 
 
-def multiples(segments: list[Segment], use_diagonals: bool) -> int:
+def multiples(segments: list[Segment], *, use_diagonals: bool) -> int:
     """Fine number of coords with multiple coverage.
 
     >>> multiples(test_data, False)
@@ -56,7 +56,7 @@ def multiples(segments: list[Segment], use_diagonals: bool) -> int:
     12
     """
     counts: Counter[Coord] = Counter()
-    for ((x1, y1), (x2, y2)) in segments:
+    for (x1, y1), (x2, y2) in segments:
         if x1 == x2:
             for y in range(y1, y2 + 1):
                 counts[(x1, y)] += 1
@@ -66,7 +66,7 @@ def multiples(segments: list[Segment], use_diagonals: bool) -> int:
         elif use_diagonals:
             assert abs(y2 - y1) == x2 - x1
             direction = 1 if y2 > y1 else -1
-            for i in range(0, x2 - x1 + 1):
+            for i in range(x2 - x1 + 1):
                 counts[(x1 + i, y1 + i * direction)] += 1
     return len(list(filter(lambda n: n > 1, counts.values())))
 
@@ -74,5 +74,5 @@ def multiples(segments: list[Segment], use_diagonals: bool) -> int:
 if __name__ == "__main__":
     testmod()
     input_segments: list[Segment] = [read_segment(s) for s in stdin.read().splitlines()]
-    print(multiples(input_segments, False))
-    print(multiples(input_segments, True))
+    print(multiples(input_segments, use_diagonals=False))
+    print(multiples(input_segments, use_diagonals=True))

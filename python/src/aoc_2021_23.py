@@ -5,12 +5,14 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Iterable
 from doctest import testmod
 from enum import Enum
 from heapq import heappop, heappush
 from sys import stdin
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, Any, ClassVar
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class Kind(Enum):
@@ -39,18 +41,14 @@ class Amphipod:
     _room_size: ClassVar[int] = 0
 
     def __init__(self, room_size: int, kind: Kind) -> None:
-        assert room_size in [2, 4], f"Invalid room size: {room_size}"
+        assert room_size in {2, 4}, f"Invalid room size: {room_size}"
         self.kind = kind
         self.index = kind.value * room_size + Amphipod._kind_counts[kind]
         Amphipod._kind_counts[kind] += 1
         Amphipod._room_size = room_size
 
-    def __eq__(self, other: Any) -> bool:
-        return (
-            isinstance(other, Amphipod)
-            and self.kind == other.kind
-            and self.index == other.index
-        )
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Amphipod) and self.kind == other.kind and self.index == other.index
 
     def __hash__(self) -> int:
         return hash(self.index)
@@ -66,7 +64,7 @@ class Amphipod:
         """Reset the amphipod."""
         assert not cls._kind_counts or all(
             cls._kind_counts[kind] == cls._room_size for kind in Kind
-        ), ("Wrong number of pod kinds" + str(cls._kind_counts) + str(cls._room_size))
+        ), "Wrong number of pod kinds" + str(cls._kind_counts) + str(cls._room_size)
         cls._kind_counts = Counter()
 
 
@@ -80,12 +78,8 @@ class Position:
         self.room = room
         self.index = room_index
 
-    def __eq__(self, other: Any) -> bool:
-        return (
-            isinstance(other, Position)
-            and self.room == other.room
-            and self.index == other.index
-        )
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, Position) and self.room == other.room and self.index == other.index
 
     def __hash__(self) -> int:
         return hash((self.room, self.index))
@@ -120,13 +114,11 @@ class State:
         self.room_size = room_size
         self.mapping: dict[Position, Amphipod] = {}
         self.cost: int = 0  # Used only within .solve()
-        assert room_size in [2, 4], "Unknown room size"
+        assert room_size in {2, 4}, "Unknown room size"
         if s is not None:
             Amphipod.reset()
-            assert len(s) == len(
-                State.template
-            ), f"Wrong length {len(s)} vs. {len(State.template)}"
-            for char, template in zip(s, State.template):
+            assert len(s) == len(State.template), f"Wrong length {len(s)} vs. {len(State.template)}"
+            for char, template in zip(s, State.template, strict=True):
                 if char in "ABCD" and template in "AaBbCcDd":
                     position = Position(
                         Kind[template.upper()],
@@ -177,7 +169,7 @@ class State:
         >>> [s.hallway_number for s in [test1, test2, test3]]
         [0, 1, 2]
         """
-        return sum(position.room is None for position in self.mapping.keys())
+        return sum(position.room is None for position in self.mapping)
 
     def path_available(self, p: Position, q: Position) -> bool:
         # pylint: disable=line-too-long
@@ -239,23 +231,17 @@ class State:
                 if end is not None and self.path_available(start, end):
                     yield (start, end)
             # Amphipod in room moves to hallway
-            else:
-                if self.hallway_number < max_hallway_number:
-                    # Only try and move if pod is in the wrong room or in the right room but above a wrong pod
-                    if start.room != pod.kind or any(
-                        self.mapping.get(p, pod).kind != pod.kind
-                        for p in (
-                            Position(start.room, i)
-                            for i in range(start.index + 1, self.room_size)
-                        )
-                    ):
-                        for end in (
-                            Position(None, i) for i in Position.valid_hallway_indices
-                        ):
-                            if end not in self.mapping and self.path_available(
-                                start, end
-                            ):
-                                yield (start, end)
+            elif self.hallway_number < max_hallway_number:
+                # Only try and move if pod is in the wrong room or in the right room but above a wrong pod
+                if start.room != pod.kind or any(
+                    self.mapping.get(p, pod).kind != pod.kind
+                    for p in (
+                        Position(start.room, i) for i in range(start.index + 1, self.room_size)
+                    )
+                ):
+                    for end in (Position(None, i) for i in Position.valid_hallway_indices):
+                        if end not in self.mapping and self.path_available(start, end):
+                            yield (start, end)
 
     def copy(self) -> State:
         """Return a copy of the state."""
@@ -323,7 +309,7 @@ class State:
         """Hash provided to allow set and dict lookup - based only on mapping."""
         return hash(frozenset(self.mapping.items()))
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         """Hash provided to allow set and dict lookup - based only on mapping."""
         return isinstance(other, State) and self.mapping == other.mapping
 
@@ -334,10 +320,10 @@ class QueuedState:
     Provided to  allow use in a priority queue based only on cost.
     """
 
-    def __init__(self, state: State):
+    def __init__(self, state: State) -> None:
         self.state = state
 
-    def __lt__(self, other: Any) -> bool:
+    def __lt__(self, other: object) -> bool:
         if isinstance(other, QueuedState):
             return self.state.cost < other.state.cost
         return NotImplemented
@@ -387,9 +373,7 @@ def solve(start_state: State, max_hallway_number: int) -> int:
     raise RuntimeError("No solution found")
 
 
-test1: State = State(
-    2, "#############\n#...........#\n###B#C#B#D###\n  #A#D#C#A#\n  #########"
-)
+test1: State = State(2, "#############\n#...........#\n###B#C#B#D###\n  #A#D#C#A#\n  #########")
 
 """ test2 is the second step for the example problem
 
@@ -429,13 +413,12 @@ test_organized.mapping = dict(
             for kind in Kind
             for _ in range(test_organized.room_size)
         ],
+        strict=True,
     )
 )
 
 
-test1_4: State = State(
-    4, "#############\n#...........#\n###B#C#B#D###\n  #A#D#C#A#\n  #########"
-)
+test1_4: State = State(4, "#############\n#...........#\n###B#C#B#D###\n  #A#D#C#A#\n  #########")
 
 
 class TestMove:

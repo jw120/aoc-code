@@ -55,9 +55,7 @@ def parse_instruction(s: str) -> Instruction:
     """Read instruction from a string."""
 
     parts = s.split()
-    assert (len(parts) == 3 and parts[0] != "inp") or (
-        len(parts) == 2 and parts[0] == "inp"
-    )
+    assert (len(parts) == 3 and parts[0] != "inp") or (len(parts) == 2 and parts[0] == "inp")
     assert parts[1] in "wxyz"
     target: Register = Register[parts[1]]
 
@@ -95,8 +93,7 @@ class ALU:
         self.inputs: Iterator[int] = iter([] if inputs is None else inputs)
 
     def run(self, inputs: Iterable[int] | None = None) -> ALU:
-        """
-        Run the program with given inputs.
+        """Run the program with given inputs.
 
         >>> ALU(test1).run([5]).reg
         (0, -5, 0, 0)

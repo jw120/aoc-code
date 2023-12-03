@@ -1,6 +1,7 @@
 """Advent of Code 2021 - Day 1."""
 
 from doctest import testmod
+from itertools import pairwise
 from sys import stdin
 
 
@@ -14,7 +15,7 @@ def number_of_increases(xs: list[int]) -> int:
     >>> number_of_increases([7])
     0
     """
-    return sum(x < y for x, y in zip(xs, xs[1:]))
+    return sum(x < y for x, y in pairwise(xs))
 
 
 def sliding(xs: list[int]) -> list[int]:
@@ -27,7 +28,7 @@ def sliding(xs: list[int]) -> list[int]:
     >>> sliding([1, 2])
     []
     """
-    return [x + y + z for x, y, z in zip(xs, xs[1:], xs[2:])]
+    return [x + y + z for x, y, z in zip(xs, xs[1:], xs[2:], strict=False)]
 
 
 if __name__ == "__main__":

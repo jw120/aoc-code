@@ -25,16 +25,14 @@ class Grid:
     """Main class for day 11."""
 
     def __init__(self, s: str) -> None:
-        self.energy: list[list[int]] = [
-            [int(c) for c in line] for line in s.splitlines()
-        ]
+        self.energy: list[list[int]] = [[int(c) for c in line] for line in s.splitlines()]
         self.extent = Extent(len(self.energy), len(self.energy[0]))
         assert self.extent.x > 0
         assert all(len(row) == self.extent.y for row in self.energy)
         self.flash_count = 0
         self.step_count = 0
 
-    def step(self, n: int = 1, stop_when_all_flash: bool = False) -> Grid:
+    def step(self, n: int = 1, *, stop_when_all_flash: bool = False) -> Grid:
         """Advance the grid of octopuses by the given number of steps.
 
         Stop if all the octopuses flash in the same step if the flag is set.
@@ -80,4 +78,4 @@ if __name__ == "__main__":
     testmod()
     input_data = stdin.read()
     print(Grid(input_data).step(100).flash_count)
-    print(Grid(input_data).step(1000, True).step_count)
+    print(Grid(input_data).step(1000, stop_when_all_flash=True).step_count)

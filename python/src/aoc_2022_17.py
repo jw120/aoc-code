@@ -39,7 +39,7 @@ WIDTH: int = 7
 class MemState:
     """State used to test for looping."""
 
-    blocks: tuple[tuple[bool]]
+    blocks: tuple[tuple[bool, ...], ...]
     rock: int
     jet: int
 

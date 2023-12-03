@@ -3,11 +3,11 @@
 from __future__ import annotations
 
 from sys import stdin
+from typing import assert_never
 
 from coord import Coord
 from direction import Direction
 from int_code import Machine
-from utils import assert_never
 
 
 def move(c: Coord, d: Direction) -> Coord:

@@ -2,13 +2,16 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
 from doctest import testmod
 from enum import Enum, auto
 from sys import stdin
+from typing import TYPE_CHECKING
 
 import numpy as np
 from coord import Coord, Extent
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 # Works but slow - should avoid scanning over whole grid each step (add a list of mobile slugs?)
 
@@ -85,17 +88,11 @@ class SeaFloor:
 
     def can_east(self, c: Coord) -> bool:
         """Test if there is a slug at the coordinate able to move East."""
-        return (
-            self.get_floor(c) == Item.EAST
-            and self.get_floor(self.east(c)) == Item.EMPTY
-        )
+        return self.get_floor(c) == Item.EAST and self.get_floor(self.east(c)) == Item.EMPTY
 
     def can_south(self, c: Coord) -> bool:
         """Test if there is a slug at the coordinate able to move East."""
-        return (
-            self.get_floor(c) == Item.SOUTH
-            and self.get_floor(self.south(c)) == Item.EMPTY
-        )
+        return self.get_floor(c) == Item.SOUTH and self.get_floor(self.south(c)) == Item.EMPTY
 
     def step(self) -> bool:
         """Step the sea floor once, returning true if any slug moved."""

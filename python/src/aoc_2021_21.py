@@ -3,12 +3,13 @@
 from collections import Counter
 from doctest import testmod
 from sys import stdin
+from typing import TypeAlias
 
 
 class Player:
     """Class for each player."""
 
-    def __init__(self, square: int):
+    def __init__(self, square: int) -> None:
         self.square = square
         self.score = 0
 
@@ -21,7 +22,7 @@ class Player:
 class DeterministicDie:
     """Class for a die."""
 
-    def __init__(self, sides: int):
+    def __init__(self, sides: int) -> None:
         self.sides = sides
         self.nxt = 1
         self.count = 0
@@ -53,6 +54,9 @@ def part_a(start1: int, start2: int) -> int:
     return players[(player + 1) % 2].score * die.count
 
 
+State: TypeAlias = tuple[bool, int, int, int, int]
+
+
 def part_b(start1: int, start2: int) -> int:
     """Simulate universe splitting on each roll.
 
@@ -72,7 +76,6 @@ def part_b(start1: int, start2: int) -> int:
     >>> part_b(4, 8)
     444356092776315
     """
-    State = tuple[bool, int, int, int, int]
     active_states: Counter[State] = Counter([(True, start1, start2, 0, 0)])
     wins1: int = 0
     wins2: int = 0
@@ -107,8 +110,6 @@ def part_b(start1: int, start2: int) -> int:
 
 if __name__ == "__main__":
     testmod()
-    input_start1, input_start2 = (
-        int(line.split(": ")[1]) for line in stdin.read().splitlines()
-    )
+    input_start1, input_start2 = (int(line.split(": ")[1]) for line in stdin.read().splitlines())
     print(part_a(input_start1, input_start2))
     print(part_b(input_start1, input_start2))

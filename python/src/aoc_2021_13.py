@@ -94,8 +94,8 @@ def print_dots(dots: set[Coord]) -> None:
     """Print the dots in output form."""
     x_max = max(d.x for d in dots)
     y_max = max(d.y for d in dots)
-    for y in range(0, y_max + 1):
-        for x in range(0, x_max + 1):
+    for y in range(y_max + 1):
+        for x in range(x_max + 1):
             print("#" if Coord(x, y) in dots else " ", end="")
         print()
 

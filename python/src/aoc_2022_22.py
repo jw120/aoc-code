@@ -9,7 +9,6 @@ from typing import Final, TypeAlias
 
 from coord import Coord, Extent
 from direction import Direction
-from utils import assert_never
 
 # It would be better to derive the connections between faces from the input file
 # but that seems hard - we hard-wire them instead.
@@ -229,8 +228,6 @@ class MonkeyMap:
             case Direction.LEFT:
                 if x != 0:
                     return None
-            case _:
-                assert_never(d)
         return (c.x // self.block_size, c.y // self.block_size)
 
     def move(self, c: Coord, d: Direction) -> tuple[Coord, Direction]:
@@ -248,8 +245,6 @@ class MonkeyMap:
                 c_new = c + Coord(1, 0)
             case Direction.LEFT:
                 c_new = c + Coord(-1, 0)
-            case _:
-                assert_never(d)
         match self.face_if_at_edge(c, d):
             case None:
                 d_new = d

@@ -58,9 +58,9 @@ def read_maze(links: list[str]) -> Maze:
     maze: Maze = {}
     for from_cave, to_cave in [s.split("-") for s in links]:
         if from_cave != "end" and to_cave != "start":
-            maze[from_cave] = maze.get(from_cave, []) + [to_cave]
+            maze[from_cave] = [*maze.get(from_cave, []), to_cave]
         if from_cave != "start" and to_cave != "end":
-            maze[to_cave] = maze.get(to_cave, []) + [from_cave]
+            maze[to_cave] = [*maze.get(to_cave, []), from_cave]
     return maze
 
 
@@ -68,36 +68,30 @@ class Path:
     """Main class for day 12."""
 
     def __init__(self) -> None:
-        self._final_cave: Cave | None = None
-        self._visited: frozenset[Cave] = frozenset()
-        self._all_small_unique: bool = True
+        self.possible_final_cave: Cave | None = None
+        self.visited: frozenset[Cave] = frozenset()
+        self.all_small_unique: bool = True
 
     def final_cave(self) -> Cave:
         """Return final cave."""
-        if self._final_cave is None:
+        if self.possible_final_cave is None:
             raise ValueError("Empty path!")
-        return self._final_cave
+        return self.possible_final_cave
 
     def includes(self, cave: Cave) -> bool:
         """Test if the cave has been visited."""
-        return cave in self._visited
-
-    def all_small_unique(self) -> bool:
-        """Return all small unique."""
-        return self._all_small_unique
+        return cave in self.visited
 
     def extend(self, cave: Cave) -> Path:
         """Extend the path to a new cave."""
         p = Path()
-        p._final_cave = cave
-        p._visited = self._visited | frozenset([cave])
-        p._all_small_unique = self._all_small_unique and not (
-            cave.islower() and self.includes(cave)
-        )
+        p.possible_final_cave = cave
+        p.visited = self.visited | frozenset([cave])
+        p.all_small_unique = self.all_small_unique and not (cave.islower() and self.includes(cave))
         return p
 
 
-def paths(maze: Maze, allow_one_revisit: bool) -> int:
+def paths(maze: Maze, *, allow_one_revisit: bool) -> int:
     """Return number of paths from the start to the end.
 
     Paths can only visit small caves (with lower case names) except that one small caves
@@ -127,7 +121,7 @@ def paths(maze: Maze, allow_one_revisit: bool) -> int:
             if (
                 exit_cave.isupper()
                 or not current_path.includes(exit_cave)
-                or (allow_one_revisit and current_path.all_small_unique())
+                or (allow_one_revisit and current_path.all_small_unique)
             ):
                 new_path = current_path.extend(exit_cave)
                 working_paths.append(new_path)
@@ -137,5 +131,5 @@ def paths(maze: Maze, allow_one_revisit: bool) -> int:
 if __name__ == "__main__":
     testmod()
     input_maze = read_maze(stdin.read().splitlines())
-    print(paths(input_maze, False))
-    print(paths(input_maze, True))
+    print(paths(input_maze, allow_one_revisit=False))
+    print(paths(input_maze, allow_one_revisit=True))

@@ -2,6 +2,7 @@
 
 from collections import Counter
 from doctest import testmod
+from itertools import pairwise
 from sys import stdin
 
 # We treat the polymers as counts of pairs and then the rules
@@ -54,7 +55,7 @@ def read_template(s: str) -> Polymer:
     >>> read_template("BALL")
     (Counter({'BA': 1, 'AL': 1, 'LL': 1}), 'L')
     """
-    return (Counter(a + b for a, b in zip(s, s[1:])), s[-1])
+    return (Counter(a + b for a, b in pairwise(s)), s[-1])
 
 
 def read_rules(ss: list[str]) -> Rules:

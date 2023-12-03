@@ -1,13 +1,7 @@
 """Utility functions for Advent of Code."""
 
 from collections.abc import Iterable
-from typing import NoReturn, TypeVar
-
-
-def assert_never(value: NoReturn) -> NoReturn:
-    """Marker for unreachable code."""
-    assert False, f"This code should never be reached, got: {value}"
-
+from typing import TypeVar
 
 T = TypeVar("T")
 

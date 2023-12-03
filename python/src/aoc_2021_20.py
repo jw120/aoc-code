@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterator
 from doctest import testmod
 from functools import reduce
 from sys import stdin
+from typing import TYPE_CHECKING
 
 from coord import Coord
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 Algorithm = list[bool]  # List of len 512
 
@@ -15,7 +18,7 @@ Algorithm = list[bool]  # List of len 512
 class Image:
     """Main class for day 20."""
 
-    def __init__(self, lines: list[str] | None = None):
+    def __init__(self, lines: list[str] | None = None) -> None:
         if lines is None:
             self.lit_pixels: frozenset[Coord] = frozenset()
         else:
@@ -60,10 +63,11 @@ class Image:
     def is_lit(self, c: Coord) -> bool:
         """Test if coordinate is lit."""
         distance_beyond_extent = max(
-            max(self.min_extent.x - c.x, 0),
-            max(c.x - self.max_extent.x + 1, 0),
-            max(self.min_extent.y - c.y, 0),
-            max(c.y - self.max_extent.y + 1, 0),
+            0,
+            self.min_extent.x - c.x,
+            c.x - self.max_extent.x + 1,
+            self.min_extent.y - c.y,
+            c.y - self.max_extent.y + 1,
         )
         if distance_beyond_extent == 0:
             return c in self.lit_pixels
@@ -91,9 +95,7 @@ class Image:
         other: Image = Image()
         border_width: int = 3 if self.distant_pixel else 2
         other.lit_pixels = frozenset(
-            c
-            for c in self.coords_with_border(border_width)
-            if algo[self.value_around(c)]
+            c for c in self.coords_with_border(border_width) if algo[self.value_around(c)]
         )
         other.distant_pixel = algo[511] if self.distant_pixel else algo[0]
         other.set_extents()

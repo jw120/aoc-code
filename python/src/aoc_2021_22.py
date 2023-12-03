@@ -3,16 +3,20 @@
 # We (ab)use private members - don't complain
 # pyright: reportPrivateUsage=false
 # pylint: disable=protected-access
+# ruff: noqa: SLF001 private-member-access
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from doctest import testmod
 from functools import reduce
-from itertools import chain, combinations
+from itertools import chain, combinations, pairwise
 from sys import stdin
+from typing import TYPE_CHECKING
 
 from coord import Coord3
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def disjoint(a0: int, a1: int, b0: int, b1: int) -> bool:
@@ -72,9 +76,7 @@ class Cuboid:
         8
         """
         return (
-            (self._max.x - self._min.x)
-            * (self._max.y - self._min.y)
-            * (self._max.z - self._min.z)
+            (self._max.x - self._min.x) * (self._max.y - self._min.y) * (self._max.z - self._min.z)
         )
 
     def as_tuple(self) -> tuple[int, int, int, int, int, int]:
@@ -158,7 +160,7 @@ class Cuboid:
 
 
 def merge_adjacents(cs: list[Cuboid]) -> None:
-    """Simplify a list of disjoint cuboids by merging adjacenet pairs."""
+    """Simplify a list of disjoint cuboids by merging adjacent pairs."""
     for c, d in combinations(cs, 2):
         assert c.disjoint(
             d
@@ -202,36 +204,26 @@ def combine(cs: list[Cuboid], step: tuple[bool, Cuboid]) -> list[Cuboid]:
         return [x] if turn_on else []
     # Start by checking all existing cuboids are disjoint
     for c, d in combinations(cs, 2):
-        assert c.disjoint(
-            d
-        ), f"Overlapping cuboids in combine: {c.as_tuple()} {d.as_tuple()}"
+        assert c.disjoint(d), f"Overlapping cuboids in combine: {c.as_tuple()} {d.as_tuple()}"
     # Split list into overlapping x and disjoint to x cuboids (ignore any within x)
-    overlapping_cuboids = [x] + list(
-        filter(lambda c: x.overlap(c) and not x.includes(c), cs)
-    )
+    overlapping_cuboids = [x, *filter(lambda c: x.overlap(c) and not x.includes(c), cs)]
     disjoint_cuboids = list(filter(lambda c: c.disjoint(x), cs))
     # print(
     #     f"{len(cs)}+1 -> {len(overlapping_cuboids)} overlapping, {len(disjoint_cuboids)} disjoint"
     # )
     # Replace the cuboids that overlap with x with all possible cuboids
     x_coords = sorted(
-        chain.from_iterable(
-            (c._min.x, c._max.x) for c in overlapping_cuboids
-        )  # pyright: ignore[reportPrivateUsage]
+        chain.from_iterable((c._min.x, c._max.x) for c in overlapping_cuboids)  # pyright: ignore[reportPrivateUsage]
     )
-    x_ranges = list(zip(x_coords, x_coords[1:]))
+    x_ranges = list(pairwise(x_coords))
     y_coords = sorted(
-        chain.from_iterable(
-            (c._min.y, c._max.y) for c in overlapping_cuboids
-        )  # pyright: ignore[reportPrivateUsage]
+        chain.from_iterable((c._min.y, c._max.y) for c in overlapping_cuboids)  # pyright: ignore[reportPrivateUsage]
     )
-    y_ranges = list(zip(y_coords, y_coords[1:]))
+    y_ranges = list(pairwise(y_coords))
     z_coords = sorted(
-        chain.from_iterable(
-            (c._min.z, c._max.z) for c in overlapping_cuboids
-        )  # pyright: ignore[reportPrivateUsage]
+        chain.from_iterable((c._min.z, c._max.z) for c in overlapping_cuboids)  # pyright: ignore[reportPrivateUsage]
     )
-    z_ranges = list(zip(z_coords, z_coords[1:]))
+    z_ranges = list(pairwise(z_coords))
     new_cuboids = [
         Cuboid(x0, x1, y0, y1, z0, z1)
         for x0, x1 in x_ranges
@@ -275,7 +267,7 @@ def total_volume(cs: Iterable[Cuboid]) -> int:
 def read_step(s: str) -> tuple[bool, Cuboid]:
     """Read from a string."""
     on_off, coords = s.split(" ")
-    assert on_off in ["on", "off"], f"Bad switch '{on_off}'"
+    assert on_off in {"on", "off"}, f"Bad switch '{on_off}'"
     x_coords, y_coords, z_coords = coords.split(",")
     x0, x1 = x_coords.removeprefix("x=").split("..")
     y0, y1 = y_coords.removeprefix("y=").split("..")

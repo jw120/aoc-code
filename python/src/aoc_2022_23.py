@@ -5,11 +5,10 @@ from __future__ import annotations
 from doctest import testmod
 from enum import Enum
 from sys import stdin
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, LiteralString
 
 # We use x as left->right and y as top->bottom
 from coord import Coord
-from utils import assert_never
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
@@ -46,8 +45,6 @@ class MoveDirection(Enum):
                 return Coord(-1, 0)
             case MoveDirection.E:
                 return Coord(1, 0)
-            case _:
-                assert_never(self)
 
     def all_directions(self) -> Iterable[MoveDirection]:
         """Return all four directions in order starting from this one.
@@ -72,8 +69,6 @@ class MoveDirection(Enum):
                 return (Coord(-1, y) for y in range(-1, 2))
             case MoveDirection.E:
                 return (Coord(1, y) for y in range(-1, 2))
-            case _:
-                assert_never(self)
 
 
 class Diffuser:
@@ -172,14 +167,14 @@ class Diffuser:
             print()
 
 
-TEST_DATA1: Final[list[str]] = """.....
+TEST_DATA1: Final[list[LiteralString]] = """.....
 ..##.
 ..#..
 .....
 ..##.
 .....""".splitlines()
 
-TEST_DATA2: Final[list[str]] = """..............
+TEST_DATA2: Final[list[LiteralString]] = """..............
 ..............
 .......#......
 .....###.#....

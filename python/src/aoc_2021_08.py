@@ -65,11 +65,7 @@ def num_output_1478(lines: list[str]) -> int:
     >>> num_output_1478(test2)
     26
     """
-    return sum(
-        len(word) in [2, 3, 4, 7]
-        for line in lines
-        for word in line.split(" | ")[1].split()
-    )
+    return sum(len(word) in {2, 3, 4, 7} for line in lines for word in line.split(" | ")[1].split())
 
 
 def solve(line: str) -> int:
@@ -116,9 +112,7 @@ def solve(line: str) -> int:
 
     return digits_to_int(
         segments_to_digit[
-            "".join(
-                sorted(segment for wire in output for segment in wire_to_segment[wire])
-            )
+            "".join(sorted(segment for wire in output for segment in wire_to_segment[wire]))
         ]
         for output in outputs
     )

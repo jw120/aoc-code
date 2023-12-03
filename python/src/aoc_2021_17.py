@@ -84,7 +84,7 @@ class Target:
         """
         best_height = 0
         success_count = 0
-        for v_x in range(0, self.x_max + 1):
+        for v_x in range(self.x_max + 1):
             for v_y in range(self.y_min, 200):
                 result = self.launch(v_x, v_y)
                 if result is not None:

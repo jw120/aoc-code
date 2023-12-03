@@ -4,11 +4,11 @@ from __future__ import annotations
 
 from enum import Enum
 from sys import stdin
+from typing import assert_never
 
 from coord import Coord
 from direction import Direction
 from int_code import Machine
-from utils import assert_never
 
 
 def move(c: Coord, d: Direction) -> Coord:
@@ -47,9 +47,8 @@ class Robot:
         self.painted.add(self.pos)
         if colour == Colour.WHITE:
             self.white.add(self.pos)
-        else:
-            if self.pos in self.white:
-                self.white.remove(self.pos)
+        elif self.pos in self.white:
+            self.white.remove(self.pos)
         return self
 
     def run(self) -> Robot:

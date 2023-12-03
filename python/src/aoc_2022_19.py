@@ -6,7 +6,6 @@ import re
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import Any
 
 
 @dataclass(frozen=True)
@@ -18,7 +17,7 @@ class Amount:
     obsidian: int
     geode: int
 
-    def __add__(self, other: Any) -> Amount:
+    def __add__(self, other: object) -> Amount:
         if isinstance(other, Amount):
             return Amount(
                 ore=self.ore + other.ore,
@@ -28,7 +27,7 @@ class Amount:
             )
         raise TypeError
 
-    def __sub__(self, other: Any) -> Amount:
+    def __sub__(self, other: object) -> Amount:
         if isinstance(other, Amount):
             return Amount(
                 ore=self.ore - other.ore,
@@ -38,7 +37,7 @@ class Amount:
             )
         raise TypeError
 
-    def __ge__(self, other: Any) -> bool:
+    def __ge__(self, other: object) -> bool:
         if isinstance(other, Amount):
             return (
                 self.ore >= other.ore

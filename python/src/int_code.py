@@ -2,10 +2,12 @@
 
 from __future__ import annotations
 
-from collections.abc import Callable
 from doctest import testmod
 from enum import Enum
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class Mode(Enum):
@@ -139,10 +141,7 @@ class Machine:
         if opcode == self.Halt_opcode:
             modes: str = ""
             args: str = ""
-        elif opcode == self.Input_opcode:
-            modes = "_" + Mode.tag(Mode.mode(instruction_code))
-            args = str(self._code(self.ip + 1))
-        elif opcode in (self.RelBaseOffset_opcode, opcode == self.Output_opcode):
+        elif opcode in {self.Input_opcode, self.RelBaseOffset_opcode, opcode == self.Output_opcode}:
             modes = "_" + Mode.tag(Mode.mode(instruction_code))
             args = str(self._code(self.ip + 1))
         else:
@@ -158,16 +157,16 @@ class Machine:
             )
         print(f"{self.ip:4} {instruction_name + modes:8} {args:20} {comment}")
 
-    def step(self, print_instructions: bool = False) -> Machine:
+    def step(self, *, print_instructions: bool = False) -> Machine:
         """Run one instruction."""
         try:
-            self._step(print_instructions)
+            self._step(print_instructions=print_instructions)
         except:
             self._print("Failed")
             raise
         return self
 
-    def _step(self, print_instructions: bool = False) -> None:
+    def _step(self, *, print_instructions: bool = False) -> None:
         instruction_code: int = self._code(self.ip)
         opcode: int = instruction_code % 100
 
@@ -227,20 +226,18 @@ class Machine:
             return_value: int = self.Arithmetic_instructions[opcode](arg1, arg2)
             dest = self._address(mode3, self._code(self.ip + 3))
             if print_instructions:
-                self._print(
-                    f"{self.Opcode_names[opcode]} {arg1} {arg2} = {return_value} -> {dest}"
-                )
+                self._print(f"{self.Opcode_names[opcode]} {arg1} {arg2} = {return_value} -> {dest}")
             self.code[dest] = return_value
             self.ip += 4
             return
 
         raise RuntimeError("Unknown opcode in step", opcode)
 
-    def run(self, print_instructions: bool = False) -> Machine:
+    def run(self, *, print_instructions: bool = False) -> Machine:
         """Run until execution stops or a pause from output."""
         self.paused = False
         while not self.halted and not self.paused:
-            self.step(print_instructions)
+            self.step(print_instructions=print_instructions)
         return self
 
 

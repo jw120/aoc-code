@@ -3,7 +3,7 @@
 
 from doctest import testmod
 from sys import stdin
-from typing import Final
+from typing import Final, LiteralString
 
 SNAFU_VALUES: Final[dict[str, int]] = {"2": 2, "1": 1, "0": 0, "-": -1, "=": -2}
 SNAFU_DIGITS: Final[dict[int, str]] = {v: k for k, v in SNAFU_VALUES.items()}
@@ -39,9 +39,7 @@ def decimal_to_snafu(x: int) -> str:
     return acc
 
 
-TEST_DATA: Final[
-    list[str]
-] = """1=-0-2
+TEST_DATA: Final[list[LiteralString]] = """1=-0-2
 12111
 2=0=
 21
@@ -58,8 +56,4 @@ TEST_DATA: Final[
 
 if __name__ == "__main__":
     testmod()
-    print(
-        decimal_to_snafu(
-            sum(snafu_to_decimal(line.strip()) for line in stdin.readlines())
-        )
-    )
+    print(decimal_to_snafu(sum(snafu_to_decimal(line.strip()) for line in stdin.readlines())))

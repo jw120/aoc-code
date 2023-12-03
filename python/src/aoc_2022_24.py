@@ -8,7 +8,7 @@ from heapq import heappop, heappush
 from itertools import chain
 from math import lcm
 from sys import stdin
-from typing import TYPE_CHECKING, Final
+from typing import TYPE_CHECKING, Final, LiteralString
 
 import numpy as np
 
@@ -216,7 +216,7 @@ class Basin:
         print("#" * self.width + ".#")
 
 
-TEST_DATA1: Final[list[str]] = """#.#####
+TEST_DATA1: Final[list[LiteralString]] = """#.#####
 #.....#
 #>....#
 #.....#
@@ -225,7 +225,7 @@ TEST_DATA1: Final[list[str]] = """#.#####
 #####.#""".splitlines()
 
 
-TEST_DATA2: Final[list[str]] = """#.######
+TEST_DATA2: Final[list[LiteralString]] = """#.######
 #>>.<^<#
 #.<..<<#
 #>v.><>#

@@ -105,9 +105,9 @@ def monkey_business(monkeys: list[Monkey], steps: int, *, simple_mode: bool) -> 
     Simple mode is for first part of the problem where items are divided by 3. For
     non-simple mode we treat all numbers modulus the product of all the divisors.
 
-    >>> monkey_business(build_monkeys(TEST_DATA), 20, True)
+    >>> monkey_business(build_monkeys(TEST_DATA), 20, simple_mode=True)
     10605
-    >>> monkey_business(build_monkeys(TEST_DATA), 10000, False)
+    >>> monkey_business(build_monkeys(TEST_DATA), 10000, simple_mode=False)
     2713310158
     """
     mode = None if simple_mode else reduce(lambda x, y: x * y, (m.divisor for m in monkeys))

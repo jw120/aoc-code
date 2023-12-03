@@ -72,7 +72,7 @@ def part1(numbers: list[str]) -> int:
     return gamma * epsilon
 
 
-def filter_string(ss: list[str], least: bool) -> str:
+def filter_string(ss: list[str], *, least: bool) -> str:
     """Return the remaining string after filtering for the most (or least) common bit.
 
     >>> filter_string(test_data, False)
@@ -96,8 +96,8 @@ def part2(numbers: list[str]) -> int:
     >>> part2(test_data)
     230
     """
-    oxygen = int(filter_string(numbers, False), 2)
-    co2 = int(filter_string(numbers, True), 2)
+    oxygen = int(filter_string(numbers, least=False), 2)
+    co2 = int(filter_string(numbers, least=True), 2)
     return oxygen * co2
 
 

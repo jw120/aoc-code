@@ -2,24 +2,24 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from doctest import testmod
-from itertools import chain, combinations
+from itertools import chain, combinations, starmap
 from sys import stdin
-from typing import Any, ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from coord import Coord3
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class Rotation:
     """90 degree rotations of axes (which remain right-handed)."""
 
-    def __init__(self, a: Coord3, b: Coord3):
+    def __init__(self, a: Coord3, b: Coord3) -> None:
         self.a = a
         self.b = b
-        self.c = Coord3(
-            a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x
-        )
+        self.c = Coord3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x)
 
     def rotate(self, v: Coord3) -> Coord3:
         """Rotate the vector."""
@@ -31,23 +31,16 @@ class Rotation:
 
     @staticmethod
     def all_rotations() -> Iterable[Rotation]:
-        """Generate all rotaions."""
+        """Generate all rotations."""
 
         dirs = [Coord3(1, 0, 0), Coord3(0, 1, 0), Coord3(0, 0, 1)]
 
         def flips(a: Coord3, b: Coord3) -> list[tuple[Coord3, Coord3]]:
             return [(a, b), (-a, b), (a, -b), (-a, -b)]
 
-        return (
-            Rotation(a, b)
-            for a, b in chain(
-                *[
-                    flips(x_dir, y_dir)
-                    for x_dir in dirs
-                    for y_dir in dirs
-                    if y_dir != x_dir
-                ]
-            )
+        return starmap(
+            Rotation,
+            chain(*[flips(x_dir, y_dir) for x_dir in dirs for y_dir in dirs if y_dir != x_dir]),
         )
 
 
@@ -57,7 +50,7 @@ class Scanner:
     scanner_prefix: ClassVar[str] = "--- scanner "
     scanner_suffix: ClassVar[str] = " ---"
 
-    def __init__(self, ss: list[str] | None = None):
+    def __init__(self, ss: list[str] | None = None) -> None:
         if ss is None:
             self.number: int = -1
             self.beacons: list[Coord3] = []
@@ -71,16 +64,12 @@ class Scanner:
                 "Scanner initial line missing suffix: '" + ss[0] + "'"
             )
             self.number = int(
-                ss[0]
-                .removeprefix(Scanner.scanner_prefix)
-                .removesuffix(Scanner.scanner_suffix)
+                ss[0].removeprefix(Scanner.scanner_prefix).removesuffix(Scanner.scanner_suffix)
             )
             self.beacons = [Coord3(*[int(i) for i in row.split(",")]) for row in ss[1:]]
-            self.beacon_distances = {
-                p.manhattan(q) for p, q in combinations(self.beacons, 2)
-            }
+            self.beacon_distances = {p.manhattan(q) for p, q in combinations(self.beacons, 2)}
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, Scanner) and self.number == other.number
 
     def __hash__(self) -> int:
@@ -93,9 +82,7 @@ class Scanner:
         other.beacons = [r.rotate(b) for b in self.beacons]
         return other
 
-    def is_match(
-        self, other: Scanner, offset: Coord3, min_match: int, max_fails: int
-    ) -> bool:
+    def is_match(self, other: Scanner, offset: Coord3, min_match: int, max_fails: int) -> bool:
         """Test if other scanner matches with the given offset and at least `min_match` beacons."""
         matches_found: int = 0
         fails_found: int = 0
@@ -113,9 +100,7 @@ class Scanner:
                 break
         return matches_found >= min_match
 
-    def find_match(
-        self, other: Scanner, min_match: int
-    ) -> tuple[Coord3, Rotation] | None:
+    def find_match(self, other: Scanner, min_match: int) -> tuple[Coord3, Rotation] | None:
         """Return relative position of other scanner if match with `min_match` beacons found.
 
         >>> test1[0].find_match(test1[1], 3)[0]
@@ -135,9 +120,7 @@ class Scanner:
         return None
 
 
-def locate(
-    input_scanners: list[Scanner], min_match: int
-) -> tuple[list[Coord3], list[Coord3]]:
+def locate(input_scanners: list[Scanner], min_match: int) -> tuple[list[Coord3], list[Coord3]]:
     """Return all the scanners and beacons found from combining the scanners.
 
     >>> scanners, beacons = locate(test3, 12)
@@ -153,10 +136,7 @@ def locate(
     # internal distances between beacons)
     feasible_matches: set[tuple[int, int]] = set()
     for s, t in combinations(input_scanners, 2):
-        if (
-            len(s.beacon_distances & t.beacon_distances)
-            >= min_match * (min_match - 1) / 2
-        ):
+        if len(s.beacon_distances & t.beacon_distances) >= min_match * (min_match - 1) / 2:
             feasible_matches.add((s.number, t.number))
             feasible_matches.add((t.number, s.number))
 
@@ -168,9 +148,7 @@ def locate(
             s = input_scanners[s_index]
             for t in input_scanners[s_index + 1 :]:
                 match = (
-                    s.find_match(t, min_match)
-                    if (s.number, t.number) in feasible_matches
-                    else None
+                    s.find_match(t, min_match) if (s.number, t.number) in feasible_matches else None
                 )
                 if match is None:
                     pairs_failed.add((s.number, t.number))
@@ -183,7 +161,7 @@ def locate(
     base_scanner, second_scanner, second_offset, second_rotation = first_match()
     # Unmatched scanners (in their original orientations and positions)
     unmatched_scanners: set[Scanner] = {
-        x for x in input_scanners if x not in [base_scanner, second_scanner]
+        x for x in input_scanners if x not in {base_scanner, second_scanner}
     }
     # Matched scanners and their offsets to the base_scanner
     # (scanners are mutated so beacons rotated to base_scanner's orientation)
@@ -216,9 +194,7 @@ def locate(
                         t_rotated = t.rotated(t_rotation)
                         t_base_offset = s_coord + t_offset
                         matched_scanners[t_rotated] = t_base_offset
-                        located_beacons |= {
-                            b + t_base_offset for b in t_rotated.beacons
-                        }
+                        located_beacons |= {b + t_base_offset for b in t_rotated.beacons}
                         match_found = True
                         break
             if match_found:
@@ -282,9 +258,7 @@ test2: list[Scanner] = [
             "7,0,8",
         ]
     ),
-    Scanner(
-        ["--- scanner 4 ---", "1,1,1", "2,2,2", "3,3,3", "3,1,2", "-6,-4,-5", "0,7,-8"]
-    ),
+    Scanner(["--- scanner 4 ---", "1,1,1", "2,2,2", "3,3,3", "3,1,2", "-6,-4,-5", "0,7,-8"]),
 ]
 
 
