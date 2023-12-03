@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from sys import stdin
-from typing import Union
 
 
 @dataclass
@@ -29,8 +28,8 @@ class RootDir:
     contents: dict[str, Content]
 
 
-Dir = Union[NonRootDir, RootDir]
-Content = Union[NonRootDir, File]
+Dir = NonRootDir | RootDir
+Content = NonRootDir | File
 
 
 def build(terminal_output: list[str]) -> RootDir:
@@ -40,13 +39,10 @@ def build(terminal_output: list[str]) -> RootDir:
     listing_mode: bool = True
 
     for line in terminal_output:
-
         if listing_mode:
             match line.split():
                 case ["dir", name]:
-                    current_dir.contents[name] = NonRootDir(
-                        contents={}, parent=current_dir
-                    )
+                    current_dir.contents[name] = NonRootDir(contents={}, parent=current_dir)
                     continue
                 case [size, name]:
                     current_dir.contents[name] = File(size=int(size))

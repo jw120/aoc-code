@@ -12,7 +12,7 @@ def packet_start(s: str) -> int:
     >>> packet_start("bvwbjplbgvbhsrlpgdmjqwftvncz")
     5
     """
-    for n, cs in enumerate(zip(s, s[1:], s[2:], s[3:]), start=4):
+    for n, cs in enumerate(zip(s, s[1:], s[2:], s[3:], strict=False), start=4):
         if len(set(cs)) == 4:
             return n
     raise ValueError("Failed to find start-of-packet marker")
@@ -41,6 +41,7 @@ def message_start(s: str) -> int:
         s[11:],
         s[12:],
         s[13:],
+        strict=False,
     )
     for n, cs in enumerate(tuples, start=14):
         if len(set(cs)) == 14:

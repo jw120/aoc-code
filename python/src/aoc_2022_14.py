@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from doctest import testmod
 from sys import stdin
+from typing import TYPE_CHECKING
 
 from coord import Coord
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def read_coord(s: str) -> Coord:
@@ -45,7 +48,7 @@ def line_coords(c1: Coord, c2: Coord) -> list[Coord]:
 class Waterfall:
     """Base object for day 14."""
 
-    def __init__(self, paths: Iterable[str]):
+    def __init__(self, paths: Iterable[str]) -> None:
         """Initialize the waterfall from a list of rock paths."""
         self.rock: set[Coord] = set()
         self.sand: set[Coord] = set()
@@ -64,9 +67,7 @@ class Waterfall:
                     self.bottom_left = Coord(
                         min(self.bottom_left.x, c.x), max(self.bottom_left.y, c.y)
                     )
-                    self.top_right = Coord(
-                        max(self.top_right.x, c.x), min(self.top_right.y, c.y)
-                    )
+                    self.top_right = Coord(max(self.top_right.x, c.x), min(self.top_right.y, c.y))
                 cursor = next_point
 
     def reset(self) -> None:
@@ -105,7 +106,7 @@ class Waterfall:
             print()
 
     def empty(self, c: Coord) -> bool:
-        """Is the coordinate empty?"""
+        """Test if the coordinate is empty."""
         if c in self.rock or c in self.sand:
             return False
         if self.floor and c.y == self.bottom_left.y + 2:
@@ -116,10 +117,9 @@ class Waterfall:
         """Add one unit of sand."""
         sand_coord = self.start
         while True:
-            if not self.floor:
-                if sand_coord.y >= self.bottom_left.y:
-                    self.finished = True
-                    return
+            if (not self.floor) and sand_coord.y >= self.bottom_left.y:
+                self.finished = True
+                return
             trial_coord = sand_coord + Coord(0, 1)
             if self.empty(trial_coord):
                 sand_coord = trial_coord
@@ -133,10 +133,9 @@ class Waterfall:
                 sand_coord = trial_coord
                 continue
             self.sand.add(sand_coord)
-            if self.floor:
-                if sand_coord == self.start:
-                    self.finished = True
-                    return
+            if self.floor and sand_coord == self.start:
+                self.finished = True
+                return
             return
 
     def add_until_overflowing(self) -> Waterfall:

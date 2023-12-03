@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from doctest import testmod
-from typing import Any
+from itertools import starmap
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Iterator
 
 
 @dataclass(eq=True, frozen=True)
@@ -30,16 +33,17 @@ class Coord:
     def adjacents(self, extent: Extent | None = None) -> Iterable[Coord]:
         """Return all the cells adjacent to this one given one (excluding diagonals).
 
-        Optionally checks bounds."""
+        Optionally checks bounds.
+        """
         x, y = self.x, self.y
-        possible_cells = (
-            Coord(p, q)
-            for p, q in [
+        possible_cells = starmap(
+            Coord,
+            [
                 (x - 1, y),
                 (x, y - 1),
                 (x, y + 1),
                 (x + 1, y),
-            ]
+            ],
         )
         if extent is None:
             return possible_cells
@@ -48,11 +52,12 @@ class Coord:
     def adjacents_with_diagonals(self, extent: Extent | None = None) -> Iterable[Coord]:
         """Return all the cells adjacent to this one given one (including diagonals).
 
-        Optionally checks bounds."""
+        Optionally checks bounds.
+        """
         x, y = self.x, self.y
-        possible_cells = (
-            Coord(p, q)
-            for p, q in [
+        possible_cells = starmap(
+            Coord,
+            [
                 (x - 1, y - 1),
                 (x - 1, y),
                 (x - 1, y + 1),
@@ -61,7 +66,7 @@ class Coord:
                 (x + 1, y - 1),
                 (x + 1, y),
                 (x + 1, y + 1),
-            ]
+            ],
         )
         if extent is None:
             return possible_cells
@@ -108,7 +113,8 @@ def manhattan(c1: Coord, c2: Coord) -> int:
 class Extent(Coord):
     """Class to track a range of coordinates from origin to give point.
 
-    Given point is not included."""
+    Given point is not included.
+    """
 
     @property
     def size(self) -> int:
@@ -149,16 +155,16 @@ class Coord3:
     def adjacents(self) -> Iterable[Coord3]:
         """Return all the cells adjacent to this one (excluding diagonals)."""
         x, y, z = self.x, self.y, self.z
-        return (
-            Coord3(p, q, r)
-            for p, q, r in [
+        return starmap(
+            Coord3,
+            [
                 (x - 1, y, z),
                 (x, y - 1, z),
                 (x, y + 1, z),
                 (x + 1, y, z),
                 (x, y, z + 1),
                 (x, y, z - 1),
-            ]
+            ],
         )
 
     def __add__(self, other: Any) -> Coord3:

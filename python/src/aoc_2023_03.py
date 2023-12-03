@@ -60,7 +60,7 @@ class Schematic:
         for c in self.extent.upto():
             if self.data[c] == "*":
                 adjacent_numbers = [n.value for n in self.numbers if is_adjacent(n, c)]
-                if len(adjacent_numbers) == 2:  # noqa: PLR2004 (magic number)
+                if len(adjacent_numbers) == 2:
                     yield adjacent_numbers[0] * adjacent_numbers[1]
 
 

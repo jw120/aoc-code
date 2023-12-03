@@ -8,12 +8,14 @@ Key insight - dfs where only consider moving to open a valve
 from __future__ import annotations
 
 from collections import deque
-from collections.abc import Iterable
 from dataclasses import dataclass
 from doctest import testmod
 from re import fullmatch
 from sys import stdin
-from typing import TypeAlias, TypeVar, cast
+from typing import TYPE_CHECKING, TypeAlias, TypeVar, cast
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 ValveName: TypeAlias = str
 
@@ -33,9 +35,7 @@ class Valve:
         >>> Valve.read("Valve BB has flow rate=13; tunnels lead to valves CC, AA")
         Valve(name='BB', flow_rate=13, tunnels=['AA', 'CC'])
         """
-        m = fullmatch(
-            r"Valve ([A-Z]+) has flow rate=(\d+); tunnels? leads? to valves? (.+)", s
-        )
+        m = fullmatch(r"Valve ([A-Z]+) has flow rate=(\d+); tunnels? leads? to valves? (.+)", s)
         assert m, f"read_value match failed on '{s}'"
         name = m.group(1)
         flow_rate = int(m.group(2))
@@ -82,9 +82,9 @@ def graph_adj_to_dist(adj: dict[T, Iterable[T]]) -> dict[tuple[T, T], int]:
     3
     """
     d: dict[tuple[T, T], int] = {}
-    for n1 in adj.keys():
+    for n1 in adj:
         dist1 = node_adj_to_dist(adj, n1)
-        for n2 in adj.keys():
+        for n2 in adj:
             d[(n1, n2)] = dist1[n2]
             d[(n2, n2)] = dist1[n2]
     return d
@@ -92,7 +92,7 @@ def graph_adj_to_dist(adj: dict[T, Iterable[T]]) -> dict[tuple[T, T], int]:
 
 @dataclass(frozen=True)
 class WalkState:
-    """State for depth-first walk of available paths"""
+    """State for depth-first walk of available paths."""
 
     current_valve_name: list[ValveName]
     time_remaining: list[int]  # for each walker
@@ -153,12 +153,8 @@ class Volcano:
                 for destination in state.unopened:
                     if destination == state.current_valve_name[walker]:
                         continue
-                    distance = self.distances[
-                        state.current_valve_name[walker], destination
-                    ]
-                    walker_new_time_remaining = (
-                        state.time_remaining[walker] - distance - 1
-                    )
+                    distance = self.distances[state.current_valve_name[walker], destination]
+                    walker_new_time_remaining = state.time_remaining[walker] - distance - 1
                     if walker_new_time_remaining > 0:
                         flow_rate = self.valves[destination].flow_rate
                         new_score = state.score + flow_rate * walker_new_time_remaining

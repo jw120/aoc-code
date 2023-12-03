@@ -4,8 +4,11 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from doctest import testmod
 from functools import reduce
+from itertools import starmap
 from re import fullmatch
 from sys import stdin
+
+# ruff: noqa: E731 (allow use of lambdas instead of def)
 
 
 @dataclass
@@ -40,9 +43,7 @@ def read_monkey(expected_index: int, s: str) -> Monkey:
     assert len(lines) == 6
     index = int(fullmatch_item(r"Monkey (\d+):", lines[0]))
     assert index == expected_index
-    items = [
-        int(s) for s in fullmatch_item(r"  Starting items: (.+)", lines[1]).split(", ")
-    ]
+    items = [int(s) for s in fullmatch_item(r"  Starting items: (.+)", lines[1]).split(", ")]
     match fullmatch_item(r"  Operation: new = old (.+)+", lines[2]).split():
         case ["+", d] if d.isdigit():
             update: Callable[[int], int] = lambda x: x + int(d)
@@ -70,8 +71,7 @@ def read_monkey(expected_index: int, s: str) -> Monkey:
 
 
 def step(monkeys: list[Monkey], steps: int, mode: int | None) -> list[Monkey]:
-    """
-    Update (mutating) monkeys given number of times.
+    """Update (mutating) monkeys given number of times.
 
     If mode is present then we take all items modules its value, if not
     then all items are divided by 3 (for the first part of the problem).
@@ -91,22 +91,15 @@ def step(monkeys: list[Monkey], steps: int, mode: int | None) -> list[Monkey]:
         for monkey in monkeys:
             for item in monkey.items:
                 new_item = monkey.update(item)
-                if mode is None:
-                    new_item = new_item // 3
-                else:
-                    new_item = new_item % mode
-                dest = (
-                    monkey.dest_true
-                    if new_item % monkey.divisor == 0
-                    else monkey.dest_false
-                )
+                new_item = new_item // 3 if mode is None else new_item % mode
+                dest = monkey.dest_true if new_item % monkey.divisor == 0 else monkey.dest_false
                 monkeys[dest].items.append(new_item)
                 monkey.count += 1
             monkey.items = []
     return monkeys
 
 
-def monkey_business(monkeys: list[Monkey], steps: int, simple_mode: bool) -> int:
+def monkey_business(monkeys: list[Monkey], steps: int, *, simple_mode: bool) -> int:
     """Run number of steps and return most active monkeys.
 
     Simple mode is for first part of the problem where items are divided by 3. For
@@ -117,10 +110,7 @@ def monkey_business(monkeys: list[Monkey], steps: int, simple_mode: bool) -> int
     >>> monkey_business(build_monkeys(TEST_DATA), 10000, False)
     2713310158
     """
-    if simple_mode:
-        mode = None
-    else:
-        mode = reduce(lambda x, y: x * y, (m.divisor for m in monkeys))
+    mode = None if simple_mode else reduce(lambda x, y: x * y, (m.divisor for m in monkeys))
     step(monkeys, steps, mode)
     counts = sorted([m.count for m in monkeys])
     return counts[-1] * counts[-2]
@@ -166,11 +156,11 @@ Monkey 3:
 
 def build_monkeys(s: str) -> list[Monkey]:
     """Create fresh set of monkeys from the input."""
-    return [read_monkey(i, block) for i, block in enumerate(s.split("\n\n"))]
+    return list(starmap(read_monkey, enumerate(s.split("\n\n"))))
 
 
 if __name__ == "__main__":
     testmod()
     txt = stdin.read()
-    print(monkey_business(build_monkeys(txt), 20, True))
-    print(monkey_business(build_monkeys(txt), 10000, False))
+    print(monkey_business(build_monkeys(txt), 20, simple_mode=True))
+    print(monkey_business(build_monkeys(txt), 10000, simple_mode=False))

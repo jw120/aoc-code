@@ -64,11 +64,13 @@ def read_monkey(s: str) -> tuple[MonkeyName, Monkey]:
     >>> read_monkey("dvpt: 3")
     ('dvpt', 3)
     """
-    assert (m := fullmatch(r"([a-z]+)\: (.+)", s.strip())), f"Parse failed: '{s}'"
+    m = fullmatch(r"([a-z]+)\: (.+)", s.strip())
+    assert m, f"Parse failed: '{s}'"
     name, rest = m.groups()
     if rest.isdigit():
         return (MonkeyName(name), int(rest))
-    assert (m := fullmatch(r"([a-z]+) (.) ([a-z]+)", rest)), f"Parse rest failed: '{s}'"
+    m = fullmatch(r"([a-z]+) (.) ([a-z]+)", rest)
+    assert m, f"Parse rest failed: '{s}'"
     left, op_str, right = m.groups()
     return (
         MonkeyName(name),
@@ -77,7 +79,7 @@ def read_monkey(s: str) -> tuple[MonkeyName, Monkey]:
 
 
 def eval_monkey(
-    name: MonkeyName, monkeys: dict[MonkeyName, Monkey], stop_on_humn: bool
+    name: MonkeyName, monkeys: dict[MonkeyName, Monkey], *, stop_on_humn: bool
 ) -> int | None:
     """Evaluate the value of the given monkey.
 
@@ -95,8 +97,9 @@ def eval_monkey(
         case int(x):
             return x
         case OpMonkey(left, op, right):
-            match eval_monkey(left, monkeys, stop_on_humn), eval_monkey(
-                right, monkeys, stop_on_humn
+            match (
+                eval_monkey(left, monkeys, stop_on_humn=stop_on_humn),
+                eval_monkey(right, monkeys, stop_on_humn=stop_on_humn),
             ):
                 case int(left_val), int(right_val):
                     return apply(left_val, op, right_val)
@@ -118,8 +121,9 @@ def solve(monkeys: dict[MonkeyName, Monkey]) -> int:
 
     # Root has two branches, one gives the target value the other needs to be set to the same
     # value which we will trace down
-    match eval_monkey(root_monkey.left, monkeys, stop_on_humn=True), eval_monkey(
-        root_monkey.right, monkeys, stop_on_humn=True
+    match (
+        eval_monkey(root_monkey.left, monkeys, stop_on_humn=True),
+        eval_monkey(root_monkey.right, monkeys, stop_on_humn=True),
     ):
         case int(left_val), None:
             root_target_value = left_val
@@ -136,8 +140,9 @@ def solve(monkeys: dict[MonkeyName, Monkey]) -> int:
             return current_value
         current_monkey = monkeys[current_monkey_name]
         assert isinstance(current_monkey, OpMonkey)
-        match eval_monkey(current_monkey.left, monkeys, stop_on_humn=True), eval_monkey(
-            current_monkey.right, monkeys, stop_on_humn=True
+        match (
+            eval_monkey(current_monkey.left, monkeys, stop_on_humn=True),
+            eval_monkey(current_monkey.right, monkeys, stop_on_humn=True),
         ):
             case int(left_val), None:
                 val = left_val
@@ -188,5 +193,5 @@ hmdt: 32"""
 if __name__ == "__main__":
     testmod()
     input_monkeys = dict(read_monkey(line) for line in stdin.readlines())
-    print(eval_monkey(MonkeyName("root"), input_monkeys, False))
+    print(eval_monkey(MonkeyName("root"), input_monkeys, stop_on_humn=False))
     print(solve(input_monkeys))

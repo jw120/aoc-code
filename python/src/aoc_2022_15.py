@@ -39,7 +39,7 @@ class Zone:
         """Test if the given cell must be empty."""
         test_beacon = Coord(x, y)
         # print("Testing", test_beacon)
-        for sensor, closest_beacon in zip(self.sensors, self.closest_beacons):
+        for sensor, closest_beacon in zip(self.sensors, self.closest_beacons, strict=True):
             if test_beacon == closest_beacon:
                 break
             closest_beacon_distance = manhattan(sensor, closest_beacon)
@@ -71,7 +71,7 @@ class Zone:
         Coord(x=14, y=11)
         """
         sensor_radius: dict[Coord, int] = {
-            s: manhattan(s, b) for s, b in zip(self.sensors, self.closest_beacons)
+            s: manhattan(s, b) for s, b in zip(self.sensors, self.closest_beacons, strict=True)
         }
         x_plus_y_constraints: set[int] = set()
         x_minus_y_constraints: set[int] = set()
@@ -95,10 +95,7 @@ class Zone:
                 y = (p_con - m_con) // 2
                 solutions.add(Coord(x, y))
         for solution in solutions:
-            if all(
-                manhattan(solution, sensor) > sensor_radius[sensor]
-                for sensor in self.sensors
-            ):
+            if all(manhattan(solution, sensor) > sensor_radius[sensor] for sensor in self.sensors):
                 return solution
         raise ValueError("No valid solution found")
 
@@ -129,9 +126,7 @@ def encode(c: Coord) -> int:
     return c.x * 4_000_000 + c.y
 
 
-TEST_DATA: list[
-    str
-] = """Sensor at x=2, y=18: closest beacon is at x=-2, y=15
+TEST_DATA: list[str] = """Sensor at x=2, y=18: closest beacon is at x=-2, y=15
 Sensor at x=9, y=16: closest beacon is at x=10, y=16
 Sensor at x=13, y=2: closest beacon is at x=15, y=3
 Sensor at x=12, y=14: closest beacon is at x=10, y=16
@@ -144,9 +139,7 @@ Sensor at x=20, y=14: closest beacon is at x=25, y=17
 Sensor at x=17, y=20: closest beacon is at x=21, y=22
 Sensor at x=16, y=7: closest beacon is at x=15, y=3
 Sensor at x=14, y=3: closest beacon is at x=15, y=3
-Sensor at x=20, y=1: closest beacon is at x=15, y=3""".split(
-    "\n"
-)
+Sensor at x=20, y=1: closest beacon is at x=15, y=3""".split("\n")
 
 
 if __name__ == "__main__":

@@ -50,7 +50,7 @@ def read_problem(s: str) -> tuple[Stacks, list[Move]]:
     stacks: Stacks = {i: [] for i in range(1, number_of_stacks + 1)}
     for line in stack_lines:
         assert len(line) == number_of_stacks * 4 - 1, f"Bad '{line}' {stack_lines}"
-    for row in range(0, highest_stack):
+    for row in range(highest_stack):
         for stack in range(1, number_of_stacks + 1):
             crate = stack_lines[-row - 1][stack * 4 - 3]
             if crate.isalpha():
@@ -59,7 +59,7 @@ def read_problem(s: str) -> tuple[Stacks, list[Move]]:
     return (stacks, moves)
 
 
-def apply_moves(stacks: Stacks, moves: list[Move], reverse: bool) -> Stacks:
+def apply_moves(stacks: Stacks, moves: list[Move], *, reverse: bool) -> Stacks:
     """Apply the moves (without mutating).
 
     >>> stacks, moves = read_problem(TEST_DATA.replace('_', ' '))

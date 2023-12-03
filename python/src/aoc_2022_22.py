@@ -19,21 +19,19 @@ FaceOffset: TypeAlias = tuple[int, int]
 
 # We define cube topology by showing for each face, if we leave the face in the given direction
 # then we appear on the given face and edge with coordinate sense preserved or not
-Topology: TypeAlias = dict[
-    FaceOffset, dict[Direction, tuple[FaceOffset, Direction, bool]]
-]
+Topology: TypeAlias = dict[FaceOffset, dict[Direction, tuple[FaceOffset, Direction, bool]]]
 
 
-# For the simple wrapping topology for the quesion example, we use a helper function
+# For the simple wrapping topology for the question example, we use a helper function
 def wrap(
-    u: FaceOffset, r: FaceOffset, d: FaceOffset, l: FaceOffset
+    u: FaceOffset, r: FaceOffset, d: FaceOffset, left: FaceOffset
 ) -> dict[Direction, tuple[FaceOffset, Direction, bool]]:
-    """Helper funtion to build topology when wrapping toroidally."""
+    """Build topology when wrapping toroid-wise."""
     return {
         Direction.UP: (u, Direction.DOWN, True),
         Direction.RIGHT: (r, Direction.LEFT, True),
         Direction.DOWN: (d, Direction.UP, True),
-        Direction.LEFT: (l, Direction.RIGHT, True),
+        Direction.LEFT: (left, Direction.RIGHT, True),
     }
 
 
@@ -134,7 +132,7 @@ MAIN_FOLD_TOPOLOGY: Final[Topology] = {
 }
 
 
-def assert_wrap(t: Topology, is_wrap: bool) -> None:
+def assert_wrap(t: Topology, *, is_wrap: bool) -> None:
     """Check that a wrap-around topology connects properly."""
     for f_from, m in t.items():
         for d in [Direction.UP, Direction.RIGHT, Direction.DOWN, Direction.LEFT]:
@@ -171,8 +169,8 @@ class MonkeyMap:
         self.extent = Extent(0, 0)
         self.topology = topology
         self.face_extent = Coord(
-            x=1 + max(x for x, _ in topology.keys()),
-            y=1 + max(y for _, y in topology.keys()),
+            x=1 + max(x for x, _ in topology),
+            y=1 + max(y for _, y in topology),
         )
         self.x_start: int = -1
         for y, row in enumerate(board_str.split("\n")):
@@ -182,9 +180,7 @@ class MonkeyMap:
                 if c in "#.":
                     self.board[Coord(x, y)] = c == "#"
                     if x >= self.extent.x or y >= self.extent.y:
-                        self.extent = Extent(
-                            max(self.extent.x, x + 1), max(self.extent.y, y + 1)
-                        )
+                        self.extent = Extent(max(self.extent.x, x + 1), max(self.extent.y, y + 1))
                 else:
                     assert c == " "
 
@@ -197,14 +193,11 @@ class MonkeyMap:
         self.path: list[str] = findall(r"\d+|L|R", path_str)
 
     def to_coord(
-        self, c: Coord, d: Direction, face: FaceOffset, edge: Direction, preserve: bool
+        self, c: Coord, d: Direction, face: FaceOffset, edge: Direction, *, preserve: bool
     ) -> Coord:
         """Return the coordinate on the given face and edge."""
         c_relative = Coord(c.x % self.block_size, c.y % self.block_size)
-        if d in (Direction.UP, Direction.DOWN):
-            offset = c_relative.x
-        else:
-            offset = c_relative.y
+        offset = c_relative.x if d in {Direction.UP, Direction.DOWN} else c_relative.y
         if not preserve:
             offset = self.block_size - 1 - offset
         match edge:
@@ -263,7 +256,7 @@ class MonkeyMap:
             case (int(face_x), int(face_y)):
                 (face_new, edge_new, preserve) = self.topology[(face_x, face_y)][d]
                 d_new = edge_new.opposite()
-                c_new = self.to_coord(c_new, d, face_new, edge_new, preserve)
+                c_new = self.to_coord(c_new, d, face_new, edge_new, preserve=preserve)
         # print(f"Testing move to {c_new} {d_new}, ", end="")
         if self.board[c_new]:
             return c, d
@@ -279,7 +272,7 @@ class MonkeyMap:
         """
         d = Direction.RIGHT
         c = self.to_coord(
-            Coord(0, 0), d, (self.x_start // self.block_size, 0), Direction.UP, True
+            Coord(0, 0), d, (self.x_start // self.block_size, 0), Direction.UP, preserve=True
         )
         for step in self.path:
             match step:

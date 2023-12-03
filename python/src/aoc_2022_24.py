@@ -2,24 +2,26 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from dataclasses import dataclass, field
 from doctest import testmod
 from heapq import heappop, heappush
 from itertools import chain
 from math import lcm
 from sys import stdin
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 import numpy as np
 
-# x runs left-ro-right, y runs top-to-bottom
+# x runs left-to-right, y runs top-to-bottom
 from coord import Coord, manhattan
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 @dataclass(frozen=True)
 class Blizzard:
-    """Data class for each blizzard"""
+    """Data class for each blizzard."""
 
     start: Coord
     step: Coord
@@ -48,14 +50,12 @@ class PrioritizedState:
 class Basin:
     """Main class for day 24."""
 
-    def __init__(self, input_lines: Iterable[str], debug: bool = False) -> None:
+    def __init__(self, input_lines: Iterable[str], *, debug: bool = False) -> None:
         self.initial_blizzards: list[Blizzard] = []
-        for row, line in enumerate(input_lines, start=-1):
-            line = line.strip()
+        for row, raw_line in enumerate(input_lines, start=-1):
+            line = raw_line.strip()
             if row == -1:
-                assert all(
-                    c == "#" for c in (line[0:1] + line[2:])
-                ), f"Bad initial line '{line}'"
+                assert all(c == "#" for c in (line[0:1] + line[2:])), f"Bad initial line '{line}'"
                 assert line[1] == "."
                 self.width: int = len(line) - 2
             elif all(c == "#" for c in line[:-2]) and line[-2:] == ".#":
@@ -84,9 +84,7 @@ class Basin:
                         case ".":
                             continue
                         case _:
-                            raise ValueError(
-                                f"Unknown character '{char}' in line '{line}'"
-                            )
+                            raise ValueError(f"Unknown character '{char}' in line '{line}'")
         self.repeat: int = lcm(self.width, self.height)
         self.initial_start = Coord(0, -1)
         self.initial_goal = Coord(self.width - 1, self.height)
@@ -119,26 +117,25 @@ class Basin:
 
     def will_be_empty(self, state: State) -> bool:
         """Test if state will be empty."""
-        if state.location in (self.start, self.goal):
+        if state.location in {self.start, self.goal}:
             return True
         if state.location.y <= -1:
             return False  # Top wall
         if state.location.y >= self.height:
             return False  # Bottom wall
-        if state.location.x in (-1, self.width):
+        if state.location.x in {-1, self.width}:
             return False  # Side walls
         return not (
             self.h_cache[(state.location.x, state.location.y, state.time % self.width)]
-            or self.v_cache[
-                (state.location.x, state.location.y, state.time % self.height)
-            ]
+            or self.v_cache[(state.location.x, state.location.y, state.time % self.height)]
         )
 
     def add_priority(self, state: State) -> PrioritizedState:
         """Add priority to the state.
 
         Used by the A*-algorithm. Defined as distances from origin
-        plus distance to goal (manhattan distances)."""
+        plus distance to goal (manhattan distances).
+        """
         return PrioritizedState(
             state=state,
             priority=state.time + manhattan(state.location, self.goal),
@@ -175,9 +172,9 @@ class Basin:
             for adj in chain(state.location.adjacents(), [state.location]):
                 # print(f"Considering move from {state.location} to {adj}")
                 trial_state = State(location=adj, time=state.time + 1)
-                if trial_state.wrap_time(
-                    self.repeat
-                ) not in visited and self.will_be_empty(trial_state):
+                if trial_state.wrap_time(self.repeat) not in visited and self.will_be_empty(
+                    trial_state
+                ):
                     heappush(heap, self.add_priority(trial_state))
                     # print("added")
 
@@ -219,9 +216,7 @@ class Basin:
         print("#" * self.width + ".#")
 
 
-TEST_DATA1: Final[
-    list[str]
-] = """#.#####
+TEST_DATA1: Final[list[str]] = """#.#####
 #.....#
 #>....#
 #.....#
@@ -230,9 +225,7 @@ TEST_DATA1: Final[
 #####.#""".splitlines()
 
 
-TEST_DATA2: Final[
-    list[str]
-] = """#.######
+TEST_DATA2: Final[list[str]] = """#.######
 #>>.<^<#
 #.<..<<#
 #>v.><>#

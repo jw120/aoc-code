@@ -17,7 +17,7 @@ def mix(initial_numbers: list[int], mixes: int = 1) -> int:
     """
     n = len(initial_numbers)
     # We replace numbers with a (number, index) tuple to cope with repeated values
-    start_tuples: list[tuple[int, int]] = list(zip(initial_numbers, range(n)))
+    start_tuples: list[tuple[int, int]] = list(zip(initial_numbers, range(n), strict=True))
     number_tuples: list[tuple[int, int]] = start_tuples.copy()
     for _ in range(mixes):
         for target_tuple in start_tuples:
@@ -31,14 +31,10 @@ def mix(initial_numbers: list[int], mixes: int = 1) -> int:
     initial_zero_position = initial_numbers.index(0)
     assert initial_numbers.count(0) == 1
     final_zero_position = number_tuples.index((0, initial_zero_position))
-    return sum(
-        number_tuples[(final_zero_position + i) % n][0] for i in range(1000, 4000, 1000)
-    )
+    return sum(number_tuples[(final_zero_position + i) % n][0] for i in range(1000, 4000, 1000))
 
 
-TEST_DATA: Final[
-    str
-] = """1
+TEST_DATA: Final[str] = """1
 2
 -3
 3

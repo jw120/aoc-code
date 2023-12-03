@@ -2,15 +2,17 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from doctest import testmod
 from enum import Enum
 from sys import stdin
-from typing import Final
+from typing import TYPE_CHECKING, Final
 
 # We use x as left->right and y as top->bottom
 from coord import Coord
 from utils import assert_never
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class MoveDirection(Enum):
@@ -21,10 +23,10 @@ class MoveDirection(Enum):
     W = 2
     E = 3
 
-    def next(self) -> MoveDirection:
+    def next_direction(self) -> MoveDirection:
         """Return next direction.
 
-        >>> MoveDirection.S.next()
+        >>> MoveDirection.S.next_direction()
         <MoveDirection.W: 2>
         """
         return MoveDirection((self.value + 1) % 4)
@@ -96,7 +98,8 @@ class Diffuser:
     def step(self) -> bool:
         """Update positions the given number of steps.
 
-        Return true if any elf moved."""
+        Return true if any elf moved.
+        """
         proposals: dict[Coord, Coord | None] = {}
         moved = False
         for elf in self.positions:
@@ -116,7 +119,7 @@ class Diffuser:
                 self.positions.add(elf_to)
                 self.positions.remove(elf_from)
                 moved = True
-        self.first_direction = self.first_direction.next()
+        self.first_direction = self.first_direction.next_direction()
         return moved
 
     def moves_until_no_move(self) -> int:
@@ -138,12 +141,8 @@ class Diffuser:
         (Coord(x=2, y=1), Coord(x=3, y=4))
         """
         return (
-            Coord(
-                x=min(p.x for p in self.positions), y=min(p.y for p in self.positions)
-            ),
-            Coord(
-                x=max(p.x for p in self.positions), y=max(p.y for p in self.positions)
-            ),
+            Coord(x=min(p.x for p in self.positions), y=min(p.y for p in self.positions)),
+            Coord(x=max(p.x for p in self.positions), y=max(p.y for p in self.positions)),
         )
 
     def score(self) -> int:
@@ -173,18 +172,14 @@ class Diffuser:
             print()
 
 
-TEST_DATA1: Final[
-    list[str]
-] = """.....
+TEST_DATA1: Final[list[str]] = """.....
 ..##.
 ..#..
 .....
 ..##.
 .....""".splitlines()
 
-TEST_DATA2: Final[
-    list[str]
-] = """..............
+TEST_DATA2: Final[list[str]] = """..............
 ..............
 .......#......
 .....###.#....

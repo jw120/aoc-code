@@ -1,3 +1,8 @@
 # Files to be installed by pip
+
+# Dev tools
 pyright
 ruff
+
+# Libraries used in solutinons
+numpy

@@ -155,7 +155,7 @@ def initial_state(time: int) -> State:
 class Dynamic:
     """Dynamic programming solution."""
 
-    def __init__(self, blueprint: BluePrint):
+    def __init__(self, blueprint: BluePrint) -> None:
         self.cache: dict[State, int | None] = {}
         self.blueprint: BluePrint = blueprint
         self.max_resources = Amount(ore=20, clay=100, obsidian=25, geode=1000)
@@ -172,12 +172,11 @@ class Dynamic:
             return None
 
         # If we can build a geode robot, we always should do only this
-        if (
-            buy_geode := state.buy(self.blueprint.geode_robot, geode(0), "G")
+        if (buy_geode := state.buy(self.blueprint.geode_robot, geode(0), "G")) is not None and (
+            buy_geode_score := self.solution(buy_geode)
         ) is not None:
-            if (buy_geode_score := self.solution(buy_geode)) is not None:
-                self.cache[state] = buy_geode.time + buy_geode_score
-                return buy_geode.time + buy_geode_score
+            self.cache[state] = buy_geode.time + buy_geode_score
+            return buy_geode.time + buy_geode_score
 
         # Otherwise consider all possible moves
         candidate_states: list[State | None] = []
@@ -190,9 +189,7 @@ class Dynamic:
         best_so_far = None
         for next_state in candidate_states:
             next_solution = self.solution(next_state)
-            if next_solution is not None and (
-                best_so_far is None or next_solution > best_so_far
-            ):
+            if next_solution is not None and (best_so_far is None or next_solution > best_so_far):
                 best_so_far = next_solution
         self.cache[state] = best_so_far
         return best_so_far

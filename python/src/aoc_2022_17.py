@@ -58,7 +58,7 @@ class Chamber:
         self.rock_count: int = 0
         # Memory holds rock count and max_y for hashes of pattern
         self.memory: dict[MemState, tuple[int, int]] = {}
-        # Once we detect a loop set this to rock count and max_y for first occurence
+        # Once we detect a loop set this to rock count and max_y for first occurrence
         self.repeat: tuple[int, int] | None = None
 
     @property
@@ -86,7 +86,7 @@ class Chamber:
         3068
         """
         for r in range(n):
-            self.drop(r % 5, False)
+            self.drop(r % 5, use_memory=False)
 
     def drop_multiple_via_cycles(self, n: int) -> None:
         """Simulate dropping given number of rocks by cycle detection.
@@ -98,7 +98,7 @@ class Chamber:
         """
         r = 0
         while self.repeat is None:
-            self.drop(r % 5, True)
+            self.drop(r % 5, use_memory=True)
             r += 1
         r0, max_y0 = self.repeat
         period = r - r0
@@ -106,20 +106,18 @@ class Chamber:
         cycles = (n - r) // period
         r += period * cycles
         while r < n:
-            self.drop(r % 5, False)
+            self.drop(r % 5, use_memory=False)
             r += 1
         self.max_y += y_delta * cycles
 
-    def drop(self, rock_index: int, use_memory: bool) -> None:
+    def drop(self, rock_index: int, *, use_memory: bool) -> None:
         """Drop the given rock."""
         start_position: Coord = Coord(2, self.max_y + 4)
         rock: Rock = [c + start_position for c in ROCKS[rock_index]]
         while True:
             # Move horizontally if possible
             horizontal_move = (
-                Coord(1, 0)
-                if self.jet_pattern[self.jet_count % self.jen_length]
-                else Coord(-1, 0)
+                Coord(1, 0) if self.jet_pattern[self.jet_count % self.jen_length] else Coord(-1, 0)
             )
             new_rock: Rock = [c + horizontal_move for c in rock]
             if self.all_valid(new_rock):
@@ -154,7 +152,7 @@ class Chamber:
         min_y = -1 if max_rows is None else self.max_y - max_rows + 1
         for y in range(self.max_y + 2, min_y - 1, -1):
             for x in range(-1, 8):
-                if x in (-1, 7):
+                if x in {-1, 7}:
                     print_char = "+" if y == -1 else "|"
                 elif y == -1:
                     print_char = "-"
