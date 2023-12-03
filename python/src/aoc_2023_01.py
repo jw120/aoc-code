@@ -42,7 +42,7 @@ def starts_num_word(s: str) -> int | None:
     """
     if s[0].isdigit():
         return int(s[0])
-    for i, w in zip(range(1, 10), WORD_DIGITS, strict=True):
+    for i, w in enumerate(WORD_DIGITS, start=1):
         if s.startswith(w):
             return i
     return None
