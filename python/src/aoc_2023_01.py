@@ -6,7 +6,7 @@ from typing import Final
 
 
 def calibration(s: str) -> int:
-    """Return first and last digit on the line as an integer
+    """Return first and last digit on the line as an integer.
 
     >>> calibration("pqr3stu8vwx")
     38
@@ -57,7 +57,7 @@ def calibration_word(s: str) -> int:
     76
     """
     digits: list[int] = [
-        x for x in [starts_num_word(s[i:]) for i in range(0, len(s))] if x is not None
+        x for x in [starts_num_word(s[i:]) for i in range(len(s))] if x is not None
     ]
     return digits[0] * 10 + digits[-1]
 

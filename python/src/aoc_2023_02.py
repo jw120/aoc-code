@@ -88,11 +88,5 @@ if __name__ == "__main__":
     testmod()
     games: list[Game] = [parse_game(s.strip()) for s in stdin.readlines()]
     full = Subset(red=12, green=13, blue=14)
-    print(
-        sum(
-            g.id_number
-            for g in games
-            if all(possible(full, subset) for subset in g.subsets)
-        )
-    )
+    print(sum(g.id_number for g in games if all(possible(full, subset) for subset in g.subsets)))
     print(sum(power(fewest(game)) for game in games))
