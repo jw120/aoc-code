@@ -10,7 +10,7 @@ def calibration(s: str) -> int:
 
     >>> calibration("pqr3stu8vwx")
     38
-    >>> calibration("treb7uchet")
+    >>> calibration("tree7the")
     77
     """
     digits: list[int] = [int(c) for c in s if c.isdigit()]
@@ -30,7 +30,7 @@ WORD_DIGITS: Final[list[str]] = [
 ]
 
 
-def starts_num_word(s: str) -> list | int:
+def starts_num_word(s: str) -> int | None:
     """If string starts with a digit or its word version, return it.
 
     >>> starts_num_word("2qw")
@@ -53,7 +53,7 @@ def calibration_word(s: str) -> int:
 
     >>> calibration_word("two1nine")
     29
-    >>> calibration_word("7pqrstsixteen")
+    >>> calibration_word("7sixteen")
     76
     """
     digits: list[int] = [

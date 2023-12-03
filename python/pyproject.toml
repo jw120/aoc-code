@@ -1,0 +1,8 @@
+[tool.poetry]
+name = "aoc-code-python"
+version = "0.1.0"
+description = "Python solutions for Advent of Code"
+authors = ["Joe Watson <jw120@users.noreply.github.com>"]
+license = "GPL"
+readme = "README.md"
+

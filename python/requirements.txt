@@ -1,0 +1,3 @@
+# Files to be installed by pip
+pyright
+ruff
