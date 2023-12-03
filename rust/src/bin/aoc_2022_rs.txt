@@ -1,0 +1,144 @@
+// Advent of Code, 2022 day XX
+
+use aoc_rust::stdin_lines;
+use std::collections::{HashMap, HashSet};
+use std::iter::zip;
+
+type ValveName = String;
+
+#[derive(Clone, Debug, PartialEq)]
+struct Valve {
+    name: ValveName,
+    flow: i32,
+    tunnels: Vec<String>,
+}
+
+impl Valve {
+    fn new(line: &str) -> Valve {
+        let words: Vec<&str> = line.split_ascii_whitespace().collect();
+        assert_eq!(words[0], "Valve");
+        let name = words[1].to_string();
+        assert_eq!(words[2], "has");
+        assert_eq!(words[3], "flow");
+        let flow = words[4]
+            .strip_prefix("rate=")
+            .and_then(|s| s.strip_suffix(';'))
+            .unwrap()
+            .parse()
+            .unwrap();
+        assert_eq!(words[5], "tunnels");
+        assert_eq!(words[6], "lead");
+        assert_eq!(words[7], "to");
+        assert_eq!(words[8], "valves");
+        let tunnels = words[9..]
+            .iter()
+            .map(|s| s.trim_end_matches(',').to_string())
+            .collect();
+        Valve {
+            name,
+            flow,
+            tunnels,
+        }
+    }
+}
+
+// Data not changed during the walk
+struct Volcano {
+    valves: HashMap<ValveName, Valve>,
+    distances: HashMap<(ValveName, ValveName), i32>,
+    non_zero_valve_names: HashSet<ValveName>,
+    start: ValveName,
+}
+
+impl Volcano {
+    fn new(vs: &[Valve], start: &str) -> Volcano {
+        let valves: HashMap<ValveName, Valve> =
+            vs.iter().map(|v| (v.name.clone(), v.clone())).collect();
+        let non_zero_valve_names: HashSet<ValveName> = vs
+            .iter()
+            .filter(|v| v.flow > 0)
+            .map(|v| v.name.clone())
+            .collect();
+        Volcano {
+            valves,
+            distances: HashMap::new(),
+            non_zero_valve_names,
+            start: start.to_string(),
+        }
+    }
+}
+
+// Data changing during walk (for multiple walkers)
+struct WalkState {
+    current_valve_name: Vec<ValveName>, // for each walker
+    time_remaining: Vec<i32>,           // for each walker
+    path: Vec<Vec<ValveName>>,          // for each walker,
+    unopened: HashSet<ValveName>,
+    score: i32, // flow for all time for valves opened so far
+}
+
+// DFS search leveraging adjacency matrix and only moving to open valves
+fn solve(volcano: &Volcano, time_available: i32, walkers: usize) -> i32 {
+    let mut stack: Vec<WalkState> = vec![WalkState {
+        current_valve_name: vec![volcano.start.clone(); walkers],
+        time_remaining: vec![time_available; walkers],
+        path: (0..walkers).map(|_| Vec::new()).collect(),
+        unopened: volcano.non_zero_valve_names.clone(),
+        score: 0,
+    }];
+    let mut best_score: i32 = 0;
+
+    while let Some(mut state) = stack.pop() {
+        if state.score > best_score {
+            best_score = state.score;
+        }
+        let possible_flow_rate: i32 = state.unopened.iter().map(|n| volcano.valves[n].flow).sum();
+        for (valve_name, (time, path)) in &mut zip(
+            state.current_valve_name,
+            zip(state.time_remaining, state.path),
+        ) {
+            for destination in state.unopened {
+                if destination == valve_name {
+                    continue;
+                }
+                let distance = volcano.distances[&(valve_name, destination)];
+                let new_time = time - distance - 1;
+                if new_time > 0 {
+                    let flow = volcano.valves[&destination].flow;
+                    let new_score = state.score + flow * new_time;
+                    let max_time = state
+                        .time_remaining
+                        .iter()
+                        .map(|t| t - distance - 1)
+                        .max()
+                        .unwrap();
+                    let possible_score = state.score + possible_flow_rate * max_time;
+                }
+            }
+        }
+    }
+    0
+}
+
+fn main() {
+    let valves: Vec<Valve> = stdin_lines().map(|s| Valve::new(&s)).collect();
+    let volcano = Volcano::new(&valves, "AA");
+    println!("{}", valves.len());
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_parse() {
+        let line = "Valve KQ has flow rate=18; tunnels lead to valves FR, BN";
+        assert_eq!(
+            Valve::new(line),
+            Valve {
+                name: String::from("KQ"),
+                flow: 18,
+                tunnels: vec![String::from("FR"), String::from("BN")]
+            }
+        );
+    }
+}
