@@ -54,7 +54,7 @@ struct Monkey {
 }
 
 impl Monkey {
-    fn parse(expectd_index: usize, mut line_iter: impl Iterator<Item = String>) -> Monkey {
+    fn parse(expected_index: usize, mut line_iter: impl Iterator<Item = String>) -> Monkey {
         static INDEX_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^Monkey (\d+):$").unwrap());
         static ITEMS_RE: Lazy<Regex> =
             Lazy::new(|| Regex::new(r"^\s+Starting items: (.+)$").unwrap());
@@ -68,7 +68,7 @@ impl Monkey {
             Lazy::new(|| Regex::new(r"^\s+Test: divisible by (\d+)$").unwrap());
 
         let index: u64 = extract_num(&INDEX_RE, &line_iter.next().unwrap());
-        assert_eq!(expectd_index, index as usize);
+        assert_eq!(expected_index, index as usize);
 
         let items: Vec<u64> = ITEMS_RE
             .captures(&line_iter.next().unwrap())
