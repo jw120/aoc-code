@@ -106,7 +106,7 @@ class Combat:
             return " " + ", ".join([str(x) for x in xs])
         return ""
 
-    def play_recursive_game(self, debug: bool = False) -> Combat:
+    def play_recursive_game(self, *, debug: bool = False) -> Combat:
         """Play recursive rounds until the game is over.
 
         >>> Combat(test1).play_recursive_game().score()
@@ -122,7 +122,6 @@ class Combat:
         round_num = 1
 
         while True:
-
             if debug:
                 print(f"-- Round {round_num} (Game {game_num}) --")
                 print(f"Player 1's deck:{self._show_deck(self.p1)}")
@@ -151,22 +150,19 @@ class Combat:
                     print("Playing a sub-game to determine the winner...")
                     print()
 
-                sub_game = Combat(
-                    (copy(self.p1[:top_player_1]), copy(self.p2[:top_player_2]))
-                )
-                sub_game.play_recursive_game(debug)
+                sub_game = Combat((copy(self.p1[:top_player_1]), copy(self.p2[:top_player_2])))
+                sub_game.play_recursive_game(debug=debug)
                 winner = sub_game.winner()
                 if debug:
                     print(f"...anyway, back to game {game_num}.")
 
             # Otherwise regular game
+            elif top_player_1 > top_player_2:
+                winner = Player.ONE
+            elif top_player_2 > top_player_1:
+                winner = Player.TWO
             else:
-                if top_player_1 > top_player_2:
-                    winner = Player.ONE
-                elif top_player_2 > top_player_1:
-                    winner = Player.TWO
-                else:
-                    raise RuntimeError("Unexpected tie", top_player_1)
+                raise RuntimeError("Unexpected tie", top_player_1)
 
             # Resolve round winner
             if debug:

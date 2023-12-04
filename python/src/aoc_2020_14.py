@@ -5,7 +5,6 @@ import re
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import Union
 
 
 @dataclass(frozen=True)
@@ -23,7 +22,7 @@ class WriteCommand:
     value: int
 
 
-Command = Union[UpdateBitmaskCommand, WriteCommand]
+Command = UpdateBitmaskCommand | WriteCommand
 
 
 def parse_command(s: str) -> Command:
@@ -39,7 +38,7 @@ def parse_command(s: str) -> Command:
     raise RuntimeError("Could not parse command", s)
 
 
-def set_bit(x: int, n: int, val: bool) -> int:
+def set_bit(x: int, n: int, *, val: bool) -> int:
     """Return a copy of x with the n'th bit set to val.
 
     >>> [set_bit(5, 1, True), set_bit(5, 1, False), set_bit(5, 2, True), set_bit(5, 2, False)]
@@ -63,11 +62,11 @@ def apply_mask1(value: int, mask: str) -> int:
     """
     if len(mask) != 36:
         raise RuntimeError("Bad mask", mask)
-    for i in range(0, 36):
+    for i in range(36):
         if mask[-i - 1] == "1":
-            value = set_bit(value, i, True)
+            value = set_bit(value, i, val=True)
         elif mask[-i - 1] == "0":
-            value = set_bit(value, i, False)
+            value = set_bit(value, i, val=False)
         elif mask[-i - 1] == "X":
             pass
         else:
@@ -88,9 +87,9 @@ def apply_mask2(address: int, mask: str) -> list[int]:
     free_bits: list[int] = []
     if len(mask) != 36:
         raise RuntimeError("Bad mask", mask)
-    for i in range(0, 36):
+    for i in range(36):
         if mask[-i - 1] == "1":
-            address = set_bit(address, i, True)
+            address = set_bit(address, i, val=True)
         elif mask[-i - 1] == "0":
             pass
         elif mask[-i - 1] == "X":
@@ -98,9 +97,9 @@ def apply_mask2(address: int, mask: str) -> list[int]:
         if len(mask) != 36:
             raise RuntimeError("Bad mask", mask)
     results: list[int] = []
-    for x in range(0, 2 ** len(free_bits)):
-        for j in range(0, len(free_bits)):
-            address = set_bit(address, free_bits[-j], bool(x & (1 << j)))
+    for x in range(2 ** len(free_bits)):
+        for j in range(len(free_bits)):
+            address = set_bit(address, free_bits[-j], val=bool(x & (1 << j)))
         results.append(address)
     return results
 

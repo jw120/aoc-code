@@ -42,7 +42,7 @@ test2: list[int] = [
 
 def prep_list(xs: list[int]) -> list[int]:
     """Sort list and add first and last elements."""
-    ys: list[int] = [0] + sorted(xs)
+    ys: list[int] = [0, *sorted(xs)]
     ys.append(ys[-1] + 3)
     return ys
 

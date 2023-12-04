@@ -41,7 +41,7 @@ class CrabCups:
                 print()
                 break
 
-    def move(self, debug: bool = False) -> CrabCups:
+    def move(self, *, debug: bool = False) -> CrabCups:
         """Perform one crab move."""
         if debug:
             self.print_cups()
@@ -55,10 +55,8 @@ class CrabCups:
             print(f"pick up: {next1} {next2} {next3}")
 
         # Find a destination
-        destination: int = (
-            self.current_value - 1 if self.current_value > 1 else self.num_values
-        )
-        while destination in [next1, next2, next3]:
+        destination: int = self.current_value - 1 if self.current_value > 1 else self.num_values
+        while destination in {next1, next2, next3}:
             destination = destination - 1 if destination > 1 else self.num_values
         if debug:
             print(f"destination {destination}")
@@ -73,12 +71,12 @@ class CrabCups:
 
         return self
 
-    def run(self, moves: int, debug: bool = False) -> CrabCups:
+    def run(self, moves: int, *, debug: bool = False) -> CrabCups:
         """Perform the given number of moves."""
         for i in range(1, moves + 1):
             if debug:
                 print(f"-- move {i} --\n")
-            self.move(debug)
+            self.move(debug=debug)
         if debug:
             print("-- final --")
             self.print_cups()

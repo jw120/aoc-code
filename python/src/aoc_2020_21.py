@@ -20,12 +20,12 @@ def parse_food(s: str) -> tuple[list[Ingredient], list[Allergen]]:
 
 test1: list[tuple[list[Ingredient], list[Allergen]]] = [
     parse_food(s)
-    for s in [
+    for s in [  # cspell: disable
         "mxmxvkd kfcds sqjhc nhms (contains dairy, fish)",
         "trh fvjkl sbzzf mxmxvkd (contains dairy)",
         "sqjhc fvjkl (contains soy)",
         "sqjhc mxmxvkd sbzzf (contains fish)",
-    ]
+    ]  # cspell: enable
 ]
 
 
@@ -64,9 +64,10 @@ def part_one(foods: list[tuple[list[Ingredient], list[Allergen]]]) -> int:
 def part_two(foods: list[tuple[list[Ingredient], list[Allergen]]]) -> str:
     """Return assigned allergens sorted by corresponding ingredient.
 
-    >>> part_two(test1)
+    >>> part_two(test1) # cspell: disable
     'mxmxvkd,sqjhc,fvjkl'
     """
+    # cspell: enable
     possible: dict[Allergen, set[Ingredient]] = possible_ingredients(foods)
 
     matched_ingredients: list[tuple[Ingredient, Allergen]] = []
@@ -82,9 +83,7 @@ def part_two(foods: list[tuple[list[Ingredient], list[Allergen]]]) -> str:
                 for a, _i_set in possible.items():
                     possible[a] = possible[a] - {ingredient}
                 break
-    return ",".join(
-        [pair[0] for pair in sorted(matched_ingredients, key=lambda x: x[1])]
-    )
+    return ",".join([pair[0] for pair in sorted(matched_ingredients, key=lambda x: x[1])])
 
 
 if __name__ == "__main__":

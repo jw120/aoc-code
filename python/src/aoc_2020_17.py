@@ -9,10 +9,12 @@ Coord3 = tuple[int, int, int]
 
 
 def min_coord3(p: Coord3, q: Coord3) -> Coord3:
+    """Minimum of two 3-coordinates."""
     return (min(p[0], q[0]), min(p[1], q[1]), min(p[2], q[2]))
 
 
 def max_coord3(p: Coord3, q: Coord3) -> Coord3:
+    """Maximum of two 3-coordinates."""
     return (max(p[0], q[0]), max(p[1], q[1]), max(p[2], q[2]))
 
 
@@ -20,10 +22,12 @@ Coord4 = tuple[int, int, int, int]
 
 
 def min_coord4(p: Coord4, q: Coord4) -> Coord4:
+    """Minimum of two 4-coordinates."""
     return (min(p[0], q[0]), min(p[1], q[1]), min(p[2], q[2]), min(p[3], q[3]))
 
 
 def max_coord4(p: Coord4, q: Coord4) -> Coord4:
+    """Maximum of two 4-coordinates."""
     return (max(p[0], q[0]), max(p[1], q[1]), max(p[2], q[2]), max(p[3], q[2]))
 
 
@@ -44,9 +48,11 @@ class Grid3d:
         self.time = 0
 
     def active(self) -> int:
+        """Return the index of the active grid data."""
         return self.time % 2
 
     def inactive(self) -> int:
+        """Return the index of the inactive grid data."""
         return (self.time + 1) % 2
 
     def add_cube(self, crd: Coord3) -> None:
@@ -81,7 +87,7 @@ class Grid3d:
         self.g[self.inactive()].clear()
         for cube in self.g[self.active()]:
             # Keep the cube alive if it has 2 or 3 neighbours
-            if self.neighbours(cube) in [2, 3]:
+            if self.neighbours(cube) in {2, 3}:
                 self.add_cube(cube)
             # Consider all nearby empty locations for activation
             for neighbour in self.neighbouring_locations(cube):
@@ -95,15 +101,15 @@ class Grid3d:
 
     def show(self) -> None:
         """Print the active grid (for debugging)."""
-        mins: Coord3 = (0, 0, 0)
-        maxs: Coord3 = (0, 0, 0)
+        min_coord: Coord3 = (0, 0, 0)
+        max_coord: Coord3 = (0, 0, 0)
         for c in self.g[self.active()]:
-            mins = min_coord3(mins, c)
-            maxs = max_coord3(maxs, c)
-        for z in range(mins[2], maxs[2] + 1):
+            min_coord = min_coord3(min_coord, c)
+            max_coord = max_coord3(max_coord, c)
+        for z in range(min_coord[2], max_coord[2] + 1):
             print(f"z={z}")
-            for y in range(mins[1], maxs[1] + 1):
-                for x in range(mins[0], maxs[0] + 1):
+            for y in range(min_coord[1], max_coord[1] + 1):
+                for x in range(min_coord[0], max_coord[0] + 1):
                     print("#" if self.has_cube((x, y, z)) else ".", end="")
                 print()
 
@@ -125,9 +131,11 @@ class Grid4d:
         self.time = 0
 
     def active(self) -> int:
+        """Return the index of the active grid data."""
         return self.time % 2
 
     def inactive(self) -> int:
+        """Return the index of the inactive grid data."""
         return (self.time + 1) % 2
 
     def add_cube(self, crd: Coord4) -> None:
@@ -162,7 +170,7 @@ class Grid4d:
         self.g[self.inactive()].clear()
         for cube in self.g[self.active()]:
             # Keep the cube alive if it has 2 or 3 neighbours
-            if self.neighbours(cube) in [2, 3]:
+            if self.neighbours(cube) in {2, 3}:
                 self.add_cube(cube)
             # Consider all nearby empty locations for activation
             for neighbour in self.neighbouring_locations(cube):
@@ -176,16 +184,16 @@ class Grid4d:
 
     def show(self) -> None:
         """Print the active grid (for debugging)."""
-        mins: Coord4 = (0, 0, 0, 0)
-        maxs: Coord4 = (0, 0, 0, 0)
+        min_coord: Coord4 = (0, 0, 0, 0)
+        max_coord: Coord4 = (0, 0, 0, 0)
         for c in self.g[self.active()]:
-            mins = min_coord4(mins, c)
-            maxs = max_coord4(maxs, c)
-        for w in range(mins[3], maxs[3] + 1):
-            for z in range(mins[2], maxs[2] + 1):
+            min_coord = min_coord4(min_coord, c)
+            max_coord = max_coord4(max_coord, c)
+        for w in range(min_coord[3], max_coord[3] + 1):
+            for z in range(min_coord[2], max_coord[2] + 1):
                 print(f"z={z}, w={w}")
-                for y in range(mins[1], maxs[1] + 1):
-                    for x in range(mins[0], maxs[0] + 1):
+                for y in range(min_coord[1], max_coord[1] + 1):
+                    for x in range(min_coord[0], max_coord[0] + 1):
                         print("#" if self.has_cube((x, y, z, w)) else ".", end="")
                     print()
                 print()
@@ -207,10 +215,10 @@ if __name__ == "__main__":
     # print(test4.count_cubes())
     input_lines = list(stdin)
     grid3 = Grid3d(input_lines)
-    for _ in range(0, 6):
+    for _ in range(6):
         grid3.iterate()
     print(grid3.count_cubes())
     grid4 = Grid4d(input_lines)
-    for _ in range(0, 6):
+    for _ in range(6):
         grid4.iterate()
     print(grid4.count_cubes())

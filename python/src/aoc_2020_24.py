@@ -23,13 +23,10 @@ class HexCoord:
             return HexCoord(self.x + 1, self.y)
         if s == "w":
             return HexCoord(self.x - 1, self.y)
-        if s not in ["ne", "se", "nw", "sw"]:
+        if s not in {"ne", "se", "nw", "sw"}:
             raise RuntimeError("Bad move direction", s)
         next_y = self.y + 1 if s[0] == "s" else self.y - 1
-        if self.y % 2 == 0:
-            next_x = self.x - (s[1] == "w")
-        else:
-            next_x = self.x + (s[1] == "e")
+        next_x = self.x - (s[1] == "w") if self.y % 2 == 0 else self.x + (s[1] == "e")
         return HexCoord(next_x, next_y)
 
     def adjoining(self) -> set[HexCoord]:
@@ -44,6 +41,7 @@ def split_moves(s: str) -> list[str]:
 
 test1: list[list[str]] = [
     split_moves(s)
+    # cspell: disable
     for s in [
         "sesenwnenenewseeswwswswwnenewsewsw",
         "neeenesenwnwwswnenewnwwsewnenwseswesw",
@@ -66,6 +64,7 @@ test1: list[list[str]] = [
         "neswnwewnwnwseenwseesewsenwsweewe",
         "wseweeenwnesenwwwswnew",
     ]
+    # cspell: enable
 ]
 
 
@@ -116,7 +115,7 @@ class Floor:
         # Update black cells
         for black_cell in self.g[self.active()]:
             n = self.count_black_neighbours(black_cell)
-            if n in (1, 2):
+            if n in {1, 2}:
                 self.g[self.inactive()].add(black_cell)
         # Find all white cells that neighbour a black cell
         white_cells: set[HexCoord] = set()

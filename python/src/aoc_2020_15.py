@@ -22,10 +22,7 @@ def run1(nums: list[int]) -> Iterator[int]:
         last_num = n
         turn += 1
     while True:
-        if last_num in prev_spoken:
-            output = last_spoken[last_num] - prev_spoken[last_num]
-        else:
-            output = 0
+        output = last_spoken[last_num] - prev_spoken[last_num] if last_num in prev_spoken else 0
         if output in last_spoken:
             prev_spoken[output] = last_spoken[output]
         last_spoken[output] = turn
@@ -37,5 +34,5 @@ def run1(nums: list[int]) -> Iterator[int]:
 if __name__ == "__main__":
     testmod()
     numbers: list[int] = [int(x) for x in stdin.readline().split(",")]
-    print(list(islice(run1(numbers), 2019, 2020))[0])
-    print(list(islice(run1(numbers), 30000000 - 1, 30000000))[0])
+    print(next(iter(islice(run1(numbers), 2019, 2020))))
+    print(next(iter(islice(run1(numbers), 30000000 - 1, 30000000))))

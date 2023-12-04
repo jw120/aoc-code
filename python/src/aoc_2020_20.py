@@ -42,14 +42,18 @@ which edge is up and bool whether the tile needs to be flipped (left-to-right) a
 Orientation = tuple[TileId, bool, Direction]
 
 
-def right(flipped: bool, rotation: Direction) -> Direction:
+def right(
+    rotation: Direction,
+    *,
+    flipped: bool,
+) -> Direction:
     """Return the edge which is to the right for given tile orientation."""
     if flipped:
         return Direction((rotation + 3) % 4)
     return Direction((rotation + 1) % 4)
 
 
-def down(_flipped: bool, rotation: Direction) -> Direction:
+def down(rotation: Direction) -> Direction:
     """Return the edge which is down for given tile orientation."""
     return Direction((rotation + 2) % 4)
 
@@ -69,7 +73,7 @@ T = TypeVar("T")
 def len_skip_none(
     xs: list[T | None],  # pyright: ignore [reportInvalidTypeVarUse]
 ) -> int:
-    """Length of a list of optionals exclduing the Nones.
+    """Length of a list of optionals excluding the Nones.
 
     >>> len_skip_none([1, None, 2])
     2
@@ -83,7 +87,7 @@ def append_cols(xs: list[list[T]], ys: list[list[T]]) -> list[list[T]]:
     >>> append_cols([[1, 2],[11, 12], [21, 22]], [[3, 4], [5, 6], [7, 8]])
     [[1, 2, 3, 4], [11, 12, 5, 6], [21, 22, 7, 8]]
     """
-    return [x + y for x, y in zip(xs, ys)]
+    return [x + y for x, y in zip(xs, ys, strict=True)]
 
 
 def flip_matrix(xs: list[list[bool]]) -> None:
@@ -107,10 +111,10 @@ def rotate_matrix(xs: list[list[T]]) -> list[list[T]]:
     return ret
 
 
-def count_trues(xs: list[list[bool]]) -> int:
+def count_true_values(xs: list[list[bool]]) -> int:
     """Count the number of true values in a matrix of bools.
 
-    >>> count_trues([[True, False], [False, False]])
+    >>> count_true_values([[True, False], [False, False]])
     1
     """
     count = 0
@@ -141,14 +145,17 @@ class Tile:
             str_to_edge("".join([line[0] for line in lines[-1:0:-1]])),
         ]
         image_strings: list[str] = [line[1:-1] for line in lines[2:-1]]
-        self.image: list[list[bool]] = [
-            [c == "#" for c in row] for row in image_strings
-        ]
+        self.image: list[list[bool]] = [[c == "#" for c in row] for row in image_strings]
 
     def __str__(self) -> str:
         return f"{self.id}: {self.edges}"
 
-    def oriented_image(self, do_flip: bool, direction: Direction) -> list[list[bool]]:
+    def oriented_image(
+        self,
+        direction: Direction,
+        *,
+        do_flip: bool,
+    ) -> list[list[bool]]:
         """Produce an oriented image."""
         i_m = deepcopy(self.image)
         for _ in range(direction):
@@ -203,7 +210,7 @@ class Board:
 
     def starting_corner(self) -> TileId:
         """Return a corner from which we can move right and down."""
-        for i in self.tiles.keys():
+        for i in self.tiles:
             connections = self.tile_connections[i]
             if connections[0] is None and connections[3] is None:
                 return i
@@ -225,7 +232,7 @@ class Board:
         """Return the tile to the right if any."""
         cur_id, cur_flipped, cur_rot = cur
         next_tile: Connection | None = self.tile_connections[cur_id][
-            right(cur_flipped, cur_rot)
+            right(cur_rot, flipped=cur_flipped)
         ]
         if next_tile is None:
             return None
@@ -244,9 +251,7 @@ class Board:
     def next_down(self, cur: Orientation) -> Orientation | None:
         """Return the tile below if any."""
         cur_id, cur_flipped, cur_rot = cur
-        next_tile: Connection | None = self.tile_connections[cur_id][
-            down(cur_flipped, cur_rot)
-        ]
+        next_tile: Connection | None = self.tile_connections[cur_id][down(cur_rot)]
         if next_tile is None:
             return None
         (
@@ -289,7 +294,7 @@ class Board:
             new_rows: list[list[bool]] = [[] for _ in range(self.tile_size)]
             for tile_id, do_flip, direction in row:
                 new_rows = append_cols(
-                    new_rows, self.tiles[tile_id].oriented_image(do_flip, direction)
+                    new_rows, self.tiles[tile_id].oriented_image(direction, do_flip=do_flip)
                 )
             self.image = self.image + new_rows
 
@@ -334,4 +339,4 @@ if __name__ == "__main__":
     board = Board(block.splitlines() for block in stdin.read().split("\n\n"))
     print(reduce(lambda x, y: x * y, board.corners(), 1))
     board.set_image()
-    print(count_trues(board.image) - board.max_sea_monsters() * count_trues(monster))
+    print(count_true_values(board.image) - board.max_sea_monsters() * count_true_values(monster))

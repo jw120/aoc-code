@@ -74,7 +74,7 @@ def expression2(s: str) -> int:
     while len(term_list) > 1:
 
         # Replace (X) with X
-        for i in range(0, len(term_list) - 2):
+        for i in range(len(term_list) - 2):
             if term_list[i] == "(" and term_list[i + 2] == ")":
                 term_list[i : i + 3] = [term_list[i + 1]]
                 break
@@ -82,7 +82,7 @@ def expression2(s: str) -> int:
         # Find and apply the highest-priority available operation
         operations: list[tuple[int, int, int]] = []  # Position, priority, value
         paren_level: int = 0
-        for i in range(0, len(term_list) - 2):
+        for i in range(len(term_list) - 2):
             if term_list[i] == "(":
                 paren_level += 1
             elif term_list[i] == ")":

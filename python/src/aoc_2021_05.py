@@ -50,9 +50,9 @@ test_data: list[Segment] = [
 def multiples(segments: list[Segment], *, use_diagonals: bool) -> int:
     """Fine number of coords with multiple coverage.
 
-    >>> multiples(test_data, False)
+    >>> multiples(test_data, use_diagonals=False)
     5
-    >>> multiples(test_data, True)
+    >>> multiples(test_data, use_diagonals=True)
     12
     """
     counts: Counter[Coord] = Counter()

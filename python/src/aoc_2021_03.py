@@ -75,9 +75,9 @@ def part1(numbers: list[str]) -> int:
 def filter_string(ss: list[str], *, least: bool) -> str:
     """Return the remaining string after filtering for the most (or least) common bit.
 
-    >>> filter_string(test_data, False)
+    >>> filter_string(test_data, least=False)
     '10111'
-    >>> filter_string(test_data, True)
+    >>> filter_string(test_data, least=True)
     '01010'
     """
     b = 0

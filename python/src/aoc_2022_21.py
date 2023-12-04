@@ -59,10 +59,14 @@ OP_TABLE = {
 def read_monkey(s: str) -> tuple[MonkeyName, Monkey]:
     """Parse a monkey returning its name and value.
 
+    cspell: disable
+
     >>> read_monkey("cczh: sllz + lgvd")
     ('cczh', OpMonkey(left='sllz', op=<Operation.ADD: 'ADD'>, right='lgvd'))
     >>> read_monkey("dvpt: 3")
     ('dvpt', 3)
+
+    cspell: enable
     """
     m = fullmatch(r"([a-z]+)\: (.+)", s.strip())
     assert m, f"Parse failed: '{s}'"
@@ -86,9 +90,9 @@ def eval_monkey(
     Flag makes the eval return None if evaluation leads to a "humn" node.
 
     >>> test = dict(read_monkey(line) for line in TEST_DATA.splitlines())
-    >>> eval_monkey("root", test, False)
+    >>> eval_monkey("root", test, stop_on_humn=False)
     152
-    >>> eval_monkey("root", test, True) is None
+    >>> eval_monkey("root", test, stop_on_humn=True) is None
     True
     """
     if stop_on_humn and name == "humn":
@@ -105,8 +109,6 @@ def eval_monkey(
                     return apply(left_val, op, right_val)
                 case _:
                     return None
-        case _:
-            raise ValueError("Bad monkey value")
 
 
 def solve(monkeys: dict[MonkeyName, Monkey]) -> int:
@@ -173,6 +175,8 @@ def solve(monkeys: dict[MonkeyName, Monkey]) -> int:
         current_monkey_name = next_monkey_name
 
 
+# cspell: disable
+
 TEST_DATA = """root: pppw + sjmn
 dbpl: 5
 cczh: sllz + lgvd
@@ -188,6 +192,8 @@ pppw: cczh / lfqf
 lgvd: ljgn * ptdq
 drzm: hmdt - zczc
 hmdt: 32"""
+
+# cspell: enable
 
 
 if __name__ == "__main__":

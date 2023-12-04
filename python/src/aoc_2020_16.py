@@ -40,7 +40,7 @@ test1a: list[ValidField] = [
 test1b: list[list[int]] = [[7, 3, 47], [40, 4, 50], [55, 2, 20], [38, 6, 12]]
 
 
-def run1(valids: list[ValidField], tickets: list[list[int]]) -> int:
+def run1(valid_values: list[ValidField], tickets: list[list[int]]) -> int:
     """Return the error rate of nearby tickets.
 
     >>> run1(test1a, test1b)
@@ -48,7 +48,7 @@ def run1(valids: list[ValidField], tickets: list[list[int]]) -> int:
     """
     valid_set: set[int] = set()
     count: int = 0
-    for _, (a, b), (c, d) in valids:
+    for _, (a, b), (c, d) in valid_values:
         for i in range(a, b + 1):
             valid_set.add(i)
         for i in range(c, d + 1):
@@ -61,18 +61,17 @@ def run1(valids: list[ValidField], tickets: list[list[int]]) -> int:
     return count
 
 
-def run2(valids: list[ValidField], your: list[int], tickets: list[list[int]]) -> int:
+def run2(valid_values: list[ValidField], your: list[int], tickets: list[list[int]]) -> int:
     """Find the six fields on your ticket."""
 
     def valid_value(f: ValidField, x: int) -> bool:
         """Is the value valid for the given field."""
         _, (lo1, hi1), (lo2, hi2) = f
-        val = (lo1 <= x <= hi1) or (lo2 <= x <= hi2)
-        return val
+        return (lo1 <= x <= hi1) or (lo2 <= x <= hi2)
 
     # Eliminate invalid tickets
     valid_set: set[int] = set()
-    for _, (a, b), (c, d) in valids:
+    for _, (a, b), (c, d) in valid_values:
         for i in range(a, b + 1):
             valid_set.add(i)
         for i in range(c, d + 1):
@@ -82,9 +81,9 @@ def run2(valids: list[ValidField], your: list[int], tickets: list[list[int]]) ->
     ]
     # For each field see which positions are compatible
     field_fit: list[tuple[str, list[int]]] = []
-    for field in valids:
+    for field in valid_values:
         valid_positions: list[int] = []
-        for position in range(0, len(tickets[0])):
+        for position in range(len(tickets[0])):
             if all(valid_value(field, ticket[position]) for ticket in valid_tickets):
                 valid_positions.append(position)
 
@@ -97,7 +96,6 @@ def run2(valids: list[ValidField], your: list[int], tickets: list[list[int]]) ->
             if not field_positions:
                 raise RuntimeError("No position found for", field_name)
             if len(field_positions) == 1:
-
                 found_position: int = field_positions[0]
                 allocated_fields.append((field_name, found_position))
                 field_fit.remove((field_name, field_positions))

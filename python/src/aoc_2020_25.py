@@ -5,7 +5,7 @@ from sys import stdin
 
 
 def step(val: int, subject_number: int) -> int:
-    """Apply one round of our transformaion."""
+    """Apply one round of our transformation."""
     return (val * subject_number) % 20201227
 
 
@@ -27,9 +27,7 @@ def find_loop_size(subject_number: int, output: int) -> int:
     return loop_count
 
 
-def find2_loop_size(
-    subject_number: int, output1: int, output2: int
-) -> tuple[int, bool]:
+def find2_loop_size(subject_number: int, output1: int, output2: int) -> tuple[int, bool]:
     """Look for two loop sizes in parallel."""
     val: int = 1
     loop_count: int = 0

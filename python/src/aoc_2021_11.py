@@ -39,7 +39,7 @@ class Grid:
 
         >>> Grid(test).step(100).flash_count
         1656
-        >>> Grid(test).step(200, True).step_count
+        >>> Grid(test).step(200, stop_when_all_flash=True).step_count
         195
         """
         for _ in range(n):

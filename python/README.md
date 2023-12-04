@@ -2,10 +2,11 @@
 
 # TODO
 
-* Check 2022-11 and 2022-16... working
+* Check 2022-24... working
 * Check 2021 working
-* Ruff clean 2019-20
-* pyright clean 2019-20
+* Ruff clean 2019
+* pyright clean 2019
+* Fix pyright error with numpy
 * Check running 2019-20
 * Refactor golden_test
 

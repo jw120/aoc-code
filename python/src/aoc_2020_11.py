@@ -26,7 +26,7 @@ class Grid:
         """Read the value at given coordinates in the active grid."""
         return self.g[self.time % 2][y][x]
 
-    def set_val(self, x: int, y: int, val: bool) -> None:
+    def set_val(self, x: int, y: int, *, val: bool) -> None:
         """Set the value at the given coordinates to a seat in the inactive grid."""
         self.g[(self.time + 1) % 2][y] = (
             self.g[(self.time + 1) % 2][y][:x]
@@ -43,17 +43,11 @@ class Grid:
         return self.get_val(x, y) == "L"
 
     def is_occupied_seat(self, x: int, y: int) -> bool:
-        """Is the location valid and an ocupied seat in the active grid."""
-        return (
-            x >= 0
-            and x < self.cols
-            and y >= 0
-            and y < self.rows
-            and self.get_val(x, y) == "#"
-        )
+        """Is the location valid and an occupied seat in the active grid."""
+        return x >= 0 and x < self.cols and y >= 0 and y < self.rows and self.get_val(x, y) == "#"
 
     def neighbouring_occupied_seats(self, x: int, y: int) -> int:
-        """Count the occuped seats neighbouring the location in the active grid."""
+        """Count the occupied seats neighbouring the location in the active grid."""
         return (
             self.is_occupied_seat(x - 1, y - 1)
             + self.is_occupied_seat(x - 1, y)
@@ -95,16 +89,16 @@ class Grid:
     def iterate_one(self) -> int:
         """Iterate the grid based on part one rules."""
         changes_made: int = 0
-        for x in range(0, self.cols):
-            for y in range(0, self.rows):
+        for x in range(self.cols):
+            for y in range(self.rows):
                 if self.is_seat(x, y):
-                    self.set_val(x, y, self.is_occupied_seat(x, y))
+                    self.set_val(x, y, val=self.is_occupied_seat(x, y))
                 nearby: int = self.neighbouring_occupied_seats(x, y)
                 if self.is_empty_seat(x, y) and nearby == 0:
-                    self.set_val(x, y, True)
+                    self.set_val(x, y, val=True)
                     changes_made += 1
                 elif self.is_occupied_seat(x, y) and nearby >= 4:
-                    self.set_val(x, y, False)
+                    self.set_val(x, y, val=False)
                     changes_made += 1
         self.time += 1
         return changes_made
@@ -112,16 +106,16 @@ class Grid:
     def iterate_two(self) -> int:
         """Iterate the grid based on part two rules."""
         changes_made: int = 0
-        for x in range(0, self.cols):
-            for y in range(0, self.rows):
+        for x in range(self.cols):
+            for y in range(self.rows):
                 if self.is_seat(x, y):
-                    self.set_val(x, y, self.is_occupied_seat(x, y))
+                    self.set_val(x, y, val=self.is_occupied_seat(x, y))
                 nearby: int = self.visible_occupied_seats(x, y)
                 if self.is_empty_seat(x, y) and nearby == 0:
-                    self.set_val(x, y, True)
+                    self.set_val(x, y, val=True)
                     changes_made += 1
                 elif self.is_occupied_seat(x, y) and nearby >= 5:
-                    self.set_val(x, y, False)
+                    self.set_val(x, y, val=False)
                     changes_made += 1
         self.time += 1
         return changes_made
@@ -130,21 +124,21 @@ class Grid:
     def occupied_seat_count(self) -> int:
         """Count the number of occupied seats in the active grid."""
         count: int = 0
-        for x in range(0, self.cols):
-            for y in range(0, self.rows):
+        for x in range(self.cols):
+            for y in range(self.rows):
                 count += self.is_occupied_seat(x, y)
         return count
 
     def show(self) -> None:
         """Print the grid (for debugging)."""
-        for y in range(0, self.rows):
-            for x in range(0, self.cols):
+        for y in range(self.rows):
+            for x in range(self.cols):
                 print(self.get_val(x, y), end="")
             print()
 
 
-def iterate_until_zero(f: Callable[[], int], quiet: bool = True) -> None:
-    """Call the functon repeatedly until it returns zero."""
+def iterate_until_zero(f: Callable[[], int], *, quiet: bool = True) -> None:
+    """Call the function repeatedly until it returns zero."""
     while (return_val := f()) != 0:
         if not quiet:
             print(f"Returned {return_val}")

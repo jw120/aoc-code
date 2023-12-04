@@ -97,17 +97,17 @@ def paths(maze: Maze, *, allow_one_revisit: bool) -> int:
     Paths can only visit small caves (with lower case names) except that one small caves
     can be visited twice if allow_one_revisit is True.
 
-    >>> paths(read_maze(test1), False)
+    >>> paths(read_maze(test1), allow_one_revisit=False)
     10
-    >>> paths(read_maze(test2), False)
+    >>> paths(read_maze(test2), allow_one_revisit=False)
     19
-    >>> paths(read_maze(test3), False)
+    >>> paths(read_maze(test3), allow_one_revisit=False)
     226
-    >>> paths(read_maze(test1), True)
+    >>> paths(read_maze(test1), allow_one_revisit=True)
     36
-    >>> paths(read_maze(test2), True)
+    >>> paths(read_maze(test2), allow_one_revisit=True)
     103
-    >>> paths(read_maze(test3), True)
+    >>> paths(read_maze(test3), allow_one_revisit=True)
     3509
     """
     complete_paths: int = 0

@@ -7,11 +7,12 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import Union
 
 
 @dataclass(frozen=True)
 class Terminal:
+    """Terminal class."""
+
     val: str
 
     def __str__(self) -> str:
@@ -20,6 +21,8 @@ class Terminal:
 
 @dataclass(frozen=True)
 class Series:
+    """Series class."""
+
     rule_indices: list[int]
 
     def __str__(self) -> str:
@@ -28,6 +31,8 @@ class Series:
 
 @dataclass(frozen=True)
 class Alternate:
+    """Alternate class."""
+
     a: Series
     b: Series
 
@@ -35,7 +40,7 @@ class Alternate:
         return f"{self.a} | {self.b}"
 
 
-Rule = Union[Terminal, Series, Alternate]
+Rule = Terminal | Series | Alternate
 
 
 def parse_rule(s: str) -> tuple[int, Rule]:
@@ -66,13 +71,15 @@ def parse_ints(s: str) -> list[int]:
 
 
 class MessageValidator:
-    """Main class for day 19
+    """Main class for day 19.
 
-    >>> mv = MessageValidator(test_rules.splitlines())
+    >>> mv = MessageValidator(test_rules.splitlines()) # cspell: disable
     >>> inputs = ["abz", "aaww", "baqq", "bby", "", "cz"]
     >>> [mv.valid_remains(s, mv.rules[3]) for s in inputs]
     ['z', None, 'qq', None, None, None]
     """
+
+    # cspell: enable
 
     def __init__(self, rules: Iterable[str]) -> None:
         self.rules: dict[int, Rule] = dict(parse_rule(r) for r in rules)
@@ -84,7 +91,7 @@ class MessageValidator:
 
     def valid(self, s: str) -> bool:
         """Test validity."""
-        return self.valid_remains(s, self.rules[0]) == ""
+        return not self.valid_remains(s, self.rules[0])
 
     def valid_remains(self, s: str, r: Rule) -> str | None:
         """Return the remaining string if the rule matches."""
@@ -133,11 +140,13 @@ class MessageValidator:
                 remainder_31 = self.valid_remains(remainder, self.rules[31])
                 if remainder_31 is None:
                     break
-                if remainder_31 == "":
+                if not remainder_31:
                     return True
                 remainder = remainder_31
                 count_31 += 1
 
+
+# cspell: disable
 
 TEST_DATA = """0: 4 1 5
 1: 2 3 | 3 2
@@ -152,6 +161,8 @@ abbbab
 aaabbb
 aaaabbb"""
 test_rules, test_messages = TEST_DATA.split("\n\n")
+
+# cspell: enable
 
 
 if __name__ == "__main__":

@@ -56,7 +56,7 @@ def find_contig_sum(xs: list[int], target: int) -> int:
     >>> find_contig_sum(test_one, 127)
     62
     """
-    for sum_start_index in range(0, len(xs)):
+    for sum_start_index in range(len(xs)):
         for sum_end_index in range(sum_start_index + 1, len(xs)):
             subseq = xs[sum_start_index:sum_end_index]
             s = sum(subseq)
