@@ -28,21 +28,18 @@ impl Card {
         }
     }
 
-    fn score(&self) -> u32 {
-        let mut current_score = 0;
+    // return number of winning numbers for the card
+    fn winners(&self) -> u32 {
+        let mut count = 0;
         for n in &self.actual {
             for w in &self.winning {
                 if n == w {
-                    if current_score == 0 {
-                        current_score = 1;
-                    } else {
-                        current_score *= 2;
-                    }
+                    count += 1;
                     break;
                 }
             }
         }
-        current_score
+        count
     }
 }
 
@@ -51,15 +48,33 @@ fn parse_numbers(s: &str) -> Vec<u32> {
     s.split_whitespace().map(|x| x.parse().unwrap()).collect()
 }
 
+// Part (a) card score from number of winning cards
+fn score(n: u32) -> u32 {
+    if n == 0 {
+        0
+    } else {
+        u32::pow(2, n - 1)
+    }
+}
+
+// Part (b) number of cards given number of winners for each card
+fn part_b(winners: &Vec<u32>) -> u32 {
+    // start with one of each card
+    let mut counts: Vec<u32> = vec![1; winners.len()];
+
+    for i in 0..winners.len() {
+        let i_copies: u32 = counts[i]; // *counts.get(i).unwrap();
+        for j in 1..winners[i] + 1 {
+            let count: &mut u32 = counts.get_mut(i + j as usize).unwrap();
+            *count += i_copies;
+        }
+    }
+    counts.iter().sum()
+}
+
 fn main() {
     let cards: Vec<Card> = stdin_lines().map(Card::new).collect();
-
-    let part_a: u32 = cards.iter().map(Card::score).sum();
-
-    // for c in cards {
-    //     println!("{:?}", c);
-    //     println!("Score {}", c.score());
-    // }
-
-    println!("{}", part_a);
+    let winners: Vec<u32> = cards.iter().map(Card::winners).collect();
+    println!("{}", winners.iter().map(|c| score(*c)).sum::<u32>());
+    println!("{}", part_b(&winners));
 }
