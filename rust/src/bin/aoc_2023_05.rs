@@ -4,11 +4,11 @@ use aoc_rust::stdin_lines;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 struct Range {
-    lo: u64,
-    hi: u64,
+    lo: i64,
+    hi: i64,
 }
 
-fn range(lo: u64, hi: u64) -> Range {
+fn range(lo: i64, hi: i64) -> Range {
     Range { lo, hi }
 }
 
@@ -21,9 +21,9 @@ struct MapBlock {
 impl MapBlock {
     fn new<S: AsRef<str>>(s: S) -> MapBlock {
         let mut space_iter = s.as_ref().trim().split_whitespace();
-        let destination_range_start: u64 = space_iter.next().unwrap().parse().unwrap();
-        let source_range_start: u64 = space_iter.next().unwrap().parse().unwrap();
-        let range_length: u64 = space_iter.next().unwrap().parse().unwrap();
+        let destination_range_start: i64 = space_iter.next().unwrap().parse().unwrap();
+        let source_range_start: i64 = space_iter.next().unwrap().parse().unwrap();
+        let range_length: i64 = space_iter.next().unwrap().parse().unwrap();
         assert!(space_iter.next().is_none());
         MapBlock {
             source: Range {
@@ -37,7 +37,7 @@ impl MapBlock {
         }
     }
 
-    fn apply(&self, input: u64) -> u64 {
+    fn _apply(&self, input: i64) -> i64 {
         if input >= self.source.lo && input <= self.source.hi {
             input + self.destination.lo - self.source.lo
         } else {
@@ -79,8 +79,8 @@ impl MapBlock {
 
 #[derive(Debug)]
 struct Map {
-    source: String,
-    destination: String,
+    _source: String,
+    _destination: String,
     blocks: Vec<MapBlock>,
 }
 
@@ -95,13 +95,13 @@ impl Map {
         blocks.sort_by_key(|b| b.source.lo);
 
         Map {
-            source: source.to_string(),
-            destination: destination.to_string(),
+            _source: source.to_string(),
+            _destination: destination.to_string(),
             blocks,
         }
     }
 
-    fn apply(&self, source: u64) -> u64 {
+    fn apply(&self, source: i64) -> i64 {
         for block in &self.blocks {
             if source < block.source.lo {
                 return source;
@@ -113,12 +113,26 @@ impl Map {
         return source;
     }
 
-    fn apply_range(&self, _source: Range) -> Vec<Range> {
-        Vec::new()
+    fn apply_range(&self, source: &[Range]) -> Vec<Range> {
+        let mut ranges_in: Vec<Range> = Vec::from(source);
+        let mut ranges_out: Vec<Range> = Vec::new();
+        for block in &self.blocks {
+            ranges_out.clear();
+            // println!("block {:?}", block);
+            // println!("ranges_in: {:?}", ranges_in);
+            for r in ranges_in {
+                let mut r_out: Vec<Range> = block.apply_range(r);
+                // println!("r_out {:?}", r_out);
+                ranges_out.append(&mut r_out);
+                // println!("ranges_out: {:?}", ranges_out);
+            }
+            ranges_in = ranges_out.clone();
+        }
+        ranges_out
     }
 }
 
-fn apply_maps(maps: &[Map], source: u64) -> u64 {
+fn apply_maps(maps: &[Map], source: i64) -> i64 {
     let mut x = source;
     for m in maps {
         x = m.apply(x);
@@ -126,7 +140,15 @@ fn apply_maps(maps: &[Map], source: u64) -> u64 {
     x
 }
 
-fn parse_seeds(block: &[String]) -> Vec<u64> {
+fn apply_maps_range(maps: &[Map], source: &[Range]) -> Vec<Range> {
+    let mut rs: Vec<Range> = Vec::from(source);
+    for m in maps {
+        rs = m.apply_range(&rs);
+    }
+    rs
+}
+
+fn parse_seeds(block: &[String]) -> Vec<i64> {
     assert!(block.len() == 1);
     block[0]
         .strip_prefix("seeds: ")
@@ -136,19 +158,30 @@ fn parse_seeds(block: &[String]) -> Vec<u64> {
         .collect()
 }
 
+fn parse_seed_ranges(block: &[String]) -> Vec<Range> {
+    parse_seeds(block)
+        .chunks(2)
+        .map(|chunk| range(chunk[0], chunk[0] + chunk[1] - 1))
+        .collect()
+}
+
 fn main() {
     let lines: Vec<String> = stdin_lines().collect();
     let mut blocks_iter = lines.split(|line| line.is_empty());
-
-    let seeds = parse_seeds(blocks_iter.next().unwrap());
+    let seeds_block = blocks_iter.next().unwrap();
     let maps: Vec<Map> = blocks_iter.map(Map::new).collect();
 
-    let locations: Vec<u64> = seeds.iter().map(|x| apply_maps(&maps, *x)).collect();
-
-    // println!("{:?}", seeds);
-    // println!("{:?}", maps);
-    // println!("{:?}", locations);
+    // part (a)
+    let seeds = parse_seeds(seeds_block);
+    let locations: Vec<i64> = seeds.iter().map(|x| apply_maps(&maps, *x)).collect();
     println!("{}", locations.iter().min().unwrap());
+
+    // part (b)
+    let seed_ranges: Vec<Range> = parse_seed_ranges(seeds_block);
+    // println!("{:?}", seed_ranges);
+    let location_ranges: Vec<Range> = apply_maps_range(&maps, &seed_ranges);
+    // println!("{:?}", location_ranges);
+    println!("{}", location_ranges.iter().map(|r| r.lo).min().unwrap());
 }
 
 #[cfg(test)]
@@ -161,9 +194,9 @@ mod tests {
             destination: Range { lo: 110, hi: 120 },
         };
         // 3 cases: input below, within or above the block
-        assert_eq!(b.apply(5), 5);
-        assert_eq!(b.apply(15), 115);
-        assert_eq!(b.apply(25), 25);
+        assert_eq!(b._apply(5), 5);
+        assert_eq!(b._apply(15), 115);
+        assert_eq!(b._apply(25), 25);
     }
 
     #[test]
