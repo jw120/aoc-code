@@ -2,11 +2,20 @@
 
 use aoc_rust::stdin_lines;
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+struct Range {
+    lo: u64,
+    hi: u64,
+}
+
+fn range(lo: u64, hi: u64) -> Range {
+    Range { lo, hi }
+}
+
 #[derive(Debug)]
 struct MapBlock {
-    destination_range_start: u64,
-    source_range_start: u64,
-    range_length: u64,
+    source: Range,
+    destination: Range,
 }
 
 impl MapBlock {
@@ -17,9 +26,53 @@ impl MapBlock {
         let range_length: u64 = space_iter.next().unwrap().parse().unwrap();
         assert!(space_iter.next().is_none());
         MapBlock {
-            destination_range_start,
-            source_range_start,
-            range_length,
+            source: Range {
+                lo: source_range_start,
+                hi: source_range_start + range_length - 1,
+            },
+            destination: Range {
+                lo: destination_range_start,
+                hi: destination_range_start + range_length - 1,
+            },
+        }
+    }
+
+    fn apply(&self, input: u64) -> u64 {
+        if input >= self.source.lo && input <= self.source.hi {
+            input + self.destination.lo - self.source.lo
+        } else {
+            input
+        }
+    }
+
+    fn apply_range(&self, input: Range) -> Vec<Range> {
+        let shift = self.destination.lo - self.source.lo;
+        if input.lo < self.source.lo {
+            if input.hi < self.source.lo {
+                vec![input]
+            } else if input.hi <= self.source.hi {
+                vec![
+                    range(input.lo, self.source.lo - 1),
+                    range(self.destination.lo, input.hi + shift),
+                ]
+            } else {
+                vec![
+                    range(input.lo, self.source.lo - 1),
+                    self.destination,
+                    range(self.source.hi + 1, input.hi),
+                ]
+            }
+        } else if input.lo <= self.source.hi {
+            if input.hi <= self.source.hi {
+                vec![range(input.lo + shift, input.hi + shift)]
+            } else {
+                vec![
+                    range(input.lo + shift, self.destination.hi),
+                    range(self.source.hi + 1, input.hi),
+                ]
+            }
+        } else {
+            vec![input]
         }
     }
 }
@@ -39,7 +92,7 @@ impl Map {
         assert!(header_iter.next().is_none());
 
         let mut blocks: Vec<MapBlock> = block[1..].iter().map(MapBlock::new).collect();
-        blocks.sort_by_key(|b| b.source_range_start);
+        blocks.sort_by_key(|b| b.source.lo);
 
         Map {
             source: source.to_string(),
@@ -50,14 +103,18 @@ impl Map {
 
     fn apply(&self, source: u64) -> u64 {
         for block in &self.blocks {
-            if source < block.source_range_start {
+            if source < block.source.lo {
                 return source;
             }
-            if source < block.source_range_start + block.range_length {
-                return block.destination_range_start + (source - block.source_range_start);
+            if source <= block.source.hi {
+                return source + block.destination.lo - block.source.lo;
             }
         }
         return source;
+    }
+
+    fn apply_range(&self, _source: Range) -> Vec<Range> {
+        Vec::new()
     }
 }
 
@@ -92,4 +149,46 @@ fn main() {
     // println!("{:?}", maps);
     // println!("{:?}", locations);
     println!("{}", locations.iter().min().unwrap());
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_apply() {
+        let b = MapBlock {
+            source: Range { lo: 10, hi: 20 },
+            destination: Range { lo: 110, hi: 120 },
+        };
+        // 3 cases: input below, within or above the block
+        assert_eq!(b.apply(5), 5);
+        assert_eq!(b.apply(15), 115);
+        assert_eq!(b.apply(25), 25);
+    }
+
+    #[test]
+    fn test_apply_range() {
+        let b = MapBlock {
+            source: Range { lo: 10, hi: 20 },
+            destination: Range { lo: 110, hi: 120 },
+        };
+        // 3 cases with lo below block range
+        assert_eq!(b.apply_range(range(5, 6)), vec![range(5, 6)]);
+        assert_eq!(
+            b.apply_range(range(5, 15)),
+            vec![range(5, 9), range(110, 115)]
+        );
+        assert_eq!(
+            b.apply_range(range(5, 25)),
+            vec![range(5, 9), range(110, 120), range(21, 25)]
+        );
+        // 2 cases with lo within block range
+        assert_eq!(b.apply_range(range(15, 17)), vec![range(115, 117)]);
+        assert_eq!(
+            b.apply_range(range(15, 24)),
+            vec![range(115, 120), range(21, 24)]
+        );
+        // 1 cases with lo above block range
+        assert_eq!(b.apply_range(range(25, 28)), vec![range(25, 28)]);
+    }
 }
