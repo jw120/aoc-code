@@ -9,6 +9,8 @@ struct Range {
 }
 
 fn range(lo: i64, hi: i64) -> Range {
+    assert!(lo <= hi);
+    assert!(lo >= 0);
     Range { lo, hi }
 }
 
@@ -113,22 +115,46 @@ impl Map {
         return source;
     }
 
-    fn apply_range(&self, source: &[Range]) -> Vec<Range> {
-        let mut ranges_in: Vec<Range> = Vec::from(source);
-        let mut ranges_out: Vec<Range> = Vec::new();
+    fn apply_range(&self, source: Range) -> Vec<Range> {
+        let mut lo: i64 = source.lo;
+        let hi: i64 = source.hi;
+        let mut out: Vec<Range> = Vec::new();
         for block in &self.blocks {
-            ranges_out.clear();
-            // println!("block {:?}", block);
-            // println!("ranges_in: {:?}", ranges_in);
-            for r in ranges_in {
-                let mut r_out: Vec<Range> = block.apply_range(r);
-                // println!("r_out {:?}", r_out);
-                ranges_out.append(&mut r_out);
-                // println!("ranges_out: {:?}", ranges_out);
+            let shift = block.destination.lo - block.source.lo;
+            if lo < block.source.lo {
+                if hi < block.source.lo {
+                    out.push(range(lo, hi));
+                    break;
+                } else if hi < block.source.hi {
+                    out.push(range(lo, block.source.lo - 1));
+                    out.push(range(block.destination.lo, hi + shift));
+                    break;
+                } else {
+                    out.push(range(lo, block.source.lo - 1));
+                    out.push(block.destination);
+                    lo = block.source.hi + 1;
+                }
+            } else if lo <= block.source.hi {
+                if hi <= block.source.hi {
+                    out.push(range(lo + shift, hi + shift));
+                    break;
+                } else {
+                    out.push(range(lo + shift, block.destination.hi));
+                    lo = block.destination.hi + 1;
+                }
+            } else {
+                // do nothing - just skip to next block
             }
-            ranges_in = ranges_out.clone();
         }
-        ranges_out
+        let last_hi = self.blocks.last().unwrap().source.hi;
+        if hi > last_hi {
+            out.push(range(last_hi + 1, hi));
+        }
+        out
+    }
+
+    fn apply_ranges(&self, source: &[Range]) -> Vec<Range> {
+        source.iter().flat_map(|r| self.apply_range(*r)).collect()
     }
 }
 
@@ -143,7 +169,7 @@ fn apply_maps(maps: &[Map], source: i64) -> i64 {
 fn apply_maps_range(maps: &[Map], source: &[Range]) -> Vec<Range> {
     let mut rs: Vec<Range> = Vec::from(source);
     for m in maps {
-        rs = m.apply_range(&rs);
+        rs = m.apply_ranges(&rs);
     }
     rs
 }
@@ -188,7 +214,7 @@ fn main() {
 mod tests {
     use super::*;
     #[test]
-    fn test_apply() {
+    fn test_block_apply() {
         let b = MapBlock {
             source: Range { lo: 10, hi: 20 },
             destination: Range { lo: 110, hi: 120 },
@@ -200,7 +226,7 @@ mod tests {
     }
 
     #[test]
-    fn test_apply_range() {
+    fn test_block_apply_range() {
         let b = MapBlock {
             source: Range { lo: 10, hi: 20 },
             destination: Range { lo: 110, hi: 120 },
@@ -223,5 +249,34 @@ mod tests {
         );
         // 1 cases with lo above block range
         assert_eq!(b.apply_range(range(25, 28)), vec![range(25, 28)]);
+    }
+
+    #[test]
+    fn test_map_apply_range() {
+        let m: Map = Map {
+            _source: "s".to_string(),
+            _destination: "d".to_string(),
+            blocks: vec![
+                MapBlock {
+                    source: Range { lo: 10, hi: 20 },
+                    destination: Range { lo: 50, hi: 60 },
+                },
+                MapBlock {
+                    source: Range { lo: 40, hi: 80 },
+                    destination: Range { lo: 140, hi: 180 },
+                },
+            ],
+        };
+
+        assert_eq!(
+            m.apply_range(range(0, 100)),
+            vec![
+                range(0, 9),
+                range(50, 60),
+                range(21, 39),
+                range(140, 180),
+                range(81, 100)
+            ]
+        );
     }
 }
