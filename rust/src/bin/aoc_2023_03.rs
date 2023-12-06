@@ -67,7 +67,7 @@ fn read_schematic() -> (Vec<Number>, Vec<UCoord>, Vec<UCoord>) {
                             ..n
                         })
                     },
-                )
+                );
             } else {
                 if let Some(n) = current_number {
                     numbers.push(n);
@@ -98,6 +98,6 @@ fn main() {
         .map(|n| n.value)
         .sum();
 
-    println!("{}", part_a);
+    println!("{part_a}");
     println!("{}", gear_ratios(&stars, &numbers));
 }

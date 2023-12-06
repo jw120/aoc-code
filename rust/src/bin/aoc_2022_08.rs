@@ -1,7 +1,7 @@
 // Advent of Code, 2022 day 8
 
 use aoc_rust::stdin_lines;
-use grid::*;
+use grid::Grid;
 use itertools::Itertools;
 
 // Create grid of heights from stdin lines
@@ -16,7 +16,7 @@ fn height_from_stdin() -> Grid<u8> {
             let i: u32 = ch.into();
             let zero_ord: u32 = '0'.into();
             assert!(i >= '0'.into() && i <= '9'.into());
-            grid[r][c] = (i - zero_ord) as u8;
+            grid[r][c] = u8::try_from(i - zero_ord).unwrap();
         }
     }
     grid

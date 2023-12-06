@@ -7,13 +7,13 @@ use std::io;
 
 #[derive(Clone, Debug)]
 enum Operation {
-    Add(u64),
-    Multiply(u64),
+    Add(usize),
+    Multiply(usize),
     Square,
 }
 
 impl Operation {
-    fn apply(&self, old: u64) -> u64 {
+    fn apply(&self, old: usize) -> usize {
         match self {
             Operation::Add(x) => old + x,
             Operation::Multiply(x) => old * x,
@@ -45,12 +45,12 @@ impl Operation {
 
 #[derive(Clone, Debug)]
 struct Monkey {
-    items: Vec<u64>,
+    items: Vec<usize>,
     operation: Operation,
-    divisor: u64,
+    divisor: usize,
     dest_true: usize,
     dest_false: usize,
-    count: u64,
+    count: usize,
 }
 
 impl Monkey {
@@ -67,10 +67,10 @@ impl Monkey {
         static DIVISOR_RE: Lazy<Regex> =
             Lazy::new(|| Regex::new(r"^\s+Test: divisible by (\d+)$").unwrap());
 
-        let index: u64 = extract_num(&INDEX_RE, &line_iter.next().unwrap());
-        assert_eq!(expected_index, index as usize);
+        let index: usize = extract_num(&INDEX_RE, &line_iter.next().unwrap());
+        assert_eq!(expected_index, index);
 
-        let items: Vec<u64> = ITEMS_RE
+        let items: Vec<usize> = ITEMS_RE
             .captures(&line_iter.next().unwrap())
             .unwrap()
             .get(1)
@@ -89,23 +89,23 @@ impl Monkey {
                 .as_str(),
         );
 
-        let divisor: u64 = extract_num(&DIVISOR_RE, &line_iter.next().unwrap());
-        let dest_true: u64 = extract_num(&TRUE_RE, &line_iter.next().unwrap());
-        let dest_false: u64 = extract_num(&FALSE_RE, &line_iter.next().unwrap());
+        let divisor: usize = extract_num(&DIVISOR_RE, &line_iter.next().unwrap());
+        let dest_true: usize = extract_num(&TRUE_RE, &line_iter.next().unwrap());
+        let dest_false: usize = extract_num(&FALSE_RE, &line_iter.next().unwrap());
 
         Monkey {
             items,
             operation,
             divisor,
-            dest_true: dest_true as usize,
-            dest_false: dest_false as usize,
+            dest_true,
+            dest_false,
             count: 0,
         }
     }
 }
 
-// Given a regex with one u64 capture return the value
-fn extract_num(r: &Lazy<Regex>, line: &str) -> u64 {
+// Given a regex with one usize capture return the value
+fn extract_num(r: &Lazy<Regex>, line: &str) -> usize {
     r.captures(line)
         .unwrap()
         .get(1)
@@ -118,13 +118,13 @@ fn extract_num(r: &Lazy<Regex>, line: &str) -> u64 {
 // Update (mutating) monkeys given number of times.
 // If mode is present then we take all items modules its value, if not
 // then all items are divided by 3 (for the first part of the problem).
-fn step(monkeys: &mut [Monkey], steps: u64, mode: Option<u64>) {
+fn step(monkeys: &mut [Monkey], steps: usize, mode: Option<usize>) {
     for _ in 0..steps {
         for m in 0..monkeys.len() {
             for i in 0..monkeys[m].items.len() {
-                let item: u64 = monkeys[m].items[i];
-                let new_item_raw: u64 = monkeys[m].operation.apply(item);
-                let new_item: u64 = match mode {
+                let item: usize = monkeys[m].items[i];
+                let new_item_raw: usize = monkeys[m].operation.apply(item);
+                let new_item: usize = match mode {
                     Some(value) => new_item_raw % value,
                     None => new_item_raw / 3,
                 };
@@ -144,14 +144,14 @@ fn step(monkeys: &mut [Monkey], steps: u64, mode: Option<u64>) {
 // Run number of steps and return most active monkeys.
 // Simple mode is for first part of the problem where items are divided by 3. For
 // non-simple mode we treat all numbers modulus the product of all the divisors.
-fn monkey_business(monkeys: &mut [Monkey], steps: u64, simple_mode: bool) -> u64 {
-    let mode: Option<u64> = if simple_mode {
+fn monkey_business(monkeys: &mut [Monkey], steps: usize, simple_mode: bool) -> usize {
+    let mode: Option<usize> = if simple_mode {
         None
     } else {
         Some(monkeys.iter().map(|m| m.divisor).product())
     };
     step(monkeys, steps, mode);
-    let mut counts: Vec<u64> = monkeys.iter().map(|m| m.count).collect();
+    let mut counts: Vec<usize> = monkeys.iter().map(|m| m.count).collect();
     counts.sort_unstable();
     counts[counts.len() - 1] * counts[counts.len() - 2]
 }

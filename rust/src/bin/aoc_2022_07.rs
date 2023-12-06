@@ -91,7 +91,7 @@ impl FileSystem {
 
     fn add_dir_sizes(&self, d: DirPtr, sizes: &mut Vec<usize>) -> usize {
         let mut size: usize = 0;
-        for (name, entry) in self.dirs[d].iter() {
+        for (name, entry) in &self.dirs[d] {
             if name != ".." && name != "/" {
                 // println!("{}", name);
                 match entry {
@@ -112,11 +112,11 @@ fn main() {
     }
     let sizes = fs.get_dir_sizes();
 
-    let part_a: usize = sizes.iter().filter(|x| **x <= 100000).sum();
-    println!("{}", part_a);
+    let part_a: usize = sizes.iter().filter(|x| **x <= 100_000).sum();
+    println!("{part_a}");
 
-    let current_space = 70000000 - sizes[sizes.len() - 1];
-    let space_needed = 30000000 - current_space;
+    let current_space = 70_000_000 - sizes[sizes.len() - 1];
+    let space_needed = 30_000_000 - current_space;
     let part_b = sizes.iter().filter(|x| **x >= space_needed).min().unwrap();
-    println!("{}", part_b);
+    println!("{part_b}");
 }

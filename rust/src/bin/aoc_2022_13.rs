@@ -12,7 +12,7 @@ enum Chunk {
 }
 
 struct ChunkIterator<'a> {
-    chars: std::iter::Peekable<std::str::Chars<'a>>, // peekable char iterator
+    chars: std::iter::Peekable<std::str::Chars<'a>>, // peek-able char iterator
     closes_due: u32,                                 // number of close parens expected
     // next two fields support promotion (e.g., of 7 into [7])
     next_chunk: Option<Chunk>, // next chunk to be returned (instead of following index)
@@ -94,24 +94,22 @@ impl<'a> Iterator for ChunkIterator<'a> {
 }
 
 fn compare(a: &str, b: &str) -> Ordering {
-    let mut i = ChunkIterator::new(a);
-    let mut j = ChunkIterator::new(b);
+    let mut a_iter = ChunkIterator::new(a);
+    let mut b_iter = ChunkIterator::new(b);
     let mut open_lists: u32 = 0;
     loop {
-        match (i.next().unwrap(), j.next().unwrap()) {
+        match (a_iter.next().unwrap(), b_iter.next().unwrap()) {
             (Chunk::Open, Chunk::Open) => open_lists += 1,
-            (Chunk::Open, Chunk::Close) => return Ordering::Greater,
-            (Chunk::Open, Chunk::Number(_)) => j.promote(),
+            (Chunk::Open | Chunk::Number(_), Chunk::Close) => return Ordering::Greater,
+            (Chunk::Open, Chunk::Number(_)) => b_iter.promote(),
             (Chunk::Close, Chunk::Close) => {
                 if open_lists == 1 {
                     return Ordering::Equal;
-                } else {
-                    open_lists += 1;
                 }
+                open_lists += 1;
             }
             (Chunk::Close, _) => return Ordering::Less,
-            (Chunk::Number(_), Chunk::Open) => i.promote(),
-            (Chunk::Number(_), Chunk::Close) => return Ordering::Greater,
+            (Chunk::Number(_), Chunk::Open) => a_iter.promote(),
             (Chunk::Number(p), Chunk::Number(q)) => {
                 if p != q {
                     return p.cmp(&q);

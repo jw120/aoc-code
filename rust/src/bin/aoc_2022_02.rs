@@ -28,12 +28,12 @@ enum Shape {
 impl Shape {
     fn resolve(&self, other: &Self) -> Outcome {
         match (self, other) {
-            (Shape::Rock, Shape::Scissors) => Outcome::Win,
-            (Shape::Rock, Shape::Paper) => Outcome::Lose,
-            (Shape::Paper, Shape::Rock) => Outcome::Win,
-            (Shape::Paper, Shape::Scissors) => Outcome::Lose,
-            (Shape::Scissors, Shape::Paper) => Outcome::Win,
-            (Shape::Scissors, Shape::Rock) => Outcome::Lose,
+            (Shape::Rock, Shape::Scissors)
+            | (Shape::Paper, Shape::Rock)
+            | (Shape::Scissors, Shape::Paper) => Outcome::Win,
+            (Shape::Rock, Shape::Paper)
+            | (Shape::Paper, Shape::Scissors)
+            | (Shape::Scissors, Shape::Rock) => Outcome::Lose,
             _ => Outcome::Draw,
         }
     }
@@ -124,7 +124,7 @@ fn score_b(g: &Game) -> i32 {
     let outcome = g.response.to_outcome();
     let mut player = Shape::Rock;
     while player.resolve(&g.opponent) != outcome {
-        player = player.next()
+        player = player.next();
     }
     outcome.score() + player.score()
 }
@@ -135,6 +135,6 @@ fn main() {
     let part_a: i32 = games.iter().map(score_a).sum();
     let part_b: i32 = games.iter().map(score_b).sum();
 
-    println!("{}", part_a);
-    println!("{}", part_b);
+    println!("{part_a}");
+    println!("{part_b}");
 }

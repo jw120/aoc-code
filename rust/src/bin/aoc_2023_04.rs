@@ -64,7 +64,7 @@ fn part_b(winners: &Vec<u32>) -> u32 {
 
     for i in 0..winners.len() {
         let i_copies: u32 = counts[i]; // *counts.get(i).unwrap();
-        for j in 1..winners[i] + 1 {
+        for j in 1..=winners[i] {
             let count: &mut u32 = counts.get_mut(i + j as usize).unwrap();
             *count += i_copies;
         }

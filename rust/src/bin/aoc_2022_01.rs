@@ -7,16 +7,13 @@ fn to_sums(xs: impl Iterator<Item = Option<i32>>) -> Vec<i32> {
     let mut current_sum = 0;
     let mut current_sum_open = false;
     for x in xs {
-        match x {
-            Some(value) => {
-                current_sum += value;
-                current_sum_open = true;
-            }
-            None => {
-                sums.push(current_sum);
-                current_sum = 0;
-                current_sum_open = false;
-            }
+        if let Some(value) = x {
+            current_sum += value;
+            current_sum_open = true;
+        } else {
+            sums.push(current_sum);
+            current_sum = 0;
+            current_sum_open = false;
         }
     }
     if current_sum_open {
@@ -39,7 +36,7 @@ fn main() {
 
     let mut sums: Vec<i32> = to_sums(numbers);
 
-    sums.sort();
+    sums.sort_unstable();
     sums.reverse();
 
     println!("{}", sums[0]);

@@ -3,6 +3,7 @@
         "devbox",
         "direnv",
         "itertools",
+        "peekable",
         "usize"
     ],
     "rust-analyzer.check.command": "clippy"

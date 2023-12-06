@@ -19,14 +19,17 @@ pub struct Coord {
 }
 
 impl Coord {
+    #[must_use]
     pub fn mag2(&self) -> i32 {
         self.row * self.row + self.col * self.col
     }
 
+    #[must_use]
     pub fn origin() -> Coord {
         Coord { row: 0, col: 0 }
     }
 
+    #[must_use]
     pub fn div(&self, z: i32) -> Coord {
         Coord {
             row: self.row / z,
@@ -34,6 +37,7 @@ impl Coord {
         }
     }
 
+    #[must_use]
     pub fn signum(&self) -> Coord {
         Coord {
             row: self.row.signum(),
@@ -41,6 +45,7 @@ impl Coord {
         }
     }
 
+    #[must_use]
     pub fn manhattan(&self, other: &Coord) -> i32 {
         (self.row - other.row).abs() + (self.col - other.col).abs()
     }
@@ -95,14 +100,17 @@ pub struct UCoord {
 }
 
 impl UCoord {
+    #[must_use]
     pub fn mag2(&self) -> usize {
         self.row * self.row + self.col * self.col
     }
 
+    #[must_use]
     pub fn origin() -> UCoord {
         UCoord { row: 0, col: 0 }
     }
 
+    #[must_use]
     pub fn div(&self, z: usize) -> UCoord {
         UCoord {
             row: self.row / z,

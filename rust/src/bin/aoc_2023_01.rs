@@ -17,7 +17,7 @@ fn to_digits_words(s: &str) -> Vec<u32> {
     let mut digits: Vec<u32> = Vec::new();
     for (i, c) in s.char_indices() {
         if let Some(d) = c.to_digit(10) {
-            digits.push(d)
+            digits.push(d);
         } else {
             let suffix = s.get(i..).unwrap();
             for (digit_i, digit_s) in enumerate(WORD_DIGITS) {
@@ -50,6 +50,6 @@ fn main() {
         .map(|xs| end_digits(&xs))
         .sum();
 
-    println!("{}", part_a);
-    println!("{}", part_b);
+    println!("{part_a}");
+    println!("{part_b}");
 }

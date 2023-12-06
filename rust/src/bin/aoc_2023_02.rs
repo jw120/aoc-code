@@ -27,7 +27,7 @@ impl Subset {
                     blue = n.parse().unwrap();
                 }
                 _ => {
-                    panic!("Unknown piece {}", piece)
+                    panic!("Unknown piece {piece}")
                 }
             }
         }
@@ -93,6 +93,6 @@ fn main() {
 
     let part_b: u32 = games.iter().map(|g| Subset::power(&fewest(g))).sum();
 
-    println!("{}", part_a);
-    println!("{}", part_b);
+    println!("{part_a}");
+    println!("{part_b}");
 }

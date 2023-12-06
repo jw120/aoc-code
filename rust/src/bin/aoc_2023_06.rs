@@ -20,7 +20,7 @@ fn split_row(s: &str) -> Vec<isize> {
 }
 
 fn parse_digits(s: &str) -> isize {
-    let digits: String = s.chars().filter(|c| c.is_ascii_digit()).collect();
+    let digits: String = s.chars().filter(char::is_ascii_digit).collect();
     digits.parse().unwrap()
 }
 
@@ -44,7 +44,7 @@ fn main() {
     let ways: isize = zip(times.iter(), distances.iter())
         .map(|(t, d)| ways_to_win(*t, *d))
         .product();
-    println!("{}", ways);
+    println!("{ways}");
 
     // part (b)
     let time = parse_digits(&times_str);

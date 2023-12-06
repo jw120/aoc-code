@@ -19,8 +19,8 @@ fn char_score(c: char) -> u32 {
 fn backpack_score(s: &str) -> u32 {
     assert!(s.len() % 2 == 0);
     let half_length = s.len() / 2;
-    let left: &HashSet<char> = &HashSet::from_iter(s[..half_length].chars());
-    let right: &HashSet<char> = &HashSet::from_iter(s[half_length..].chars());
+    let left: &HashSet<char> = &s[..half_length].chars().collect();
+    let right: &HashSet<char> = &s[half_length..].chars().collect();
     let intersection: HashSet<char> = left & right;
     let mut iter = intersection.iter();
     let x: &char = iter.next().unwrap();
@@ -34,9 +34,9 @@ fn part_b(lines: &[String]) -> u32 {
     while let (Some(a), Some(b), Some(c)) =
         (lines_iter.next(), lines_iter.next(), lines_iter.next())
     {
-        let a_set: &HashSet<char> = &HashSet::from_iter(a.chars());
-        let b_set: &HashSet<char> = &HashSet::from_iter(b.chars());
-        let c_set: &HashSet<char> = &HashSet::from_iter(c.chars());
+        let a_set: &HashSet<char> = &a.chars().collect();
+        let b_set: &HashSet<char> = &b.chars().collect();
+        let c_set: &HashSet<char> = &c.chars().collect();
         let ab_set: HashSet<char> = a_set & b_set;
         let abc_set: HashSet<char> = &ab_set & c_set;
         let mut combined = abc_set.iter();
@@ -52,7 +52,7 @@ fn main() {
 
     let part_a: u32 = backpacks.iter().map(|s| backpack_score(s)).sum();
 
-    println!("{}", part_a);
+    println!("{part_a}");
     println!("{}", part_b(&backpacks));
 }
 

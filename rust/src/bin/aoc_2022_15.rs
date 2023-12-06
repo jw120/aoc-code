@@ -65,7 +65,7 @@ fn empty_in_row(reports: &[Report], y: i32) -> usize {
         .map(|(r, o)| (r.sensor + *o).col)
         .max()
         .unwrap();
-    (x_min..x_max + 1)
+    (x_min..=x_max)
         .filter(|x| must_be_empty(reports, Coord { row: y, col: *x }))
         .count()
 }
@@ -115,8 +115,8 @@ fn find_beacon(reports: &[Report]) -> Coord {
     }
     assert!(!x_plus_y_constraints.is_empty() && !x_minus_y_constraints.is_empty());
     let mut solutions: HashSet<Coord> = HashSet::new();
-    for p_con in x_plus_y_constraints.iter() {
-        for m_con in x_minus_y_constraints.iter() {
+    for p_con in &x_plus_y_constraints {
+        for m_con in &x_minus_y_constraints {
             if p_con + m_con % 2 == 1 || p_con - m_con % 2 == 1 {
                 continue;
             }
@@ -141,8 +141,8 @@ fn main() {
 
     println!("{}", empty_in_row(&reports, 2_000_000));
     let beacon = find_beacon(&reports);
-    let encoded: i64 = (beacon.col as i64) * 4_000_000 + (beacon.row as i64);
-    println!("{}", encoded);
+    let encoded: i64 = i64::from(beacon.col) * 4_000_000 + i64::from(beacon.row);
+    println!("{encoded}");
 }
 
 #[cfg(test)]

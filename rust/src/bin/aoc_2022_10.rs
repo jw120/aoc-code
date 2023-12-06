@@ -58,9 +58,9 @@ fn run(instructions: &[Instruction]) -> (i32, Vec<char>) {
 fn main() {
     let instructions: Vec<Instruction> = stdin_lines().map(|s| Instruction::parse(&s)).collect();
     let (signal, crt) = run(&instructions);
-    println!("{}", signal);
+    println!("{signal}");
     for (i, c) in crt.iter().enumerate() {
-        print!("{}", c);
+        print!("{c}");
         if (i + 1) % 40 == 0 {
             println!();
         }

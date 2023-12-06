@@ -2,7 +2,7 @@
 
 use aoc_rust::stdin_lines;
 use aoc_rust::UCoord;
-use grid::*;
+use grid::Grid;
 use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::hash::Hash;
@@ -67,25 +67,25 @@ fn available_forward(heights: &Grid<u8>, s: UCoord) -> Vec<UCoord> {
         reachable.push(UCoord {
             row: s.row + 1,
             col: s.col,
-        })
+        });
     }
     if (s.row > 0) && (heights[s.row - 1][s.col] <= h + 1) {
         reachable.push(UCoord {
             row: s.row - 1,
             col: s.col,
-        })
+        });
     }
     if (s.col + 1 < cols) && (heights[s.row][s.col + 1] <= h + 1) {
         reachable.push(UCoord {
             row: s.row,
             col: s.col + 1,
-        })
+        });
     }
     if (s.col > 0) && (heights[s.row][s.col - 1] <= h + 1) {
         reachable.push(UCoord {
             row: s.row,
             col: s.col - 1,
-        })
+        });
     }
     reachable
 }
@@ -100,25 +100,25 @@ fn available_reverse(heights: &Grid<u8>, s: UCoord) -> Vec<UCoord> {
         reachable.push(UCoord {
             row: s.row + 1,
             col: s.col,
-        })
+        });
     }
     if (s.row > 0) && (heights[s.row - 1][s.col] >= h - 1) {
         reachable.push(UCoord {
             row: s.row - 1,
             col: s.col,
-        })
+        });
     }
     if (s.col + 1 < cols) && (heights[s.row][s.col + 1] >= h - 1) {
         reachable.push(UCoord {
             row: s.row,
             col: s.col + 1,
-        })
+        });
     }
     if (s.col > 0) && (heights[s.row][s.col - 1] >= h - 1) {
         reachable.push(UCoord {
             row: s.row,
             col: s.col - 1,
-        })
+        });
     }
     reachable
 }
