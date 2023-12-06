@@ -137,28 +137,24 @@ impl Map {
                     out.push(range(lo, block.source.lo - 1));
                     out.push(range(block.destination.lo, hi + shift));
                     break;
-                } else {
-                    out.push(range(lo, block.source.lo - 1));
-                    out.push(block.destination);
-                    lo = block.source.hi + 1;
                 }
+                out.push(range(lo, block.source.lo - 1));
+                out.push(block.destination);
+                lo = block.source.hi + 1;
             } else if lo <= block.source.hi {
                 if hi <= block.source.hi {
                     out.push(range(lo + shift, hi + shift));
                     break;
-                } else {
-                    out.push(range(lo + shift, block.destination.hi));
-                    lo = block.source.hi + 1;
                 }
-            } else {
-                // do nothing - just skip to next block
-            }
+                out.push(range(lo + shift, block.destination.hi));
+                lo = block.source.hi + 1;
+            } // else do nothing - just skip to next block
         }
         let last_hi = self.blocks.last().unwrap().source.hi;
         if hi > last_hi {
             out.push(range(max(lo, last_hi + 1), hi));
         }
-        assert_eq!(source.width(), out.iter().map(|r| r.width()).sum());
+        assert_eq!(source.width(), out.iter().map(Range::width).sum());
         out
     }
 
@@ -202,7 +198,7 @@ fn parse_seed_ranges(block: &[String]) -> Vec<Range> {
 
 fn main() {
     let lines: Vec<String> = stdin_lines().collect();
-    let mut blocks_iter = lines.split(|line| line.is_empty());
+    let mut blocks_iter = lines.split(String::is_empty);
     let seeds_block = blocks_iter.next().unwrap();
     let maps: Vec<Map> = blocks_iter.map(Map::new).collect();
 

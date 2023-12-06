@@ -2,7 +2,7 @@
 
 use aoc_rust::stdin_lines;
 use aoc_rust::UCoord;
-use grid::*;
+use grid::Grid;
 use std::iter::zip;
 
 // We add sand in two modes
@@ -42,7 +42,7 @@ impl Board {
         let mut rock_row_max: usize = 0;
         let mut rock_col_min: usize = START_COL;
         let mut rock_col_max: usize = START_COL;
-        for path in paths[0..paths.len()].iter() {
+        for path in &paths {
             for c in path {
                 rock_row_min = rock_row_min.min(c.row);
                 rock_row_max = rock_row_max.max(c.row);
@@ -77,7 +77,7 @@ impl Board {
             }
         }
         // Add rocks to the floor
-        for c in col_min..col_max + 1 {
+        for c in col_min..=col_max {
             board.set(
                 UCoord {
                     row: row_max,
@@ -139,11 +139,11 @@ impl Board {
         sand_count
     }
 
-    // Add rocks to all points between the two cordinates (inclusive)
+    // Add rocks to all points between the two coordinates (inclusive)
     fn add_rock_line(&mut self, c1: &UCoord, c2: &UCoord) {
         if c2.col > c1.col {
             assert!(c2.row == c1.row);
-            for c in c1.col..c2.col + 1 {
+            for c in c1.col..=c2.col {
                 self.set(
                     UCoord {
                         row: c1.row,
@@ -154,7 +154,7 @@ impl Board {
             }
         } else if c2.col < c1.col {
             assert!(c2.row == c1.row);
-            for c in c2.col..c1.col + 1 {
+            for c in c2.col..=c1.col {
                 self.set(
                     UCoord {
                         row: c1.row,
@@ -165,7 +165,7 @@ impl Board {
             }
         } else if c2.row > c1.row {
             assert!(c2.col == c1.col);
-            for r in c1.row..c2.row + 1 {
+            for r in c1.row..=c2.row {
                 self.set(
                     UCoord {
                         row: r,
@@ -177,7 +177,7 @@ impl Board {
         } else {
             assert!(c2.row < c1.row);
             assert!(c2.col == c1.col);
-            for r in c2.row..c1.row + 1 {
+            for r in c2.row..=c1.row {
                 self.set(
                     UCoord {
                         row: r,

@@ -152,14 +152,14 @@ fn monkey_business(monkeys: &mut [Monkey], steps: u64, simple_mode: bool) -> u64
     };
     step(monkeys, steps, mode);
     let mut counts: Vec<u64> = monkeys.iter().map(|m| m.count).collect();
-    counts.sort();
+    counts.sort_unstable();
     counts[counts.len() - 1] * counts[counts.len() - 2]
 }
 
 fn main() {
     let monkeys: Vec<Monkey> = io::stdin()
         .lines()
-        .map(|r| r.unwrap())
+        .map(Result::unwrap)
         .chunks(7)
         .into_iter()
         .enumerate()

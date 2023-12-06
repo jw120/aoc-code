@@ -80,7 +80,7 @@ fn print_stack_tops(stacks: &[Stack]) {
 fn main() {
     let stacks_lines: Vec<String> = stdin_lines().take_while(|s| !s.trim().is_empty()).collect();
     let mut stacks_a: Vec<Stack> = parse_stacks(stacks_lines.as_slice());
-    let mut stacks_b: Vec<Stack> = stacks_a.to_vec();
+    let mut stacks_b: Vec<Stack> = stacks_a.clone();
 
     let moves: Vec<Move> = stdin_lines().map(|s| Move::parse(&s)).collect();
 
