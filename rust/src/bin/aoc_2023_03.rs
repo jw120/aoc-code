@@ -38,11 +38,8 @@ fn gear_ratios(stars: &[UCoord], numbers: &[Number]) -> u32 {
     for star in stars {
         let adjacent_numbers: Vec<&Number> =
             numbers.iter().filter(|n| n.is_adjacent(*star)).collect();
-        match adjacent_numbers[..] {
-            [n1, n2] => {
-                sum += n1.value * n2.value;
-            }
-            _ => {}
+        if let [n1, n2] = adjacent_numbers[..] {
+            sum += n1.value * n2.value;
         }
     }
     sum

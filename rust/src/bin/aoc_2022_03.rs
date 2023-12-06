@@ -84,7 +84,6 @@ mod tests {
     const BACKPACK_EXPECTED: [u32; 6] = [16, 38, 42, 22, 20, 19];
     // cspell: enable
 
-
     #[test]
     fn test_backpack_score() {
         for (s, x) in zip(BACKPACK_EXAMPLES.iter(), BACKPACK_EXPECTED.iter()) {

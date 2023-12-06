@@ -5,19 +5,11 @@ use itertools::enumerate;
 
 // Convert string to a list of its digits
 fn to_digits(s: &str) -> Vec<u32> {
-    s.chars().map(|c| c.to_digit(10)).flatten().collect()
+    s.chars().filter_map(|c| c.to_digit(10)).collect()
 }
 
 const WORD_DIGITS: [&str; 9] = [
-    "one",
-    "two",
-    "three",
-    "four",
-    "five",
-    "six",
-    "seven",
-    "eight",
-    "nine",
+    "one", "two", "three", "four", "five", "six", "seven", "eight", "nine",
 ];
 
 // Convert string to a list of its digits, allowing word forms
@@ -38,7 +30,6 @@ fn to_digits_words(s: &str) -> Vec<u32> {
     }
     digits
 }
-
 
 fn end_digits(xs: &Vec<u32>) -> u32 {
     xs[0] * 10 + xs[xs.len() - 1]
@@ -61,5 +52,4 @@ fn main() {
 
     println!("{}", part_a);
     println!("{}", part_b);
-
 }

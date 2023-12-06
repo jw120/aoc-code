@@ -20,7 +20,7 @@ fn split_row(s: &str) -> Vec<isize> {
 }
 
 fn parse_digits(s: &str) -> isize {
-    let digits: String = s.chars().filter(|c| c.is_digit(10)).collect();
+    let digits: String = s.chars().filter(|c| c.is_ascii_digit()).collect();
     digits.parse().unwrap()
 }
 

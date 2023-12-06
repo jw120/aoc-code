@@ -47,10 +47,10 @@ struct Game {
 impl Game {
     fn new<S: AsRef<str>>(s: S) -> Game {
         let s_remaining: &str = s.as_ref().strip_prefix("Game").unwrap().trim();
-        let mut colon_split = s_remaining.split(":");
+        let mut colon_split = s_remaining.split(':');
         let s_id: &str = colon_split.next().unwrap();
         let s_subsets: &str = colon_split.next().unwrap();
-        assert!(colon_split.next() == None);
+        assert!(colon_split.next().is_none());
         Game {
             id: s_id.parse().unwrap(),
             subsets: s_subsets.split("; ").map(Subset::new).collect(),

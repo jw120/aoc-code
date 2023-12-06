@@ -30,7 +30,7 @@ struct MapBlock {
 
 impl MapBlock {
     fn new<S: AsRef<str>>(s: S) -> MapBlock {
-        let mut space_iter = s.as_ref().trim().split_whitespace();
+        let mut space_iter = s.as_ref().split_whitespace();
         let destination_range_start: i64 = space_iter.next().unwrap().parse().unwrap();
         let source_range_start: i64 = space_iter.next().unwrap().parse().unwrap();
         let range_length: i64 = space_iter.next().unwrap().parse().unwrap();
@@ -120,7 +120,7 @@ impl Map {
                 return source + block.destination.lo - block.source.lo;
             }
         }
-        return source;
+        source
     }
 
     fn apply_range(&self, source: Range) -> Vec<Range> {

@@ -4,5 +4,6 @@
         "direnv",
         "itertools",
         "usize"
-    ]
+    ],
+    "rust-analyzer.check.command": "clippy"
 }

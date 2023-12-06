@@ -12,14 +12,14 @@ struct Card {
 impl Card {
     fn new<S: AsRef<str>>(s: S) -> Card {
         let s_remaining: &str = s.as_ref().strip_prefix("Card").unwrap().trim();
-        let mut colon_split = s_remaining.split(":");
+        let mut colon_split = s_remaining.split(':');
         let s_id: &str = colon_split.next().unwrap();
         let s_cards: &str = colon_split.next().unwrap();
-        assert!(colon_split.next() == None);
+        assert!(colon_split.next().is_none());
         let mut bar_split = s_cards.split(" | ");
         let s_winning: &str = bar_split.next().unwrap();
         let s_actual: &str = bar_split.next().unwrap();
-        assert!(bar_split.next() == None);
+        assert!(bar_split.next().is_none());
 
         Card {
             _id: s_id.parse().unwrap(),
