@@ -1,6 +1,7 @@
 // Advent of Code, 2023 day 05
 
 use aoc_rust::stdin_lines;
+use std::cmp::max;
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 struct Range {
@@ -12,6 +13,13 @@ fn range(lo: i64, hi: i64) -> Range {
     assert!(lo <= hi);
     assert!(lo >= 0);
     Range { lo, hi }
+}
+
+impl Range {
+    fn width(&self) -> i64 {
+        assert!(self.lo <= self.hi);
+        self.hi - self.lo + 1
+    }
 }
 
 #[derive(Debug)]
@@ -47,7 +55,7 @@ impl MapBlock {
         }
     }
 
-    fn apply_range(&self, input: Range) -> Vec<Range> {
+    fn _apply_range(&self, input: Range) -> Vec<Range> {
         let shift = self.destination.lo - self.source.lo;
         if input.lo < self.source.lo {
             if input.hi < self.source.lo {
@@ -140,7 +148,7 @@ impl Map {
                     break;
                 } else {
                     out.push(range(lo + shift, block.destination.hi));
-                    lo = block.destination.hi + 1;
+                    lo = block.source.hi + 1;
                 }
             } else {
                 // do nothing - just skip to next block
@@ -148,8 +156,9 @@ impl Map {
         }
         let last_hi = self.blocks.last().unwrap().source.hi;
         if hi > last_hi {
-            out.push(range(last_hi + 1, hi));
+            out.push(range(max(lo, last_hi + 1), hi));
         }
+        assert_eq!(source.width(), out.iter().map(|r| r.width()).sum());
         out
     }
 
@@ -204,9 +213,7 @@ fn main() {
 
     // part (b)
     let seed_ranges: Vec<Range> = parse_seed_ranges(seeds_block);
-    // println!("{:?}", seed_ranges);
     let location_ranges: Vec<Range> = apply_maps_range(&maps, &seed_ranges);
-    // println!("{:?}", location_ranges);
     println!("{}", location_ranges.iter().map(|r| r.lo).min().unwrap());
 }
 
@@ -232,23 +239,23 @@ mod tests {
             destination: Range { lo: 110, hi: 120 },
         };
         // 3 cases with lo below block range
-        assert_eq!(b.apply_range(range(5, 6)), vec![range(5, 6)]);
+        assert_eq!(b._apply_range(range(5, 6)), vec![range(5, 6)]);
         assert_eq!(
-            b.apply_range(range(5, 15)),
+            b._apply_range(range(5, 15)),
             vec![range(5, 9), range(110, 115)]
         );
         assert_eq!(
-            b.apply_range(range(5, 25)),
+            b._apply_range(range(5, 25)),
             vec![range(5, 9), range(110, 120), range(21, 25)]
         );
         // 2 cases with lo within block range
-        assert_eq!(b.apply_range(range(15, 17)), vec![range(115, 117)]);
+        assert_eq!(b._apply_range(range(15, 17)), vec![range(115, 117)]);
         assert_eq!(
-            b.apply_range(range(15, 24)),
+            b._apply_range(range(15, 24)),
             vec![range(115, 120), range(21, 24)]
         );
         // 1 cases with lo above block range
-        assert_eq!(b.apply_range(range(25, 28)), vec![range(25, 28)]);
+        assert_eq!(b._apply_range(range(25, 28)), vec![range(25, 28)]);
     }
 
     #[test]
