@@ -1,29 +1,39 @@
 // Advent of Code, 2023 day 03
 
-use aoc_rust::Coord;
+use aoc_rust::UCoord;
+use std::io::stdin;
 
 struct Number {
-    value: isize,
-    position: Coord, // position of first digit
-    length: i32,     // number of digits
+    value: u32,
+    position: UCoord, // position of first digit
+    length: usize,    // number of digits
+}
+
+// subtract one unless value is zero
+fn dec(x: usize) -> usize {
+    if x > 0 {
+        x - 1
+    } else {
+        x
+    }
 }
 
 impl Number {
     // Is the number adjacent to the coordinate
-    fn is_adjacent(&self, c: Coord) -> bool {
-        c.col >= self.position.col - 1
+    fn is_adjacent(&self, c: UCoord) -> bool {
+        c.col >= dec(self.position.col)
             && c.col <= self.position.col + self.length
-            && c.row >= self.position.row - 1
+            && c.row >= dec(self.position.row)
             && c.row <= self.position.row + 1
     }
 
     // Is the number adjacent to any of the coordinates
-    fn is_any_adjacent(&self, cs: &[Coord]) -> bool {
+    fn is_any_adjacent(&self, cs: &[UCoord]) -> bool {
         cs.iter().any(|c| self.is_adjacent(*c))
     }
 }
 
-fn gear_ratios(stars: &[Coord], numbers: &[Number]) -> isize {
+fn gear_ratios(stars: &[UCoord], numbers: &[Number]) -> u32 {
     let mut sum = 0;
     for star in stars {
         let adjacent_numbers: Vec<&Number> =
@@ -38,49 +48,54 @@ fn gear_ratios(stars: &[Coord], numbers: &[Number]) -> isize {
     sum
 }
 
-fn read_schematic() -> (Vec<Number>, Vec<Coord>, Vec<Coord>) {
-    (Vec::new(), Vec::new(), Vec::new())
+fn read_schematic() -> (Vec<Number>, Vec<UCoord>, Vec<UCoord>) {
+    let mut numbers: Vec<Number> = Vec::new();
+    let mut symbols: Vec<UCoord> = Vec::new();
+    let mut stars: Vec<UCoord> = Vec::new();
+    let mut current_number: Option<Number> = None;
 
-    // def __init__(self, lines: list[str]) -> None:
-    //     # Read grid data
-    //     self.extent: Extent = Extent(x=len(lines[0]), y=len(lines))
-    //     self.data: dict[Coord, str] = {}
-    //     for y, line in enumerate(lines):
-    //         for x, c in enumerate(line):
-    //             self.data[Coord(x, y)] = c
-    //     # Locate symbols
-    //     self.symbols: list[Coord] = []
-    //     for c in self.extent.upto():
-    //         if (not self.data[c].isdigit()) and self.data[c] != ".":
-    //             self.symbols.append(c)
-    //     # Locate numbers
-    //     self.numbers: list[Number] = []
-    //     n: Number | None = None
-    //     for y in range(self.extent.y):
-    //         for x in range(self.extent.x + 1):
-    //             if x == self.extent.x:
-    //                 if n is not None:
-    //                     self.numbers.append(n)
-    //                 n = None
-    //             else:
-    //                 c = Coord(x, y)
-    //                 d = self.data[c]
-    //                 if d.isdigit():
-    //                     if n is None:
-    //                         n = Number(value=int(d), position=c, length=1)
-    //                     else:
-    //                         n.value = n.value * 10 + int(d)
-    //                         n.length += 1
-    //                 else:
-    //                     if n is not None:
-    //                         self.numbers.append(n)
-    //                     n = None
+    for (row, line) in stdin().lines().enumerate() {
+        for (col, ch) in line.unwrap().chars().enumerate() {
+            if let Some(ch_value) = ch.to_digit(10) {
+                current_number = current_number.map_or(
+                    Some(Number {
+                        value: ch_value,
+                        position: UCoord { row, col },
+                        length: 1,
+                    }),
+                    |n| {
+                        Some(Number {
+                            value: n.value * 10 + ch_value,
+                            length: n.length + 1,
+                            ..n
+                        })
+                    },
+                )
+            } else {
+                if let Some(n) = current_number {
+                    numbers.push(n);
+                    current_number = None;
+                }
+                if ch != '.' {
+                    symbols.push(UCoord { row, col });
+                    if ch == '*' {
+                        stars.push(UCoord { row, col });
+                    }
+                }
+            }
+        }
+        if let Some(n) = current_number {
+            numbers.push(n);
+            current_number = None;
+        }
+    }
+    (numbers, symbols, stars)
 }
 
 fn main() {
     let (numbers, symbols, stars) = read_schematic();
 
-    let part_a: isize = numbers
+    let part_a: u32 = numbers
         .iter()
         .filter(|n| (*n).is_any_adjacent(&symbols))
         .map(|n| n.value)
