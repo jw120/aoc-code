@@ -3,7 +3,7 @@
 use std::io::stdin;
 use std::iter::zip;
 
-fn read_row(prefix: &str) -> Vec<isize> {
+fn read_row(prefix: &str) -> String {
     stdin()
         .lines()
         .next()
@@ -12,9 +12,16 @@ fn read_row(prefix: &str) -> Vec<isize> {
         .strip_prefix(prefix)
         .unwrap()
         .trim()
-        .split_whitespace()
-        .map(|s| s.parse().unwrap())
-        .collect()
+        .to_string()
+}
+
+fn split_row(s: &str) -> Vec<isize> {
+    s.split_whitespace().map(|s| s.parse().unwrap()).collect()
+}
+
+fn parse_digits(s: &str) -> isize {
+    let digits: String = s.chars().filter(|c| c.is_digit(10)).collect();
+    digits.parse().unwrap()
 }
 
 fn ways_to_win(time: isize, distance: isize) -> isize {
@@ -28,15 +35,19 @@ fn ways_to_win(time: isize, distance: isize) -> isize {
 }
 
 fn main() {
-    let times: Vec<isize> = read_row("Time:");
-    let distances: Vec<isize> = read_row("Distance:");
+    let times_str = read_row("Time:");
+    let distances_str = read_row("Distance:");
 
-    let ways: Vec<isize> = zip(times.iter(), distances.iter())
+    // part (a)
+    let times: Vec<isize> = split_row(&times_str);
+    let distances: Vec<isize> = split_row(&distances_str);
+    let ways: isize = zip(times.iter(), distances.iter())
         .map(|(t, d)| ways_to_win(*t, *d))
-        .collect();
+        .product();
+    println!("{}", ways);
 
-    println!("{:?}", times);
-    println!("{:?}", distances);
-    println!("{:?}", ways);
-    println!("{}", ways.iter().product::<isize>());
+    // part (b)
+    let time = parse_digits(&times_str);
+    let distance = parse_digits(&distances_str);
+    println!("{}", ways_to_win(time, distance));
 }
