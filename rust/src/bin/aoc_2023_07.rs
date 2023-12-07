@@ -56,7 +56,6 @@ fn hand_type(hand: &Hand) -> Type {
     }
     let mut counts_list: Vec<&i32> = counts.values().collect();
     counts_list.sort();
-    println!("Hand {:?}, Counts {:?}", hand, counts_list);
 
     match counts_list[..] {
         [5] => Type::Five,
@@ -68,6 +67,10 @@ fn hand_type(hand: &Hand) -> Type {
         [1, 1, 1, 1, 1] => Type::HighCard,
         _ => panic!("Unexpected counts: {:?} {:?}", counts_list, hand),
     }
+}
+
+fn hand_type_wild(hand: &Hand) -> Type {
+    hand_type(hand)
 }
 
 fn cmp_game(
@@ -86,22 +89,28 @@ fn parse_game(s: &str) -> (Hand, u64) {
     }
 }
 
-fn main() {
-    let mut games: Vec<(Hand, Type, u64)> = stdin_lines()
-        .map(|s| parse_game(&s))
-        .map(|(h, i)| (h, hand_type(&h), i))
-        .collect();
-
-    games.sort_by(cmp_game);
-
-    println!("{:?}", games);
-    let part_a: u64 = games
+fn winnings(games: &[(Hand, Type, u64)]) -> u64 {
+    games
         .iter()
         .enumerate()
         .map(|(i, (_, _, bid))| ((i + 1) as u64) * bid)
-        .sum();
-    let part_b: i32 = 0;
+        .sum()
+}
 
-    println!("{}", part_a);
-    println!("{}", part_b);
+fn main() {
+    let games: Vec<(Hand, u64)> = stdin_lines().map(|s| parse_game(&s)).collect();
+
+    // part (a)
+    let mut games_no_wild: Vec<(Hand, Type, u64)> =
+        games.iter().map(|(h, i)| (*h, hand_type(&h), *i)).collect();
+    games_no_wild.sort_by(cmp_game);
+    println!("{}", winnings(&games_no_wild));
+
+    // part (b)
+    let mut games_wild: Vec<(Hand, Type, u64)> = games
+        .iter()
+        .map(|(h, i)| (*h, hand_type_wild(&h), *i))
+        .collect();
+    games_wild.sort_by(cmp_game);
+    println!("{}", winnings(&games_wild));
 }
