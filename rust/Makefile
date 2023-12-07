@@ -11,7 +11,7 @@ run_2022: \
 
 run_2023: \
 	rust_2023_01 rust_2023_02 rust_2023_03 rust_2023_04 rust_2023_05 \
-	rust_2023_06
+	rust_2023_06 rust_2023_07
 
 check:
 	cargo fmt --quiet
