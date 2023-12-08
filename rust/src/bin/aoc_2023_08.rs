@@ -1,5 +1,6 @@
 // Advent of Code, 2023 day XX
 
+use std::cmp::{max, min};
 use std::collections::HashMap;
 use std::io::stdin;
 
@@ -39,11 +40,11 @@ fn parse() -> (Vec<Step>, HashMap<String, (String, String)>) {
     (path, routes)
 }
 
+// Simply run to completion
 fn run(path: &[Step], routes: &HashMap<String, (String, String)>) -> usize {
     let mut count: usize = 0;
     let mut location: &str = "AAA";
     while location != "ZZZ" {
-        println!("{}", location);
         location = match path[count % path.len()] {
             Step::Left => &routes[location].0,
             Step::Right => &routes[location].1,
@@ -53,36 +54,70 @@ fn run(path: &[Step], routes: &HashMap<String, (String, String)>) -> usize {
     count
 }
 
+// Run multiple paths in parallel. Implement by running each in series and
+// finding the repeating period.
 fn run_multi(path: &[Step], routes: &HashMap<String, (String, String)>) -> usize {
-    let mut count: usize = 0;
-    let mut locations: Vec<&str> = routes
+    let path_length = path.len();
+    let start_locations: Vec<&str> = routes
         .keys()
         .filter(|s| s.ends_with('A'))
         .map(|s| s.as_str())
         .collect();
-    let mut finished: bool = false;
-    while !finished {
-        finished = true;
-        for i in 0..locations.len() {
-            let location = locations[i];
-            let new_location = match path[count % path.len()] {
-                Step::Left => &routes[location].0,
-                Step::Right => &routes[location].1,
-            };
-            locations[i] = new_location;
-            if !new_location.ends_with('Z') {
-                finished = false;
+    let mut periods: Vec<usize> = Vec::new();
+    for location in start_locations {
+        let mut count: usize = 0;
+        let mut current_location = location;
+        let mut visited: HashMap<(&str, usize), usize> = HashMap::new();
+        loop {
+            let path_index = count % path_length;
+            if current_location.ends_with('Z') {
+                let current_location_index = (current_location, path_index);
+                if let Some(prev_count) = visited.get(&current_location_index) {
+                    let period = count - prev_count;
+                    periods.push(period);
+                    break;
+                } else {
+                    visited.insert(current_location_index, count);
+                }
             }
+            current_location = match path[path_index] {
+                Step::Left => &routes[current_location].0,
+                Step::Right => &routes[current_location].1,
+            };
+            count += 1;
         }
-        count += 1;
     }
-    count
+    lcm_multi(&periods)
+}
+
+fn lcm_multi(xs: &[usize]) -> usize {
+    let mut x = xs[0];
+    for y in &xs[1..] {
+        x = lcm(x, *y)
+    }
+    x
+}
+
+fn lcm(a: usize, b: usize) -> usize {
+    if a == 0 && b == 0 {
+        0
+    } else {
+        a * (b / gcd(a, b))
+    }
+}
+
+fn gcd(a: usize, b: usize) -> usize {
+    let mut x = max(a, b);
+    let mut y = min(a, b);
+    while y > 0 {
+        (x, y) = (y, x % y)
+    }
+    x
 }
 
 fn main() {
     let (path, routes) = parse();
-    println!("{:?} {:?}", path, routes);
 
-    //    println!("{}", run(&path, &routes));
+    println!("{}", run(&path, &routes));
     println!("{}", run_multi(&path, &routes));
 }
