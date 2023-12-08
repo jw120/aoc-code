@@ -43,6 +43,7 @@ fn run(path: &[Step], routes: &HashMap<String, (String, String)>) -> usize {
     let mut count: usize = 0;
     let mut location: &str = "AAA";
     while location != "ZZZ" {
+        println!("{}", location);
         location = match path[count % path.len()] {
             Step::Left => &routes[location].0,
             Step::Right => &routes[location].1,
@@ -52,8 +53,36 @@ fn run(path: &[Step], routes: &HashMap<String, (String, String)>) -> usize {
     count
 }
 
+fn run_multi(path: &[Step], routes: &HashMap<String, (String, String)>) -> usize {
+    let mut count: usize = 0;
+    let mut locations: Vec<&str> = routes
+        .keys()
+        .filter(|s| s.ends_with('A'))
+        .map(|s| s.as_str())
+        .collect();
+    let mut finished: bool = false;
+    while !finished {
+        finished = true;
+        for i in 0..locations.len() {
+            let location = locations[i];
+            let new_location = match path[count % path.len()] {
+                Step::Left => &routes[location].0,
+                Step::Right => &routes[location].1,
+            };
+            locations[i] = new_location;
+            if !new_location.ends_with('Z') {
+                finished = false;
+            }
+        }
+        count += 1;
+    }
+    count
+}
+
 fn main() {
     let (path, routes) = parse();
+    println!("{:?} {:?}", path, routes);
 
-    println!("{}", run(&path, &routes));
+    //    println!("{}", run(&path, &routes));
+    println!("{}", run_multi(&path, &routes));
 }
