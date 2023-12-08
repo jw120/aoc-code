@@ -6,5 +6,11 @@
         "peekable",
         "usize"
     ],
-    "rust-analyzer.check.command": "clippy"
+    "rust-analyzer.check.command": "clippy",
+    "rust-analyzer.completion.fullFunctionSignatures.enable": false,
+    "rust-analyzer.inlayHints.chainingHints.enable": false,
+    "rust-analyzer.inlayHints.closureCaptureHints.enable": false,
+    "rust-analyzer.inlayHints.closureReturnTypeHints.enable": "never",
+    "rust-analyzer.inlayHints.parameterHints.enable": false,
+    "rust-analyzer.inlayHints.typeHints.enable": false
 }
