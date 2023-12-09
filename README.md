@@ -1,3 +1,11 @@
+TODO
+
+* Get /haskell to work
+* Fix notes on solutions and how to run
+* Fix top-level makefile
+
+
+
 # Advent of Code
 
 My solutions to advent of code.  So far contains:
