@@ -117,6 +117,21 @@ impl UCoord {
             col: self.col / z,
         }
     }
+
+    #[must_use]
+    pub fn manhattan(&self, other: &UCoord) -> usize {
+        let row_diff: usize = if self.row > other.row {
+            self.row - other.row
+        } else {
+            other.row - self.row
+        };
+        let col_diff: usize = if self.col > other.col {
+            self.col - other.col
+        } else {
+            other.col - self.col
+        };
+        row_diff + col_diff
+    }
 }
 
 impl Add for UCoord {
