@@ -3,7 +3,7 @@
 use aoc_rust::{stdin_lines, UCoord};
 use std::cmp::max;
 
-fn read_galaxies() -> Vec<UCoord> {
+fn read_galaxies() -> (usize, usize, Vec<UCoord>) {
     // Read galaxy positions, capturing size of the grid
     let mut galaxies: Vec<UCoord> = Vec::new();
     let mut rows: usize = 0;
@@ -19,7 +19,10 @@ fn read_galaxies() -> Vec<UCoord> {
             }
         }
     }
-    // Shift coordinates to add an extra row and col for empty rows/cols
+    (rows, cols, galaxies)
+}
+
+fn shift(rows: usize, cols: usize, galaxies: &[UCoord], z: usize) -> Vec<UCoord> {
     let empty_rows: Vec<usize> = (0..rows)
         .filter(|row| galaxies.iter().all(|c| c.row != *row))
         .collect();
@@ -27,12 +30,11 @@ fn read_galaxies() -> Vec<UCoord> {
         .filter(|col| galaxies.iter().all(|c| c.col != *col))
         .collect();
     let row_shift: Vec<usize> = (0..rows)
-        .map(|row| row + empty_rows.iter().filter(|r| **r < row).count())
+        .map(|row| row + (z - 1) * empty_rows.iter().filter(|r| **r < row).count())
         .collect();
     let col_shift: Vec<usize> = (0..cols)
-        .map(|col| col + empty_cols.iter().filter(|c| **c < col).count())
+        .map(|col| col + (z - 1) * empty_cols.iter().filter(|c| **c < col).count())
         .collect();
-    println!("{:?} {:?}", row_shift, col_shift);
     galaxies
         .iter()
         .map(|g| UCoord {
@@ -53,11 +55,13 @@ fn pair_distances(xs: &[UCoord]) -> usize {
 }
 
 fn main() {
-    let galaxies: Vec<UCoord> = read_galaxies();
+    let (rows, cols, galaxies) = read_galaxies();
 
-    let part_a: usize = pair_distances(&galaxies);
-    let part_b: i32 = 0;
+    // part (a)
+    let a_galaxies = shift(rows, cols, &galaxies, 2);
+    println!("{}", pair_distances(&a_galaxies));
 
-    println!("{}", part_a);
-    println!("{}", part_b);
+    // part (b)
+    let b_galaxies = shift(rows, cols, &galaxies, 1_000_000);
+    println!("{}", pair_distances(&b_galaxies));
 }
