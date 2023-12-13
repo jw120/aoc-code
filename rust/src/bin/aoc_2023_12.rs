@@ -15,20 +15,22 @@ fn read_records() -> Vec<(Vec<Option<bool>>, Vec<usize>)> {
     let mut acc: Vec<(Vec<Option<bool>>, Vec<usize>)> = Vec::new();
     for line in stdin_lines() {
         let mut space_iter = line.split_whitespace();
-        let template: Vec<Option<bool>> = read_template(space_iter.next().unwrap());
-        let groups = read_group(space_iter.next().unwrap());
+        let template: Vec<Option<bool>> = space_iter
+            .next()
+            .unwrap()
+            .chars()
+            .map(parse_spring)
+            .collect();
+        let groups = space_iter
+            .next()
+            .unwrap()
+            .split(',')
+            .map(|x| x.parse().unwrap())
+            .collect();
         assert!(space_iter.next().is_none());
         acc.push((template, groups));
     }
     acc
-}
-
-fn read_template(s: &str) -> Vec<Option<bool>> {
-    s.chars().map(parse_spring).collect()
-}
-
-fn read_group(s: &str) -> Vec<usize> {
-    s.split(',').map(|x| x.parse().unwrap()).collect()
 }
 
 // Call given function on all possible slices of given length with n ones
@@ -58,6 +60,7 @@ where
     gen(xs, n, k + 1, callback);
 }
 
+// Count lengths of contiguous groups
 fn count_groups(xs: &[bool]) -> Vec<usize> {
     let mut groups: Vec<usize> = Vec::new();
     let mut current_group: usize = 0;
@@ -75,6 +78,7 @@ fn count_groups(xs: &[bool]) -> Vec<usize> {
     groups
 }
 
+// See if applying the arrangement of unknown springs to the template has expected groups
 fn test_fit(template: &[Option<bool>], groups: &[usize], arrangement: &[bool]) -> bool {
     let mut arrangement_iter = arrangement.iter();
     let ys: Vec<bool> = template
@@ -84,33 +88,20 @@ fn test_fit(template: &[Option<bool>], groups: &[usize], arrangement: &[bool]) -
             None => *arrangement_iter.next().unwrap(),
         })
         .collect();
-    let ys_groups = count_groups(&ys);
-    println!(
-        "test_fit {:?} {} {:?} {:?} {:?}",
-        ys,
-        ys_groups == groups,
-        ys_groups,
-        template,
-        groups
-    );
-    ys_groups == groups
+    count_groups(&ys) == groups
 }
 
+// Count number of arrangements of unknown springs that match
 fn count_fit(template: &[Option<bool>], groups: &[usize]) -> usize {
     let unknown_springs: usize = template.iter().filter(|x| x.is_none()).count();
     let unknown_broken_springs: usize =
         groups.iter().sum::<usize>() - template.iter().filter(|x| **x == Some(true)).count();
     let mut count: usize = 0;
-    println!(
-        "count_fit for {} unknown broken springs in {} unknown springs",
-        unknown_broken_springs, unknown_springs
-    );
     generate_bits(unknown_broken_springs, unknown_springs, &mut |xs| {
         if test_fit(template, groups, xs) {
             count += 1;
         }
     });
-    println!("{:?} {:?} {}", template, groups, count);
     count
 }
 
