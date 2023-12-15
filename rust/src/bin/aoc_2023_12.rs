@@ -43,6 +43,7 @@ where
 }
 
 // Helper function for generate_bits
+// Based on style of https://en.wikipedia.org/wiki/Heap%27s_algorithm
 fn gen<F>(xs: &mut [bool], n: usize, k: usize, callback: &mut F)
 where
     F: FnMut(&[bool]),
