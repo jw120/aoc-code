@@ -4,6 +4,7 @@
         "direnv",
         "itertools",
         "peekable",
+        "SWNE",
         "usize"
     ],
     "rust-analyzer.check.command": "clippy",
