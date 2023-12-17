@@ -2,7 +2,7 @@
 
 #![allow(clippy::upper_case_acronyms)]
 
-use aoc_rust::{stdin_lines, UCoord};
+use aoc_rust::{stdin_lines, Coord};
 use grid::{grid, Grid};
 use std::collections::HashSet;
 
@@ -14,44 +14,13 @@ enum Direction {
     W,
 }
 
-fn step<X>(
-    position: UCoord,
-    direction: Direction,
-    grid: &Grid<X>,
-    first_step: &mut bool,
-) -> Option<UCoord> {
-    if *first_step {
-        *first_step = false;
-        return Some(UCoord { row: 0, col: 0 });
-    }
-    match direction {
-        Direction::N => {
-            if position.row > 0 {
-                Some(position - UCoord { row: 1, col: 0 })
-            } else {
-                None
-            }
-        }
-        Direction::E => {
-            if position.col < grid.cols() - 1 {
-                Some(position + UCoord { row: 0, col: 1 })
-            } else {
-                None
-            }
-        }
-        Direction::S => {
-            if position.row < grid.rows() - 1 {
-                Some(position + UCoord { row: 1, col: 0 })
-            } else {
-                None
-            }
-        }
-        Direction::W => {
-            if position.col > 0 {
-                Some(position - UCoord { row: 0, col: 1 })
-            } else {
-                None
-            }
+impl Direction {
+    fn step(&self) -> Coord {
+        match self {
+            Direction::N => Coord { row: -1, col: 0 },
+            Direction::E => Coord { row: 0, col: 1 },
+            Direction::S => Coord { row: 1, col: 0 },
+            Direction::W => Coord { row: 0, col: -1 },
         }
     }
 }
@@ -79,27 +48,70 @@ impl Square {
     }
 }
 
-fn read_grid() -> Grid<Square> {
-    let mut grid: Grid<Square> = grid![];
-    for line in stdin_lines() {
-        let row_vec: Vec<Square> = line.chars().map(Square::parse).collect();
-        grid.push_row(row_vec);
-    }
-    grid
+// Python-style singleton object
+struct Contraption {
+    tiles: Grid<Square>,
+    visited: Grid<HashSet<Direction>>,
 }
 
-fn beam(grid: &Grid<Square>) -> usize {
-    let mut beams: Vec<(UCoord, Direction)> = vec![(UCoord { row: 0, col: 0 }, Direction::E)];
-    let mut visited: Grid<HashSet<Direction>> = Grid::new(grid.rows(), grid.cols());
-    let mut first_step: bool = true; // Ugly hack to fix first step starting at (0, -1)
-    while let Some((position, direction)) = beams.pop() {
-        if !first_step && !visited[(position.row, position.col)].insert(direction) {
-            continue;
+impl Contraption {
+    // Construct contraption from stdin
+    fn read() -> Contraption {
+        let mut grid: Grid<Square> = grid![];
+        for line in stdin_lines() {
+            let row_vec: Vec<Square> = line.chars().map(Square::parse).collect();
+            grid.push_row(row_vec);
+        }
+        let rows = grid.rows();
+        let cols = grid.cols();
+        Contraption {
+            tiles: grid,
+            visited: Grid::new(rows, cols),
+        }
+    }
+
+    // Square at given coordinate
+    fn get(&self, c: Coord) -> Square {
+        self.tiles[(c.row as usize, c.col as usize)]
+    }
+
+    // Test if the coordinate is within bounds
+    fn valid(&self, c: Coord) -> bool {
+        c.row >= 0
+            && (c.row as usize) < self.tiles.rows()
+            && c.col >= 0
+            && (c.col as usize) < self.tiles.cols()
+    }
+
+    // Add position and direction to visited, true if not already visited
+    // if coordinate is off-grid always return true
+    fn add_visited(&mut self, c: Coord, d: Direction) -> bool {
+        !self.valid(c) || self.visited[(c.row as usize, c.col as usize)].insert(d)
+    }
+
+    // number of squares visited from given starting point
+    fn beam(&mut self, start_position: Coord, start_direction: Direction) -> usize {
+        let mut beams: Vec<(Coord, Direction)> = vec![(start_position, start_direction)];
+        for i in self.visited.iter_mut() {
+            i.clear()
         }
 
-        if let Some(next_position) = step(position, direction, grid, &mut first_step) {
-            let next_square: Square = grid[(next_position.row, next_position.col)];
-            let next_direction: Direction = match (next_square, direction) {
+        while let Some((position, direction)) = beams.pop() {
+            // println!("{:?} {:?}", position, direction);
+            // skip if we have already been here
+            if !self.add_visited(position, direction) {
+                continue;
+            }
+
+            let next_position = position + direction.step();
+            // println!("next {:?}", next_position);
+
+            // skip if would move out of bounds
+            if !self.valid(next_position) {
+                continue;
+            }
+
+            let next_direction: Direction = match (self.get(next_position), direction) {
                 (Square::Empty, _)
                 | (Square::NS, Direction::N | Direction::S)
                 | (Square::WE, Direction::E | Direction::W) => direction,
@@ -122,16 +134,15 @@ fn beam(grid: &Grid<Square>) -> usize {
             };
             beams.push((next_position, next_direction))
         }
-    }
 
-    visited.iter().filter(|s| !s.is_empty()).count()
+        self.visited.iter().filter(|s| !s.is_empty()).count()
+    }
 }
 
 fn main() {
-    let grid: Grid<Square> = read_grid();
+    let mut contraption = Contraption::read();
 
-    let part_b: usize = grid.cols();
+    let part_a: usize = contraption.beam(Coord { row: 0, col: -1 }, Direction::E);
 
-    println!("{}", beam(&grid));
-    println!("{}", part_b);
+    println!("{}", part_a);
 }
