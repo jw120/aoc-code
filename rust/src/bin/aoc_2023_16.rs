@@ -144,5 +144,22 @@ fn main() {
 
     let part_a: usize = contraption.beam(Coord { row: 0, col: -1 }, Direction::E);
 
+    let n: i32 = contraption.tiles.rows() as i32;
+    // iterator assumes grid is square
+    assert_eq!(n, contraption.tiles.cols() as i32);
+    let part_b = (0..n)
+        .flat_map(|i| {
+            [
+                (Coord { row: n, col: i }, Direction::N),
+                (Coord { row: i, col: -1 }, Direction::E),
+                (Coord { row: -1, col: i }, Direction::S),
+                (Coord { row: i, col: n }, Direction::W),
+            ]
+        })
+        .map(|(c, d)| contraption.beam(c, d))
+        .max()
+        .unwrap();
+
     println!("{}", part_a);
+    println!("{}", part_b);
 }
