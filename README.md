@@ -5,6 +5,8 @@ TODO
 * Fix top-level makefile
 
 
+* 2023 08 - solution only works as input is a special case where loops. Simpler version of loop detection would work.
+
 
 # Advent of Code
 

@@ -7,7 +7,7 @@ maintainer:          "joe_watson@mail.com"
 copyright:           "2021 Joe Watson"
 
 library:
-  source-dirs: hs-src
+  source-dirs: src
 
 extra-source-files:
 - README.md
@@ -90,14 +90,14 @@ default-extensions:
 executables:
  aoc-exe:
   main:                Main.hs
-  source-dirs:         hs-app
+  source-dirs:         app
   dependencies:
   - aoc-code
 
 tests:
   test:
     main:               "Driver.hs"
-    source-dirs:        "hs-test"
+    source-dirs:        "test"
     dependencies:
     - aoc-code
     - tasty

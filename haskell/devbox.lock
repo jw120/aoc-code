@@ -1,0 +1,99 @@
+{
+  "lockfile_version": "1",
+  "packages": {
+    "cabal-install@latest": {
+      "last_modified": "2023-11-20T11:26:57Z",
+      "resolved": "github:NixOS/nixpkgs/f1f62c94f61343b1dc8e9b91e52975890884f39f#cabal-install",
+      "source": "devbox-search",
+      "version": "3.10.2.1",
+      "systems": {
+        "aarch64-darwin": {
+          "store_path": "/nix/store/9kc4hgbfacpzkqs96ymn0p4jd3xldq1p-cabal-install-3.10.2.1"
+        },
+        "aarch64-linux": {
+          "store_path": "/nix/store/aq0wmmy909rwa8rcdjj3z20x1y1h88yy-cabal-install-3.10.2.1"
+        },
+        "x86_64-darwin": {
+          "store_path": "/nix/store/6q6l9x72rs0m6hlkbh8q768lj8v9vf4h-cabal-install-3.10.2.1"
+        },
+        "x86_64-linux": {
+          "store_path": "/nix/store/j4c7mim1c9lgx8b163yab6rn3hvqkczq-cabal-install-3.10.2.1"
+        }
+      }
+    },
+    "hpack@latest": {
+      "last_modified": "2023-11-20T11:26:57Z",
+      "resolved": "github:NixOS/nixpkgs/f1f62c94f61343b1dc8e9b91e52975890884f39f#hpack",
+      "source": "devbox-search",
+      "version": "0.35.2",
+      "systems": {
+        "aarch64-darwin": {
+          "store_path": "/nix/store/iiz6skawnpynqih7cjn7mbwwa51m3d0v-hpack-0.35.2"
+        },
+        "aarch64-linux": {
+          "store_path": "/nix/store/38lxn96xihfg2cl8fdgw8y9mgfilk9lc-hpack-0.35.2"
+        },
+        "x86_64-darwin": {
+          "store_path": "/nix/store/55kgvwdxx57iiw37g659rr6q38ccv2rx-hpack-0.35.2"
+        },
+        "x86_64-linux": {
+          "store_path": "/nix/store/8sc6i2glbvbjvprg0i4dd3rgqkmnyb57-hpack-0.35.2"
+        }
+      }
+    },
+    "iconv@latest": {
+      "last_modified": "2023-12-04T12:43:35Z",
+      "resolved": "github:NixOS/nixpkgs/09ec6a0881e1a36c29d67497693a67a16f4da573#iconv",
+      "source": "devbox-search",
+      "version": "2.38-27",
+      "systems": {
+        "aarch64-linux": {
+          "store_path": "/nix/store/ydrgcp0ks5w1jnywcf9vmqzqljwl7abc-glibc-2.38-27-bin"
+        },
+        "x86_64-linux": {
+          "store_path": "/nix/store/cx01qk0qyylvkgisbwc7d3pk8sliccgh-glibc-2.38-27-bin"
+        }
+      }
+    },
+    "stack@latest": {
+      "last_modified": "2023-11-20T11:26:57Z",
+      "resolved": "github:NixOS/nixpkgs/f1f62c94f61343b1dc8e9b91e52975890884f39f#stack",
+      "source": "devbox-search",
+      "version": "2.13.1",
+      "systems": {
+        "aarch64-darwin": {
+          "store_path": "/nix/store/3bgl0m23l6fx8ibpf7c3qm41g2iznviv-stack-2.13.1"
+        },
+        "aarch64-linux": {
+          "store_path": "/nix/store/vcv7nq0d9763lridz7q764v24jap0rhf-stack-2.13.1"
+        },
+        "x86_64-darwin": {
+          "store_path": "/nix/store/qfcvdfadj828rq7rxn7hlx6grgz5jhfz-stack-2.13.1"
+        },
+        "x86_64-linux": {
+          "store_path": "/nix/store/11a4s0w0cz665rarxpndk63rav35nn78-stack-2.13.1"
+        }
+      }
+    },
+    "zlib@latest": {
+      "last_modified": "2023-12-04T12:43:35Z",
+      "resolved": "github:NixOS/nixpkgs/09ec6a0881e1a36c29d67497693a67a16f4da573#zlib",
+      "source": "devbox-search",
+      "version": "1.3",
+      "systems": {
+        "aarch64-darwin": {
+          "store_path": "/nix/store/a377d66g1rgsd4vkzxdhkza5g55fkmky-zlib-1.3"
+        },
+        "aarch64-linux": {
+          "store_path": "/nix/store/s07pkwgpf7gdsz9m66vxyx4fbd0879vg-zlib-1.3"
+        },
+        "x86_64-darwin": {
+          "store_path": "/nix/store/ig962y9d643hwwx9xqhdadc1lll8gvig-zlib-1.3"
+        },
+        "x86_64-linux": {
+          "store_path": "/nix/store/8xgb8phqmfn9h971q7dg369h647i1aa0-zlib-1.3"
+        }
+      }
+    }
+  }
+}
