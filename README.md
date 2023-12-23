@@ -1,26 +1,26 @@
-TODO
+# TODO
 
 * Get /haskell to work
 * Fix notes on solutions and how to run
 * Fix top-level makefile
 
-
 * 2023 08 - solution only works as input is a special case where loops. Simpler version of loop detection would work.
+* 2023 12 - accidentally saw reddit comment "use dynamic programming"
 
-
-# Advent of Code
+## Advent of Code
 
 My solutions to advent of code.  So far contains:
 
- * Complete 2022 in Python (done in 2022 advent season)
- * Ongoing 2021 in Python and Haskell (done in 2021 advent season)
- * Complete 2020 in Python (done in 2020 advent season)
- * Partial 2019 in Python (started in 2020 advent season)
- * Partial 2018 in Haskell (started in 2018 advent season)
+* Complete 2022 in Python (done in 2022 advent season)
+* Ongoing 2021 in Python and Haskell (done in 2021 advent season)
+* Complete 2020 in Python (done in 2020 advent season)
+* Partial 2019 in Python (started in 2020 advent season)
+* Partial 2018 in Haskell (started in 2018 advent season)
 
- In addition the `others` folder contains a few other attempts
- * 2017 in R
- * 2018 in racket
+In addition the `others` folder contains a few other attempts
+
+* 2017 in R
+* 2018 in racket
 
 Assumes `../aoc-data` (which is a private repo) holds personalized input data and solutions.
 
@@ -40,28 +40,30 @@ stack test --test-arguments=--pattern=fast
 ## Python code
 
 Assumes Python 3.10 available. Uses poetry dependency manager (to align with repl.it)
-```
+
+```{sh}
 pipx install poetry
 ```
 
 Use poetry's virtual environment and install packages
-```
+
+```{sh}
 poetry shell
 poetry install
 ```
-
 
 ## Comments
 
 TODO
 
-- Haskell 2018 - fill in missing
-- Haskell 2018 - linting and warnings
-- Python 2020 - Speed up slow solutions
-- Python 2020 - Avoid duplication in Day 17
-- R etc (add from aoc folder)
+* Haskell 2018 - fill in missing
+* Haskell 2018 - linting and warnings
+* Python 2020 - Speed up slow solutions
+* Python 2020 - Avoid duplication in Day 17
+* R etc (add from aoc folder)
 
 To improve
+
 * 2015-04 (17s) - MD5s - find a non-naive solution that is faster
 * 2015-06 (18s) - Array updates - faster
 
@@ -77,39 +79,31 @@ Hints used
 
 * 2020 my first time completing. No major problems.
 
-    + Done without hints except looking up the Chinese Remainder Theorem (Day 13),
-    + Day 20 was the most work - lot of fiddly processing to fit the images together, but the sea monster is a nice pay off
-    + Briefly stuck finding a fast method for day 23 (crab cups), saw on reddit the hint to use another data structure
-    + Lots of Life
+  * Done without hints except looking up the Chinese Remainder Theorem (Day 13),
+  * Day 20 was the most work - lot of fiddly processing to fit the images together, but the sea monster is a nice pay off
+  * Briefly stuck finding a fast method for day 23 (crab cups), saw on reddit the hint to use another data structure
+  * Lots of Life
 
 * 2019
 
-    + Stuck on day 12 (fast method for simulating four body problem)
-    + Day 13 (IntCode pong game) was fun
+  * Stuck on day 12 (fast method for simulating four body problem)
+  * Day 13 (IntCode pong game) was fun
 
 * 2018
 
-    + Going back to these in Haskell in 2020/21 after doing 2019/20 in Python - clear that Python is a better fit for smaller programs were iterative improvement works, Haskell takes more effort to do easy things
-    + Day 17 (water pouring) not finished in 2018, solved in 2020 after briefly looking at reddit discussion and seeing I had the wrong definition of the extent of the map for counting the final score.
+  * Going back to these in Haskell in 2020/21 after doing 2019/20 in Python - clear that Python is a better fit for smaller programs were iterative improvement works, Haskell takes more effort to do easy things
+  * Day 17 (water pouring) not finished in 2018, solved in 2020 after briefly looking at reddit discussion and seeing I had the wrong definition of the extent of the map for counting the final score.
 
-
-
-
-
-
-
-
-
-# Problem descriptions
+## Problem descriptions
 
 TODO - Check haskell files which are not included in stack test --test-arguments=--pattern=fast
 
 Time = Python execution time in
-Lines = number of python lines in solution (using pygount)
+Lines = number of python lines in solution (using `pygount`)
 Trick: 0 = just implement the instructions, 1 = needs some thought, 2 = depends on insight
 Done: Languages implements (p=python, j=julia, h=haskell)
 
-            Area            Description                             Data structures                     Time    Lines   Trick   Done
+|           Area            Description                             Data structures                     Time    Lines   Trick   Done
 
 2021-01     Sonar           Sequence differences and averaging      List                                60      11      0       hjp
 2021-02     Submarine       Command parsing                         List                                70      32      0       hjp
@@ -138,27 +132,3 @@ Done: Languages implements (p=python, j=julia, h=haskell)
 2022-21     Math            Tree of math operations
 2022-22     Map             Movement on cube surface
 2022-23     Diffusion       Life-like                               Set
-
-
-
-
-59	Python	python	python/aoc_2021_11.py
-87	Python	python	python/aoc_2021_12.py
-66	Python	python	python/aoc_2021_13.py
-60	Python	python	python/aoc_2021_14.py
-71	Python	python	python/aoc_2021_15.py
-64	Python	python	python/aoc_2021_17.py
-337	Python	python	python/aoc_2021_19.py
-97	Python	python	python/aoc_2021_20.py
-69	Python	python	python/aoc_2021_21.py
-182	Python	python	python/aoc_2021_22.py
-283	Python	python	python/aoc_2021_23.py
-118	Python	python	python/aoc_2021_24.py
-100	Python	python	python/aoc_2021_25.py
-
-2021 11: ok (304 ms)
-2021 12: ok (994 ms)
-2021 13: ok (69 ms)
-2021 14: ok (64 ms)
-2021 21: ok (424 ms)
-

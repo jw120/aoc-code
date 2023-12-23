@@ -1,4 +1,4 @@
-// Advent of Code, 2023 day XX
+// Advent of Code, 2023 day 13
 
 use aoc_rust::stdin_lines;
 use grid::Grid;
@@ -19,25 +19,27 @@ fn read_pattern(lines: &[String]) -> Grid<bool> {
 }
 
 // Return number of columns to left of vertical mirror if found
-fn has_col_mirror(pattern: &Grid<bool>) -> Option<usize> {
+fn has_col_mirror(pattern: &Grid<bool>, errors: usize) -> Option<usize> {
     let rows: usize = pattern.rows();
     let cols: usize = pattern.cols();
     for col in 0..(cols - 1) {
-        println!("Testing col {}", col);
         let mut left: usize = col;
         let mut right: usize = col + 1;
+        let mut error_count: usize = 0;
         loop {
-            if !((0..rows).all(|row| pattern[(row, left)] == pattern[(row, right)])) {
-                println!("No match {} {}", left, right);
+            error_count += (0..rows)
+                .filter(|row| pattern[(*row, left)] != pattern[(*row, right)])
+                .count();
+            if error_count > errors {
                 break;
             }
-            println!("Match {} {}", left, right);
             if left > 0 && right < cols - 1 {
                 left -= 1;
                 right += 1;
-            } else {
-                println!("passed col {}", col);
+            } else if error_count == errors {
                 return Some(col + 1);
+            } else {
+                break;
             }
         }
     }
@@ -45,40 +47,38 @@ fn has_col_mirror(pattern: &Grid<bool>) -> Option<usize> {
 }
 
 // Return 100x number of rows above a horizontal mirror if found
-fn has_row_mirror(pattern: &Grid<bool>) -> Option<usize> {
+fn has_row_mirror(pattern: &Grid<bool>, errors: usize) -> Option<usize> {
     let rows: usize = pattern.rows();
     let cols: usize = pattern.cols();
     for row in 0..(rows - 1) {
-        println!("Testing row {}", row);
         let mut top: usize = row;
         let mut bottom: usize = row + 1;
+        let mut error_count: usize = 0;
         loop {
-            if !((0..cols).all(|col| pattern[(top, col)] == pattern[(bottom, col)])) {
-                println!("No match {} {}", top, bottom);
+            error_count += (0..cols)
+                .filter(|col| pattern[(top, *col)] != pattern[(bottom, *col)])
+                .count();
+            if error_count > errors {
                 break;
             }
-            println!("Match {} {}", top, bottom);
             if top > 0 && bottom < rows - 1 {
                 top -= 1;
                 bottom += 1;
-            } else {
-                println!("passed row {}", row);
+            } else if error_count == errors {
                 return Some(100 * (row + 1));
+            } else {
+                break;
             }
         }
     }
     None
 }
 
-fn mirror_value(pattern: &Grid<bool>) -> usize {
-    if let Some(score) = has_col_mirror(pattern) {
-        return score;
-    }
-    if let Some(score) = has_row_mirror(pattern) {
-        score
-    } else {
-        panic!("No mirror found");
-    }
+// Find a column or row mirror with given number of errors
+fn mirror_value(pattern: &Grid<bool>, errors: usize) -> usize {
+    has_col_mirror(pattern, errors)
+        .or(has_row_mirror(pattern, errors))
+        .unwrap()
 }
 
 fn main() {
@@ -88,7 +88,15 @@ fn main() {
         .map(read_pattern)
         .collect();
 
-    let part_a: usize = patterns.iter().map(mirror_value).sum();
+    let part_a: usize = patterns
+        .iter()
+        .map(|pattern| mirror_value(pattern, 0))
+        .sum();
+    let part_b: usize = patterns
+        .iter()
+        .map(|pattern| mirror_value(pattern, 1))
+        .sum();
 
     println!("{}", part_a);
+    println!("{}", part_b);
 }
