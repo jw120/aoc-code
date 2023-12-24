@@ -15,7 +15,7 @@ fn read_galaxies() -> (usize, usize, Vec<UCoord>) {
             match ch {
                 '#' => galaxies.push(UCoord { row, col }),
                 '.' => {}
-                _ => panic!("Unknown character '{}'", ch),
+                _ => panic!("Unknown character '{ch}'"),
             }
         }
     }
@@ -48,7 +48,7 @@ fn pair_distances(xs: &[UCoord]) -> usize {
     let mut distance: usize = 0;
     for (i, x) in xs.iter().enumerate() {
         for y in xs.iter().skip(i + 1) {
-            distance += x.manhattan(y)
+            distance += x.manhattan(y);
         }
     }
     distance

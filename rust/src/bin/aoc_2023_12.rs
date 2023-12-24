@@ -7,7 +7,7 @@ fn parse_spring(ch: char) -> Option<bool> {
         '.' => Some(false),
         '#' => Some(true),
         '?' => None,
-        _ => panic!("Unknown spring char '{}'", ch),
+        _ => panic!("Unknown spring char '{ch}'"),
     }
 }
 
@@ -114,5 +114,5 @@ fn main() {
         .map(|(template, groups)| count_fit(template, groups))
         .sum();
 
-    println!("{}", part_a);
+    println!("{part_a}");
 }

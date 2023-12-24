@@ -28,6 +28,6 @@ fn main() {
     let part_a: i64 = sequences.iter().map(|seq| extrapolate(seq, false)).sum();
     let part_b: i64 = sequences.iter().map(|seq| extrapolate(seq, true)).sum();
 
-    println!("{}", part_a);
-    println!("{}", part_b);
+    println!("{part_a}");
+    println!("{part_b}");
 }

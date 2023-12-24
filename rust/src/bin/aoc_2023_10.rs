@@ -25,7 +25,7 @@ enum Direction {
 }
 
 impl Direction {
-    fn reverse(&self) -> Direction {
+    fn reverse(self) -> Direction {
         match self {
             Direction::N => Direction::S,
             Direction::E => Direction::W,
@@ -60,13 +60,12 @@ impl Pipe {
             'J' => Pipe::NW,
             '7' => Pipe::SW,
             'F' => Pipe::SE,
-            '.' => Pipe::Ground,
-            'S' => Pipe::Ground,
-            _ => panic!("Unknown pipe '{}'", ch),
+            '.' | 'S' => Pipe::Ground,
+            _ => panic!("Unknown pipe '{ch}'"),
         }
     }
 
-    fn chr(&self) -> char {
+    fn chr(self) -> char {
         match self {
             Pipe::NS => '|',
             Pipe::EW => '-',
@@ -78,12 +77,12 @@ impl Pipe {
         }
     }
 
-    fn has_exit(&self, direction: Direction) -> bool {
+    fn has_exit(self, direction: Direction) -> bool {
         match direction {
-            Direction::N => *self == Pipe::NS || *self == Pipe::NE || *self == Pipe::NW,
-            Direction::E => *self == Pipe::EW || *self == Pipe::NE || *self == Pipe::SE,
-            Direction::S => *self == Pipe::NS || *self == Pipe::SE || *self == Pipe::SW,
-            Direction::W => *self == Pipe::EW || *self == Pipe::NW || *self == Pipe::SW,
+            Direction::N => self == Pipe::NS || self == Pipe::NE || self == Pipe::NW,
+            Direction::E => self == Pipe::EW || self == Pipe::NE || self == Pipe::SE,
+            Direction::S => self == Pipe::NS || self == Pipe::SE || self == Pipe::SW,
+            Direction::W => self == Pipe::EW || self == Pipe::NW || self == Pipe::SW,
         }
     }
 }
@@ -145,13 +144,13 @@ fn main() {
     let start: UCoord = read_grid(&mut grid);
 
     for row in grid.iter_rows() {
-        let line: String = row.map(Pipe::chr).collect();
-        println!("{}", line);
+        let line: String = row.map(|ch| Pipe::chr(*ch)).collect();
+        println!("{line}");
     }
 
     let part_a: usize = run_loop(&grid, start) / 2;
     let part_b: i32 = 0;
 
-    println!("{}", part_a);
-    println!("{}", part_b);
+    println!("{part_a}");
+    println!("{part_b}");
 }

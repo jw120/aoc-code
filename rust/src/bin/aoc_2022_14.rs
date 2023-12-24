@@ -193,14 +193,14 @@ impl Board {
         assert!(c.row <= self.row_max);
         assert!(c.col >= self.col_min);
         assert!(c.col < self.col_min + self.cols);
-        self.grid[c.row][c.col - self.col_min]
+        self.grid[(c.row, c.col - self.col_min)]
     }
 
     fn set(&mut self, c: UCoord, value: Square) {
         assert!(c.row <= self.row_max);
         assert!(c.col >= self.col_min);
         assert!(c.col < self.col_min + self.cols);
-        self.grid[c.row][c.col - self.col_min] = value;
+        self.grid[(c.row, c.col - self.col_min)] = value;
     }
 }
 

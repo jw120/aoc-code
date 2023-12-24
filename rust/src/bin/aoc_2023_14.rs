@@ -23,7 +23,7 @@ fn read_pattern() -> Grid<Square> {
                 '#' => Square::Cube,
                 'O' => Square::Round,
                 '.' => Square::Empty,
-                _ => panic!("Unknown character '{}'", ch),
+                _ => panic!("Unknown character '{ch}'"),
             })
             .collect();
         pattern.push_row(row);
@@ -140,7 +140,7 @@ fn main() {
     println!("{}", load(&pattern_a));
 
     // Part (b)
-    let cycles: usize = 1000000000;
+    let cycles: usize = 1_000_000_000;
     let mut hash_memory: HashMap<u64, usize> = HashMap::new();
     let mut load_memory: HashMap<usize, usize> = HashMap::new();
     for i in 0..cycles {
@@ -160,7 +160,7 @@ fn main() {
             let period = i - previous_i;
             let offset = (cycles - 1 - i) % period;
             let value = load_memory.get(&(i - period + offset)).unwrap();
-            println!("{}", value);
+            println!("{value}");
             break;
         }
     }

@@ -15,7 +15,7 @@ enum Direction {
 }
 
 impl Direction {
-    fn step(&self) -> Coord {
+    fn step(self) -> Coord {
         match self {
             Direction::N => Coord { row: -1, col: 0 },
             Direction::E => Coord { row: 0, col: 1 },
@@ -43,7 +43,7 @@ impl Square {
             '\\' => Square::NWSE,
             '-' => Square::WE,
             '|' => Square::NS,
-            _ => panic!("Unknown char: '{}'", ch),
+            _ => panic!("Unknown char: '{ch}'"),
         }
     }
 }
@@ -93,7 +93,7 @@ impl Contraption {
     fn beam(&mut self, start_position: Coord, start_direction: Direction) -> usize {
         let mut beams: Vec<(Coord, Direction)> = vec![(start_position, start_direction)];
         for i in self.visited.iter_mut() {
-            i.clear()
+            i.clear();
         }
 
         while let Some((position, direction)) = beams.pop() {
@@ -132,7 +132,7 @@ impl Contraption {
                 (Square::NWSE, Direction::S) => Direction::E,
                 (Square::NWSE, Direction::W) => Direction::N,
             };
-            beams.push((next_position, next_direction))
+            beams.push((next_position, next_direction));
         }
 
         self.visited.iter().filter(|s| !s.is_empty()).count()
@@ -144,9 +144,9 @@ fn main() {
 
     let part_a: usize = contraption.beam(Coord { row: 0, col: -1 }, Direction::E);
 
-    let n: i32 = contraption.tiles.rows() as i32;
-    // iterator assumes grid is square
-    assert_eq!(n, contraption.tiles.cols() as i32);
+    assert_eq!(contraption.tiles.rows(), contraption.tiles.cols());
+
+    let n: i32 = i32::try_from(contraption.tiles.rows()).unwrap();
     let part_b = (0..n)
         .flat_map(|i| {
             [
@@ -160,6 +160,6 @@ fn main() {
         .max()
         .unwrap();
 
-    println!("{}", part_a);
-    println!("{}", part_b);
+    println!("{part_a}");
+    println!("{part_b}");
 }

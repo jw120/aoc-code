@@ -7,8 +7,8 @@ use std::collections::HashSet;
 use std::collections::VecDeque;
 use std::hash::Hash;
 
-// Read heightmap, start and end from stdin
-fn read_heightmap(lines: &Vec<String>) -> (Grid<u8>, UCoord, UCoord) {
+// Read height map, start and end from stdin
+fn read_height_map(lines: &Vec<String>) -> (Grid<u8>, UCoord, UCoord) {
     let rows = lines.len();
     let cols = lines[0].len();
     let mut grid: Grid<u8> = Grid::new(rows, cols);
@@ -28,7 +28,7 @@ fn read_heightmap(lines: &Vec<String>) -> (Grid<u8>, UCoord, UCoord) {
                 _ => (ch as u8) - b'a',
             };
             assert!(height < 26);
-            grid[row][col] = height;
+            grid[(row, col)] = height;
         }
     }
     (grid, start.unwrap(), end.unwrap())
@@ -62,26 +62,26 @@ fn available_forward(heights: &Grid<u8>, s: UCoord) -> Vec<UCoord> {
     let mut reachable: Vec<UCoord> = Vec::new();
     let rows = heights.rows();
     let cols = heights.cols();
-    let h = heights[s.row][s.col];
-    if (s.row + 1 < rows) && (heights[s.row + 1][s.col] <= h + 1) {
+    let h = heights[(s.row, s.col)];
+    if (s.row + 1 < rows) && (heights[(s.row + 1, s.col)] <= h + 1) {
         reachable.push(UCoord {
             row: s.row + 1,
             col: s.col,
         });
     }
-    if (s.row > 0) && (heights[s.row - 1][s.col] <= h + 1) {
+    if (s.row > 0) && (heights[(s.row - 1, s.col)] <= h + 1) {
         reachable.push(UCoord {
             row: s.row - 1,
             col: s.col,
         });
     }
-    if (s.col + 1 < cols) && (heights[s.row][s.col + 1] <= h + 1) {
+    if (s.col + 1 < cols) && (heights[(s.row, s.col + 1)] <= h + 1) {
         reachable.push(UCoord {
             row: s.row,
             col: s.col + 1,
         });
     }
-    if (s.col > 0) && (heights[s.row][s.col - 1] <= h + 1) {
+    if (s.col > 0) && (heights[(s.row, s.col - 1)] <= h + 1) {
         reachable.push(UCoord {
             row: s.row,
             col: s.col - 1,
@@ -95,26 +95,26 @@ fn available_reverse(heights: &Grid<u8>, s: UCoord) -> Vec<UCoord> {
     let mut reachable: Vec<UCoord> = Vec::new();
     let rows = heights.rows();
     let cols = heights.cols();
-    let h = heights[s.row][s.col];
-    if (s.row + 1 < rows) && (heights[s.row + 1][s.col] >= h - 1) {
+    let h = heights[(s.row, s.col)];
+    if (s.row + 1 < rows) && (heights[(s.row + 1, s.col)] >= h - 1) {
         reachable.push(UCoord {
             row: s.row + 1,
             col: s.col,
         });
     }
-    if (s.row > 0) && (heights[s.row - 1][s.col] >= h - 1) {
+    if (s.row > 0) && (heights[(s.row - 1, s.col)] >= h - 1) {
         reachable.push(UCoord {
             row: s.row - 1,
             col: s.col,
         });
     }
-    if (s.col + 1 < cols) && (heights[s.row][s.col + 1] >= h - 1) {
+    if (s.col + 1 < cols) && (heights[(s.row, s.col + 1)] >= h - 1) {
         reachable.push(UCoord {
             row: s.row,
             col: s.col + 1,
         });
     }
-    if (s.col > 0) && (heights[s.row][s.col - 1] >= h - 1) {
+    if (s.col > 0) && (heights[(s.row, s.col - 1)] >= h - 1) {
         reachable.push(UCoord {
             row: s.row,
             col: s.col - 1,
@@ -125,7 +125,7 @@ fn available_reverse(heights: &Grid<u8>, s: UCoord) -> Vec<UCoord> {
 
 fn main() {
     let lines: Vec<String> = stdin_lines().collect();
-    let (heights, start, end) = read_heightmap(&lines);
+    let (heights, start, end) = read_height_map(&lines);
 
     println!(
         "{}",
@@ -135,7 +135,7 @@ fn main() {
         "{}",
         bfs(
             end,
-            |s| heights[s.row][s.col] == 0,
+            |s| heights[(s.row, s.col)] == 0,
             |s| available_reverse(&heights, s)
         )
         .unwrap()

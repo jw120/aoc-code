@@ -84,7 +84,7 @@ fn mirror_value(pattern: &Grid<bool>, errors: usize) -> usize {
 fn main() {
     let lines: Vec<String> = stdin_lines().collect();
     let patterns: Vec<Grid<bool>> = lines
-        .split(|line| line.is_empty())
+        .split(std::string::String::is_empty)
         .map(read_pattern)
         .collect();
 
@@ -97,6 +97,6 @@ fn main() {
         .map(|pattern| mirror_value(pattern, 1))
         .sum();
 
-    println!("{}", part_a);
-    println!("{}", part_b);
+    println!("{part_a}");
+    println!("{part_b}");
 }

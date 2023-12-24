@@ -13,7 +13,7 @@ fn hash(s: &str) -> u8 {
 }
 
 fn hash_seq(s: &str) -> u32 {
-    s.split(',').map(|x| hash(x) as u32).sum()
+    s.split(',').map(|x| u32::from(hash(x))).sum()
 }
 
 fn run(s: &str) -> usize {

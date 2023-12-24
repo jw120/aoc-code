@@ -16,7 +16,7 @@ fn height_from_stdin() -> Grid<u8> {
             let i: u32 = ch.into();
             let zero_ord: u32 = '0'.into();
             assert!(i >= '0'.into() && i <= '9'.into());
-            grid[r][c] = u8::try_from(i - zero_ord).unwrap();
+            grid[(r, c)] = u8::try_from(i - zero_ord).unwrap();
         }
     }
     grid
@@ -30,42 +30,42 @@ fn count_visible(heights: &Grid<u8>) -> usize {
 
     // Reveal trees in each row
     for r in 0..rows {
-        visible[r][0] = true;
-        visible[r][cols - 1] = true;
-        let mut max_lr = heights[r][0];
-        let mut max_rl = heights[r][cols - 1];
+        visible[(r, 0)] = true;
+        visible[(r, cols - 1)] = true;
+        let mut max_lr = heights[(r, 0)];
+        let mut max_rl = heights[(r, cols - 1)];
         for c in 1..cols - 1 {
-            let height_lr = heights[r][c];
+            let height_lr = heights[(r, c)];
             if height_lr > max_lr {
                 max_lr = height_lr;
-                visible[r][c] = true;
+                visible[(r, c)] = true;
             }
             let c_rl = cols - 1 - c;
-            let height_rl = heights[r][c_rl];
+            let height_rl = heights[(r, c_rl)];
             if height_rl > max_rl {
                 max_rl = height_rl;
-                visible[r][c_rl] = true;
+                visible[(r, c_rl)] = true;
             }
         }
     }
 
     // Reveal trees in each column
     for c in 0..cols {
-        visible[0][c] = true;
-        visible[rows - 1][c] = true;
-        let mut max_ud = heights[0][c];
-        let mut max_du = heights[rows - 1][c];
+        visible[(0, c)] = true;
+        visible[(rows - 1, c)] = true;
+        let mut max_ud = heights[(0, c)];
+        let mut max_du = heights[(rows - 1, c)];
         for r in 1..rows - 1 {
-            let height_ud = heights[r][c];
+            let height_ud = heights[(r, c)];
             if height_ud > max_ud {
                 max_ud = height_ud;
-                visible[r][c] = true;
+                visible[(r, c)] = true;
             }
             let r_du = rows - 1 - r;
-            let height_du = heights[r_du][c];
+            let height_du = heights[(r_du, c)];
             if height_du > max_du {
                 max_du = height_du;
-                visible[r_du][c] = true;
+                visible[(r_du, c)] = true;
             }
         }
     }
@@ -81,33 +81,33 @@ fn scenic(heights: &Grid<u8>, r: usize, c: usize) -> usize {
         return 0;
     }
 
-    let h = heights[r][c];
+    let h = heights[(r, c)];
     let mut score = 1;
 
     // look up
     let mut d: usize = 1;
-    while r > d && heights[r - d][c] < h {
+    while r > d && heights[(r - d, c)] < h {
         d += 1;
     }
     score *= d;
 
     // look down
     d = 1;
-    while r + d + 1 < rows && heights[r + d][c] < h {
+    while r + d + 1 < rows && heights[(r + d, c)] < h {
         d += 1;
     }
     score *= d;
 
     // look left
     d = 1;
-    while c > d && heights[r][c - d] < h {
+    while c > d && heights[(r, c - d)] < h {
         d += 1;
     }
     score *= d;
 
     // look right
     d = 1;
-    while c + d + 1 < cols && heights[r][c + d] < h {
+    while c + d + 1 < cols && heights[(r, c + d)] < h {
         d += 1;
     }
     score *= d;

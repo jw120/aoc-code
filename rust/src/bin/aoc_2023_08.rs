@@ -15,7 +15,7 @@ impl Step {
         match ch {
             'L' => Step::Left,
             'R' => Step::Right,
-            _ => panic!("Bad step '{}'", ch),
+            _ => panic!("Bad step '{ch}'"),
         }
     }
 }
@@ -61,7 +61,7 @@ fn run_multi(path: &[Step], routes: &HashMap<String, (String, String)>) -> usize
     let start_locations: Vec<&str> = routes
         .keys()
         .filter(|s| s.ends_with('A'))
-        .map(|s| s.as_str())
+        .map(std::string::String::as_str)
         .collect();
     let mut periods: Vec<usize> = Vec::new();
     for location in start_locations {
@@ -76,9 +76,8 @@ fn run_multi(path: &[Step], routes: &HashMap<String, (String, String)>) -> usize
                     let period = count - prev_count;
                     periods.push(period);
                     break;
-                } else {
-                    visited.insert(current_location_index, count);
                 }
+                visited.insert(current_location_index, count);
             }
             current_location = match path[path_index] {
                 Step::Left => &routes[current_location].0,
@@ -93,7 +92,7 @@ fn run_multi(path: &[Step], routes: &HashMap<String, (String, String)>) -> usize
 fn lcm_multi(xs: &[usize]) -> usize {
     let mut x = xs[0];
     for y in &xs[1..] {
-        x = lcm(x, *y)
+        x = lcm(x, *y);
     }
     x
 }
@@ -110,7 +109,7 @@ fn gcd(a: usize, b: usize) -> usize {
     let mut x = max(a, b);
     let mut y = min(a, b);
     while y > 0 {
-        (x, y) = (y, x % y)
+        (x, y) = (y, x % y);
     }
     x
 }
