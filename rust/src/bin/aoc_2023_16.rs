@@ -72,21 +72,29 @@ impl Contraption {
 
     // Square at given coordinate
     fn get(&self, c: Coord) -> Square {
-        self.tiles[(c.row as usize, c.col as usize)]
+        self.tiles[(
+            usize::try_from(c.row).unwrap(),
+            usize::try_from(c.col).unwrap(),
+        )]
     }
 
     // Test if the coordinate is within bounds
     fn valid(&self, c: Coord) -> bool {
         c.row >= 0
-            && (c.row as usize) < self.tiles.rows()
+            && (usize::try_from(c.row).unwrap()) < self.tiles.rows()
             && c.col >= 0
-            && (c.col as usize) < self.tiles.cols()
+            && (usize::try_from(c.col).unwrap()) < self.tiles.cols()
     }
 
     // Add position and direction to visited, true if not already visited
     // if coordinate is off-grid always return true
     fn add_visited(&mut self, c: Coord, d: Direction) -> bool {
-        !self.valid(c) || self.visited[(c.row as usize, c.col as usize)].insert(d)
+        !self.valid(c)
+            || self.visited[(
+                usize::try_from(c.row).unwrap(),
+                usize::try_from(c.col).unwrap(),
+            )]
+                .insert(d)
     }
 
     // number of squares visited from given starting point
@@ -123,14 +131,10 @@ impl Contraption {
                     beams.push((next_position, Direction::W));
                     Direction::E
                 }
-                (Square::SWNE, Direction::N) => Direction::E,
-                (Square::SWNE, Direction::E) => Direction::N,
-                (Square::SWNE, Direction::S) => Direction::W,
-                (Square::SWNE, Direction::W) => Direction::S,
-                (Square::NWSE, Direction::N) => Direction::W,
-                (Square::NWSE, Direction::E) => Direction::S,
-                (Square::NWSE, Direction::S) => Direction::E,
-                (Square::NWSE, Direction::W) => Direction::N,
+                (Square::NWSE, Direction::W) | (Square::SWNE, Direction::E) => Direction::N,
+                (Square::NWSE, Direction::S) | (Square::SWNE, Direction::N) => Direction::E,
+                (Square::NWSE, Direction::E) | (Square::SWNE, Direction::W) => Direction::S,
+                (Square::NWSE, Direction::N) | (Square::SWNE, Direction::S) => Direction::W,
             };
             beams.push((next_position, next_direction));
         }
