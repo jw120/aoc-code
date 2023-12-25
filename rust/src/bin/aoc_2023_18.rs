@@ -72,13 +72,67 @@ fn dig(steps: &[(Direction, u32, u32)]) -> HashSet<Coord> {
     trench
 }
 
+// number of coordinates enclosed by the boundary
+fn interior(boundary: &HashSet<Coord>) -> usize {
+    // Find extent of boundary
+    let row_min: i32 = boundary.iter().map(|c| c.row).min().unwrap();
+    let row_max: i32 = boundary.iter().map(|c| c.row).max().unwrap();
+    let col_min: i32 = boundary.iter().map(|c| c.col).min().unwrap();
+    let col_max: i32 = boundary.iter().map(|c| c.col).max().unwrap();
+
+    // Start filling from around the extent
+    let mut queue: Vec<Coord> = Vec::new();
+    for row in (row_min - 1)..=(row_max + 1) {
+        queue.push(Coord {
+            row,
+            col: col_min - 1,
+        });
+        queue.push(Coord {
+            row,
+            col: col_max + 1,
+        });
+    }
+    for col in col_min..=col_max {
+        queue.push(Coord {
+            row: row_min - 1,
+            col,
+        });
+        queue.push(Coord {
+            row: row_max + 1,
+            col,
+        });
+    }
+
+    // Flood fill
+    let mut filled: HashSet<Coord> = HashSet::from_iter(queue.clone());
+    while let Some(c) = queue.pop() {
+        for direction in [Direction::U, Direction::R, Direction::D, Direction::L] {
+            let adj = direction.step(c);
+            if adj.row >= row_min
+                && adj.row <= row_max
+                && adj.col >= col_min
+                && adj.col <= col_max
+                && !boundary.contains(&adj)
+                && !filled.contains(&adj)
+            {
+                queue.push(adj);
+                filled.insert(adj);
+            }
+        }
+    }
+
+    // boundary and interior is area around extent less wat we filled
+    let around: usize = ((row_max - row_min + 3) * (col_max - col_min + 3))
+        .try_into()
+        .unwrap();
+    around - filled.len()
+}
+
 fn main() {
     let dig_plan: Vec<(Direction, u32, u32)> = stdin_lines().map(|s| parse_line(&s)).collect();
     let ground: HashSet<Coord> = dig(&dig_plan);
 
-    let part_a: usize = dig_plan.len();
-    let part_b: usize = ground.len();
+    let part_a: usize = interior(&ground);
 
     println!("{}", part_a);
-    println!("{}", part_b);
 }
