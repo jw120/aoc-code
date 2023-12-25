@@ -6,6 +6,7 @@
         "direnv",
         "itertools",
         "peekable",
+        "rfind",
         "SWNE",
         "usize"
     ],
