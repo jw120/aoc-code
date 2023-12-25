@@ -64,7 +64,7 @@ fn dig(steps: &[(Direction, u32, u32)]) -> HashSet<Coord> {
         for _ in 0..*distance {
             c = direction.step(c);
             last_overlap = !trench.insert(c);
-            overlap_count += if last_overlap { 1 } else { 0 };
+            overlap_count += usize::from(last_overlap);
         }
     }
     assert_eq!(overlap_count, 1);
@@ -134,5 +134,5 @@ fn main() {
 
     let part_a: usize = interior(&ground);
 
-    println!("{}", part_a);
+    println!("{part_a}");
 }

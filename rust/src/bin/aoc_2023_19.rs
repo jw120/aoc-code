@@ -9,7 +9,7 @@ struct Workflow {
     default: Destination,
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 enum Category {
     X,
     M,
@@ -17,13 +17,7 @@ enum Category {
     S,
 }
 
-#[derive(Debug)]
-enum Comparison {
-    LT,
-    GT,
-}
-
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 enum Destination {
     Workflow(String),
     Accept,
@@ -38,7 +32,7 @@ fn parse_destination(s: &str) -> Destination {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 struct Rule {
     category: Category,
     greater: bool,
@@ -64,7 +58,7 @@ fn parse_rule(s: &str) -> Rule {
     Rule {
         category,
         greater,
-        limit: s[3..colon].parse().unwrap(),
+        limit: s[2..colon].parse().unwrap(),
         destination: parse_destination(&s[colon + 1..]),
     }
 }
@@ -137,16 +131,43 @@ fn read_input() -> (HashMap<String, Workflow>, Vec<Part>) {
     (h, ps)
 }
 
+fn apply(rule: &Rule, part: &Part) -> Option<Destination> {
+    let value = match rule.category {
+        Category::X => part.x,
+        Category::M => part.m,
+        Category::A => part.a,
+        Category::S => part.s,
+    };
+    if (rule.greater && value > rule.limit) || (!rule.greater && value < rule.limit) {
+        Some(rule.destination.clone())
+    } else {
+        None
+    }
+}
+
+fn run_part(part: &Part, workflows: &HashMap<String, Workflow>) -> Option<usize> {
+    let mut workflow_name: String = "in".to_string();
+    loop {
+        let workflow = workflows.get(&workflow_name).unwrap();
+        let mut destination: Option<Destination> = None;
+        for rule in workflow.rules.clone() {
+            destination = apply(&rule, part);
+            if destination.is_some() {
+                break;
+            }
+        }
+        match destination.unwrap_or(workflow.default.clone()) {
+            Destination::Accept => return Some(part.x + part.m + part.a + part.s),
+            Destination::Reject => return None,
+            Destination::Workflow(s) => workflow_name = s.to_string(),
+        }
+    }
+}
+
 fn main() {
     let (workflows, parts) = read_input();
-    let part_a: usize = workflows.len();
 
-    for (name, workflow) in workflows {
-        println!("{}: {:?}", name, workflow);
-    }
-    for p in parts {
-        println!("{:?}", p);
-    }
+    let part_a: usize = parts.iter().filter_map(|p| run_part(p, &workflows)).sum();
 
-    println!("{}", part_a);
+    println!("{part_a}");
 }
