@@ -6,8 +6,6 @@ fn main() {
     let xs: Vec<XX> = stdin_lines().map(|s| parse(s)).collect();
 
     let part_a: usize = 0;
-    let part_b: usize = 0;
 
-    println!("{}", part_a);
-    println!("{}", part_b);
+    println!("{part_a}");
 }
