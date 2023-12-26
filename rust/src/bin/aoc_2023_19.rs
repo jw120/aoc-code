@@ -272,7 +272,40 @@ fn set_value(set: &Set) -> usize {
         * (set.s.1 - set.s.0 + 1)
 }
 
+// Set up conversions for reduced coordinates
+// E.g., given the values 5, 100, 20 we reduce them to 0, 2, 1
+// and provide a map to reduce 5->0, 100->2, 20->1 and a
+// reverse-vector [5, 20, 100] to convert back
+fn _make_reduce_maps(
+    input_values: impl Iterator<Item = usize>,
+) -> (HashMap<usize, usize>, Vec<usize>) {
+    let mut values: Vec<usize> = input_values.collect();
+    values.sort();
+    values.dedup();
+    let mut h = HashMap::new();
+    for (i, value) in values.clone().into_iter().enumerate() {
+        h.insert(value, i);
+    }
+    (h, values)
+}
+
 fn sum_valid(valid: &[Set]) -> usize {
+    // // Reduce all coordinates
+    // let (x_map, x_values) = make_reduce_maps(valid.iter().flat_map(|set| [set.x.0, set.x.1]));
+    // let (m_map, m_values) = make_reduce_maps(valid.iter().flat_map(|set| [set.m.0, set.m.1]));
+    // let (a_map, a_values) = make_reduce_maps(valid.iter().flat_map(|set| [set.a.0, set.a.1]));
+    // let (s_map, s_values) = make_reduce_maps(valid.iter().flat_map(|set| [set.s.0, set.s.1]));
+
+    // let reduced_valid: Vec<Set> = valid
+    //     .iter()
+    //     .map(|set| Set {
+    //         x: (x_map[&set.x.0], x_map[&set.x.1]),
+    //         m: (x_map[&set.m.0], m_map[&set.m.1]),
+    //         a: (x_map[&set.a.0], a_map[&set.a.1]),
+    //         s: (x_map[&set.s.0], s_map[&set.s.1]),
+    //     })
+    //     .collect();
+
     println!("Valid {:?}", valid);
     for s in valid {
         println!("{:?}", s);
