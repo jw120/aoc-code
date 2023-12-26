@@ -4,6 +4,7 @@
         "Deque",
         "devbox",
         "direnv",
+        "flipflop",
         "itertools",
         "peekable",
         "rfind",
