@@ -35,19 +35,25 @@ impl Garden {
         }
     }
 
-    fn valid_moves(&self, c: UCoord) -> impl Iterator<Item = UCoord> {
-        let xs: Vec<UCoord> = Vec::new();
-        xs.into_iter()
-    }
-
     fn count_paths(&self, n: usize) -> usize {
         let mut current: HashSet<UCoord> = HashSet::from([self.start]);
         for _step in 0..n {
             let previous = current.clone();
             current.clear();
             for source in previous {
-                for dest in self.valid_moves(source) {
-                    current.insert(dest);
+                let r = source.row;
+                let c = source.col;
+                if r > 0 && self.plots[(r - 1, c)] {
+                    current.insert(UCoord { row: r - 1, col: c });
+                }
+                if r < self.plots.rows() - 1 && self.plots[(r + 1, c)] {
+                    current.insert(UCoord { row: r + 1, col: c });
+                }
+                if c > 0 && self.plots[(r, c - 1)] {
+                    current.insert(UCoord { row: r, col: c - 1 });
+                }
+                if c < self.plots.cols() - 1 && self.plots[(r, c + 1)] {
+                    current.insert(UCoord { row: r, col: c + 1 });
                 }
             }
         }
@@ -58,7 +64,7 @@ impl Garden {
 fn main() {
     let garden = Garden::read();
 
-    let part_a: usize = garden.count_paths(6);
+    let part_a: usize = garden.count_paths(64);
 
     println!("{part_a}");
 }
