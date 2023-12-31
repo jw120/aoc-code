@@ -26,7 +26,7 @@ fn main() {
     let bricks: Vec<Brick> = stdin_lines().map(read_brick).collect();
 
     for brick in bricks {
-        println!("{:?}", brick);
+        println!("{brick:?}");
     }
 
     let part_a: usize = 0;

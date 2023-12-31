@@ -103,7 +103,7 @@ fn parse_module(s: &str) -> (String, Module) {
         .next()
         .unwrap()
         .split(", ")
-        .map(|s| s.to_string())
+        .map(std::string::ToString::to_string)
         .collect();
     (module_name.to_string(), (module_type, destinations))
 }
@@ -215,7 +215,7 @@ fn run(modules: &HashMap<String, Module>, n: usize) -> usize {
         if !flipflop_previous.is_empty() {
             for (flipflop_name, flipflop_state) in &flipflop_states {
                 if flipflop_state != flipflop_previous.get(flipflop_name).unwrap() {
-                    *flipflop_counts.get_mut(flipflop_name).unwrap() += 1
+                    *flipflop_counts.get_mut(flipflop_name).unwrap() += 1;
                 }
             }
         }
@@ -235,7 +235,7 @@ fn run(modules: &HashMap<String, Module>, n: usize) -> usize {
                     "{} {:?}",
                     conjunction_name,
                     conjunction_states.get(conjunction_name).unwrap()
-                )
+                );
             };
         }
 
@@ -246,7 +246,7 @@ fn run(modules: &HashMap<String, Module>, n: usize) -> usize {
     }
 
     for (flipflop_name, count) in flipflop_counts {
-        println!("{} {}", flipflop_name, count);
+        println!("{flipflop_name} {count}");
     }
     low_count * high_count
 }

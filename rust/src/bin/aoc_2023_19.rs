@@ -174,7 +174,7 @@ fn range_overlap((a_min, a_max): (usize, usize), (b_min, b_max): (usize, usize))
 }
 
 // Split set based on given rule - returning sets that pass, fail
-fn split(rule: &Rule, set: Set) -> (Option<Set>, Option<Set>) {
+fn split(rule: &Rule, set: &Set) -> (Option<Set>, Option<Set>) {
     let (value_min, value_max) = match rule.category {
         Category::X => set.x,
         Category::M => set.m,
@@ -205,37 +205,37 @@ fn split(rule: &Rule, set: Set) -> (Option<Set>, Option<Set>) {
     };
     match rule.category {
         Category::X => (
-            pass.map(|p| Set { x: p, ..set }),
-            fail.map(|p| Set { x: p, ..set }),
+            pass.map(|p| Set { x: p, ..*set }),
+            fail.map(|p| Set { x: p, ..*set }),
         ),
         Category::M => (
-            pass.map(|p| Set { m: p, ..set }),
-            fail.map(|p| Set { m: p, ..set }),
+            pass.map(|p| Set { m: p, ..*set }),
+            fail.map(|p| Set { m: p, ..*set }),
         ),
         Category::A => (
-            pass.map(|p| Set { a: p, ..set }),
-            fail.map(|p| Set { a: p, ..set }),
+            pass.map(|p| Set { a: p, ..*set }),
+            fail.map(|p| Set { a: p, ..*set }),
         ),
         Category::S => (
-            pass.map(|p| Set { s: p, ..set }),
-            fail.map(|p| Set { s: p, ..set }),
+            pass.map(|p| Set { s: p, ..*set }),
+            fail.map(|p| Set { s: p, ..*set }),
         ),
     }
 }
 
-fn run_set(set: Set, workflow_name: String, workflows: &HashMap<String, Workflow>) -> Vec<Set> {
+fn run_set(set: Set, workflow_name: &str, workflows: &HashMap<String, Workflow>) -> Vec<Set> {
     let mut accepted: Vec<Set> = Vec::new();
-    let workflow = workflows.get(&workflow_name).unwrap();
+    let workflow = workflows.get(workflow_name).unwrap();
     let mut remaining_set: Set = set;
     let mut nothing_remaining: bool = false;
     for rule in workflow.rules.clone() {
-        let (pass, fail) = split(&rule, remaining_set.clone());
+        let (pass, fail) = split(&rule, &remaining_set);
         if let Some(pass_set) = pass {
             match rule.destination {
                 Destination::Accept => accepted.push(pass_set),
                 Destination::Reject => {}
                 Destination::Workflow(w) => {
-                    for x in run_set(pass_set, w, workflows) {
+                    for x in run_set(pass_set, &w, workflows) {
                         accepted.push(x);
                     }
                 }
@@ -252,7 +252,7 @@ fn run_set(set: Set, workflow_name: String, workflows: &HashMap<String, Workflow
             Destination::Accept => accepted.push(remaining_set),
             Destination::Reject => {}
             Destination::Workflow(w) => {
-                for x in run_set(remaining_set, w.to_string(), workflows) {
+                for x in run_set(remaining_set, w, workflows) {
                     accepted.push(x);
                 }
             }
@@ -280,7 +280,7 @@ fn _make_reduce_maps(
     input_values: impl Iterator<Item = usize>,
 ) -> (HashMap<usize, usize>, Vec<usize>) {
     let mut values: Vec<usize> = input_values.collect();
-    values.sort();
+    values.sort_unstable();
     values.dedup();
     let mut h = HashMap::new();
     for (i, value) in values.clone().into_iter().enumerate() {
@@ -306,13 +306,13 @@ fn sum_valid(valid: &[Set]) -> usize {
     //     })
     //     .collect();
 
-    println!("Valid {:?}", valid);
+    println!("Valid {valid:?}");
     for s in valid {
-        println!("{:?}", s);
+        println!("{s:?}");
     }
     for s1 in valid {
         for s2 in valid {
-            assert!(!overlap(s1, s2), "{:?} {:?}", s1, s2);
+            assert!(!overlap(s1, s2), "{s1:?} {s2:?}");
         }
     }
 
@@ -361,7 +361,7 @@ fn main() {
         a: (1, 4000),
         s: (1, 4000),
     };
-    let valid: Vec<Set> = run_set(start, "in".to_string(), &workflows);
+    let valid: Vec<Set> = run_set(start, "in", &workflows);
     let part_b: usize = sum_valid(&valid);
     println!("{part_b}");
 }

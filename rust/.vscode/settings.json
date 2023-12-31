@@ -9,6 +9,7 @@
         "peekable",
         "rfind",
         "SWNE",
+        "ucoord",
         "usize"
     ],
     "rust-analyzer.check.command": "clippy",
