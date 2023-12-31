@@ -173,3 +173,91 @@ impl SubAssign for UCoord {
         };
     }
 }
+
+// 3-d coordinate type
+
+#[derive(Debug, Copy, Clone, Eq, Hash, PartialEq)]
+pub struct Coord3 {
+    pub x: i32,
+    pub y: i32,
+    pub z: i32,
+}
+
+impl Coord3 {
+    #[must_use]
+    pub fn mag2(&self) -> i32 {
+        self.x * self.x + self.y * self.y
+    }
+
+    #[must_use]
+    pub fn origin() -> Coord3 {
+        Coord3 { x: 0, y: 0, z: 0 }
+    }
+
+    #[must_use]
+    pub fn div(&self, d: i32) -> Coord3 {
+        Coord3 {
+            x: self.x / d,
+            y: self.y / d,
+            z: self.z / d,
+        }
+    }
+
+    #[must_use]
+    pub fn signum(&self) -> Coord3 {
+        Coord3 {
+            x: self.x.signum(),
+            y: self.y.signum(),
+            z: self.z.signum(),
+        }
+    }
+
+    #[must_use]
+    pub fn manhattan(&self, other: &Coord3) -> i32 {
+        (self.x - other.x).abs() + (self.y - other.y).abs() + (self.z - other.z).abs()
+    }
+}
+
+impl Add for Coord3 {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
+    }
+}
+
+impl AddAssign for Coord3 {
+    fn add_assign(&mut self, other: Self) {
+        *self = Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        };
+    }
+}
+
+impl Sub for Coord3 {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
+    }
+}
+
+impl SubAssign for Coord3 {
+    fn sub_assign(&mut self, other: Self) {
+        *self = Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        };
+    }
+}
