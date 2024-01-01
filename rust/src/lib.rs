@@ -18,6 +18,10 @@ pub struct Coord {
     pub col: i32,
 }
 
+pub fn coord(row: i32, col: i32) -> Coord {
+    Coord { row, col }
+}
+
 impl Coord {
     #[must_use]
     pub fn mag2(&self) -> i32 {
@@ -97,6 +101,10 @@ impl SubAssign for Coord {
 pub struct UCoord {
     pub row: usize,
     pub col: usize,
+}
+
+pub fn ucoord(row: usize, col: usize) -> UCoord {
+    UCoord { row, col }
 }
 
 impl UCoord {
@@ -183,6 +191,10 @@ pub struct Coord3 {
     pub z: i32,
 }
 
+pub fn coord3(x: i32, y: i32, z: i32) -> Coord3 {
+    Coord3 { x, y, z }
+}
+
 impl Coord3 {
     #[must_use]
     pub fn mag2(&self) -> i32 {
@@ -253,6 +265,104 @@ impl Sub for Coord3 {
 }
 
 impl SubAssign for Coord3 {
+    fn sub_assign(&mut self, other: Self) {
+        *self = Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        };
+    }
+}
+
+// 3-d unsigned coordinate type
+
+#[derive(Debug, Copy, Clone, Eq, Hash, PartialEq)]
+pub struct UCoord3 {
+    pub x: usize,
+    pub y: usize,
+    pub z: usize,
+}
+
+pub fn ucoord3(x: usize, y: usize, z: usize) -> UCoord3 {
+    UCoord3 { x, y, z }
+}
+
+impl UCoord3 {
+    #[must_use]
+    pub fn mag2(&self) -> usize {
+        self.x * self.x + self.y * self.y
+    }
+
+    #[must_use]
+    pub fn origin() -> UCoord3 {
+        UCoord3 { x: 0, y: 0, z: 0 }
+    }
+
+    #[must_use]
+    pub fn div(&self, d: usize) -> UCoord3 {
+        UCoord3 {
+            x: self.x / d,
+            y: self.y / d,
+            z: self.z / d,
+        }
+    }
+
+    #[must_use]
+    pub fn manhattan(&self, other: &UCoord3) -> usize {
+        let x_diff: usize = if self.x > other.x {
+            self.x - other.x
+        } else {
+            other.x - self.x
+        };
+        let y_diff: usize = if self.y > other.y {
+            self.y - other.y
+        } else {
+            other.y - self.y
+        };
+        let z_diff: usize = if self.z > other.z {
+            self.z - other.z
+        } else {
+            other.z - self.z
+        };
+        x_diff + y_diff + z_diff
+    }
+}
+
+impl Add for UCoord3 {
+    type Output = Self;
+
+    fn add(self, other: Self) -> Self {
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        }
+    }
+}
+
+impl AddAssign for UCoord3 {
+    fn add_assign(&mut self, other: Self) {
+        *self = Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+            z: self.z + other.z,
+        };
+    }
+}
+
+impl Sub for UCoord3 {
+    type Output = Self;
+
+    fn sub(self, other: Self) -> Self {
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+            z: self.z - other.z,
+        }
+    }
+}
+
+impl SubAssign for UCoord3 {
     fn sub_assign(&mut self, other: Self) {
         *self = Self {
             x: self.x - other.x,
