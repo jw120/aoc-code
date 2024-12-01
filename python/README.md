@@ -4,6 +4,10 @@
 
 * Check all run
 
+  * 2019 08 (broken in golden)
+  * 2020 14
+  * 2020 19
+
 * Check 2022-24... working
 * Check 2021 working
 * Refactor golden_test

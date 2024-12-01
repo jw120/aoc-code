@@ -13,16 +13,18 @@ from tempfile import NamedTemporaryFile
 from time import time
 
 PYTHON_EXECUTABLE: str = "python"
-SOURCE_FILE_FORMAT: str = "python/aoc_{year}_{day:02}.py"
-INPUT_FILE_FORMAT: str = "../aoc-data/input/{year}_{day:02}.txt"
-GOOD_FILE_FORMAT: str = "../aoc-data/good/{year}_{day:02}.txt"
+SOURCE_FILE_FORMAT: str = "src/aoc_{year}_{day:02}.py"
+INPUT_FILE_FORMAT: str = "../../aoc-data/input/{year}_{day:02}.txt"
+GOOD_FILE_FORMAT: str = "../../aoc-data/good/{year}_{day:02}.txt"
 ELAPSED_MS_THRESHOLD: int = 500  # Show time taken if reaches this
 
 completed: list[tuple[int, Iterable[int]]] = [
     (2019, [*list(range(1, 12)), 13, 14, 15]),
     (2020, range(1, 26)),
-    (2021, [*list(range(1, 16)), 17, 19, 20, 21, 22, 23, 25]),
+    (2021, [*list(range(1, 16)), 17, *list(range(19, 24)), 25]),
     (2022, range(1, 26)),
+    (2023, [*list(range(1, 10)), 11, *list(range(13, 17))]),
+    (2024, range(1, 2)),
 ]
 
 # With >3s execution time

@@ -4,8 +4,7 @@ use std::collections::HashMap;
 use std::io;
 use std::iter::zip;
 
-fn parse(r: Result<String, io::Error>) -> (i32, i32) {
-    let s: String = r.unwrap();
+fn parse(s: &str) -> (i32, i32) {
     let mut iter = s.split_ascii_whitespace();
     let x: i32 = iter.next().unwrap().parse().unwrap();
     let y: i32 = iter.next().unwrap().parse().unwrap();
@@ -33,7 +32,10 @@ fn similarity(pairs: &[(i32, i32)]) -> i32 {
 }
 
 fn main() {
-    let pairs: Vec<(i32, i32)> = io::stdin().lines().map(parse).collect();
+    let pairs: Vec<(i32, i32)> = io::stdin()
+        .lines()
+        .map(|line| parse(&line.unwrap()))
+        .collect();
 
     println!("{}", total_distance(&pairs));
     println!("{}", similarity(&pairs));

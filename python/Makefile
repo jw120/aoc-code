@@ -38,16 +38,19 @@ run_2022: \
 run_2023: \
 	python_2023_01 python_2023_02 python_2023_03
 
+run_2024: \
+	python_2024_01 
+
 check:
 	ruff format $(PYTHON_SRC)
 	ruff check $(PYTHON_SRC)
 	pyright $(PYTHON_SRC)
 
 python-test:
-	python python/golden_test.py
+	python src/golden_test.py
 
 python-test-fast:
-	python python/golden_test.py --fast
+	python src/golden_test.py --fast
 
 
 OUT_DIR = out
