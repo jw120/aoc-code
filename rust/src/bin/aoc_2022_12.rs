@@ -8,7 +8,7 @@ use std::collections::VecDeque;
 use std::hash::Hash;
 
 // Read height map, start and end from stdin
-fn read_height_map(lines: &Vec<String>) -> (Grid<u8>, UCoord, UCoord) {
+fn read_height_map(lines: &[String]) -> (Grid<u8>, UCoord, UCoord) {
     let rows = lines.len();
     let cols = lines[0].len();
     let mut grid: Grid<u8> = Grid::new(rows, cols);

@@ -1,4 +1,4 @@
-.PHONY: all check run run_2022 run_2023
+.PHONY: all check run run_2022 run_2023 run_2024
 
 all: check run
 
@@ -14,6 +14,9 @@ run_2023: \
 	rust_2023_06 rust_2023_07 rust_2023_08 rust_2023_09              \
 	rust_2023_11              rust_2023_13 rust_2023_14 rust_2023_15 \
 	rust_2023_16 
+
+run_2024: \
+	rust_2024_01
 
 check:
 	cargo fmt --quiet

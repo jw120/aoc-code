@@ -58,7 +58,7 @@ fn score(n: u32) -> u32 {
 }
 
 // Part (b) number of cards given number of winners for each card
-fn part_b(winners: &Vec<u32>) -> u32 {
+fn part_b(winners: &[u32]) -> u32 {
     // start with one of each card
     let mut counts: Vec<u32> = vec![1; winners.len()];
 

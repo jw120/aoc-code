@@ -31,7 +31,7 @@ fn to_digits_words(s: &str) -> Vec<u32> {
     digits
 }
 
-fn end_digits(xs: &Vec<u32>) -> u32 {
+fn end_digits(xs: &[u32]) -> u32 {
     xs[0] * 10 + xs[xs.len() - 1]
 }
 

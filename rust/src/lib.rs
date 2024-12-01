@@ -18,6 +18,7 @@ pub struct Coord {
     pub col: i32,
 }
 
+#[must_use]
 pub fn coord(row: i32, col: i32) -> Coord {
     Coord { row, col }
 }
@@ -103,6 +104,7 @@ pub struct UCoord {
     pub col: usize,
 }
 
+#[must_use]
 pub fn ucoord(row: usize, col: usize) -> UCoord {
     UCoord { row, col }
 }
@@ -191,6 +193,7 @@ pub struct Coord3 {
     pub z: i32,
 }
 
+#[must_use]
 pub fn coord3(x: i32, y: i32, z: i32) -> Coord3 {
     Coord3 { x, y, z }
 }
@@ -283,6 +286,7 @@ pub struct UCoord3 {
     pub z: usize,
 }
 
+#[must_use]
 pub fn ucoord3(x: usize, y: usize, z: usize) -> UCoord3 {
     UCoord3 { x, y, z }
 }
