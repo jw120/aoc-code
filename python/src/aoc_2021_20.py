@@ -138,20 +138,14 @@ test1: Image = Image(["#..#.", "#....", "##..#", "..#..", "..###"])
 
 test_algo1: Algorithm = [
     c == "#"
-    # pylint: disable-next=line-too-long
     for c in "..#.#..#####.#.#.#.###.##.....###.##.#..###.####..#####..#....#..#..##..###..######.###...####..#..#####..##..#.#####...##.#.#..#.##..#.#......#.###.######.###.####...#.##.##..#..#..#####.....#.#....###..#.##......#.....#..#..#..##..#...##.######.####.####.#.#...#.......#..#.#.#...####.##.#......#..#...##.#.##..#...##.#.##..###.#......#.#.......#.#.#.####.###.##...#.....####.#..#..#.##.#....##..#.####....##...##..#...#......#.#.......#.......##..####..#...#.#.#...##..#.#..###..#####........#..####......#..#"
 ]
 assert len(test_algo1) == 512
 
 if __name__ == "__main__":
     testmod()
-    # test1.show()
-    # test1.enhanced_copy(test_algo1).show()
     algo_block, image_block = stdin.read().split("\n\n")
     input_algo = read_algo(algo_block)
     input_image = Image(image_block.splitlines())
-    # image.show()
-    # image.enhanced_copy(algo).show()
-    # image.enhanced_copy(algo).enhanced_copy(algo).show()
     print(input_image.enhanced_copy(input_algo).enhanced_copy(input_algo).number_lit)
     print(input_image.enhanced_repeated_copy(input_algo, 50).number_lit)

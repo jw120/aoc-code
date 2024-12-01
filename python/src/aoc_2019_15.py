@@ -114,7 +114,6 @@ class Controller:
         path: list[Coord] = []
         while x != self.loc:
             path.append(x)
-            # pylint: disable=consider-using-get
             x = frontier[x] if x in frontier else visited[x]
         if self.debug:
             print("Path", path)

@@ -1,6 +1,5 @@
 """Advent of Code 2022 - Day 25."""
 
-
 from doctest import testmod
 from sys import stdin
 from typing import Final, LiteralString
@@ -33,7 +32,7 @@ def decimal_to_snafu(x: int) -> str:
     while x != 0:
         digit = (x + 2) % 5 - 2
         acc = SNAFU_DIGITS[digit] + acc
-        x = x - digit
+        x -= digit
         assert x % 5 == 0
         x //= 5
     return acc

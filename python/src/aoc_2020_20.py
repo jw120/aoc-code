@@ -4,6 +4,7 @@ from collections.abc import Iterable
 from copy import deepcopy
 from doctest import testmod
 from functools import reduce
+from operator import mul
 from sys import stdin
 from typing import NewType, TypeVar
 
@@ -21,7 +22,7 @@ We read the pixels in the given directions
 |     V
  <----
 """
-EdgeValue = NewType("EdgeValue", int)  #
+EdgeValue = NewType("EdgeValue", int)
 
 """ Directions are encoded as 0 = Up, 1 = Right, 2 = Down, 3 = Left
 
@@ -296,7 +297,7 @@ class Board:
                 new_rows = append_cols(
                     new_rows, self.tiles[tile_id].oriented_image(direction, do_flip=do_flip)
                 )
-            self.image = self.image + new_rows
+            self.image += new_rows
 
     def sea_monsters(self) -> int:
         """Count sea monsters in the image's current orientation."""
@@ -337,6 +338,6 @@ class Board:
 if __name__ == "__main__":
     testmod()
     board = Board(block.splitlines() for block in stdin.read().split("\n\n"))
-    print(reduce(lambda x, y: x * y, board.corners(), 1))
+    print(reduce(mul, board.corners(), 1))
     board.set_image()
     print(count_true_values(board.image) - board.max_sea_monsters() * count_true_values(monster))

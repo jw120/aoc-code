@@ -1,13 +1,12 @@
 """Advent of Code 2019 - Day 9."""
 
-# pylint: disable=missing-function-docstring
-
 from sys import stdin
 
 from int_code import Machine
 
 
 def run(code: list[int], x: int) -> int:
+    """Run the machine code."""
     machine = Machine(code, [x])
     machine.run()
     assert len(machine.output_vals) == 1

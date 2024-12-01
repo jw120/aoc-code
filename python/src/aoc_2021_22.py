@@ -2,7 +2,6 @@
 
 # We (ab)use private members - don't complain
 # pyright: reportPrivateUsage=false
-# pylint: disable=protected-access
 # ruff: noqa: SLF001 private-member-access
 
 from __future__ import annotations
@@ -167,9 +166,8 @@ def merge_adjacents(cs: list[Cuboid]) -> None:
         ), f"Overlapping cuboids entering merge_adjacents: {c.as_tuple()} {d.as_tuple()}"
     made_change = True
     while made_change:
-        #        print("merged", [c.as_tuple() for c in cs])
         made_change = False
-        for i in range(len(cs)):  # pylint: disable=consider-using-enumerate
+        for i in range(len(cs)):
             for j in range(i + 1, len(cs)):
                 i_j = cs[i].merge(cs[j])
                 if i_j is not None:
@@ -199,7 +197,6 @@ def combine(cs: list[Cuboid], step: tuple[bool, Cuboid]) -> list[Cuboid]:
     39
     """
     turn_on, x = step
-    # print("Combining", turn_on, x.as_tuple())
     if not cs:
         return [x] if turn_on else []
     # Start by checking all existing cuboids are disjoint
@@ -208,9 +205,6 @@ def combine(cs: list[Cuboid], step: tuple[bool, Cuboid]) -> list[Cuboid]:
     # Split list into overlapping x and disjoint to x cuboids (ignore any within x)
     overlapping_cuboids = [x, *filter(lambda c: x.overlap(c) and not x.includes(c), cs)]
     disjoint_cuboids = list(filter(lambda c: c.disjoint(x), cs))
-    # print(
-    #     f"{len(cs)}+1 -> {len(overlapping_cuboids)} overlapping, {len(disjoint_cuboids)} disjoint"
-    # )
     # Replace the cuboids that overlap with x with all possible cuboids
     x_coords = sorted(
         chain.from_iterable((c._min.x, c._max.x) for c in overlapping_cuboids)  # pyright: ignore[reportPrivateUsage]

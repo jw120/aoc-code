@@ -187,13 +187,13 @@ test_code_5: list[int] = [
 
 
 def run_machine(
-    code: list[int], phase: int, input_val: int, print_instructions: bool = False
+    code: list[int], phase: int, input_val: int, *, print_instructions: bool = False
 ) -> int:
     """Rune the machine."""
     if print_instructions:
         print(f"Running machine with phase setting {phase} and input {input_val}")
     m: Machine = Machine(code, [phase, input_val])
-    m.run(print_instructions)
+    m.run(print_instructions=print_instructions)
     assert len(m.output_vals) == 1
     output_value = m.output_vals[0]
     if print_instructions:
@@ -202,7 +202,7 @@ def run_machine(
 
 
 def run_phase_settings(
-    code: list[int], phase_settings: PhaseSettings, print_instructions: bool = False
+    code: list[int], phase_settings: PhaseSettings, *, print_instructions: bool = False
 ) -> int:
     """Run a series of machines from input 0 with given phase settings.
 
@@ -216,15 +216,13 @@ def run_phase_settings(
     output_val: int = 0
     while phase_settings:
         output_val = run_machine(
-            code, phase_settings[0], output_val, print_instructions
+            code, phase_settings[0], output_val, print_instructions=print_instructions
         )
         phase_settings = phase_settings[1:]
     return output_val
 
 
-def run_phase_settings_with_feedback(
-    code: list[int], phase_settings: PhaseSettings
-) -> int:
+def run_phase_settings_with_feedback(code: list[int], phase_settings: PhaseSettings) -> int:
     """Run a series machines with feedback from input 0 with given phase settings.
 
     >>> run_phase_settings_with_feedback(test_code_4, [9, 8, 7, 6, 5])
@@ -265,7 +263,7 @@ def permutations(xs: list[X]) -> Iterator[list[X]]:
         for i, first_val in enumerate(xs):
             other_vals: list[X] = xs[:i] + xs[i + 1 :]
             for p in permutations(other_vals):
-                yield [first_val] + p
+                yield [first_val, *p]
 
 
 def part_one(code: list[int]) -> int:
@@ -275,9 +273,7 @@ def part_one(code: list[int]) -> int:
 
 def part_two(code: list[int]) -> int:
     """Solve part two."""
-    return max(
-        run_phase_settings_with_feedback(code, p) for p in permutations([5, 6, 7, 8, 9])
-    )
+    return max(run_phase_settings_with_feedback(code, p) for p in permutations([5, 6, 7, 8, 9]))
 
 
 if __name__ == "__main__":

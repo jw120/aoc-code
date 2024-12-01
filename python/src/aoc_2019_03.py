@@ -1,13 +1,11 @@
 """Advent of Code 2019 - Day 3."""
 
-# pylint: disable=missing-class-docstring
-
 from __future__ import annotations
 
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import ClassVar, Union
+from typing import ClassVar
 
 
 @dataclass(eq=True, frozen=True)
@@ -27,29 +25,37 @@ class Offset:
 
 @dataclass
 class Up:
+    """Up."""
+
     offset: ClassVar[Offset] = Offset(0, 1)
     name: ClassVar[str] = "U"
 
 
 @dataclass
 class Right:
+    """Right."""
+
     offset: ClassVar[Offset] = Offset(1, 0)
     name: ClassVar[str] = "R"
 
 
 @dataclass
 class Down:
+    """Down."""
+
     offset: ClassVar[Offset] = Offset(0, -1)
     name: ClassVar[str] = "D"
 
 
 @dataclass
 class Left:
+    """Left."""
+
     offset: ClassVar[Offset] = Offset(-1, 0)
     name: ClassVar[str] = "L"
 
 
-Direction = Union[Up, Right, Down, Left]
+Direction = Up | Right | Down | Left
 
 
 def parse_direction(s: str) -> Direction:
@@ -85,7 +91,7 @@ def trace(wire: Wire) -> set[Offset]:
     visited: set[Offset] = set()
     for direction, distance in wire:
         for _ in range(1, distance + 1):
-            pos = pos + direction.offset
+            pos += direction.offset
             visited.add(pos)
     return visited
 
@@ -102,7 +108,7 @@ def trace_steps(wire: Wire) -> dict[Offset, int]:
     for direction, distance in wire:
         for _ in range(1, distance + 1):
             steps += 1
-            pos = pos + direction.offset
+            pos += direction.offset
             if pos not in visited:
                 visited[pos] = steps
     return visited

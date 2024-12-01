@@ -1,7 +1,5 @@
 """Advent of Code 2020 - Day 17."""
 
-# pylint: disable=missing-function-docstring, invalid-name
-
 from collections.abc import Iterable
 from sys import stdin
 
@@ -204,15 +202,6 @@ test4 = Grid4d([".#.", "..#", "###"])
 
 
 if __name__ == "__main__":
-    # print("Before any cycles:\n")
-    # test4.show()
-    # print()
-    # for t in range(1, 7):
-    #     print(f"After {t} cycle{'s' if t > 1 else ''}:\n")
-    #     test4.iterate()
-    # #        test4.show()
-    # #       print()
-    # print(test4.count_cubes())
     input_lines = list(stdin)
     grid3 = Grid3d(input_lines)
     for _ in range(6):

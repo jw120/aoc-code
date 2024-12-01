@@ -1,7 +1,5 @@
 """Advent of Code 2020 - Day 19."""
 
-# pylint: disable=missing-class-docstring
-
 import re
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -73,13 +71,13 @@ def parse_ints(s: str) -> list[int]:
 class MessageValidator:
     """Main class for day 19.
 
-    >>> mv = MessageValidator(test_rules.splitlines()) # cspell: disable
+    >>> mv = MessageValidator(test_rules.splitlines()) # spell-checker: disable
     >>> inputs = ["abz", "aaww", "baqq", "bby", "", "cz"]
     >>> [mv.valid_remains(s, mv.rules[3]) for s in inputs]
     ['z', None, 'qq', None, None, None]
     """
 
-    # cspell: enable
+    # spell-checker: enable
 
     def __init__(self, rules: Iterable[str]) -> None:
         self.rules: dict[int, Rule] = dict(parse_rule(r) for r in rules)
@@ -104,7 +102,6 @@ class MessageValidator:
                 return remainder
             return self.valid_remains(s, r.b)
         for i in r.rule_indices:
-            #            print("Series", s, i)
             remainder = self.valid_remains(s, self.rules[i])
             if remainder is None:
                 return None
@@ -146,7 +143,7 @@ class MessageValidator:
                 count_31 += 1
 
 
-# cspell: disable
+# spell-checker: disable
 
 TEST_DATA = """0: 4 1 5
 1: 2 3 | 3 2
@@ -162,7 +159,7 @@ aaabbb
 aaaabbb"""
 test_rules, test_messages = TEST_DATA.split("\n\n")
 
-# cspell: enable
+# spell-checker: enable
 
 
 if __name__ == "__main__":

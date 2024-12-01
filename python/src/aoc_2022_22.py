@@ -5,7 +5,7 @@ from __future__ import annotations
 from doctest import testmod
 from re import findall
 from sys import stdin
-from typing import Final, TypeAlias
+from typing import Final
 
 from coord import Coord, Extent
 from direction import Direction
@@ -14,11 +14,11 @@ from direction import Direction
 # but that seems hard - we hard-wire them instead.
 
 # We reference cube faces by their (x-right, y-down) offsets
-FaceOffset: TypeAlias = tuple[int, int]
+type FaceOffset = tuple[int, int]
 
 # We define cube topology by showing for each face, if we leave the face in the given direction
 # then we appear on the given face and edge with coordinate sense preserved or not
-Topology: TypeAlias = dict[FaceOffset, dict[Direction, tuple[FaceOffset, Direction, bool]]]
+type Topology = dict[FaceOffset, dict[Direction, tuple[FaceOffset, Direction, bool]]]
 
 
 # For the simple wrapping topology for the question example, we use a helper function
@@ -235,7 +235,6 @@ class MonkeyMap:
 
         If path is blocked, then return the same Coord.
         """
-        # print("Move", c, d)
         match d:
             case Direction.UP:
                 c_new = c + Coord(0, -1)
@@ -249,10 +248,9 @@ class MonkeyMap:
             case None:
                 d_new = d
             case (int(face_x), int(face_y)):
-                (face_new, edge_new, preserve) = self.topology[(face_x, face_y)][d]
+                (face_new, edge_new, preserve) = self.topology[face_x, face_y][d]
                 d_new = edge_new.opposite()
                 c_new = self.to_coord(c_new, d, face_new, edge_new, preserve=preserve)
-        # print(f"Testing move to {c_new} {d_new}, ", end="")
         if self.board[c_new]:
             return c, d
         return c_new, d_new

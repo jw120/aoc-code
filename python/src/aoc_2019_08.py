@@ -1,12 +1,13 @@
 """Advent of Code 2019 - Day 8."""
 
-# pylint: disable=missing-function-docstring, missing-class-docstring
-
 from collections import Counter
+from operator import itemgetter
 from sys import stdin
 
 
 class Image:
+    """Image."""
+
     def __init__(self, pixels: str, rows: int, cols: int) -> None:
         self.pixels = pixels
         self.rows = rows
@@ -17,24 +18,27 @@ class Image:
             raise RuntimeError("Bad size")
 
     def pixel(self, layer: int, row: int, col: int) -> str:
+        """Return pixel value."""
         return self.pixels[layer * self.layer_size + row * self.cols + col]
 
 
 def part_one(i: Image) -> int:
+    """Solve part one."""
     layer_counts: list[Counter[str]] = []
-    for layer in range(0, i.layers):
+    for layer in range(i.layers):
         layer_counts.append(Counter())
-        for row in range(0, i.rows):
-            for col in range(0, i.cols):
+        for row in range(i.rows):
+            for col in range(i.cols):
                 p: str = i.pixel(layer, row, col)
                 layer_counts[layer][p] += 1
-    min_layer = min(layer_counts, key=lambda x: x["0"])
+    min_layer = min(layer_counts, key=itemgetter(0))
     return min_layer["1"] * min_layer["2"]
 
 
 def part_two(i: Image) -> None:
-    for row in range(0, i.rows):
-        for col in range(0, i.cols):
+    """Solve part-two."""
+    for row in range(i.rows):
+        for col in range(i.cols):
             layer = 0
             while i.pixel(layer, row, col) == "2":
                 layer += 1

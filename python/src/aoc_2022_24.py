@@ -106,11 +106,11 @@ class Basin:
             y = b.start.y
             if b.step.y == 0:
                 for t in range(self.width):
-                    self.h_cache[(x, y, t)] = True
+                    self.h_cache[x, y, t] = True
                     x = (x + b.step.x) % self.width
             else:
                 for t in range(self.height):
-                    self.v_cache[(x, y, t)] = True
+                    self.v_cache[x, y, t] = True
                     y = (y + b.step.y) % self.height
         if self.debug:
             print(f"{self.width}x{self.height}")
@@ -126,8 +126,8 @@ class Basin:
         if state.location.x in {-1, self.width}:
             return False  # Side walls
         return not (
-            self.h_cache[(state.location.x, state.location.y, state.time % self.width)]
-            or self.v_cache[(state.location.x, state.location.y, state.time % self.height)]
+            self.h_cache[state.location.x, state.location.y, state.time % self.width]
+            or self.v_cache[state.location.x, state.location.y, state.time % self.height]
         )
 
     def add_priority(self, state: State) -> PrioritizedState:
@@ -156,8 +156,6 @@ class Basin:
             if not heap:
                 raise ValueError("No path found")
             state: State = heappop(heap).state
-            # if self.debug:
-            #     print(state)
             visited.add(state.wrap_time(self.repeat))
             if state.time > t_max:
                 t_max = state.time
@@ -165,18 +163,14 @@ class Basin:
                     print(
                         f"t_max={t_max},",
                     )
-                    # if t_max == 100:
-                    #     return -1
             if state.location == self.goal:
                 return state.time
             for adj in chain(state.location.adjacents(), [state.location]):
-                # print(f"Considering move from {state.location} to {adj}")
                 trial_state = State(location=adj, time=state.time + 1)
                 if trial_state.wrap_time(self.repeat) not in visited and self.will_be_empty(
                     trial_state
                 ):
                     heappush(heap, self.add_priority(trial_state))
-                    # print("added")
 
     def forward_path(self, start_time: int) -> int:
         """Return length of shortest path from start to goal with given start time.

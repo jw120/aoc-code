@@ -37,13 +37,11 @@ def run(instructions: Iterable[str], sample_cycles: set[int]) -> tuple[int, str]
             case _:
                 raise ValueError(f"Bad instruction: '{ins}'")
         for _ in range(cycles_needed):
-            # print(cycle, x)
             if cycle in sample_cycles:
                 accumulated_signal_strength += cycle * x
             crt_position = (cycle - 1) % 40
             crt_pixel = "#" if abs(crt_position - x) <= 1 else "."
-            crt = crt + crt_pixel
-            # print(cycle, x, crt_pixel)
+            crt += crt_pixel
             cycle += 1
         x += x_delta
 
@@ -56,7 +54,7 @@ def show_crt(s: str) -> None:
         print(s[40 * i : 40 * (i + 1)])
 
 
-# TEST_SHORT = ["noop", "addx 3", "addx -5", "noop"]
+# spell-checker:disable
 
 TEST_LONG_ENCODED = (
     "a15a-11a6a-3a5a-1a-8a13a4na-1a5a-1a5a-1a5a-1a5a-1a-35a1a24"
@@ -67,11 +65,11 @@ TEST_LONG_ENCODED = (
     "a-6a-11nnn"
 )
 
+# spell-checker:enable
+
+
 TEST_LONG = (
-    TEST_LONG_ENCODED.replace("a", "\naddx ")
-    .replace("n", "\nnoop")
-    .removeprefix("\n")
-    .split("\n")
+    TEST_LONG_ENCODED.replace("a", "\naddx ").replace("n", "\nnoop").removeprefix("\n").split("\n")
 )
 
 selected_samples = {20, 60, 100, 140, 180, 220}

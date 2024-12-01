@@ -4,7 +4,6 @@ Key insight - dfs where only consider moving to open a valve
 
 """
 
-
 from __future__ import annotations
 
 from collections import deque
@@ -12,12 +11,12 @@ from dataclasses import dataclass
 from doctest import testmod
 from re import fullmatch
 from sys import stdin
-from typing import TYPE_CHECKING, TypeAlias, TypeVar, cast
+from typing import TYPE_CHECKING, TypeVar, cast
 
 if TYPE_CHECKING:
     from collections.abc import Iterable
 
-ValveName: TypeAlias = str
+type ValveName = str
 
 
 @dataclass
@@ -39,7 +38,7 @@ class Valve:
         assert m, f"read_value match failed on '{s}'"
         name = m.group(1)
         flow_rate = int(m.group(2))
-        tunnels = sorted(cast(list[str], m.group(3).split(", ")))
+        tunnels = sorted(cast("list[str]", m.group(3).split(", ")))
         assert len(tunnels) > 0
         return Valve(name, flow_rate, tunnels)
 
@@ -85,8 +84,8 @@ def graph_adj_to_dist(adj: dict[T, Iterable[T]]) -> dict[tuple[T, T], int]:
     for n1 in adj:
         dist1 = node_adj_to_dist(adj, n1)
         for n2 in adj:
-            d[(n1, n2)] = dist1[n2]
-            d[(n2, n2)] = dist1[n2]
+            d[n1, n2] = dist1[n2]
+            d[n2, n2] = dist1[n2]
     return d
 
 
@@ -143,12 +142,9 @@ class Volcano:
             if not stack:
                 break
             state = stack.pop()
-            if state.score > best_score:
-                best_score = state.score
-            #                print(best_score, state.path)
+            best_score = max(state.score, best_score)
             possible_flow_rate = sum(self.valves[v].flow_rate for v in state.unopened)
             for walker in range(walkers):
-                #                print(state)
                 assert set(state.path[walker]).isdisjoint(state.unopened)
                 for destination in state.unopened:
                     if destination == state.current_valve_name[walker]:

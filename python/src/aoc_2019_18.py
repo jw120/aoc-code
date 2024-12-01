@@ -36,7 +36,6 @@ class Maze:
     """Main class for day 18."""
 
     def __init__(self, lines: list[str]) -> None:
-
         self._extent: Extent = Extent(len(lines), len(lines[0]))
         self._doors: dict[Coord, str] = {}
         self._keys: dict[Coord, str] = {}
@@ -68,11 +67,7 @@ class Maze:
 
     def available(self, w: Walker) -> list[Walker]:
         """Return the states which can be moved to."""
-        return [
-            x.add_key(self._keys.get(x.position))
-            for x in w.adjacents()
-            if self._open(x)
-        ]
+        return [x.add_key(self._keys.get(x.position)) for x in w.adjacents() if self._open(x)]
 
     def has_all_keys(self, w: Walker) -> bool:
         """Have all keys been collected."""
@@ -80,17 +75,12 @@ class Maze:
 
     def _open(self, w: Walker) -> bool:
         """Can we move to the given walker state."""
-        #        print("Is open", w)
         if not w.position.in_bounds(self._extent):
-            #            print("OOB")
             return False
         if self.wall(w.position):
-            #            print("Wall")
             return False
         if w.position in self._doors:
-            #            print("Door")
             return self._doors[w.position].lower() in w.keys
-        #        print("Clear")
         return True
 
     def wall(self, p: Coord) -> bool:
@@ -118,27 +108,21 @@ class Maze:
 TEST1 = """
 #########
 #b.A.@.a#
-#########"""[
-    1:
-]
+#########"""[1:]
 
 TEST2 = """
 ########################
 #f.D.E.e.C.b.A.@.a.B.c.#
 ######################.#
 #d.....................#
-########################"""[
-    1:
-]
+########################"""[1:]
 
 TEST3 = """
 ########################
 #...............b.C.D.f#
 #.######################
 #.....@.a.B.c.d.A.e.F.g#
-########################"""[
-    1:
-]
+########################"""[1:]
 
 TEST4 = """
 #################
@@ -149,9 +133,7 @@ TEST4 = """
 #k.E..a...g..B.n#
 ########.########
 #l.F..d...h..C.m#
-#################"""[
-    1:
-]
+#################"""[1:]
 
 TEST5 = """
 ########################
@@ -159,9 +141,7 @@ TEST5 = """
 ###d#e#f################
 ###A#B#C################
 ###g#h#i################
-########################"""[
-    1:
-]
+########################"""[1:]
 
 if __name__ == "__main__":
     input_maze = Maze(stdin.read().splitlines())

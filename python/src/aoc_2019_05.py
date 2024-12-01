@@ -1,13 +1,12 @@
 """Advent of Code 2019 - Day 5."""
 
-# pylint: disable=missing-function-docstring
-
 from sys import stdin
 
 import int_code
 
 
 def part_one(code: list[int]) -> None:
+    """Solve part one."""
     machine: int_code.Machine = int_code.Machine(code, [1])
     machine.run()
     if any(machine.output_vals[:-1]):
@@ -17,6 +16,7 @@ def part_one(code: list[int]) -> None:
 
 
 def part_two(code: list[int]) -> None:
+    """Solve part two."""
     machine: int_code.Machine = int_code.Machine(code, [5])
     machine.run()
     print(machine.output_vals[-1])

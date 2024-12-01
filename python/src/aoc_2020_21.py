@@ -1,6 +1,7 @@
 """Advent of Code 2020 - Day 21."""
 
 from doctest import testmod
+from operator import itemgetter
 from sys import stdin
 from typing import NewType
 
@@ -20,24 +21,24 @@ def parse_food(s: str) -> tuple[list[Ingredient], list[Allergen]]:
 
 test1: list[tuple[list[Ingredient], list[Allergen]]] = [
     parse_food(s)
-    for s in [  # cspell: disable
+    for s in [  # spell-checker: disable
         "mxmxvkd kfcds sqjhc nhms (contains dairy, fish)",
         "trh fvjkl sbzzf mxmxvkd (contains dairy)",
         "sqjhc fvjkl (contains soy)",
         "sqjhc mxmxvkd sbzzf (contains fish)",
-    ]  # cspell: enable
+    ]  # spell-checker: enable
 ]
 
 
 def possible_ingredients(
-    foods: list[tuple[list[Ingredient], list[Allergen]]]
+    foods: list[tuple[list[Ingredient], list[Allergen]]],
 ) -> dict[Allergen, set[Ingredient]]:
     """Find which possible ingredients each allergen might be in."""
     possible: dict[Allergen, set[Ingredient]] = {}
     for ingredients, allergens in foods:
         for a in allergens:
             if a in possible:
-                possible[a] = possible[a] & set(ingredients)
+                possible[a] &= set(ingredients)
             else:
                 possible[a] = set(ingredients)
     return possible
@@ -64,10 +65,10 @@ def part_one(foods: list[tuple[list[Ingredient], list[Allergen]]]) -> int:
 def part_two(foods: list[tuple[list[Ingredient], list[Allergen]]]) -> str:
     """Return assigned allergens sorted by corresponding ingredient.
 
-    >>> part_two(test1) # cspell: disable
+    >>> part_two(test1) # spell-checker: disable
     'mxmxvkd,sqjhc,fvjkl'
     """
-    # cspell: enable
+    # spell-checker: enable
     possible: dict[Allergen, set[Ingredient]] = possible_ingredients(foods)
 
     matched_ingredients: list[tuple[Ingredient, Allergen]] = []
@@ -81,9 +82,9 @@ def part_two(foods: list[tuple[list[Ingredient], list[Allergen]]]) -> str:
                 # Remove the matched allergen and ingredient from the dictionary
                 del possible[allergen]
                 for a, _i_set in possible.items():
-                    possible[a] = possible[a] - {ingredient}
+                    possible[a] -= {ingredient}
                 break
-    return ",".join([pair[0] for pair in sorted(matched_ingredients, key=lambda x: x[1])])
+    return ",".join([pair[0] for pair in sorted(matched_ingredients, key=itemgetter(1))])
 
 
 if __name__ == "__main__":

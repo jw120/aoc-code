@@ -1,21 +1,17 @@
 """Advent of Code 2019 - Day 4."""
 
-# pylint: disable=missing-function-docstring
-
 from collections.abc import Callable
 from sys import stdin
 
 
-def valid_one(
-    a: int, b: int, c: int, d: int, e: int, f: int, low: int, high: int
-) -> bool:
+def valid_one(a: int, b: int, c: int, d: int, e: int, f: int, low: int, high: int) -> bool:
+    """Test for valid one."""
     n: int = 10 * (10 * (10 * (10 * (10 * a + b) + c) + d) + e) + f
-    return (low <= n <= high) and (a == b or b == c or c == d or d == e or e == f)
+    return (low <= n <= high) and (a == b or b == c or c == d or d == e or e == f)  # noqa: PLR1714
 
 
-def valid_two(
-    a: int, b: int, c: int, d: int, e: int, f: int, low: int, high: int
-) -> bool:
+def valid_two(a: int, b: int, c: int, d: int, e: int, f: int, low: int, high: int) -> bool:
+    """Test for valid two."""
     n: int = 10 * (10 * (10 * (10 * (10 * a + b) + c) + d) + e) + f
     return (low <= n <= high) and (
         (a == b and b != c)
@@ -29,8 +25,9 @@ def valid_two(
 def count(
     valid: Callable[[int, int, int, int, int, int, int, int], bool], low: int, high: int
 ) -> int:
+    """Count."""
     n: int = 0
-    for a in range(0, 10):
+    for a in range(10):
         for b in range(a, 10):
             for c in range(b, 10):
                 for d in range(c, 10):

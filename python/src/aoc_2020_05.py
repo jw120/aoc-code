@@ -16,9 +16,7 @@ def seat_id(code: str) -> int:
     >>> seat_id('BBFFBBFRLL')
     820
     """
-    swapped: str = (
-        code.replace("B", "1").replace("F", "0").replace("R", "1").replace("L", "0")
-    )
+    swapped: str = code.replace("B", "1").replace("F", "0").replace("R", "1").replace("L", "0")
     return int(swapped, 2)
 
 

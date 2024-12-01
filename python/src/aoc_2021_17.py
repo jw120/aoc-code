@@ -27,7 +27,7 @@ class Probe:
             x_change = 1
         else:
             x_change = 0
-        self.velocity = self.velocity + Coord(x_change, -1)
+        self.velocity += Coord(x_change, -1)
 
 
 class Target:
@@ -62,8 +62,7 @@ class Target:
         probe = Probe(v_x, v_y)
         max_height = 0
         while True:
-            if probe.position.y > max_height:
-                max_height = probe.position.y
+            max_height = max(probe.position.y, max_height)
             if (
                 probe.position.x >= self.x_min
                 and probe.position.x <= self.x_max
@@ -89,8 +88,7 @@ class Target:
                 result = self.launch(v_x, v_y)
                 if result is not None:
                     success_count += 1
-                    if result > best_height:
-                        best_height = result
+                    best_height = max(result, best_height)
         return (best_height, success_count)
 
 

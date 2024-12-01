@@ -59,14 +59,14 @@ OP_TABLE = {
 def read_monkey(s: str) -> tuple[MonkeyName, Monkey]:
     """Parse a monkey returning its name and value.
 
-    cspell: disable
+    spell-checker: disable
 
     >>> read_monkey("cczh: sllz + lgvd")
     ('cczh', OpMonkey(left='sllz', op=<Operation.ADD: 'ADD'>, right='lgvd'))
     >>> read_monkey("dvpt: 3")
     ('dvpt', 3)
 
-    cspell: enable
+    spell-checker: enable
     """
     m = fullmatch(r"([a-z]+)\: (.+)", s.strip())
     assert m, f"Parse failed: '{s}'"
@@ -157,14 +157,14 @@ def solve(monkeys: dict[MonkeyName, Monkey]) -> int:
             case _:
                 raise ValueError("Unexpected")
         if current_monkey.op == Operation.ADD:
-            current_value = current_value - val
+            current_value -= val
         elif current_monkey.op == Operation.SUB and next_left:
             current_value = val + current_value
         elif current_monkey.op == Operation.SUB and not next_left:
             current_value = val - current_value
         elif current_monkey.op == Operation.MUL:
             assert current_value % val == 0
-            current_value = current_value // val
+            current_value //= val
         elif current_monkey.op == Operation.DIV and not next_left:
             assert current_value % val == 0
             current_value = val // current_value
@@ -175,7 +175,7 @@ def solve(monkeys: dict[MonkeyName, Monkey]) -> int:
         current_monkey_name = next_monkey_name
 
 
-# cspell: disable
+# spell-checker: disable
 
 TEST_DATA = """root: pppw + sjmn
 dbpl: 5
@@ -193,7 +193,7 @@ lgvd: ljgn * ptdq
 drzm: hmdt - zczc
 hmdt: 32"""
 
-# cspell: enable
+# spell-checker: enable
 
 
 if __name__ == "__main__":

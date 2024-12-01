@@ -71,9 +71,9 @@ def read_rules(ss: list[str]) -> Rules:
     return r
 
 
-# cspell:disable
+# spell-checker:disable
 test_template: Polymer = read_template("NNCB")
-# cspell:enable
+# spell-checker:enable
 test_rules: Rules = read_rules(
     [
         "CH -> B",

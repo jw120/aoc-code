@@ -85,17 +85,17 @@ class Coord:
         """Return the (0, 0) coordinate."""
         return Coord(0, 0)
 
-    def __add__(self, other: Any) -> Coord:
+    def __add__(self, other: Any) -> Coord:  # noqa: ANN401
         if isinstance(other, Coord):
             return Coord(self.x + other.x, self.y + other.y)
         raise TypeError
 
-    def __sub__(self, other: Any) -> Coord:
+    def __sub__(self, other: Any) -> Coord:  # noqa: ANN401
         if isinstance(other, Coord):
             return Coord(self.x - other.x, self.y - other.y)
         raise TypeError
 
-    def __floordiv__(self, other: Any) -> Coord:
+    def __floordiv__(self, other: Any) -> Coord:  # noqa: ANN401
         if isinstance(other, int):
             return Coord(self.x // other, self.y // other)
         raise TypeError
@@ -167,12 +167,12 @@ class Coord3:
             ],
         )
 
-    def __add__(self, other: Any) -> Coord3:
+    def __add__(self, other: Any) -> Coord3:  # noqa: ANN401
         if isinstance(other, Coord3):
             return Coord3(self.x + other.x, self.y + other.y, self.z + other.z)
         raise TypeError
 
-    def __sub__(self, other: Any) -> Coord3:
+    def __sub__(self, other: Any) -> Coord3:  # noqa: ANN401
         if isinstance(other, Coord3):
             return Coord3(self.x - other.x, self.y - other.y, self.z - other.z)
         raise TypeError

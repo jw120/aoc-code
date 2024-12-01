@@ -28,9 +28,7 @@ def sum_groups(xs: list[int | None]) -> list[int]:
 
 if __name__ == "__main__":
     testmod()
-    calories: list[int | None] = [
-        (int(line) if line.strip() else None) for line in stdin
-    ]
+    calories: list[int | None] = [(int(line) if line.strip() else None) for line in stdin]
     elves = sorted(sum_groups(calories), reverse=True)
     print(elves[0])
     print(sum(elves[:3]))

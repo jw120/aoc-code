@@ -5,8 +5,8 @@ from doctest import testmod
 from re import Match, Pattern
 from sys import stdin
 
-rule_divider: Pattern[str] = re.compile(" bags?[,\\.] ?")
-bag_match: Pattern[str] = re.compile("([0-9]+) (.+)")
+rule_divider: Pattern[str] = re.compile(r" bags?[,\\.] ?")
+bag_match: Pattern[str] = re.compile(r"([0-9]+) (.+)")
 
 Rule = tuple[str, list[tuple[str, int]]]
 
@@ -63,11 +63,10 @@ def part_one(rules: list[Rule], target: str) -> int:
     4
     """
     # Read all the rules into a dict showing what a bag can be insider
-    # can_be_inside[x] = {a, b, c}
-    # means bag colour can be insider bags of colours a, b or c
+    # can_be_inside[x] = {a, b, c} means bag colour can be insider bags of colours a, b or c
     can_be_inside: dict[str, set[str]] = {}
-    for (outer, contents) in rules:
-        for (inner, _) in contents:
+    for outer, contents in rules:
+        for inner, _ in contents:
             can_be_inside.setdefault(inner, set()).add(outer)
     # Walk backwards from the target bag
     visited: set[str] = set()
@@ -93,14 +92,14 @@ def part_two(rules: list[Rule], target: str) -> int:
     def bags_inside(bag: str) -> int:
         if bag not in count_inside:
             count: int = 0
-            for (inner, num) in has_inside[bag]:
+            for inner, num in has_inside[bag]:
                 count += num * (1 + bags_inside(inner))
             count_inside[bag] = count
         return count_inside[bag]
 
     # Read the rules into a Dict
     has_inside: dict[str, list[tuple[str, int]]] = {}
-    for (outer, inners) in rules:
+    for outer, inners in rules:
         has_inside[outer] = inners
 
     return bags_inside(target)

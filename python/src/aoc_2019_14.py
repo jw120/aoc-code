@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 from collections import Counter
-from collections.abc import Iterable, Mapping
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
-from typing import Any, Final, Union
+from typing import TYPE_CHECKING, Any, Final
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable, Mapping
 
 
 @dataclass(eq=True, frozen=True)
@@ -26,7 +28,7 @@ class CompositeRecipe:
     produced: int
 
 
-Recipe = Union[BasicRecipe, CompositeRecipe]
+Recipe = BasicRecipe | CompositeRecipe
 
 
 def round_up(x: int, y: int) -> int:
@@ -51,10 +53,7 @@ def all_zero(d: Mapping[Any, int]) -> bool:
     >>> all_zero(Counter({'red': 0, 'blue': 0}))
     True
     """
-    for v in d.values():
-        if v != 0:
-            return False
-    return True
+    return all(v == 0 for v in d.values())
 
 
 class NanoFactory:
@@ -70,7 +69,7 @@ class NanoFactory:
                 self.composite_recipes[chemical] = recipe
 
     def _basics_required(self, target: str, number: int) -> Counter[str]:
-        """Return number of basic chemcials required to make one of the given composite chemical.
+        """Return number of basic chemicals required to make one of the given composite chemical.
 
         Returns the required basic chemicals and the leftovers
         """
@@ -134,7 +133,7 @@ class NanoFactory:
         """
 
         def can_be_made(x: int) -> bool:
-            """Can we make the given number of target chemicals with availble ore."""
+            """Can we make the given number of target chemicals with available ore."""
             return self.required(target, x) <= available_ore
 
         # Find a range that brackets the maximum amount
@@ -175,18 +174,14 @@ def parse_recipe(s: str) -> tuple[str, Recipe]:
     return (out_name, CompositeRecipe(components=components, produced=produced))
 
 
-TEST1: Final[
-    str
-] = """10 ORE => 10 A
+TEST1: Final[str] = """10 ORE => 10 A
     1 ORE => 1 B
     7 A, 1 B => 1 C
     7 A, 1 C => 1 D
     7 A, 1 D => 1 E
     7 A, 1 E => 1 FUEL"""
 
-TEST2: Final[
-    str
-] = """9 ORE => 2 A
+TEST2: Final[str] = """9 ORE => 2 A
     8 ORE => 3 B
     7 ORE => 5 C
     3 A, 4 B => 1 AB
@@ -194,9 +189,9 @@ TEST2: Final[
     4 C, 1 A => 1 CA
     2 AB, 3 BC, 4 CA => 1 FUEL"""
 
-TEST3: Final[
-    str
-] = """157 ORE => 5 NZVS
+# spell-checker:disable
+
+TEST3: Final[str] = """157 ORE => 5 NZVS
     165 ORE => 6 DCFZ
     44 XJWVT, 5 KHKGT, 1 QDVJ, 29 NZVS, 9 GPVTF, 48 HKGWZ => 1 FUEL
     12 HKGWZ, 1 GPVTF, 8 PSHF => 9 QDVJ
@@ -206,9 +201,7 @@ TEST3: Final[
     165 ORE => 2 GPVTF
     3 DCFZ, 7 NZVS, 5 HKGWZ, 10 PSHF => 8 KHKGT"""
 
-TEST4: Final[
-    str
-] = """2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG
+TEST4: Final[str] = """2 VPVL, 7 FWMGM, 2 CXFTF, 11 MNCFX => 1 STKFG
     17 NVRVD, 3 JNWZP => 8 VPVL
     53 STKFG, 6 MNCFX, 46 VJHF, 81 HVMC, 68 CXFTF, 25 GNMV => 1 FUEL
     22 VJHF, 37 MNCFX => 5 FWMGM
@@ -221,9 +214,7 @@ TEST4: Final[
     1 VJHF, 6 MNCFX => 4 RFSQX
     176 ORE => 6 VJHF"""
 
-TEST5: Final[
-    str
-] = """171 ORE => 8 CNZTR
+TEST5: Final[str] = """171 ORE => 8 CNZTR
     7 ZLQW, 3 BMBT, 9 XCVML, 26 XMNCP, 1 WPTQ, 2 MZWV, 1 RJRHP => 4 PLWSL
     114 ORE => 4 BHXH
     14 VRPVC => 6 BMBT
@@ -240,6 +231,8 @@ TEST5: Final[
     121 ORE => 7 VRPVC
     7 XCVML => 6 RJRHP
     5 BHXH, 4 VRPVC => 5 LTCX"""
+
+# spell-checker:enable
 
 if __name__ == "__main__":
     testmod()

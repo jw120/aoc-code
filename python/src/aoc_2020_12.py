@@ -60,7 +60,6 @@ class Ship:
             self.facing = rotate(self.facing, param)
         else:
             raise RuntimeError("Bad command for action", com, param)
-        #        print(com, param, self.x, self.y, self.facing)
         return self
 
     def actions(self, commands: Iterable[tuple[str, int]]) -> Ship:

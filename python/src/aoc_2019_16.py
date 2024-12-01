@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from doctest import testmod
 from itertools import islice
 from sys import stdin
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def combine(xs: Iterable[int], ys: Iterable[int]) -> int:
@@ -15,7 +18,7 @@ def combine(xs: Iterable[int], ys: Iterable[int]) -> int:
     True
     """
     total: int = 0
-    for (x, y) in zip(xs, ys):
+    for x, y in zip(xs, ys, strict=False):
         total += x * y
     return abs(total) % 10
 

@@ -1,7 +1,5 @@
 """Advent of Code 2019 - Day 2."""
 
-# pylint: disable=missing-function-docstring
-
 from doctest import testmod
 from sys import stdin
 
@@ -9,6 +7,7 @@ import int_code
 
 
 def run_with_noun_verb(code: list[int], noun: int, verb: int) -> int:
+    """Run with noun and verb."""
     machine: int_code.Machine = int_code.Machine(code)
     machine.code[1] = noun
     machine.code[2] = verb
@@ -17,8 +16,9 @@ def run_with_noun_verb(code: list[int], noun: int, verb: int) -> int:
 
 
 def search_noun_verb(code: list[int], target: int) -> int:
-    for noun in range(0, 100):
-        for verb in range(0, 100):
+    """Search for noun and verb."""
+    for noun in range(100):
+        for verb in range(100):
             if run_with_noun_verb(code, noun, verb) == target:
                 return 100 * noun + verb
     raise RuntimeError("Failed to hit target")

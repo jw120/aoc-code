@@ -1,7 +1,5 @@
 """Advent of Code 2020 - Day 1."""
 
-# pylint: disable=consider-using-enumerate
-
 from doctest import testmod
 from sys import stdin
 

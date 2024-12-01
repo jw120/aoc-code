@@ -73,7 +73,5 @@ if __name__ == "__main__":
     lines: list[str] = stdin.read().splitlines()
     scans: list[tuple[Result, str]] = [scan(s) for s in lines]
     print(sum(illegal_score(c) for r, c in scans if r == Result.ILLEGAL))
-    scores: list[int] = [
-        completion_score(s) for r, s in scans if r == Result.INCOMPLETE
-    ]
+    scores: list[int] = [completion_score(s) for r, s in scans if r == Result.INCOMPLETE]
     print(sorted(scores)[len(scores) // 2])

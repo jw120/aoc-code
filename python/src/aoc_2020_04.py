@@ -53,11 +53,11 @@ tests_two: list[str] = [
     "iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719",
 ]
 
-date_pattern: Pattern[str] = re.compile("[0-9]{4}")
-hgt_pattern: Pattern[str] = re.compile("([0-9]{2,3})(cm|in)")
-hcl_pattern: Pattern[str] = re.compile("#[0-9a-f]{6}")
-ecl_pattern: Pattern[str] = re.compile("amb|blu|brn|gry|grn|hzl|oth")
-pid_pattern: Pattern[str] = re.compile("[0-9]{9}")
+date_pattern: Pattern[str] = re.compile(r"[0-9]{4}")
+hgt_pattern: Pattern[str] = re.compile(r"([0-9]{2,3})(cm|in)")
+hcl_pattern: Pattern[str] = re.compile(r"#[0-9a-f]{6}")
+ecl_pattern: Pattern[str] = re.compile(r"amb|blu|brn|gry|grn|hzl|oth")
+pid_pattern: Pattern[str] = re.compile(r"[0-9]{9}")
 
 
 def valid_date(s: str, min_year: int, max_year: int) -> bool:
@@ -104,8 +104,6 @@ def valid_two(p: Passport) -> bool:
 
 if __name__ == "__main__":
     testmod()
-    passports: list[Passport] = [
-        parse_passport(block) for block in stdin.read().split("\n\n")
-    ]
+    passports: list[Passport] = [parse_passport(block) for block in stdin.read().split("\n\n")]
     print(sum(valid_one(p) for p in passports))
     print(sum(valid_two(p) for p in passports))

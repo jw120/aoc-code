@@ -29,9 +29,7 @@ class Grid:
     def __init__(self, rows: list[str]) -> None:
         self._extent = Extent(len(rows), len(rows[0]))
         self._risk: list[list[int]] = [[int(d) for d in row] for row in rows]
-        self._total_risk: list[list[int]] = [
-            [0] * self._extent.x for _ in range(self._extent.y)
-        ]
+        self._total_risk: list[list[int]] = [[0] * self._extent.x for _ in range(self._extent.y)]
         self._expanded: bool = False
 
     def expand(self) -> Grid:
@@ -51,10 +49,7 @@ class Grid:
         """Return risk of the grid."""
         if self._expanded:
             offset = c.x // self._extent.x + c.y // self._extent.y
-            return (
-                (self._risk[c.x % self._extent.x][c.y % self._extent.y] + offset - 1)
-                % 9
-            ) + 1
+            return ((self._risk[c.x % self._extent.x][c.y % self._extent.y] + offset - 1) % 9) + 1
         return self._risk[c.x][c.y]
 
     def walk(self) -> int:
@@ -79,13 +74,9 @@ class Grid:
                     not_needed.add(c)
                 else:
                     for n in c.adjacents(extent):
-                        if (
-                            n not in frontier
-                            and n not in visited
-                            and c_risk + self.risk(n) == risk
-                        ):
+                        if n not in frontier and n not in visited and c_risk + self.risk(n) == risk:
                             new_frontier[n] = risk
-            frontier = frontier | new_frontier
+            frontier |= new_frontier
             for c in not_needed:
                 del frontier[c]
                 visited.add(c)

@@ -36,12 +36,12 @@ class HexCoord:
 
 def split_moves(s: str) -> list[str]:
     """Split input string into a list of moves."""
-    return [m[0] for m in re.finditer("[ns]?[ew]", s)]
+    return [m[0] for m in re.finditer(r"[ns]?[ew]", s)]
 
 
 test1: list[list[str]] = [
     split_moves(s)
-    # cspell: disable
+    # spell-checker:disable
     for s in [
         "sesenwnenenewseeswwswswwnenewsewsw",
         "neeenesenwnwwswnenewnwwsewnenwseswesw",
@@ -64,7 +64,7 @@ test1: list[list[str]] = [
         "neswnwewnwnwseenwseesewsenwsweewe",
         "wseweeenwnesenwwwswnew",
     ]
-    # cspell: enable
+    # spell-checker:enable
 ]
 
 
@@ -121,7 +121,7 @@ class Floor:
         white_cells: set[HexCoord] = set()
         for black_cell in self.g[self.active()]:
             neighbours = black_cell.adjoining() - self.g[self.active()]
-            white_cells = white_cells | neighbours
+            white_cells |= neighbours
         # Activate any eligible white cells
         for white_cell in white_cells:
             n = self.count_black_neighbours(white_cell)

@@ -2,11 +2,14 @@
 
 from __future__ import annotations
 
-from collections.abc import Iterable
 from dataclasses import dataclass
 from doctest import testmod
 from math import atan2, gcd, pi
 from sys import stdin
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 @dataclass(frozen=True)
@@ -43,16 +46,14 @@ class Grid:
     """Main class for day 10."""
 
     def __init__(self, s: str) -> None:
-        self._m: list[list[bool]] = [
-            [s == "#" for s in row.strip()] for row in s.split()
-        ]
+        self._m: list[list[bool]] = [[s == "#" for s in row.strip()] for row in s.split()]
         self.x_num: int = len(self._m[0])
         self.y_num: int = len(self._m)
 
     def all_positions(self) -> Iterable[Vec]:
         """Provide iteration over all positions, row-wise."""
-        for y in range(0, self.y_num):
-            for x in range(0, self.x_num):
+        for y in range(self.y_num):
+            for x in range(self.x_num):
                 yield Vec(x, y)
 
     def m(self, v: Vec) -> bool:
@@ -138,8 +139,6 @@ class Grid:
                 asts.pop(0)
             # Prune empty entries
             ast_list = [(v, asts) for (v, asts) in ast_list if asts]
-
-        return 0
 
 
 def part_two(grid: Grid) -> int:

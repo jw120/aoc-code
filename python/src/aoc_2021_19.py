@@ -179,7 +179,7 @@ def locate(input_scanners: list[Scanner], min_match: int) -> tuple[list[Coord3],
     while unmatched_scanners:
         match_found: bool = False
         for s, s_coord in matched_scanners.items():
-            for t in unmatched_scanners:
+            for t in unmatched_scanners.copy():
                 if (s.number, t.number) not in pairs_failed:
                     match = (
                         s.find_match(t, min_match)

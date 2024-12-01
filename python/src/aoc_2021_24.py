@@ -113,8 +113,6 @@ class ALU:
         """Run one step."""
         kind, target, source, _text = instruction
 
-        # print(self.reg, _text)
-
         w, x, y, z = self.reg
 
         if source is None:  # Input instruction
@@ -163,8 +161,6 @@ if __name__ == "__main__":
     for model_number in product(range(9, 0, -1), repeat=14):
         alu.run(model_number)
         count += 1
-        # if model_number[2:] == (1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1):
-        #     print(model_number, alu.reg[3])
         if count % 100_000 == 0:
             print(count, model_number, flush=True)
         if alu.reg[3] == 0:

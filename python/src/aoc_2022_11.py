@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from doctest import testmod
 from functools import reduce
 from itertools import starmap
+from operator import mul
 from re import fullmatch
 from sys import stdin
 
@@ -110,7 +111,7 @@ def monkey_business(monkeys: list[Monkey], steps: int, *, simple_mode: bool) -> 
     >>> monkey_business(build_monkeys(TEST_DATA), 10000, simple_mode=False)
     2713310158
     """
-    mode = None if simple_mode else reduce(lambda x, y: x * y, (m.divisor for m in monkeys))
+    mode = None if simple_mode else reduce(mul, (m.divisor for m in monkeys))
     step(monkeys, steps, mode)
     counts = sorted([m.count for m in monkeys])
     return counts[-1] * counts[-2]

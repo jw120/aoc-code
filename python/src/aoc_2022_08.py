@@ -75,7 +75,6 @@ def scenic(m: list[list[int]], x: int, y: int) -> int:
     8
     """
 
-    # rows = len(m)
     cols = len(m[0])
 
     h = m[x][y]

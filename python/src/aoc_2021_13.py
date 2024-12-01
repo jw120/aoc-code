@@ -67,14 +67,8 @@ def fold_dot(dot: Coord, fold: Fold) -> Coord:
     """Apply a fold to the dot."""
     fold_axis, fold_value = fold
     if fold_axis == "x":
-        return (
-            dot
-            if dot.x < fold_value
-            else Coord(fold_value - (dot.x - fold_value), dot.y)
-        )
-    return (
-        dot if dot.y < fold_value else Coord(dot.x, fold_value - (dot.y - fold_value))
-    )
+        return dot if dot.x < fold_value else Coord(fold_value - (dot.x - fold_value), dot.y)
+    return dot if dot.y < fold_value else Coord(dot.x, fold_value - (dot.y - fold_value))
 
 
 def apply_folds(dots: set[Coord], folds: list[Fold]) -> set[Coord]:

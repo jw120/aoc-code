@@ -5,7 +5,8 @@ from collections.abc import Iterator
 from doctest import testmod
 from sys import stdin
 
-# cspell:disable
+# spell-checker:disable
+
 test1: str = "acedgfb cdfbe gcdfa fbcad dab cefabd cdfgeb eafb cagedb ab | cdfeb fcadb cdfeb cdbaf"
 test2: list[str] = [
     "be cfbegad cbdgef fgaecd cgeb fdcge agebfd fecdb fabcd edb | fdgacbe cefdb cefbgd gcbe",
@@ -19,6 +20,8 @@ test2: list[str] = [
     "egadfb cdbfeg cegd fecab cgb gbdefca cg fgcdab egfdb bfceg | gbdfcae bgc cg cgb",
     "gcafb gcf dcaebfg ecagb gf abcdeg gaef cafbge fdbac fegbdc | fgae cfgab fg bagce",
 ]
+# spell-checker:enable
+
 
 # Mapping from digits to number of segments:
 #
@@ -45,6 +48,7 @@ test2: list[str] = [
 # Mapping from segments to digits in which the are present
 # seg_dig = {'a': set([0, 2, 3, 5, 6, 7, 8, 9]), 'b': set([0, 4])
 
+# spell-checker:disable
 segments_to_digit: dict[str, int] = {
     "abcefg": 0,
     "cf": 1,
@@ -57,6 +61,7 @@ segments_to_digit: dict[str, int] = {
     "abcdefg": 8,
     "abcdfg": 9,
 }
+# spell-checker:enable
 
 
 def num_output_1478(lines: list[str]) -> int:

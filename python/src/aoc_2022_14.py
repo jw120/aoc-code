@@ -109,9 +109,7 @@ class Waterfall:
         """Test if the coordinate is empty."""
         if c in self.rock or c in self.sand:
             return False
-        if self.floor and c.y == self.bottom_left.y + 2:
-            return False
-        return True
+        return not (self.floor and c.y == self.bottom_left.y + 2)
 
     def add(self) -> None:
         """Add one unit of sand."""

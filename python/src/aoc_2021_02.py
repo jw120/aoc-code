@@ -25,15 +25,11 @@ def run1(cs: list[str]) -> int:
     >>> run1(["forward 5", "down 5", "forward 8", "up 3", "down 8", "forward 2"])
     150
     """
-    horiz, depth = reduce(
-        lambda acc, x: (acc[0] + x[0], acc[1] + x[1]), [change(c) for c in cs]
-    )
+    horiz, depth = reduce(lambda acc, x: (acc[0] + x[0], acc[1] + x[1]), [change(c) for c in cs])
     return horiz * depth
 
 
-def apply2(
-    current: tuple[int, int, int], command: tuple[int, int]
-) -> tuple[int, int, int]:
+def apply2(current: tuple[int, int, int], command: tuple[int, int]) -> tuple[int, int, int]:
     """Apply the distance and depth changes of a complex command."""
     horiz, depth, aim = current
     return (horiz + command[0], depth + command[0] * aim, aim + command[1])

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import curses
+from pathlib import Path
 from sys import stdin
 from typing import Any
 
@@ -17,7 +18,7 @@ def count_blocks(xs: list[int]) -> tuple[int, int | None]:
         if (x, y) == (-1, 0):
             score = tile_id
         else:
-            screen[(x, y)] = tile_id
+            screen[x, y] = tile_id
     return (sum(x == 2 for x in screen.values()), score)
 
 
@@ -48,12 +49,12 @@ class Player:
         self.animate: bool = False
         self.score: int = 0
 
-    def _run(self, stdscr: Any) -> None:
+    def _run(self, stdscr: Any) -> None:  # noqa: ANN401
         """Run the player."""
 
         if self.animate:
             if curses.can_change_color():
-                curses.init_color(0, 0, 0, 0)  # Set background (coloru 0) to rgb black
+                curses.init_color(0, 0, 0, 0)  # Set background (colour 0) to rgb black
             stdscr.clear()
             curses.curs_set(0)  # Hide the cursor
 
@@ -82,11 +83,10 @@ class Player:
                                 if self.animate:
                                     stdscr.refresh()
                                     curses.napms(50)
-                                    # stdscr.getkey()
                             elif tile_id == 3:
                                 self.paddle_position = x
                     case _:
-                        raise ValueError("Unexpected output values." "")
+                        raise ValueError("Unexpected output values.")
             else:  # Wait for more output
                 pass
 
@@ -108,8 +108,10 @@ if __name__ == "__main__":
     # as need to take key inputs)
     show_animation: bool = False
     if show_animation:
-        with open("../aoc-data/input/2019_13.txt", encoding="utf-8") as f:
-            input_code: list[int] = [int(x) for x in f.read().split(",")]
+        input_code: list[int] = [
+            int(x)
+            for x in Path("../aoc-data/input/2019_13.txt").read_text(encoding="utf-8").split(",")
+        ]
     else:
         input_code = [int(x) for x in stdin.read().split(",")]
     blocks, _score = count_blocks(Machine(input_code).run().output_vals)

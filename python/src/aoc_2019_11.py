@@ -93,7 +93,6 @@ class Robot:
 
 
 if __name__ == "__main__":
-    #    testmod()
     program: list[int] = [int(s) for s in stdin.read().split(",")]
     print(len(Robot(program).run().painted))
     Robot(program).paint(Colour.WHITE).run().show()

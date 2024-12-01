@@ -122,7 +122,6 @@ class State:
 
     resources: Amount
     robots: Amount
-    # path: list[str]
     time: int
 
     def buy(self, cost: Amount, robot: Amount, _name: str) -> State | None:
@@ -131,7 +130,6 @@ class State:
             return State(
                 resources=self.resources + self.robots - cost,
                 robots=self.robots + robot,
-                # path=self.path + [name],
                 time=self.time - 1,
             )
         return None
@@ -141,7 +139,6 @@ class State:
         return State(
             resources=self.resources + self.robots,
             robots=self.robots,
-            # path=self.path + ["."],
             time=self.time - 1,
         )
 
@@ -198,11 +195,9 @@ def qualities(blueprint_list: list[BluePrint], time: int) -> int:
     """Return sum of qualities for a list of blueprints."""
     acc = 0
     for b in blueprint_list:
-        # print(b)
         b_solution = Dynamic(b).solution(initial_state(time))
         assert b_solution is not None
         acc += b.number * b_solution
-        # print(b.number, b_solution, acc)
     return acc
 
 
@@ -210,11 +205,9 @@ def score_product(blueprint_list: list[BluePrint], time: int) -> int:
     """Return product of scores for a list of blueprints."""
     acc = 1
     for b in blueprint_list:
-        # print(b)
         b_solution = Dynamic(b).solution(initial_state(time))
         assert b_solution is not None
         acc *= b_solution
-        # print(b.number, b_solution, acc)
     return acc
 
 
@@ -227,9 +220,6 @@ TEST_DATA = (
 
 if __name__ == "__main__":
     testmod()
-    # test_blueprints = [read_blueprint(line) for line in TEST_DATA.splitlines()]
-    # print(qualities(test_blueprints, 24))
-    # print(score_product(test_blueprints[:3], 32))
     blueprints = [read_blueprint(line.strip()) for line in stdin.readlines()]
     print(qualities(blueprints, 24))
     print(score_product(blueprints[:3], 32))

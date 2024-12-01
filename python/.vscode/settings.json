@@ -8,16 +8,37 @@
     
     ],
     "cSpell.words": [
+        "addstr",
+        "addx",
         "adjacents",
+        "bcdf",
         "Bitmask",
         "devbox",
         "direnv",
         "dtype",
         "envrc",
+        "FURB",
+        "getkey",
         "humn",
+        "isort",
         "lastindex",
+        "napms",
         "NESW",
+        "numpy",
+        "PDNZ",
+        "popleft",
+        "prevs",
+        "pycodestyle",
+        "pydocstyle",
+        "pyflakes",
+        "pylint",
         "pyright",
+        "pyupgrade",
+        "PZND",
+        "refurb",
+        "stdscr",
         "wxyz"
-    ]
+    ],
+    "ruff.nativeServer": true,
+    "ruff.configurationPreference": "filesystemFirst"
 }

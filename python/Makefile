@@ -1,7 +1,7 @@
 
 .PHONY: all check run run_2022 run_2023
 
-PYTHON_SRC := src/aoc_2021_*.py src/aoc_2022_*.py src/aoc_2023_*.py
+PYTHON_SRC := src/
 
 all: check run
 

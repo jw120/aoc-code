@@ -9,9 +9,7 @@ from utils import set_union
 K = TypeVar("K")
 
 
-def build_tree(
-    links: list[tuple[K, K]]
-) -> tuple[dict[K, set[K]], dict[K, K | None], list[K]]:
+def build_tree(links: list[tuple[K, K]]) -> tuple[dict[K, set[K]], dict[K, K | None], list[K]]:
     """Build a representation of a tree.
 
     Given a list of key->key links, construct dicts of all forward (one->many)
@@ -28,7 +26,7 @@ def build_tree(
     backward: dict[K, K | None] = {}
     k_from: K
     k_to: K
-    for (k_from, k_to) in links:
+    for k_from, k_to in links:
         forward.setdefault(k_from, set())
         forward.setdefault(k_to, set())
         if k_to in backward and backward[k_to] is not None:

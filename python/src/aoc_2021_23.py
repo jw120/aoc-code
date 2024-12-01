@@ -1,7 +1,5 @@
 """Advent of Code 2021 - Day 23."""
 
-# pylint
-
 from __future__ import annotations
 
 from collections import Counter
@@ -95,9 +93,9 @@ class Position:
 class State:
     """State holds a (mutable) mapping from positions to amphipods."""
 
-    template: ClassVar[
-        str
-    ] = "#############\n#...........#\n###A#B#C#D###\n  #a#b#c#d#\n  #########"
+    template: ClassVar[str] = (
+        "#############\n#...........#\n###A#B#C#D###\n  #a#b#c#d#\n  #########"
+    )
 
     def __init__(
         self,
@@ -172,7 +170,6 @@ class State:
         return sum(position.room is None for position in self.mapping)
 
     def path_available(self, p: Position, q: Position) -> bool:
-        # pylint: disable=line-too-long
         """Is a path available between two positions (no blocking amphipods).
 
         Does not test if either end-state is occupied. Only considers paths from a room to a hallway
@@ -207,7 +204,6 @@ class State:
     def available_moves(
         self: State, max_hallway_number: int
     ) -> Iterable[tuple[Position, Position]]:
-        # pylint: disable=line-too-long
         """Return all available moves.
 
         >>> expected_moves = {(Position(k, 0), Position(None, h)) for k in Kind for h in Position.valid_hallway_indices}
@@ -435,26 +431,6 @@ class TestMove:
         print(self.state.cost)
         self.state.show()
         return self
-
-
-# test1.show()
-# t = (
-#     TestMove(3)
-#     .move(Position(Kind.C, 0), Position(None, 3))
-#     .move(Position(Kind.B, 0), Position(None, 5))
-#     .move(Position(None, 5), Position(Kind.C, 0))
-#     .move(Position(Kind.B, 1), Position(None, 5))
-#     .move(Position(None, 3), Position(Kind.B, 1))
-#     .move(Position(Kind.A, 0), Position(None, 3))
-#     .move(Position(None, 3), Position(Kind.B, 0))
-#     .move(Position(Kind.D, 0), Position(None, 7))
-#     .move(Position(Kind.D, 1), Position(None, 9))
-#     .move(Position(None, 7), Position(Kind.D, 1))
-#     .move(Position(None, 5), Position(Kind.D, 0))
-#     .move(Position(None, 9), Position(Kind.A, 0))
-# )
-# assert t.state.organized
-# assert t.state.cost == 12521
 
 
 if __name__ == "__main__":

@@ -86,7 +86,7 @@ def basins(heights: list[list[int]]) -> int:
             x, y = i, j
             while True:
                 if (x, y) in minima:
-                    minima_counts[(x, y)] += 1
+                    minima_counts[x, y] += 1
                     break
                 x, y = move_down(x, y)
     return prod(count for _minima, count in minima_counts.most_common(3))
@@ -94,9 +94,7 @@ def basins(heights: list[list[int]]) -> int:
 
 if __name__ == "__main__":
     testmod()
-    input_heights: list[list[int]] = [
-        [int(c) for c in line] for line in stdin.read().splitlines()
-    ]
+    input_heights: list[list[int]] = [[int(c) for c in line] for line in stdin.read().splitlines()]
     for row in input_heights[1:]:
         assert len(row) == len(input_heights[0])
     assert len(input_heights) == len(input_heights[0])

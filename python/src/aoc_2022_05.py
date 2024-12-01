@@ -73,7 +73,6 @@ def apply_moves(stacks: Stacks, moves: list[Move], *, reverse: bool) -> Stacks:
         moving = new_stacks[move.source][-move.number :]
         if reverse:
             moving = list(reversed(moving))
-        # print("moving", moving)
         new_stacks[move.source][-move.number :] = []
         new_stacks[move.destination] += moving
     return new_stacks

@@ -7,9 +7,7 @@ from typing import TypeVar
 S = TypeVar("S")
 
 
-def bfs(
-    start: S, at_goal: Callable[[S], bool], available: Callable[[S], list[S]]
-) -> int | None:
+def bfs(start: S, at_goal: Callable[[S], bool], available: Callable[[S], list[S]]) -> int | None:
     """Conduct basic BFS search and return length of minimum path."""
     q: deque[tuple[S, int]] = deque([(start, 0)])
     distance: dict[S, int] = {start: 0}

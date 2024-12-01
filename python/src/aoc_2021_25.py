@@ -8,6 +8,7 @@ from sys import stdin
 from typing import TYPE_CHECKING
 
 import numpy as np
+
 from coord import Coord, Extent
 
 if TYPE_CHECKING:
@@ -71,7 +72,6 @@ class SeaFloor:
 
     def get_floor(self, c: Coord) -> Item:
         """Get the item on the floor at the given coordinates."""
-        # print("get", c.x, c.y, Item(self._a[c.x, c.y]).name)
         return Item(self._a[c.x, c.y])
 
     def over_floor(self) -> Iterator[Coord]:
@@ -122,7 +122,6 @@ class SeaFloor:
         while True:
             moved: bool = self.step()
             steps += 1
-            #            print(steps)
             if not moved:
                 return steps
 

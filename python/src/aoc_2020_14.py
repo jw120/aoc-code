@@ -1,6 +1,5 @@
 """Advent of Code 2020 - Day 14."""
 
-
 import re
 from dataclasses import dataclass
 from doctest import testmod

@@ -3,6 +3,7 @@
 import re
 from doctest import testmod
 from functools import reduce
+from operator import mul
 from sys import stdin
 
 ValidField = tuple[str, tuple[int, int], tuple[int, int]]
@@ -49,14 +50,11 @@ def run1(valid_values: list[ValidField], tickets: list[list[int]]) -> int:
     valid_set: set[int] = set()
     count: int = 0
     for _, (a, b), (c, d) in valid_values:
-        for i in range(a, b + 1):
-            valid_set.add(i)
-        for i in range(c, d + 1):
-            valid_set.add(i)
+        valid_set.update(range(a, b + 1))
+        valid_set.update(range(c, d + 1))
     for ticket in tickets:
         for num in ticket:
             if num not in valid_set:
-                #                print("Not valid", num)
                 count += num
     return count
 
@@ -72,10 +70,8 @@ def run2(valid_values: list[ValidField], your: list[int], tickets: list[list[int
     # Eliminate invalid tickets
     valid_set: set[int] = set()
     for _, (a, b), (c, d) in valid_values:
-        for i in range(a, b + 1):
-            valid_set.add(i)
-        for i in range(c, d + 1):
-            valid_set.add(i)
+        valid_set.update(range(a, b + 1))
+        valid_set.update(range(c, d + 1))
     valid_tickets: list[list[int]] = [
         ticket for ticket in tickets if all(num in valid_set for num in ticket)
     ]
@@ -92,7 +88,6 @@ def run2(valid_values: list[ValidField], your: list[int], tickets: list[list[int
     allocated_fields: list[tuple[str, int]] = []
     while field_fit:
         for field_name, field_positions in field_fit:
-            # pylint: disable=modified-iterating-list
             if not field_positions:
                 raise RuntimeError("No position found for", field_name)
             if len(field_positions) == 1:
@@ -110,7 +105,7 @@ def run2(valid_values: list[ValidField], your: list[int], tickets: list[list[int
         position for name, position in allocated_fields if name.startswith("departure")
     ]
     your_values: list[int] = [your[position] for position in departure_field_positions]
-    return reduce(lambda x, y: x * y, your_values, 1)
+    return reduce(mul, your_values, 1)
 
 
 if __name__ == "__main__":

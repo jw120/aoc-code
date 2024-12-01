@@ -3,7 +3,6 @@
 from collections import Counter
 from doctest import testmod
 from sys import stdin
-from typing import TypeAlias
 
 
 class Player:
@@ -54,7 +53,7 @@ def part_a(start1: int, start2: int) -> int:
     return players[(player + 1) % 2].score * die.count
 
 
-State: TypeAlias = tuple[bool, int, int, int, int]
+type State = tuple[bool, int, int, int, int]
 
 
 def part_b(start1: int, start2: int) -> int:

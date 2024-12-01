@@ -1,6 +1,5 @@
 """Advent of Code 2022 - Day 20."""
 
-
 from doctest import testmod
 from sys import stdin
 from typing import Final
@@ -27,7 +26,6 @@ def mix(initial_numbers: list[int], mixes: int = 1) -> int:
             del number_tuples[old_target_position : old_target_position + 1]
             new_target_position = (old_target_position + target_value) % (n - 1)
             number_tuples.insert(new_target_position, target_tuple)
-            # print(target_value, old_target_position, new_target_position, numbers)
     initial_zero_position = initial_numbers.index(0)
     assert initial_numbers.count(0) == 1
     final_zero_position = number_tuples.index((0, initial_zero_position))

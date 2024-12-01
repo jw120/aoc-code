@@ -2,6 +2,7 @@
 
 import re
 from doctest import testmod
+from operator import itemgetter
 from re import Pattern
 from sys import stdin
 
@@ -72,7 +73,6 @@ def expression2(s: str) -> int:
 
     # Simplify as much as possible:
     while len(term_list) > 1:
-
         # Replace (X) with X
         for i in range(len(term_list) - 2):
             if term_list[i] == "(" and term_list[i + 2] == ")":
@@ -97,7 +97,7 @@ def expression2(s: str) -> int:
                 ):
                     priority = paren_level * 2 + (1 if i1 == "+" else 0)
                     operations.append((i, priority, apply(i1, i0, i2)))
-        i, _, val = max(operations, key=lambda x: x[1])
+        i, _, val = max(operations, key=itemgetter(1))
         term_list[i : i + 3] = [val]
 
     if len(term_list) == 1 and isinstance(term_list[0], int):

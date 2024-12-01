@@ -1,6 +1,5 @@
 """Advent of Code 2022 - Day 15."""
 
-
 from collections.abc import Iterable
 from doctest import testmod
 from itertools import combinations
@@ -39,14 +38,12 @@ class Zone:
     def must_be_empty(self, x: int, y: int) -> bool:
         """Test if the given cell must be empty."""
         test_beacon = Coord(x, y)
-        # print("Testing", test_beacon)
         for sensor, closest_beacon in zip(self.sensors, self.closest_beacons, strict=True):
             if test_beacon == closest_beacon:
                 break
             closest_beacon_distance = manhattan(sensor, closest_beacon)
             test_distance = manhattan(sensor, test_beacon)
             if test_distance <= closest_beacon_distance:
-                # print("Forbidden", sensor)
                 return True
         return False
 
@@ -117,7 +114,6 @@ def get_constraint(s1: Coord, s2: Coord, r1: int, r2: int) -> tuple[bool, int]:
     if s1.y < s2.y:
         assert s1.x + s1.y + r1 + 1 == s2.x + s2.y - r2 - 1
         return (True, s1.x + s1.y + r1 + 1)
-        # print(f"x+y = {s1.x+s1.y+r1+1} = {s2.x+s2.y-r2-1}")
     assert s1.x - s1.y + r1 + 1 == s2.x - s2.y - r2 - 1
     return (False, s1.x - s1.y + r1 + 1)
 
@@ -127,20 +123,22 @@ def encode(c: Coord) -> int:
     return c.x * 4_000_000 + c.y
 
 
-TEST_DATA: Final[list[LiteralString]] = """Sensor at x=2, y=18: closest beacon is at x=-2, y=15
-Sensor at x=9, y=16: closest beacon is at x=10, y=16
-Sensor at x=13, y=2: closest beacon is at x=15, y=3
-Sensor at x=12, y=14: closest beacon is at x=10, y=16
-Sensor at x=10, y=20: closest beacon is at x=10, y=16
-Sensor at x=14, y=17: closest beacon is at x=10, y=16
-Sensor at x=8, y=7: closest beacon is at x=2, y=10
-Sensor at x=2, y=0: closest beacon is at x=2, y=10
-Sensor at x=0, y=11: closest beacon is at x=2, y=10
-Sensor at x=20, y=14: closest beacon is at x=25, y=17
-Sensor at x=17, y=20: closest beacon is at x=21, y=22
-Sensor at x=16, y=7: closest beacon is at x=15, y=3
-Sensor at x=14, y=3: closest beacon is at x=15, y=3
-Sensor at x=20, y=1: closest beacon is at x=15, y=3""".split("\n")
+TEST_DATA: Final[list[LiteralString]] = [
+    "Sensor at x=2, y=18: closest beacon is at x=-2, y=15",
+    "Sensor at x=9, y=16: closest beacon is at x=10, y=16",
+    "Sensor at x=13, y=2: closest beacon is at x=15, y=3",
+    "Sensor at x=12, y=14: closest beacon is at x=10, y=16",
+    "Sensor at x=10, y=20: closest beacon is at x=10, y=16",
+    "Sensor at x=14, y=17: closest beacon is at x=10, y=16",
+    "Sensor at x=8, y=7: closest beacon is at x=2, y=10",
+    "Sensor at x=2, y=0: closest beacon is at x=2, y=10",
+    "Sensor at x=0, y=11: closest beacon is at x=2, y=10",
+    "Sensor at x=20, y=14: closest beacon is at x=25, y=17",
+    "Sensor at x=17, y=20: closest beacon is at x=21, y=22",
+    "Sensor at x=16, y=7: closest beacon is at x=15, y=3",
+    "Sensor at x=14, y=3: closest beacon is at x=15, y=3",
+    "Sensor at x=20, y=1: closest beacon is at x=15, y=3",
+]
 
 
 if __name__ == "__main__":
