@@ -7,6 +7,8 @@
   * 2019 08 (broken in golden)
   * 2020 14
   * 2020 19
+  * 2022 24 (very slow)
+  * 2023-04 and beyond not tested
 
 * Check 2022-24... working
 * Check 2021 working
