@@ -60,6 +60,6 @@ python_%: | $(OUT_DIR)
 	@/bin/echo -n "$@: "
 	@/usr/bin/time -p python src/aoc_$*.py < ../../aoc-data/input/$*.txt > $(OUT_DIR)/python_$*.txt 2> $(OUT_DIR)/python_time_$*.txt
 	@head -1 $(OUT_DIR)/python_time_$*.txt | cut -c 14-
-	@diff $(OUT_DIR)/python_$*.txt ../../aoc-data/good/$*.txt
+	@diff $(OUT_DIR)/python_$*.txt ../../aoc-data/good/$*.txt && /bin/echo "OK"
 
 
