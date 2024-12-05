@@ -39,7 +39,7 @@ run_2023: \
 	python_2023_01 python_2023_02 python_2023_03
 
 run_2024: \
-	python_2024_01 python_2024_02 python_2024_03
+	python_2024_01 python_2024_02 python_2024_03 python_2024_04 python_2024_05
 
 check:
 	ruff format $(PYTHON_SRC)
@@ -56,6 +56,7 @@ OUT_DIR = out
 
 python_%: | $(OUT_DIR)
 	@/bin/echo -n "$@: "
+	@python src/aoc_$*.py < ../../aoc-data/input/$*.txt > $(OUT_DIR)/python_$*.txt
 	@diff $(OUT_DIR)/python_$*.txt ../../aoc-data/good/$*.txt && /bin/echo "OK"
 
 
