@@ -31,13 +31,12 @@ def valid_middle(update: list[int], orderings: set[tuple[int, int]]) -> int:
 
 def fixed_middle(update: list[int], orderings: set[tuple[int, int]]) -> int:
     """Return middle page after fixing if the update was invalid, zero otherwise."""
-    if valid_middle(update, orderings) != 0:
-        return 0
+    any_invalid = False
     for i, j in combinations(range(len(update)), 2):
-        x, y = update[i], update[j]
-        if (y, x) in orderings:
+        if (update[j], update[i]) in orderings:
+            any_invalid = True
             update[i], update[j] = update[j], update[i]
-    return update[len(update) // 2]
+    return update[len(update) // 2] if any_invalid else 0
 
 
 if __name__ == "__main__":
