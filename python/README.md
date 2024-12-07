@@ -1,5 +1,10 @@
 # Python Advent of Code
 
+## 2024 Notes
+
+* Day 6 - ugly brute force
+* Day 7 - could be faster
+
 ## TODO
 
 * Check all run
