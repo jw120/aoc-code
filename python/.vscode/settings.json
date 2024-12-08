@@ -11,6 +11,8 @@
         "addstr",
         "addx",
         "adjacents",
+        "antinode",
+        "antinodes",
         "bcdf",
         "Bitmask",
         "devbox",
