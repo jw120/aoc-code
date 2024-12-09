@@ -63,6 +63,50 @@ def compact(disk: list[Chunk]) -> int:
     return check_sum
 
 
+def find_right_most_fit(
+    current_chunk: int,
+    space: int,
+    disk: list[Chunk],  # , used: list[bool]
+) -> tuple[int, int, int] | None:
+    """Return index, id and blocks of right-most chunk whose size fits."""
+    for i in range(len(disk) - 1, current_chunk, -1):
+        # if not used[i]:
+        i_id = disk[i].id_
+        if i_id is not None and disk[i].blocks <= space:
+            return (i, i_id, disk[i].blocks)
+    return None
+
+
+def compact_whole(disk: list[Chunk]) -> int:
+    """Compact the disk with whole files and return the checksum."""
+    current_chunk = 0
+    current_block = 0
+    check_sum = 0
+
+    while current_chunk < len(disk):
+        blocks = disk[current_chunk].blocks
+        match disk[current_chunk].id_:
+            case None:
+                while blocks > 0:
+                    match find_right_most_fit(current_chunk, blocks, disk):  # , used):
+                        case None:
+                            current_block += blocks
+                            break
+                        case (r, r_id, r_blocks):
+                            for _ in range(r_blocks):
+                                check_sum += r_id * current_block
+                                current_block += 1
+                                blocks -= 1
+                            disk[r].id_ = None  # Mark block as free space
+            case file_id:
+                for _ in range(blocks):
+                    check_sum += file_id * current_block
+                    current_block += 1
+        current_chunk += 1
+    return check_sum
+
+
 if __name__ == "__main__":
     disk = read_disk(stdin.read().strip())
     print(compact(disk))
+    print(compact_whole(disk))
