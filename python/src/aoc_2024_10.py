@@ -25,24 +25,19 @@ class Topo:
             print()
 
     def count_trails(self, start: Coord) -> int:
-        """Return number of 9-height positions reachable.
-
-        Uses bfs.
-        """
-        visited: set[Coord] = set()
+        """Return number of 9-height positions reachable."""
         frontier: set[Coord] = {start}
-        count: int = 0
+        reached: set[Coord] = set()
         while frontier:
             current = frontier.pop()
-            visited.add(current)
             current_ht = self.ht(current)
             if current_ht == 9:
-                count += 1
+                reached.add(current)
             else:
-                for adjacent in set(current.adjacents(self.extent)) - visited - frontier:
+                for adjacent in set(current.adjacents(self.extent)) - frontier:
                     if self.ht(adjacent) == current_ht + 1:
                         frontier.add(adjacent)
-        return count
+        return len(reached)
 
     def rating(self, start: Coord) -> int:
         """Return number of distinct hiking trails from start."""
