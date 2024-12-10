@@ -39,6 +39,7 @@
         "PZND",
         "refurb",
         "stdscr",
+        "Topo",
         "wxyz"
     ],
     "ruff.nativeServer": true,
