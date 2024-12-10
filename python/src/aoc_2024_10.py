@@ -36,7 +36,6 @@ class Topo:
             current = frontier.pop()
             visited.add(current)
             current_ht = self.ht(current)
-            # print(current, current_ht)
             if current_ht == 9:
                 count += 1
             else:
@@ -45,7 +44,24 @@ class Topo:
                         frontier.add(adjacent)
         return count
 
+    def rating(self, start: Coord) -> int:
+        """Return number of distinct hiking trails from start."""
+        current: Coord = start
+        rating: int = 0  # Number of paths found so far
+        while True:
+            current_height = self.ht(current)
+            if current_height == 9:
+                return rating + 1  # Found one path
+            exits = [
+                crd for crd in current.adjacents(self.extent) if self.ht(crd) == current_height + 1
+            ]
+            if not exits:
+                return rating  # Reached a dead-end
+            rating += sum(self.rating(x) for x in exits[1:])  # Check side-branches
+            current = exits[0]  # And keep searching
+
 
 if __name__ == "__main__":
     topo = Topo(stdin.readlines())
     print(sum(topo.count_trails(t) for t in topo.trail_heads))
+    print(sum(topo.rating(t) for t in topo.trail_heads))
