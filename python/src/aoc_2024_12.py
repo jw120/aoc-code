@@ -58,6 +58,28 @@ def perimeter(s: set[Coord]) -> int:
     return 4 * len(s) - 2 * interior_boundaries
 
 
+#
+#
+#            E(x,y,T)
+#          +-------+
+#          |       |
+#  E(x,y,F)| x , y |E(x+1,y,F)
+#          |       |
+#          +-------+
+#           E(x,y+1,T)
+#
+
+
+#
+#
+#             (0, 1)
+#       (-1,0)(x, y)(1,0)
+#             (0, -1)
+#
+#
+# (x, y)(0, 1) -> (x+1,y) (0, 1)
+#
+
 # Edge c is to left, below cell c. True if edge is horizontal
 type Edge = tuple[Coord, bool]
 
@@ -73,11 +95,11 @@ def connected(edge: Edge) -> set[Edge]:
     if is_horizontal:
         return {
             (c + Coord(1, 0), True),
-            (c - Coord(1, 0), True),
-            (c + Coord(1, 0), False),
-            (c + Coord(1, -1), False),
+            (c + Coord(-1, 0), True),
             (c, False),
+            (c + Coord(1, 0), False),
             (c + Coord(0, -1), False),
+            (c + Coord(1, -1), False),
         }
     return {
         (c + Coord(0, 1), False),
@@ -102,23 +124,29 @@ def number_of_sides(s: set[Coord]) -> int:
     assert len(exterior_edges) == perimeter(s)
 
     # Walk around edges, counting turning points
-    first_edge: Edge = exterior_edges.pop()
     count: int = 0
-    current = first_edge
-    is_first_edge: bool = True
     while exterior_edges:
-        #     print("current", current)
-        #     print("exterior edges", exterior_edges)
-        #     print("connected", connected(current))
-        next_edges = connected(current) & exterior_edges
-        # print("next_edges", next_edges)
-        assert len(next_edges) == 2 if is_first_edge else 1
-        is_first_edge = False
-        next_edge = next_edges.pop()
-        count += next_edge[1] != current[1]
-        current = next_edge
-        exterior_edges.remove(current)
-    count += current[1] != first_edge[1]
+        first_edge: Edge = exterior_edges.pop()
+        print("first edge", first_edge)
+        current = first_edge
+        is_first_edge: bool = True
+        while True:
+            print("current", current, len(exterior_edges))
+            next_edges = connected(current) & exterior_edges
+            if current == (Coord(3, 2), True):
+                print("connected", connected(current))
+                print("exterior edges", exterior_edges)
+                print("next_edges", len(next_edges), next_edges)
+            if not next_edges:
+                break
+            assert len(next_edges) == (2 if is_first_edge else 1)
+            is_first_edge = False
+            next_edge = next_edges.pop()
+            count += next_edge[1] != current[1]
+            current = next_edge
+            exterior_edges.remove(current)
+        assert current in connected(first_edge)
+        count += current[1] != first_edge[1]
     return count
 
 
@@ -138,7 +166,7 @@ if __name__ == "__main__":
     garden = Garden(stdin.readlines())
     regions = garden.assign_regions()
     for type_, cells in regions:
-        print(type_, ": ", end="")
-        print(len(cells), perimeter(cells), number_of_sides(cells))
-    print(sum(price1(cells) for _type, cells in regions))
-    print(sum(price2(cells) for _type, cells in regions))
+        print(type_, ": ", len(cells), perimeter(cells), end="")
+        print(number_of_sides(cells))
+    # print(sum(price1(cells) for _type, cells in regions))
+    # print(sum(price2(cells) for _type, cells in regions))
