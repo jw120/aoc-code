@@ -29,6 +29,15 @@ class Robot:
         )
 
 
+def show(positions: list[Coord], width: int, height: int) -> None:
+    """Show robot positions, looking for an Xmas tree."""
+    position_set: set[Coord] = set(positions)
+    for y in range(height):
+        for x in range(width):
+            print("*" if Coord(x, y) in position_set else ".", end="")
+        print()
+
+
 def part_a(robots: list[Robot], width: int, height: int) -> int:
     """Solve part A."""
     positions = [r.position for r in robots]
@@ -47,6 +56,21 @@ def part_a(robots: list[Robot], width: int, height: int) -> int:
     return prod(counts.values())
 
 
+def part_b(robots: list[Robot], width: int, height: int) -> int:
+    """Solve part B - iterate until all positions unique."""
+    positions = [r.position for r in robots]
+    velocities = [r.velocity for r in robots]
+    cycle = 0
+    while True:
+        cycle += 1
+        for i in range(len(positions)):
+            positions[i] += velocities[i]
+            positions[i] = Coord(positions[i].x % width, positions[i].y % height)
+        if len(set(positions)) == len(positions):
+            return cycle
+            # To show the tree: show(positions, width, height)
+
+
 if __name__ == "__main__":
     robots = [Robot.read(line) for line in stdin.readlines()]
     if len(robots) == 12:
@@ -54,3 +78,4 @@ if __name__ == "__main__":
     else:
         width, height = 101, 103  # Real problem
     print(part_a(robots, width, height))
+    print(part_b(robots, width, height))

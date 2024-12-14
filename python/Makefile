@@ -40,7 +40,8 @@ run_2023: \
 
 run_2024: \
 	python_2024_01 python_2024_02 python_2024_03 python_2024_04 python_2024_05 \
-	python_2024_06 python_2024_07 python_2024_08 python_2024_09 python_2024_10
+	python_2024_06 python_2024_07 python_2024_08 python_2024_09 python_2024_10 \
+	python_2024_11 python_2024_12                python_2024_14
 
 check:
 	ruff format $(PYTHON_SRC)
