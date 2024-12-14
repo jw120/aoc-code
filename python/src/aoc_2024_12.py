@@ -1,5 +1,9 @@
 """Advent of Code 2024 - Day 12."""
 
+from __future__ import annotations
+
+from dataclasses import dataclass
+from enum import Enum, auto
 from itertools import combinations
 from sys import stdin
 
@@ -11,7 +15,7 @@ class Garden:
 
     def __init__(self, lines: list[str]) -> None:
         self.extent = Extent(len(lines[0].strip()), len(lines))
-        self.grid: list[str] = lines
+        self.grid: list[str] = list(reversed(lines))  # So y-axis is up
 
     def g(self, crd: Coord) -> str:
         """Get plant type at given coordinate."""
@@ -58,57 +62,78 @@ def perimeter(s: set[Coord]) -> int:
     return 4 * len(s) - 2 * interior_boundaries
 
 
-#
-#
-#            E(x,y,T)
-#          +-------+
-#          |       |
-#  E(x,y,F)| x , y |E(x+1,y,F)
-#          |       |
-#          +-------+
-#           E(x,y+1,T)
-#
+class Dir(Enum):
+    """Label for an edge of a cell."""
+
+    Top = auto()
+    Right = auto()
+    Bottom = auto()
+    Left = auto()
+
+    def letter(self) -> str:
+        """Return single-letter version for printing."""
+        match self:
+            case Dir.Top:
+                return "T"
+            case Dir.Right:
+                return "R"
+            case Dir.Bottom:
+                return "B"
+            case Dir.Left:
+                return "L"
 
 
-#
-#
-#             (0, 1)
-#       (-1,0)(x, y)(1,0)
-#             (0, -1)
-#
-#
-# (x, y)(0, 1) -> (x+1,y) (0, 1)
-#
+@dataclass(frozen=True)
+class Edge:
+    """Edge is attached to each cell."""
 
-# Edge c is to left, below cell c. True if edge is horizontal
-type Edge = tuple[Coord, bool]
+    cell: Coord
+    label: Dir
+
+    def opposite(self) -> Edge:
+        """Return the parallel edge of the adjacent cell."""
+        match self.label:
+            case Dir.Top:
+                return Edge(self.cell + Coord(0, 1), Dir.Bottom)
+            case Dir.Right:
+                return Edge(self.cell + Coord(1, 0), Dir.Left)
+            case Dir.Bottom:
+                return Edge(self.cell + Coord(0, -1), Dir.Top)
+            case Dir.Left:
+                return Edge(self.cell + Coord(-1, 0), Dir.Right)
+
+    def __str__(self) -> str:
+        """Return string form for debugging."""
+        return f"{self.label.letter()}({self.cell.x},{self.cell.y})"
 
 
-def edges(c: Coord) -> list[Edge]:
-    """Return edges around a coordinate."""
-    return [(c, True), (c + Coord(0, 1), True), (c, False), (c + Coord(1, 0), False)]
-
-
-def connected(edge: Edge) -> set[Edge]:
-    """Return all the edges connected to the given edge."""
-    c, is_horizontal = edge
-    if is_horizontal:
-        return {
-            (c + Coord(1, 0), True),
-            (c + Coord(-1, 0), True),
-            (c, False),
-            (c + Coord(1, 0), False),
-            (c + Coord(0, -1), False),
-            (c + Coord(1, -1), False),
-        }
-    return {
-        (c + Coord(0, 1), False),
-        (c + Coord(0, -1), False),
-        (c, True),
-        (c + Coord(-1, 0), True),
-        (c + Coord(0, 1), True),
-        (c + Coord(-1, 1), True),
-    }
+def next_exterior_edge(edge: Edge, cells: set[Coord]) -> Edge:
+    """Return next exterior edge if moving clockwise."""
+    match edge.label:
+        case Dir.Top:
+            if edge.cell + Coord(1, 0) in cells:
+                if edge.cell + Coord(1, 1) in cells:
+                    return Edge(edge.cell + Coord(1, 1), Dir.Left)
+                return Edge(edge.cell + Coord(1, 0), Dir.Top)
+            return Edge(edge.cell, Dir.Right)
+        case Dir.Right:
+            if edge.cell + Coord(0, -1) in cells:
+                if edge.cell + Coord(1, -1) in cells:
+                    return Edge(edge.cell + Coord(1, -1), Dir.Top)
+                return Edge(edge.cell + Coord(0, -1), Dir.Right)
+            return Edge(edge.cell, Dir.Bottom)
+        case Dir.Bottom:
+            if edge.cell + Coord(-1, 0) in cells:
+                if edge.cell + Coord(-1, -1) in cells:
+                    return Edge(edge.cell + Coord(-1, -1), Dir.Right)
+                return Edge(edge.cell + Coord(-1, 0), Dir.Bottom)
+            return Edge(edge.cell, Dir.Left)
+        case Dir.Left:
+            if edge.cell + Coord(0, 1) in cells:
+                if edge.cell + Coord(-1, 1) in cells:
+                    return Edge(edge.cell + Coord(-1, 1), Dir.Bottom)
+                return Edge(edge.cell + Coord(0, 1), Dir.Left)
+            return Edge(edge.cell, Dir.Top)
 
 
 def number_of_sides(s: set[Coord]) -> int:
@@ -116,9 +141,11 @@ def number_of_sides(s: set[Coord]) -> int:
     # Find all exterior edges (all non-duplicated cell edges)
     exterior_edges: set[Edge] = set()
     for cell in s:
-        for edge in edges(cell):
-            if edge in exterior_edges:
-                exterior_edges.remove(edge)
+        for direction in Dir:
+            edge = Edge(cell, direction)
+            opposite = edge.opposite()
+            if opposite in exterior_edges:
+                exterior_edges.remove(opposite)
             else:
                 exterior_edges.add(edge)
     assert len(exterior_edges) == perimeter(s)
@@ -127,26 +154,15 @@ def number_of_sides(s: set[Coord]) -> int:
     count: int = 0
     while exterior_edges:
         first_edge: Edge = exterior_edges.pop()
-        print("first edge", first_edge)
         current = first_edge
-        is_first_edge: bool = True
         while True:
-            print("current", current, len(exterior_edges))
-            next_edges = connected(current) & exterior_edges
-            if current == (Coord(3, 2), True):
-                print("connected", connected(current))
-                print("exterior edges", exterior_edges)
-                print("next_edges", len(next_edges), next_edges)
-            if not next_edges:
+            next_edge = next_exterior_edge(current, s)
+            if next_edge.label != current.label:
+                count += 1
+            if next_edge == first_edge:
                 break
-            assert len(next_edges) == (2 if is_first_edge else 1)
-            is_first_edge = False
-            next_edge = next_edges.pop()
-            count += next_edge[1] != current[1]
             current = next_edge
             exterior_edges.remove(current)
-        assert current in connected(first_edge)
-        count += current[1] != first_edge[1]
     return count
 
 
@@ -165,8 +181,5 @@ def price2(s: set[Coord]) -> int:
 if __name__ == "__main__":
     garden = Garden(stdin.readlines())
     regions = garden.assign_regions()
-    for type_, cells in regions:
-        print(type_, ": ", len(cells), perimeter(cells), end="")
-        print(number_of_sides(cells))
-    # print(sum(price1(cells) for _type, cells in regions))
-    # print(sum(price2(cells) for _type, cells in regions))
+    print(sum(price1(cells) for _type, cells in regions))
+    print(sum(price2(cells) for _type, cells in regions))
