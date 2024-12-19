@@ -1,4 +1,8 @@
-"""Advent of Code 2024 - Day 16."""
+"""Advent of Code 2024 - Day 16.
+
+Works - but not fully general - e.g., if multiple routes reach goal square.
+
+"""
 
 from __future__ import annotations
 
@@ -102,6 +106,7 @@ class Maze:
         start = State(self.start, Dir.E)
         q: list[PriorityState] = [PriorityState(0, start)]
         heapify(q)
+
         # Explored set that keeps track of distances and parents
         explored: dict[State, tuple[int, set[State]]] = {start: (0, set())}
 
@@ -115,9 +120,14 @@ class Maze:
             # Move in current direction
             state_next = State(state.coord + state.direction.delta(), state.direction)
             distance_next = distance + 1
-            if not self[state_next.coord] and state_next not in explored:
-                explored[state_next] = (distance_next, {state})
-                heappush(q, PriorityState(distance_next, state_next))
+            if not self[state_next.coord]:
+                if state_next not in explored:
+                    explored[state_next] = (distance_next, {state})
+                    heappush(q, PriorityState(distance_next, state_next))
+                else:
+                    previous_distance, previous_parent = explored[state_next]
+                    if previous_distance == distance_next:
+                        previous_parent.add(state)
             for d in state.direction.adjacents():
                 state_rotate = State(state.coord, d)
                 distance_rotate = distance + 1000
@@ -126,15 +136,16 @@ class Maze:
                     heappush(q, PriorityState(distance_rotate, state_rotate))
         else:
             return -1, set()
-        path: set[Coord] = set()
-        while True:
-            path.add(state.coord)
-            _distance, parent = explored[state]
+        backtrack: set[Coord] = set()
+        frontier: set[State] = {state}
+        while frontier:
+            s = frontier.pop()
+            backtrack.add(s.coord)
+            _distance, parent = explored[s]
             if not parent:
                 break
-            assert len(parent) == 1
-            state = parent.pop()
-        return distance, path
+            frontier |= parent
+        return distance, backtrack
 
     def print(self, highlight: set[Coord] | None = None) -> None:
         """Print warehouse for debugging."""
@@ -155,5 +166,5 @@ class Maze:
 if __name__ == "__main__":
     maze = Maze(stdin.readlines())
     distance, path = maze.bfs()
-    maze.print(path)
-    print(distance, len(path))
+    print(distance)
+    print(len(path))
