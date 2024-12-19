@@ -43,15 +43,22 @@ class Dir(Enum):
                 return [Dir.N, Dir.S]
 
 
-@dataclass
+@dataclass(frozen=True)
 class State:
-    """State for our breadth-first search."""
+    """State for our walker."""
 
-    distance: int
     coord: Coord
     direction: Dir
 
-    def __lt__(self, other: State) -> bool:
+
+@dataclass
+class PriorityState:
+    """State for our priority queue."""
+
+    distance: int
+    state: State
+
+    def __lt__(self, other: PriorityState) -> bool:
         return self.distance < other.distance
 
 
@@ -86,35 +93,58 @@ class Maze:
         """Return contents of given space."""
         return self.wall[coord.y][coord.x]
 
-    def bfs(self) -> int | None:
-        """Return shortest-path from start to finish."""
-        q: list[State] = [State(distance=0, coord=self.start, direction=Dir.E)]
+    def bfs(self) -> tuple[int, set[Coord]]:
+        """Find shortest-path from start to finish.
+
+        Return path length and number of squares on shortest-length paths.
+        """
+        # Priority queue of states
+        start = State(self.start, Dir.E)
+        q: list[PriorityState] = [PriorityState(0, start)]
         heapify(q)
-        explored: set[tuple[Coord, Dir]] = {(self.start, Dir.E)}
+        # Explored set that keeps track of distances and parents
+        explored: dict[State, tuple[int, set[State]]] = {start: (0, set())}
 
         while q:
-            state = heappop(q)
-            print(state)
+            priority_state = heappop(q)
+            distance = priority_state.distance
+            state = priority_state.state
+            # Check if at finish
             if state.coord == self.finish:
-                return state.distance
+                break
             # Move in current direction
-            c_next = state.coord + state.direction.delta()
-            if not self[c_next] and (c_next, state.direction) not in explored:
-                explored.add((c_next, state.direction))
-                heappush(q, State(state.distance + 1, c_next, state.direction))
+            state_next = State(state.coord + state.direction.delta(), state.direction)
+            distance_next = distance + 1
+            if not self[state_next.coord] and state_next not in explored:
+                explored[state_next] = (distance_next, {state})
+                heappush(q, PriorityState(distance_next, state_next))
             for d in state.direction.adjacents():
-                if (state.coord, d) not in explored:
-                    explored.add((state.coord, d))
-                    heappush(q, State(state.distance + 1000, state.coord, d))
-        return None
+                state_rotate = State(state.coord, d)
+                distance_rotate = distance + 1000
+                if state_rotate not in explored:
+                    explored[state_rotate] = (distance_rotate, {state})
+                    heappush(q, PriorityState(distance_rotate, state_rotate))
+        else:
+            return -1, set()
+        path: set[Coord] = set()
+        while True:
+            path.add(state.coord)
+            _distance, parent = explored[state]
+            if not parent:
+                break
+            assert len(parent) == 1
+            state = parent.pop()
+        return distance, path
 
-    def print(self) -> None:
+    def print(self, highlight: set[Coord] | None = None) -> None:
         """Print warehouse for debugging."""
         for coord in self.extent.upto_by_y():
             if coord == self.start:
                 print("S", end="")
             elif coord == self.finish:
                 print("E", end="")
+            elif highlight is not None and coord in highlight:
+                print("O", end="")
             else:
                 print("#" if self[coord] else ".", end="")
             if coord.x == self.extent.x - 1:
@@ -124,5 +154,6 @@ class Maze:
 
 if __name__ == "__main__":
     maze = Maze(stdin.readlines())
-    maze.print()
-    print(maze.bfs())
+    distance, path = maze.bfs()
+    maze.print(path)
+    print(distance, len(path))
