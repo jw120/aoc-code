@@ -18,7 +18,7 @@ def possible(available: list[str], desired: str) -> bool:
     return any(desired.startswith(a) and possible(available, desired[len(a) :]) for a in available)
 
 
-def ways(available: list[str], desired: str, cache: dict[str, int] | None = None) -> int:
+def ways(available: list[str], desired: str, cache: dict[str, int] | None) -> int:
     """Count number of ways the desired pattern be constructed with the available patterns."""
     if not desired:
         return 1
@@ -26,10 +26,9 @@ def ways(available: list[str], desired: str, cache: dict[str, int] | None = None
         cache = {}
     if desired in cache:
         return cache[desired]
-    count = 0
-    for a in available:
-        if desired.startswith(a):
-            count += ways(available, desired[len(a) :], cache)
+    count = sum(
+        ways(available, desired[len(a) :], cache) for a in available if desired.startswith(a)
+    )
     cache[desired] = count
     return count
 
@@ -37,4 +36,4 @@ def ways(available: list[str], desired: str, cache: dict[str, int] | None = None
 if __name__ == "__main__":
     available, desired = parse(stdin.read())
     print(sum(possible(available, d) for d in desired))
-    print(sum(ways(available, d) for d in desired))
+    print(sum(ways(available, d, None) for d in desired))

@@ -140,7 +140,6 @@ if __name__ == "__main__":
     print(",".join(str(i) for i in computer.output))
 
     a = 1
-    # computer.program = [0, 3, 5, 4, 3, 0]
     while True:
         a += 1
         computer.reset()
