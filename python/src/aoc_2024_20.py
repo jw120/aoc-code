@@ -1,5 +1,6 @@
 """Advent of Code 2024 - Day 20."""
 
+from collections import Counter
 from sys import stdin
 
 from coord import Coord, Extent
@@ -27,7 +28,7 @@ class RaceTrack:
                     elif ch == "E":
                         end = Coord(x, y)
                     else:
-                        assert ch == "."
+                        assert ch == ".", f"Bad char '{ch}'"
         assert start is not None
         assert end is not None
         self.start: Coord = start
@@ -39,13 +40,26 @@ class RaceTrack:
     def __setitem__(self, coord: Coord, value: bool) -> None:
         self.wall[coord.y][coord.x] = value
 
-    def shortest_path(self) -> int | None:
+    def shortest_path(self, cheat: Coord | None = None) -> int | None:
         """Return length of shortest path from start to end."""
         return bfs(
             self.start,
             lambda c: c == self.end,
-            lambda c: [c for c in c.adjacents(self.extent) if not self[c]],
+            lambda c: [c for c in c.adjacents(self.extent) if c == cheat or not self[c]],
         )
+
+    def cheats(self) -> Counter[int]:
+        """Find all cheats."""
+        counts: Counter[int] = Counter()
+        no_cheat_time = self.shortest_path(None)
+        assert no_cheat_time is not None
+        for coord in self.extent.upto_by_y():
+            if not self[coord]:
+                continue
+            cheat_time = self.shortest_path(coord)
+            assert cheat_time is not None
+            counts[no_cheat_time - cheat_time] += 1
+        return counts
 
     def print(self) -> None:
         """Print for debugging."""
@@ -62,5 +76,5 @@ class RaceTrack:
 
 if __name__ == "__main__":
     race_track = RaceTrack(stdin.readlines())
-    race_track.print()
-    print(race_track.shortest_path())
+    cheat_counts = race_track.cheats()
+    print(sum(count for saving, count in cheat_counts.items() if saving >= 100))
