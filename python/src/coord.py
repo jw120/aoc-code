@@ -135,6 +135,10 @@ class Extent(Coord):
         """
         return (Coord(x, y) for y in range(self.y) for x in range(self.x))
 
+    def within(self, coord: Coord) -> bool:
+        """Test if the coordinate is within the extent."""
+        return coord.x >= 0 and coord.y >= 0 and coord.x < self.x and coord.y < self.y
+
 
 @dataclass(eq=True, frozen=True)
 class Coord3:

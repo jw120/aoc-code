@@ -1,6 +1,6 @@
 """Advent of Code 2024 - Day 20."""
 
-from collections import Counter
+from collections import deque
 from sys import stdin
 
 from coord import Coord, Extent
@@ -48,18 +48,52 @@ class RaceTrack:
             lambda c: [c for c in c.adjacents(self.extent) if c == cheat or not self[c]],
         )
 
-    def cheats(self) -> Counter[int]:
-        """Find all cheats."""
-        counts: Counter[int] = Counter()
-        no_cheat_time = self.shortest_path(None)
-        assert no_cheat_time is not None
+    def distances(self, reference: Coord) -> dict[Coord, int]:
+        """Return distances to reference point for all reachable non-wall coordinates."""
+        q: deque[tuple[Coord, int]] = deque([(reference, 0)])
+        d: dict[Coord, int] = {reference: 0}
+        while q:
+            coord, dist = q.popleft()
+            new_states = [
+                (a, dist + 1) for a in coord.adjacents(self.extent) if not self[a] and a not in d
+            ]
+            q.extend(new_states)
+            d |= dict(new_states)
+        return d
+
+    def cheats(self, threshold_saving: int) -> int:
+        """Find all cheats with time saving on or above threshold."""
+        # For every non-wall square, find distance from start and the end
+        start_distances = self.distances(self.start)
+        end_distances = self.distances(self.end)
+        shortest_path = self.shortest_path()
+        assert shortest_path is not None
+        assert start_distances[self.end] == shortest_path
+        assert end_distances[self.start] == shortest_path
+        # for c, d in distances.items():
+        #     if d < 10:
+        #         print(c, d)
+        # Minimum time to qualify
+        threshold_distance = shortest_path - threshold_saving
+        print("Threshold", threshold_distance)
+        # Scan over all squares, look where a cheat would save threshold
+        count = 0
         for coord in self.extent.upto_by_y():
-            if not self[coord]:
+            if coord not in start_distances:  # Skip walls and squares unreachable from the start
                 continue
-            cheat_time = self.shortest_path(coord)
-            assert cheat_time is not None
-            counts[no_cheat_time - cheat_time] += 1
-        return counts
+            for delta in (Coord(1, 0), Coord(0, 1), Coord(-1, 0), Coord(0, -1)):
+                if (
+                    self.extent.within(coord + delta)
+                    and self[coord + delta]
+                    and self.extent.within(coord + delta + delta)
+                    and not self[coord + delta + delta]
+                    and (coord + delta + delta) in end_distances
+                ):
+                    distance = start_distances[coord] + end_distances[coord + delta + delta] + 2
+                    if distance <= threshold_distance:
+                        print(coord, coord + delta + delta, distance)
+                        count += 1
+        return count
 
     def print(self) -> None:
         """Print for debugging."""
@@ -76,5 +110,4 @@ class RaceTrack:
 
 if __name__ == "__main__":
     race_track = RaceTrack(stdin.readlines())
-    cheat_counts = race_track.cheats()
-    print(sum(count for saving, count in cheat_counts.items() if saving >= 100))
+    print(race_track.cheats(100))
