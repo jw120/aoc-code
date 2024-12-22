@@ -62,7 +62,7 @@ class RaceTrack:
         return d
 
     def cheats(self, threshold_saving: int) -> int:
-        """Find all cheats with time saving on or above threshold."""
+        """Find all single-wall cheats with time saving on or above threshold."""
         # For every non-wall square, find distance from start and the end
         start_distances = self.distances(self.start)
         end_distances = self.distances(self.end)
@@ -70,16 +70,14 @@ class RaceTrack:
         assert shortest_path is not None
         assert start_distances[self.end] == shortest_path
         assert end_distances[self.start] == shortest_path
-        # for c, d in distances.items():
-        #     if d < 10:
-        #         print(c, d)
         # Minimum time to qualify
         threshold_distance = shortest_path - threshold_saving
-        print("Threshold", threshold_distance)
         # Scan over all squares, look where a cheat would save threshold
         count = 0
         for coord in self.extent.upto_by_y():
             if coord not in start_distances:  # Skip walls and squares unreachable from the start
+                continue
+            if start_distances[coord] + 2 > threshold_distance:  # Give up if too far gone already
                 continue
             for delta in (Coord(1, 0), Coord(0, 1), Coord(-1, 0), Coord(0, -1)):
                 if (
@@ -91,7 +89,39 @@ class RaceTrack:
                 ):
                     distance = start_distances[coord] + end_distances[coord + delta + delta] + 2
                     if distance <= threshold_distance:
-                        print(coord, coord + delta + delta, distance)
+                        count += 1
+        return count
+
+    def cheats_multiple(self, threshold_saving: int, steps: int) -> int:
+        """Find all cheats with up to given steps and a time saving on or above threshold."""
+        # Find all deltas with manhattan distance of 20
+        stencil: list[Coord] = []
+        for x in range(-steps, steps + 1):
+            for y in range(-steps, steps + 1):
+                coord = Coord(x, y)
+                if coord.dist(Coord.origin()) <= steps and coord != Coord.origin():
+                    stencil.append(coord)
+        # For every non-wall square, find distance from start and the end
+        start_distances = self.distances(self.start)
+        end_distances = self.distances(self.end)
+        shortest_path = self.shortest_path()
+        assert shortest_path is not None
+        assert start_distances[self.end] == shortest_path
+        assert end_distances[self.start] == shortest_path
+        # Minimum time to qualify
+        threshold_distance = shortest_path - threshold_saving
+        # Scan over all squares, look where a cheat would save threshold
+        count = 0
+        for coord in self.extent.upto_by_y():
+            if coord not in start_distances:  # Skip walls and squares unreachable from the start
+                continue
+            if start_distances[coord] > threshold_distance:  # Give up if too far gone already
+                continue
+            for delta in stencil:
+                target = coord + delta
+                if self.extent.within(target) and not self[target] and target in end_distances:
+                    distance = start_distances[coord] + end_distances[target] + coord.dist(target)
+                    if distance <= threshold_distance:
                         count += 1
         return count
 
@@ -111,3 +141,4 @@ class RaceTrack:
 if __name__ == "__main__":
     race_track = RaceTrack(stdin.readlines())
     print(race_track.cheats(100))
+    print(race_track.cheats_multiple(100, 20))
