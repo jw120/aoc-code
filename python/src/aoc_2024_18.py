@@ -1,28 +1,10 @@
 """Advent of Code 2024 - Day 18."""
 
-from collections import deque
 from collections.abc import Callable
 from sys import stdin
-from typing import TypeVar
 
 from coord import Coord, Extent
 from search import bfs
-
-S = TypeVar("S")
-
-
-# def bfs(start: S, at_goal: Callable[[S], bool], available: Callable[[S], list[S]]) -> int | None:
-#     """Conduct basic BFS search and return length of minimum path."""
-#     q: deque[tuple[S, int]] = deque([(start, 0)])
-#     distance: dict[S, int] = {start: 0}
-#     while q:
-#         s, dist = q.popleft()
-#         if at_goal(s):
-#             return dist
-#         new_states = [(a, dist + 1) for a in available(s) if a not in distance]
-#         q.extend(new_states)
-#         distance |= dict(new_states)
-#     return None
 
 
 class Memory:
@@ -62,16 +44,24 @@ class Memory:
         print()
 
 
+def lowest_positive(lo: int, hi: int, f: Callable[[int], bool]) -> int:
+    """Return lowest value in range lo..hi for which function is True."""
+    while hi - lo > 1:
+        n = (lo + hi) // 2
+        print(lo, n, hi)
+        if f(n):
+            hi = n
+        else:
+            lo = n
+    return hi
+
+
 if __name__ == "__main__":
     corruptions = stdin.readlines()
     memory = Memory(corruptions, 71)
     print(memory.shortest_path(1024))
-    for n, c in enumerate(corruptions):
-        print(n, c.strip())
-        if memory.shortest_path(n) is None:
-            break
-
-
-# 3039 31,22  ANSWER
-
-# 3040 50,24
+    print(
+        corruptions[
+            lowest_positive(1024, len(corruptions), lambda n: memory.shortest_path(n) is None)
+        ].strip()
+    )

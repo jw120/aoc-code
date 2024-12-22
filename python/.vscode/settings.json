@@ -21,6 +21,7 @@
         "envrc",
         "FURB",
         "getkey",
+        "heapq",
         "humn",
         "isort",
         "lastindex",

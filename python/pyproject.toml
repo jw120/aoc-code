@@ -13,7 +13,7 @@ target-version = "py313"
 [tool.ruff.lint.pylint]
 max-args = 8 # (Default is 5)
 max-branches = 20 # (Default is 12)
-max-locals = 16 # (Default is 15)
+max-locals = 20 # (Default is 15)
 max-nested-blocks = 7 # (Default is 5)
 max-returns = 12 # (Default is 6)
 max-statements = 60 # (Default is 50)
