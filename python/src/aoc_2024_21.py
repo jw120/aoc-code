@@ -33,9 +33,7 @@ def numeric(s: str) -> str:
     current: Coord = KEYPAD["A"]
     output = ""
     for target in s:
-        target_coord = KEYPAD[target]
         moves = numeric_moves(current, KEYPAD[target])
-        # print(f"Moving from {current} to {target}@{target_coord} by {moves}")
         output += moves
         output += "A"
         current = KEYPAD[target]
@@ -61,9 +59,7 @@ def directional(s: str) -> str:
     current: Coord = DPAD["A"]
     output = ""
     for target in s:
-        target_coord = DPAD[target]
         moves = directional_moves(current, DPAD[target])
-        # print(f"Moving from {current} to {target}@{target_coord} by {moves}")
         output += moves
         output += "A"
         current = DPAD[target]
