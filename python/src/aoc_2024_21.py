@@ -64,31 +64,26 @@ def numeric_moves(start: Coord, end: Coord) -> list[str]:
     return moves(end - start)
 
 
-def directional(s: str) -> str:
+def directional(s: str) -> list[list[str]]:
     """Return directional keypad moves for robot to type given sequence on another directional keypad."""
     current: Coord = DPAD["A"]
-    output = ""
+    output: list[list[str]] = []
     for target in s:
         moves = directional_moves(current, DPAD[target])
-        output += moves
-        output += "A"
+        output.append([m + "A" for m in moves])
         current = DPAD[target]
     return output
 
 
 def directional_moves(start: Coord, end: Coord) -> list[str]:
     """Return directional moves request to move arm for directional pad. Avoids gap."""
-    # If start on bottom-left, and moving to top, go right first
-    # if start == Coord(0, 1) and end.y == 0:
-    #     intermediate = Coord(end.x, 1)
-    #     return moves(intermediate - start) + moves(end - intermediate)
-    # # If moving from top to bottom-left, move down first
-    # if end == Coord(0, 1) and start.y == 0:
-    #     intermediate = Coord(end.x, 1)
-    #     return moves(intermediate - start) + moves(end - intermediate)
-    # # Otherwise move directly
-    # return moves(end - start)
-    return [""]
+    # If start on bottom-left, and moving to top, must go right first
+    if start == Coord(0, 1) and end.y == 0:
+        return [">" + m for m in directional_moves(start + Coord(1, 0), end)]
+    # # If moving from top to bottom-left, last step must be left
+    if end == Coord(0, 1) and start.y == 0:
+        return [m + "<" for m in directional_moves(start, Coord(1, 1))]
+    return moves(end - start)
 
 
 def moves(move: Coord) -> list[str]:
@@ -107,6 +102,33 @@ def moves(move: Coord) -> list[str]:
     return output
 
 
+def apply_directional(xss: list[list[str]]) -> list[list[str]]:
+    """Apply directional moves with all possible minimum-length move sequences."""
+    output: list[list[str]] = []
+    for xs in xss:
+        print("applying to", xs)
+        segment: list[list[str]] = []
+        for x in xs:
+            print(f"  case '{x}'")
+            segment.extend(directional(x))
+        print("segment", segment)
+        min_length = min(length(s) for s in segment)
+        print("min_length", min_length)
+        chosen = next(s for s in segment if length(s) == min_length)
+        print("chosen", chosen)
+        output.append(chosen)
+
+    return output
+
+
+def length(xss: list[list[str]]) -> int:
+    """Minimum length of move sequences."""
+    total = 0
+    for xs in xss:
+        total += min(len(x) for x in xs)
+    return total
+
+
 if __name__ == "__main__":
     numeric_targets = [line.strip() for line in stdin.readlines()]
     # lengths = [len(directional(directional(numeric(n)))) for n in numeric_targets]
@@ -116,10 +138,14 @@ if __name__ == "__main__":
     t = numeric_targets[0]
     d1 = numeric(t)
     print(t)
-    print("Got:", numeric(t))
+    print(length(d1))
+    print("Got:", d1)
     print("   : <A^A>^^AvvvA")
-
-    # print("Got:", directional(numeric(t)))
-    # print("   : v<<A>>^A<A>AvA<^AA>A<vAAA>^A")
-    # print("Got:", directional(directional(numeric(t))))
-    # print("   : <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A")
+    d2 = apply_directional(d1)
+    print(length(d2))
+    print("Got:", d2)
+    print("   : v<<A>>^A<A>AvA<^AA>A<vAAA>^A")
+    d3 = apply_directional(d2)
+    print(length(d3))
+    print("Got:", d3)
+    print("   : <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A")
