@@ -44,10 +44,16 @@ def numeric(s: str) -> MoveChain:
     """
     current: Coord = KEYPAD["A"]
     output: MoveChain = []
+    previous_moves: MoveChoice = []
     for target in s:
-        moves: str | list[str] = numeric_moves(current, KEYPAD[target])
-        output.append([m + "A" for m in moves])
+        moves: MoveChoice = numeric_moves(current, KEYPAD[target])
+        print(target, "->", moves)
+        if len(moves) == 1 and len(previous_moves) == 1:
+            output[-1] = [output[-1][0] + moves[0] + "A"]
+        else:
+            output.append([m + "A" for m in moves])
         current = KEYPAD[target]
+        previous_moves = moves
     return output
 
 
@@ -73,14 +79,19 @@ def numeric_moves(start: Coord, end: Coord) -> MoveChoice:
     return moves(end - start)
 
 
-def directional(moves: Moves) -> MoveChain:
+def directional(target_moves: Moves) -> MoveChain:
     """Return directional keypad moves for robot to type given sequence on another directional keypad."""
     current: Coord = DPAD["A"]
     output: MoveChain = []
-    for target in moves:
-        move_choice = directional_moves(current, DPAD[target])
-        output.append([m + "A" for m in move_choice])
+    previous_moves: MoveChoice = []
+    for target in target_moves:
+        moves: MoveChoice = directional_moves(current, DPAD[target])
+        if len(moves) == 1 and len(previous_moves) == 1:
+            output[-1] = [output[-1][0] + moves[0] + "A"]
+        else:
+            output.append([m + "A" for m in moves])
         current = DPAD[target]
+        previous_moves = moves
     return output
 
 
