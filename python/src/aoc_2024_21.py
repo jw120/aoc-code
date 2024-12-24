@@ -28,29 +28,39 @@ DPAD: Final[dict[str, Coord]] = {
 }
 
 
-def numeric(s: str) -> str:
-    """Return directional keypad moves for robot to type given sequence on the numeric keypad."""
+def numeric(s: str) -> list[list[str]]:
+    """Return directional keypad moves for robot to type given sequence on the numeric keypad.
+
+    Output is a list of alternatives.
+    """
     current: Coord = KEYPAD["A"]
-    output = ""
+    output: list[list[str]] = []
     for target in s:
-        moves = numeric_moves(current, KEYPAD[target])
-        output += moves
-        output += "A"
+        moves: list[str] = numeric_moves(current, KEYPAD[target])
+        output.append([m + "A" for m in moves])
         current = KEYPAD[target]
     return output
 
 
-def numeric_moves(start: Coord, end: Coord) -> str:
+def numeric_moves(start: Coord, end: Coord) -> list[str]:
     """Return directional moves request to move arm for numeric pad. Avoids gap."""
-    # If start on bottom row, move up first
-    if start.y == 3 and end.y < 3:
-        intermediate = Coord(start.x, 2)
-        return moves(intermediate - start) + moves(end - intermediate)
-    # If moving to bottom row, move down last
-    if end.y == 3 and start.y < 3:
-        intermediate = Coord(end.x, 2)
-        return moves(intermediate - start) + moves(end - intermediate)
-    # Otherwise move directly
+    # If start at 0 and move to left-most column, must go up first
+    if start == Coord(1, 3) and end.x == 0:
+        return ["^" + m for m in numeric_moves(Coord(1, 2), end)]
+    # If start at A and going to left-most column, two ways
+    if start == Coord(2, 3) and end.x == 0:
+        return ["^" + m for m in numeric_moves(Coord(2, 2), end)] + [
+            "<^" + m for m in numeric_moves(Coord(1, 2), end)
+        ]
+    # If moving to 0 from left-most column, move down last
+    if end == Coord(1, 3) and start.x == 0:
+        return [m + "v" for m in numeric_moves(start, Coord(1, 2))]
+    # If moving to A from left-most column, two ways
+    if end == Coord(2, 3) and start.x == 0:
+        return [m + "v" for m in numeric_moves(start, Coord(2, 2))] + [
+            m + "v>" for m in numeric_moves(start, Coord(1, 2))
+        ]
+    # Simple case
     return moves(end - start)
 
 
@@ -66,50 +76,50 @@ def directional(s: str) -> str:
     return output
 
 
-def directional_moves(start: Coord, end: Coord) -> str:
+def directional_moves(start: Coord, end: Coord) -> list[str]:
     """Return directional moves request to move arm for directional pad. Avoids gap."""
     # If start on bottom-left, and moving to top, go right first
-    if start == Coord(0, 1) and end.y == 0:
-        intermediate = Coord(end.x, 1)
-        return moves(intermediate - start) + moves(end - intermediate)
-    # If moving from top to bottom-left, move down first
-    if end == Coord(0, 1) and start.y == 0:
-        intermediate = Coord(end.x, 1)
-        return moves(intermediate - start) + moves(end - intermediate)
-    # Otherwise move directly
-    return moves(end - start)
+    # if start == Coord(0, 1) and end.y == 0:
+    #     intermediate = Coord(end.x, 1)
+    #     return moves(intermediate - start) + moves(end - intermediate)
+    # # If moving from top to bottom-left, move down first
+    # if end == Coord(0, 1) and start.y == 0:
+    #     intermediate = Coord(end.x, 1)
+    #     return moves(intermediate - start) + moves(end - intermediate)
+    # # Otherwise move directly
+    # return moves(end - start)
+    return [""]
 
 
-def moves(move: Coord) -> str:
+def moves(move: Coord) -> list[str]:
     """Return directional moves request to move arm for numeric pad."""
-    output = ""
-    while move != Coord.origin():
-        if move.x > 0:
-            output += ">"
-            move += Coord(-1, 0)
-        if move.x < 0:
-            output += "<"
-            move += Coord(1, 0)
-        if move.y > 0:
-            output += "v"
-            move += Coord(0, -1)
-        if move.y < 0:
-            output += "^"
-            move += Coord(0, 1)
+    if move == Coord.origin():
+        return [""]
+    output: list[str] = []
+    if move.x > 0:
+        output.extend(">" + m for m in moves(move + Coord(-1, 0)))
+    if move.x < 0:
+        output.extend("<" + m for m in moves(move + Coord(1, 0)))
+    if move.y > 0:
+        output.extend("v" + m for m in moves(move + Coord(0, -1)))
+    if move.y < 0:
+        output.extend("^" + m for m in moves(move + Coord(0, 1)))
     return output
 
 
 if __name__ == "__main__":
     numeric_targets = [line.strip() for line in stdin.readlines()]
-    lengths = [len(directional(directional(numeric(n)))) for n in numeric_targets]
-    numbers = [int(n[:-1]) for n in numeric_targets]
-    print(lengths)
-    print(numbers)
+    # lengths = [len(directional(directional(numeric(n)))) for n in numeric_targets]
+    # numbers = [int(n[:-1]) for n in numeric_targets]
+    # print(lengths)
+    # print(numbers)
     t = numeric_targets[0]
+    d1 = numeric(t)
     print(t)
     print("Got:", numeric(t))
     print("   : <A^A>^^AvvvA")
-    print("Got:", directional(numeric(t)))
-    print("   : v<<A>>^A<A>AvA<^AA>A<vAAA>^A")
-    print("Got:", directional(directional(numeric(t))))
-    print("   : <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A")
+
+    # print("Got:", directional(numeric(t)))
+    # print("   : v<<A>>^A<A>AvA<^AA>A<vAAA>^A")
+    # print("Got:", directional(directional(numeric(t))))
+    # print("   : <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A")
