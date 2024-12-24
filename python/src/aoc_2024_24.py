@@ -50,6 +50,8 @@ def run(initial_assignments: dict[str, bool], gates: list[Gate]) -> dict[str, bo
                 out_value = apply(assignments[in1], op, assignments[in2])
                 assignments[out] = out_value
                 gates_to_drop.add(gate)
+        if not gates_to_drop:
+            break
         remaining_gates -= gates_to_drop
     return assignments
 
@@ -63,7 +65,22 @@ def z(assignments: dict[str, bool]) -> int:
     return x
 
 
+def part_b(gates: list[Gate]) -> None:
+    """Try part b."""
+    assignments: dict[str, bool] = {}
+    for x in [False, True]:
+        for y in [False, True]:
+            assignments["x00"] = x
+            assignments["y00"] = y
+            output_assignments = run(assignments, gates)
+            print(output_assignments)
+            z = output_assignments["z00"]
+            z_carry = output_assignments["z01"]
+            print(x, y, z, z_carry)
+
+
 if __name__ == "__main__":
     initial_assignments, gates = parse(stdin.read())
-    assignments = run(initial_assignments, gates)
-    print(z(assignments))
+    # assignments = run(initial_assignments, gates)
+    # print(z(assignments))
+    part_b(gates)
