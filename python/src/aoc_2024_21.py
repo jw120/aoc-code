@@ -47,7 +47,6 @@ def numeric(s: str) -> MoveChain:
     previous_moves: MoveChoice = []
     for target in s:
         moves: MoveChoice = numeric_moves(current, KEYPAD[target])
-        print(target, "->", moves)
         if len(moves) == 1 and len(previous_moves) == 1:
             output[-1] = [output[-1][0] + moves[0] + "A"]
         else:
@@ -125,22 +124,26 @@ def moves(move: Coord) -> MoveChoice:
 def apply_directional(move_chain: MoveChain) -> MoveChain:
     """Apply directional moves with all possible minimum-length move sequences."""
     output: MoveChain = []
+    # for move_choice in move_chain:
+    #     if len(move_choice) > 1:
+    #         print("Considering", move_choice)
+    #     shortest_length: int | None = None
+    #     shortest_chain: MoveChain = []
+    #     for choice in move_choice:
+    #         choice_chain: MoveChain = directional(choice)
+    #         choice_length: int = chain_length(choice_chain)
+    #         if len(move_choice) > 1:
+    #             print("  Trying", choice, choice_chain, choice_length)
+    #         if shortest_length is None or choice_length < shortest_length:
+    #             shortest_length = choice_length
+    #             shortest_chain = choice_chain
+    #     if len(move_choice) > 1:
+    #         print("  Shortest", shortest_chain)
+    #     output.extend(shortest_chain)
     for move_choice in move_chain:
         if len(move_choice) > 1:
             print("Considering", move_choice)
-        shortest_length: int | None = None
-        shortest_chain: MoveChain = []
-        for choice in move_choice:
-            choice_chain: MoveChain = directional(choice)
-            choice_length: int = chain_length(choice_chain)
-            if len(move_choice) > 1:
-                print("  Trying", choice, choice_chain, choice_length)
-            if shortest_length is None or choice_length < shortest_length:
-                shortest_length = choice_length
-                shortest_chain = choice_chain
-        if len(move_choice) > 1:
-            print("  Shortest", shortest_chain)
-        output.extend(shortest_chain)
+        output.extend(directional(choice) for choice in move_choice)
     return output
 
 
