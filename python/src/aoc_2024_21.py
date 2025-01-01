@@ -108,11 +108,20 @@ def directional_simple(start: Coord, end: Coord) -> MoveChoice:
 # Find shortest sequences considering n additional robots.
 #
 
+cache: dict[tuple[str, str, int], str] = {}
+
 
 def shortest(start: str, end: str, n: int, *, numeric: bool) -> str:
     """Return one shortest directional move sequence considering n additional robots."""
+    # if n == 10:
+    #     print(start, end, cache.get((start, end, n)))  # , n, numeric)a
+
+    # Check cache
+    if (start, end, n) in cache:
+        # print("  Cached", cache[start, end, n])
+        return cache[start, end, n]
+
     # Generate all candidate routes
-    # print("shortest", start, end, n, numeric)
     candidates = (
         numeric_simple(KEYPAD[start], KEYPAD[end])
         if numeric
@@ -121,11 +130,12 @@ def shortest(start: str, end: str, n: int, *, numeric: bool) -> str:
     # print("  candidates", candidates)
     if n == 0:
         # print("  -->", start, end, n, candidates[0])
+        cache[start, end, n] = candidates[0]
         return candidates[0]
 
     # Select one of the shortest candidates
     shortest_candidate_route: str | None = None
-    shortest_candidate: str | None = None
+    # shortest_candidate: str | None = None
     for candidate in candidates:
         candidate_route = ""
         current = "A"
@@ -138,7 +148,8 @@ def shortest(start: str, end: str, n: int, *, numeric: bool) -> str:
             shortest_candidate = candidate
     assert shortest_candidate_route is not None
     # print("  candidate", shortest_candidate)
-    # print("  route", shortest_candidate_route)
+    # print("route", shortest_candidate_route)
+    cache[start, end, n] = shortest_candidate_route
     return shortest_candidate_route
 
 
@@ -159,6 +170,14 @@ if __name__ == "__main__":
     total = 0
     for target in numeric_targets:
         sequence = shortest_sequence(target, 2, numeric=True)
+        complexity = int(target[:-1]) * len(sequence)
+        total += complexity
+    print(total)
+
+    # # Part b
+    total = 0
+    for target in numeric_targets:
+        sequence = shortest_sequence(target, 25, numeric=True)
         complexity = int(target[:-1]) * len(sequence)
         total += complexity
     print(total)
