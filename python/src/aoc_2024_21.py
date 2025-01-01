@@ -37,149 +37,128 @@ type MoveChoice = list[str]
 type MoveChain = list[MoveChoice]
 
 
-def numeric(s: str) -> MoveChain:
-    """Return directional keypad moves for robot to type given sequence on the numeric keypad.
-
-    Output is a list of alternatives.
-    """
-    current: Coord = KEYPAD["A"]
-    output: MoveChain = []
-    previous_moves: MoveChoice = []
-    for target in s:
-        moves: MoveChoice = numeric_moves(current, KEYPAD[target])
-        if len(moves) == 1 and len(previous_moves) == 1:
-            output[-1] = [output[-1][0] + moves[0] + "A"]
-        else:
-            output.append([m + "A" for m in moves])
-        current = KEYPAD[target]
-        previous_moves = moves
-    return output
+#
+# Zero-th level - Unconstrained moves.
+#
+# Generate shortest move sequences on a directional key pads for a relative move
+# without considering the gap constraint
+#
 
 
-def numeric_moves(start: Coord, end: Coord) -> MoveChoice:
-    """Return directional moves request to move arm for numeric pad. Avoids gap."""
-    # If start at 0 and move to left-most column, must go up first
-    if start == Coord(1, 3) and end.x == 0:
-        return ["^" + m for m in numeric_moves(Coord(1, 2), end)]
-    # If start at A and going to left-most column, two ways
-    if start == Coord(2, 3) and end.x == 0:
-        return ["^" + m for m in numeric_moves(Coord(2, 2), end)] + [
-            "<^" + m for m in numeric_moves(Coord(1, 2), end)
-        ]
-    # If moving to 0 from left-most column, move down last
-    if end == Coord(1, 3) and start.x == 0:
-        return [m + "v" for m in numeric_moves(start, Coord(1, 2))]
-    # If moving to A from left-most column, two ways
-    if end == Coord(2, 3) and start.x == 0:
-        return [m + "v" for m in numeric_moves(start, Coord(2, 2))] + [
-            m + "v>" for m in numeric_moves(start, Coord(1, 2))
-        ]
-    # Simple case
-    return moves(end - start)
-
-
-def directional(target_moves: Moves) -> MoveChain:
-    """Return directional keypad moves for robot to type given sequence on another directional keypad."""
-    current: Coord = DPAD["A"]
-    output: MoveChain = []
-    previous_moves: MoveChoice = []
-    for target in target_moves:
-        moves: MoveChoice = directional_moves(current, DPAD[target])
-        if len(moves) == 1 and len(previous_moves) == 1:
-            output[-1] = [output[-1][0] + moves[0] + "A"]
-        else:
-            output.append([m + "A" for m in moves])
-        current = DPAD[target]
-        previous_moves = moves
-    return output
-
-
-def directional_moves(start: Coord, end: Coord) -> MoveChoice:
-    """Return directional moves request to move arm for directional pad. Avoids gap."""
-    # If start on bottom-left, and moving to top, must go right first
-    if start == Coord(0, 1) and end.y == 0:
-        return [">" + m for m in directional_moves(start + Coord(1, 0), end)]
-    # # If moving from top to bottom-left, last step must be left
-    if end == Coord(0, 1) and start.y == 0:
-        return [m + "<" for m in directional_moves(start, Coord(1, 1))]
-    return moves(end - start)
-
-
-def moves(move: Coord) -> MoveChoice:
-    """Return directional moves request to move arm for numeric pad."""
+def moves_unconstrained(move: Coord) -> MoveChoice:
+    """Return unconstrained directional moves request to move arm for numeric pad."""
     if move == Coord.origin():
         return [""]
     output: MoveChoice = []
     if move.x > 0:
-        output.extend(">" + m for m in moves(move + Coord(-1, 0)))
+        output.extend(">" + m for m in moves_unconstrained(move + Coord(-1, 0)))
     if move.x < 0:
-        output.extend("<" + m for m in moves(move + Coord(1, 0)))
+        output.extend("<" + m for m in moves_unconstrained(move + Coord(1, 0)))
     if move.y > 0:
-        output.extend("v" + m for m in moves(move + Coord(0, -1)))
+        output.extend("v" + m for m in moves_unconstrained(move + Coord(0, -1)))
     if move.y < 0:
-        output.extend("^" + m for m in moves(move + Coord(0, 1)))
+        output.extend("^" + m for m in moves_unconstrained(move + Coord(0, 1)))
     return output
 
 
-def apply_directional(move_chain: MoveChain) -> MoveChain:
-    """Apply directional moves with all possible minimum-length move sequences."""
-    output: MoveChain = []
-    # for move_choice in move_chain:
-    #     if len(move_choice) > 1:
-    #         print("Considering", move_choice)
-    #     shortest_length: int | None = None
-    #     shortest_chain: MoveChain = []
-    #     for choice in move_choice:
-    #         choice_chain: MoveChain = directional(choice)
-    #         choice_length: int = chain_length(choice_chain)
-    #         if len(move_choice) > 1:
-    #             print("  Trying", choice, choice_chain, choice_length)
-    #         if shortest_length is None or choice_length < shortest_length:
-    #             shortest_length = choice_length
-    #             shortest_chain = choice_chain
-    #     if len(move_choice) > 1:
-    #         print("  Shortest", shortest_chain)
-    #     output.extend(shortest_chain)
-    for move_choice in move_chain:
-        if len(move_choice) > 1:
-            print("Considering", move_choice)
-        output.extend(directional(choice) for choice in move_choice)
-    return output
+#
+# First level - Simple shortest sequences.
+#
+# Generate all shortest sequences for given move, taking into account
+# the gap constrain but only considering the current robot.
+#
 
 
-def chain_length(chain: MoveChain) -> int:
-    """Minimum length of a move chain."""
-    total = 0
-    for choice in chain:
-        total += min(len(s) for s in choice)
-    return total
+def numeric_simple(start: Coord, end: Coord) -> MoveChoice:
+    """Return directional moves request to move arm for numeric pad. Avoids gap."""
+    # If start at 0 and move to left-most column, must go up first
+    if start == Coord(1, 3) and end.x == 0:
+        return ["^" + m for m in numeric_simple(Coord(1, 2), end)]
+    # If start at A and going to left-most column, two ways
+    if start == Coord(2, 3) and end.x == 0:
+        return ["^" + m for m in numeric_simple(Coord(2, 2), end)] + [
+            "<^" + m for m in numeric_simple(Coord(1, 2), end)
+        ]
+    # If moving to 0 from left-most column, move down last
+    if end == Coord(1, 3) and start.x == 0:
+        return [m[:-1] + "vA" for m in numeric_simple(start, Coord(1, 2))]
+    # If moving to A from left-most column, two ways
+    if end == Coord(2, 3) and start.x == 0:
+        return [m[:-1] + "vA" for m in numeric_simple(start, Coord(2, 2))] + [
+            m[:-1] + "v>A" for m in numeric_simple(start, Coord(1, 2))
+        ]
+    # Simple case
+    return [m + "A" for m in moves_unconstrained(end - start)]
+
+
+def directional_simple(start: Coord, end: Coord) -> MoveChoice:
+    """Return directional moves request to move arm for directional pad. Avoids gap."""
+    # If start on bottom-left, and moving to top, must go right first
+    if start == Coord(0, 1) and end.y == 0:
+        return [">" + m for m in directional_simple(start + Coord(1, 0), end)]
+    # # If moving from top to bottom-left, last step must be left
+    if end == Coord(0, 1) and start.y == 0:
+        return [m[:-1] + "<A" for m in directional_simple(start, Coord(1, 1))]
+    return [m + "A" for m in moves_unconstrained(end - start)]
+
+
+#
+# Second level - Final shortest sequences
+#
+# Find shortest sequences considering n additional robots.
+#
+
+
+def shortest(start: str, end: str, n: int, *, numeric: bool) -> str:
+    """Return one shortest directional move sequence considering n additional robots."""
+    # Generate all candidate routes
+    # print("shortest", start, end, n, numeric)
+    candidates = (
+        numeric_simple(KEYPAD[start], KEYPAD[end])
+        if numeric
+        else directional_simple(DPAD[start], DPAD[end])
+    )
+    # print("  candidates", candidates)
+    if n == 0:
+        # print("  -->", start, end, n, candidates[0])
+        return candidates[0]
+
+    # Select one of the shortest candidates
+    shortest_candidate_route: str | None = None
+    shortest_candidate: str | None = None
+    for candidate in candidates:
+        candidate_route = ""
+        current = "A"
+        for key in candidate:
+            step_route = shortest(current, key, n - 1, numeric=False)
+            candidate_route += step_route
+            current = key
+        if shortest_candidate_route is None or len(candidate_route) < len(shortest_candidate_route):
+            shortest_candidate_route = candidate_route
+            shortest_candidate = candidate
+    assert shortest_candidate_route is not None
+    # print("  candidate", shortest_candidate)
+    # print("  route", shortest_candidate_route)
+    return shortest_candidate_route
+
+
+def shortest_sequence(route: str, n: int, *, numeric: bool) -> str:
+    """Return shortest directional moves considering n additional robots."""
+    final_route: str = ""
+    current = "A"
+    for key in route:
+        final_route += shortest(current, key, n, numeric=numeric)
+        current = key
+    return final_route
 
 
 if __name__ == "__main__":
     numeric_targets = [line.strip() for line in stdin.readlines()]
-    # # Part (a)
-    # total = 0
-    # for target in numeric_targets:
-    #     move_chain = apply_directional(apply_directional(numeric(target)))
-    #     complexity = int(target[:-1]) * chain_length(move_chain)
-    #     print(target, int(target[:-1]), chain_length(move_chain), complexity)
-    #     total += complexity
-    # print(total)
 
-    t = numeric_targets[3]
-    d1 = numeric(t)
-    print(t)
-    print(chain_length(d1))
-    print("Got:", d1)
-    # print("   : <A^A>^^AvvvA", len("<A^A>^^AvvvA"))
-    d2 = apply_directional(d1)
-    print(chain_length(d2))
-    print("Got:", d2)
-    # print("   : v<<A>>^A<A>AvA<^AA>A<vAAA>^A", len("v<<A>>^A<A>AvA<^AA>A<vAAA>^A"))
-    d3 = apply_directional(d2)
-    print(chain_length(d3))
-    print("Got:", d3)
-    # print(
-    #     "   : <vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A",
-    #     len("<vA<AA>>^AvAA<^A>A<v<A>>^AvA^A<vA>^A<v<A>^A>AAvA^A<v<A>A>^AAAvA<^A>A"),
-    # )
+    # Part a
+    total = 0
+    for target in numeric_targets:
+        sequence = shortest_sequence(target, 2, numeric=True)
+        complexity = int(target[:-1]) * len(sequence)
+        total += complexity
+    print(total)
