@@ -24,6 +24,7 @@
         "heapq",
         "humn",
         "isort",
+        "lanternfish",
         "lastindex",
         "napms",
         "NESW",

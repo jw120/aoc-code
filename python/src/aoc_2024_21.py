@@ -1,5 +1,6 @@
 """Advent of Code 2024 - Day 22."""
 
+from collections import Counter
 from sys import stdin
 from typing import Final
 
@@ -27,15 +28,6 @@ DPAD: Final[dict[str, Coord]] = {
     ">": Coord(2, 1),
 }
 
-# We represent moves of the directional keypad by strings
-type Moves = str
-
-# When there are more than one alternative moves we return a list of moves
-type MoveChoice = list[str]
-
-# We generate move chains which are a series of move sequences (with alternatives)
-type MoveChain = list[MoveChoice]
-
 
 #
 # Zero-th level - Unconstrained moves.
@@ -45,11 +37,11 @@ type MoveChain = list[MoveChoice]
 #
 
 
-def moves_unconstrained(move: Coord) -> MoveChoice:
+def moves_unconstrained(move: Coord) -> list[str]:
     """Return unconstrained directional moves request to move arm for numeric pad."""
     if move == Coord.origin():
         return [""]
-    output: MoveChoice = []
+    output: list[str] = []
     if move.x > 0:
         output.extend(">" + m for m in moves_unconstrained(move + Coord(-1, 0)))
     if move.x < 0:
@@ -69,7 +61,7 @@ def moves_unconstrained(move: Coord) -> MoveChoice:
 #
 
 
-def numeric_simple(start: Coord, end: Coord) -> MoveChoice:
+def numeric_simple(start: Coord, end: Coord) -> list[str]:
     """Return directional moves request to move arm for numeric pad. Avoids gap."""
     # If start at 0 and move to left-most column, must go up first
     if start == Coord(1, 3) and end.x == 0:
@@ -91,7 +83,7 @@ def numeric_simple(start: Coord, end: Coord) -> MoveChoice:
     return [m + "A" for m in moves_unconstrained(end - start)]
 
 
-def directional_simple(start: Coord, end: Coord) -> MoveChoice:
+def directional_simple(start: Coord, end: Coord) -> list[str]:
     """Return directional moves request to move arm for directional pad. Avoids gap."""
     # If start on bottom-left, and moving to top, must go right first
     if start == Coord(0, 1) and end.y == 0:
@@ -109,6 +101,7 @@ def directional_simple(start: Coord, end: Coord) -> MoveChoice:
 #
 
 cache: dict[tuple[str, str, int], str] = {}
+cache_lanternfish: dict[tuple[str, int], Counter[str]] = {}
 
 
 def shortest(start: str, end: str, n: int, *, numeric: bool) -> str:
@@ -153,12 +146,65 @@ def shortest(start: str, end: str, n: int, *, numeric: bool) -> str:
     return shortest_candidate_route
 
 
+def shortest_lanternfish(step: str, n: int, *, numeric: bool) -> Counter[str]:
+    """Return one shortest directional move sequence considering n additional robots."""
+
+    if (step, n) in cache_lanternfish:
+        return cache_lanternfish[step, n]
+
+    # Generate all candidate routes
+    candidates = [
+        to_lanternfish(s)
+        for s in (
+            numeric_simple(KEYPAD[step[0]], KEYPAD[step[1]])
+            if numeric
+            else directional_simple(DPAD[step[0]], DPAD[step[1]])
+        )
+    ]
+    if n == 0:
+        cache_lanternfish[step, n] = candidates[0]
+        return candidates[0]
+
+    # Select one of the shortest candidates
+    shortest_candidate: Counter[str] | None = None
+    for candidate in candidates:
+        candidate_route: Counter[str] = Counter()
+        for candidate_step, candidate_number in candidate.items():
+            step_route = shortest_lanternfish(candidate_step, n - 1, numeric=False)
+            for step_step, step_number in step_route.items():
+                candidate[step_step] += step_number * candidate_number
+        if shortest_candidate is None or candidate_route.total() < shortest_candidate.total():
+            shortest_candidate = candidate_route
+    assert shortest_candidate is not None
+    cache_lanternfish[step, n] = shortest_candidate
+    return shortest_candidate
+
+
+def to_lanternfish(route: str) -> Counter[str]:
+    """Convert to lanternfish representation."""
+    counter: Counter[str] = Counter()
+    r = "A" + route
+    for i in range(len(r) - 1):
+        counter[route[i : i + 2]] += 1
+    return counter
+
+
 def shortest_sequence(route: str, n: int, *, numeric: bool) -> str:
     """Return shortest directional moves considering n additional robots."""
     final_route: str = ""
     current = "A"
     for key in route:
         final_route += shortest(current, key, n, numeric=numeric)
+        current = key
+    return final_route
+
+
+def shortest_sequence_lanternfish(route: str, n: int) -> Counter[str]:
+    """Return shortest directional moves considering n additional robots."""
+    final_route: Counter[str] = Counter()
+    current = "A"
+    for key in route:
+        final_route.update(shortest(current, key, n, numeric=True))
         current = key
     return final_route
 
@@ -171,13 +217,32 @@ if __name__ == "__main__":
     for target in numeric_targets:
         sequence = shortest_sequence(target, 2, numeric=True)
         complexity = int(target[:-1]) * len(sequence)
+        print(target, int(target[:-1]), len(sequence), complexity)
+        total += complexity
+    print(total)
+
+    total = 0
+    for target in numeric_targets:
+        sequence_lanternfish = shortest_sequence_lanternfish(target, 2)
+        complexity = int(target[:-1]) * sequence_lanternfish.total()
+        print(target, int(target[:-1]), sequence_lanternfish.total(), complexity)
         total += complexity
     print(total)
 
     # # Part b
+    z = 25
+    # total = 0
+    # for target in numeric_targets:
+    #     sequence = shortest_sequence(target, z, numeric=True)
+    #     complexity = int(target[:-1]) * len(sequence)
+    #     print(target, int(target[:-1]), len(sequence), complexity)
+    #     total += complexity
+    # print(total)
+
     total = 0
     for target in numeric_targets:
-        sequence = shortest_sequence(target, 25, numeric=True)
-        complexity = int(target[:-1]) * len(sequence)
+        sequence_lanternfish = shortest_sequence_lanternfish(target, z)
+        complexity = int(target[:-1]) * sequence_lanternfish.total()
+        print(target, int(target[:-1]), sequence_lanternfish.total(), complexity)
         total += complexity
     print(total)
