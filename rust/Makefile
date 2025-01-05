@@ -2,7 +2,7 @@
 
 all: check run
 
-run: run_2022 run_2023
+run: run_2022 run_2023 run_2024
 
 run_2022: \
 	rust_2022_01 rust_2022_02 rust_2022_03 rust_2022_04 rust_2022_05 \
@@ -16,7 +16,7 @@ run_2023: \
 	rust_2023_16 
 
 run_2024: \
-	rust_2024_01 rust_2024_02
+	rust_2024_01 rust_2024_02 rust_2024_03
 
 check:
 	cargo fmt --quiet

@@ -107,6 +107,7 @@ impl Occupancies {
         position.x + position.y * self.y_factor + (position.z - 1) * self.z_factor
     }
 
+    #[allow(clippy::ref_option)]
     fn get(&self, position: &UCoord3) -> &Option<usize> {
         self.pos.get(self.offset(position)).unwrap()
     }

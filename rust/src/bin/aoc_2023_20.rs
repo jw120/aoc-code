@@ -219,7 +219,7 @@ fn run(modules: &HashMap<String, Module>, n: usize) -> usize {
                 }
             }
         }
-        flipflop_previous = flipflop_states.clone();
+        flipflop_previous.clone_from(&flipflop_states);
 
         print!("{button_push}: ");
         // for (_flipflop_name, flipflop_state) in &flipflop_states {

@@ -19,7 +19,7 @@ struct ChunkIterator<'a> {
     last: Option<u32>,         // previous value (from promotion)
 }
 
-impl<'a> ChunkIterator<'a> {
+impl ChunkIterator<'_> {
     fn new(s: &str) -> ChunkIterator {
         ChunkIterator {
             chars: s.chars().peekable(),
@@ -34,7 +34,7 @@ impl<'a> ChunkIterator<'a> {
     }
 }
 
-impl<'a> Iterator for ChunkIterator<'a> {
+impl Iterator for ChunkIterator<'_> {
     type Item = Chunk;
 
     fn next(&mut self) -> Option<Self::Item> {
