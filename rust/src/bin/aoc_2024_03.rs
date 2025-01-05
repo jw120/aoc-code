@@ -23,7 +23,7 @@ fn sum_enabled(data: &str) -> i32 {
         } else if &capture[0] == "don't()" {
             enabled = false;
         } else if enabled {
-            total += capture[3].parse::<i32>().unwrap() * capture[4].parse::<i32>().unwrap()
+            total += capture[3].parse::<i32>().unwrap() * capture[4].parse::<i32>().unwrap();
         }
     }
     total
