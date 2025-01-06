@@ -27,5 +27,7 @@ OUT_DIR = out
 
 rust_%: | $(OUT_DIR)
 	@/bin/echo -n "$@: "
-	@cargo run --quiet --bin=aoc_$* < ../../aoc-data/input/$*.txt > $(OUT_DIR)/rust_$*.txt
-	@diff $(OUT_DIR)/rust_$*.txt ../../aoc-data/good/$*.txt && /bin/echo "OK"
+	@cargo build --quiet --bin=aoc_$*
+	@time -o $(OUT_DIR)/time_$*.txt -p cargo run --quiet --bin=aoc_$* < ../../aoc-data/input/$*.txt > $(OUT_DIR)/rust_$*.txt
+	@diff $(OUT_DIR)/rust_$*.txt ../../aoc-data/good/$*.txt && /bin/echo -n "OK" && (grep real $(OUT_DIR)/time_$*.txt | sed s/real//)
+
