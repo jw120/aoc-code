@@ -1,6 +1,5 @@
 // Advent of Code 2024 - Day 6.
 
-use aoc_rust::{ucoord, UCoord};
 use grid::Grid;
 use std::collections::HashSet;
 use std::io;
@@ -22,17 +21,17 @@ fn turn(d: &Direction) -> Direction {
     }
 }
 
-fn apply(c: &UCoord, d: &Direction) -> Option<UCoord> {
+fn apply((start_row, start_col): (usize, usize), d: &Direction) -> Option<(usize, usize)> {
     match d {
-        Direction::Left => c.col.checked_sub(1).map(|col| ucoord(c.row, col)),
-        Direction::Down => Some(ucoord(c.row + 1, c.col)),
-        Direction::Right => Some(ucoord(c.row, c.col + 1)),
-        Direction::Up => c.row.checked_sub(1).map(|row| ucoord(row, c.col)),
+        Direction::Left => start_col.checked_sub(1).map(|col| (start_row, col)),
+        Direction::Down => Some((start_row + 1, start_col)),
+        Direction::Right => Some((start_row, start_col + 1)),
+        Direction::Up => start_row.checked_sub(1).map(|row| (row, start_col)),
     }
 }
 
-fn read_grid() -> (Grid<bool>, UCoord) {
-    let mut start: Option<UCoord> = None;
+fn read_grid() -> (Grid<bool>, (usize, usize)) {
+    let mut start: Option<(usize, usize)> = None;
     let mut grid: Grid<bool> = Grid::new(0, 0);
     for (row, raw_line) in io::stdin().lines().enumerate() {
         let line = raw_line.unwrap();
@@ -40,7 +39,7 @@ fn read_grid() -> (Grid<bool>, UCoord) {
         for (col, ch) in line.chars().enumerate() {
             if ch == '^' {
                 assert!(start.is_none());
-                start = Some(ucoord(row, col));
+                start = Some((row, col));
             }
         }
         grid.push_row(line.chars().map(|c| c == '#').collect());
@@ -48,14 +47,14 @@ fn read_grid() -> (Grid<bool>, UCoord) {
     (grid, start.unwrap_or_else(|| panic!("No start position")))
 }
 
-fn walk_till_exit(grid: &Grid<bool>, start: &UCoord) -> Grid<bool> {
-    let mut position: UCoord = *start;
+fn walk_till_exit(grid: &Grid<bool>, start: (usize, usize)) -> Grid<bool> {
+    let mut position: (usize, usize) = start;
     let mut direction: Direction = Direction::Up;
     let mut visited: Grid<bool> = Grid::new(grid.rows(), grid.cols());
     loop {
-        visited[(position.row, position.col)] = true;
-        if let Some(next_position) = apply(&position, &direction) {
-            if let Some(next_square) = grid.get(next_position.row, next_position.col) {
+        visited[position] = true;
+        if let Some(next_position) = apply(position, &direction) {
+            if let Some(next_square) = grid.get(next_position.0, next_position.1) {
                 if *next_square {
                     direction = turn(&direction);
                 } else {
@@ -71,21 +70,21 @@ fn walk_till_exit(grid: &Grid<bool>, start: &UCoord) -> Grid<bool> {
     visited
 }
 
-fn walk_till_loop(grid: &Grid<bool>, extra: &UCoord, start: &UCoord) -> bool {
+fn walk_till_loop(grid: &Grid<bool>, extra: (usize, usize), start: (usize, usize)) -> bool {
     if extra == start {
         return false;
     }
-    let mut position: UCoord = *start;
+    let mut position: (usize, usize) = start;
     let mut direction: Direction = Direction::Up;
-    let mut visited: HashSet<(UCoord, Direction)> = HashSet::new();
+    let mut visited: HashSet<((usize, usize), Direction)> = HashSet::new();
     loop {
         if visited.contains(&(position, direction)) {
             return true;
         }
         visited.insert((position, direction));
-        if let Some(next_position) = apply(&position, &direction) {
-            if let Some(next_square) = grid.get(next_position.row, next_position.col) {
-                if *next_square || next_position == *extra {
+        if let Some(next_position) = apply(position, &direction) {
+            if let Some(next_square) = grid.get(next_position.0, next_position.1) {
+                if *next_square || next_position == extra {
                     direction = turn(&direction);
                 } else {
                     position = next_position;
@@ -97,16 +96,16 @@ fn walk_till_loop(grid: &Grid<bool>, extra: &UCoord, start: &UCoord) -> bool {
     }
 }
 
-fn count_looping_barriers(grid: &Grid<bool>, visited: &Grid<bool>, start: &UCoord) -> usize {
+fn count_looping_barriers(grid: &Grid<bool>, visited: &Grid<bool>, start: (usize, usize)) -> usize {
     visited
         .indexed_iter()
-        .filter(|((row, col), square)| **square && walk_till_loop(grid, &ucoord(*row, *col), start))
+        .filter(|((row, col), square)| **square && walk_till_loop(grid, (*row, *col), start))
         .count()
 }
 
 fn main() {
     let (grid, start) = read_grid();
-    let visited = walk_till_exit(&grid, &start);
+    let visited = walk_till_exit(&grid, start);
     println!("{}", visited.iter().filter(|b| **b).count());
-    println!("{}", count_looping_barriers(&grid, &visited, &start));
+    println!("{}", count_looping_barriers(&grid, &visited, start));
 }

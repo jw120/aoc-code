@@ -16,7 +16,8 @@ run_2023: \
 	rust_2023_16 
 
 run_2024: \
-	rust_2024_01 rust_2024_02 rust_2024_03 rust_2024_04 rust_2024_05
+	rust_2024_01 rust_2024_02 rust_2024_03 rust_2024_04 rust_2024_05 \
+	rust_2024_06
 
 check:
 	cargo fmt --quiet
@@ -27,7 +28,7 @@ OUT_DIR = out
 
 rust_%: | $(OUT_DIR)
 	@/bin/echo -n "$@: "
-	@cargo build --quiet --bin=aoc_$*
-	@time -o $(OUT_DIR)/time_$*.txt -p cargo run --quiet --bin=aoc_$* < ../../aoc-data/input/$*.txt > $(OUT_DIR)/rust_$*.txt
+	@cargo build --release --quiet --bin=aoc_$*
+	@time -o $(OUT_DIR)/time_$*.txt -p cargo run --release --quiet --bin=aoc_$* < ../../aoc-data/input/$*.txt > $(OUT_DIR)/rust_$*.txt
 	@diff $(OUT_DIR)/rust_$*.txt ../../aoc-data/good/$*.txt && /bin/echo -n "OK" && (grep real $(OUT_DIR)/time_$*.txt | sed s/real//)
 
