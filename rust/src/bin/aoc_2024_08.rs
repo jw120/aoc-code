@@ -44,7 +44,7 @@ impl Map {
         }
     }
 
-    fn anti_nodes(&self) -> HashSet<Coord> {
+    fn anti_nodes_a(&self) -> HashSet<Coord> {
         let mut locations: HashSet<Coord> = HashSet::new();
         for nodes in self.antenna.values() {
             for v in nodes.iter().combinations(2) {
@@ -58,31 +58,33 @@ impl Map {
         }
         locations
     }
+
+    fn anti_nodes_b(&self) -> HashSet<Coord> {
+        let mut locations: HashSet<Coord> = HashSet::new();
+        for nodes in self.antenna.values() {
+            for v in nodes.iter().combinations(2) {
+                let [n1, n2] = v[..] else {
+                    panic!("Expected 2-vector from combinations(2)")
+                };
+                let diff = *n2 - *n1;
+                let mut n = *n1;
+                while let Some(c) = self.check_bounds(n) {
+                    locations.insert(c);
+                    n += diff;
+                }
+                n = *n1 - diff;
+                while let Some(c) = self.check_bounds(n) {
+                    locations.insert(c);
+                    n -= diff;
+                }
+            }
+        }
+        locations
+    }
 }
-
-//     def antinodes_b(self) -> set[Coord]:
-//         """Return antinode locations for part b."""
-//         locations: set[Coord] = set()
-//         for _frequency, nodes in self.antenna.items():
-//             for n1, n2 in combinations(nodes, 2):
-//                 d = n2 - n1
-//                 d //= gcd(abs(d.x), abs(d.y))
-//                 c = n1
-//                 while c.in_bounds(self.extent):
-//                     locations.add(c)
-//                     c += d
-//                 c = n1 - d
-//                 while c.in_bounds(self.extent):
-//                     locations.add(c)
-//                     c -= d
-//         return locations
-
-// if __name__ == "__main__":
-//     m = Map(stdin.readlines())
-//     print(len(m.antinodes()))
-//     print(len(m.antinodes_b()))
 
 fn main() {
     let map = Map::read();
-    println!("{}", map.anti_nodes().len());
+    println!("{}", map.anti_nodes_a().len());
+    println!("{}", map.anti_nodes_b().len());
 }
