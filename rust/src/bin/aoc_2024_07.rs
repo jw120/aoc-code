@@ -20,54 +20,47 @@ fn parse(s: &str) -> Calibration {
     Calibration { target, numbers }
 }
 
-fn check2(calibration: &Calibration, value: u64, index: usize) -> bool {
+fn check(calibration: &Calibration, value: u64, index: usize, allow_combine: bool) -> bool {
     if index == calibration.numbers.len() {
-        value == calibration.target
-    } else {
-        check2(calibration, value + calibration.numbers[index], index + 1)
-            || check2(calibration, value * calibration.numbers[index], index + 1)
+        return value == calibration.target;
     }
-}
-
-fn test2(calibration: &Calibration) -> u64 {
-    if check2(calibration, calibration.numbers[0], 1) {
-        calibration.target
-    } else {
-        0
+    if value > calibration.target {
+        return false;
     }
-}
-
-fn check3(calibration: &Calibration, value: u64, index: usize) -> bool {
-    if index == calibration.numbers.len() {
-        value == calibration.target
-    } else {
-        check3(calibration, value + calibration.numbers[index], index + 1)
-            || check3(calibration, value * calibration.numbers[index], index + 1)
-            || check3(
-                calibration,
-                combine(value, calibration.numbers[index]),
-                index + 1,
-            )
-    }
+    check(
+        calibration,
+        value + calibration.numbers[index],
+        index + 1,
+        allow_combine,
+    ) || check(
+        calibration,
+        value * calibration.numbers[index],
+        index + 1,
+        allow_combine,
+    ) || (allow_combine
+        && check(
+            calibration,
+            combine(value, calibration.numbers[index]),
+            index + 1,
+            allow_combine,
+        ))
 }
 
 fn combine(a: u64, b: u64) -> u64 {
     (a.to_string() + &b.to_string()).parse().unwrap()
 }
 
-fn test3(calibration: &Calibration) -> u64 {
-    if check3(calibration, calibration.numbers[0], 1) {
-        calibration.target
-    } else {
-        0
-    }
-}
-
 fn main() {
     let calibrations: Vec<Calibration> = io::stdin().lines().map(|s| parse(&s.unwrap())).collect();
-    print!(
-        "{}\n{}\n",
-        calibrations.iter().map(test2).sum::<u64>(),
-        calibrations.iter().map(test3).sum::<u64>()
-    )
+    let part_a: u64 = calibrations
+        .iter()
+        .filter(|c| check(c, c.numbers[0], 1, false))
+        .map(|c| c.target)
+        .sum::<u64>();
+    let part_b: u64 = calibrations
+        .iter()
+        .filter(|c| check(c, c.numbers[0], 1, true))
+        .map(|c| c.target)
+        .sum();
+    print!("{}\n{}\n", part_a, part_b);
 }

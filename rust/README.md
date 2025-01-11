@@ -7,6 +7,7 @@
 
 Remove Coord from pre-2024
 Better method for 2024-06
+For 2024-07 - make faster by working down from target.
 
 ## TODO For 2022
 
