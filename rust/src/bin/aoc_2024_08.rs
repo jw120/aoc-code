@@ -1,31 +1,32 @@
 // Advent of Code 2024 - Day 8.
 
+use aoc_rust::{coord, Coord};
 use itertools::Itertools;
 use std::cmp::max;
 use std::collections::{HashMap, HashSet};
 use std::io;
 
 struct Map {
-    height: usize,
-    width: usize,
-    antenna: HashMap<char, Vec<(usize, usize)>>,
+    height: i32,
+    width: i32,
+    antenna: HashMap<char, Vec<Coord>>,
 }
 
 impl Map {
     fn read() -> Self {
-        let mut height: usize = 0;
-        let mut width: usize = 0;
-        let mut antenna: HashMap<char, Vec<(usize, usize)>> = HashMap::new();
-        for (y, line) in io::stdin().lines().enumerate() {
-            for (x, ch) in line.unwrap().trim().chars().enumerate() {
+        let mut height: i32 = 0;
+        let mut width: i32 = 0;
+        let mut antenna: HashMap<char, Vec<Coord>> = HashMap::new();
+        for (line, row) in io::stdin().lines().zip(0..) {
+            for (ch, col) in line.unwrap().trim().chars().zip(0..) {
                 if ch != '.' {
                     antenna
                         .entry(ch)
-                        .and_modify(|v| v.push((x, y)))
-                        .or_insert(vec![(x, y)]);
+                        .and_modify(|v| v.push(coord(row, col)))
+                        .or_insert(vec![coord(row, col)]);
                 }
-                height = max(height, y + 1);
-                width = max(width, x + 1);
+                height = max(height, row + 1);
+                width = max(width, col + 1);
             }
         }
         Map {
@@ -35,32 +36,24 @@ impl Map {
         }
     }
 
-    fn check_bounds(&self, x: i32, y: i32) -> Option<(usize, usize)> {
-        let x = usize::try_from(x).ok()?;
-        let y = usize::try_from(y).ok()?;
-        if x < self.width && y < self.height {
-            Some((x, y))
+    fn check_bounds(&self, coord: Coord) -> Option<Coord> {
+        if coord.row >= 0 && coord.row < self.height && coord.col >= 0 && coord.col < self.width {
+            Some(coord)
         } else {
             None
         }
     }
 
-    fn anti_nodes(&self) -> HashSet<(usize, usize)> {
-        let mut locations: HashSet<(usize, usize)> = HashSet::new();
+    fn anti_nodes(&self) -> HashSet<Coord> {
+        let mut locations: HashSet<Coord> = HashSet::new();
         for nodes in self.antenna.values() {
             for v in nodes.iter().combinations(2) {
-                let [(n1_x, n1_y), (n2_x, n2_y)] = v[..] else {
+                let [n1, n2] = v[..] else {
                     panic!("Expected 2-vector from combinations(2)")
                 };
-                let (n1_x, n1_y) = (i32::try_from(*n1_x).unwrap(), i32::try_from(*n1_y).unwrap());
-                let (n2_x, n2_y) = (i32::try_from(*n2_x).unwrap(), i32::try_from(*n2_y).unwrap());
-                let (diff_x, diff_y) = (n2_x - n1_x, n2_y - n1_y);
-                if let Some(anti_node) = self.check_bounds(n1_x - diff_x, n1_y - diff_y) {
-                    locations.insert(anti_node);
-                }
-                if let Some(anti_node) = self.check_bounds(n2_x + diff_x, n2_y + diff_y) {
-                    locations.insert(anti_node);
-                }
+                let diff = *n2 - *n1;
+                self.check_bounds(*n1 - diff).map(|n| locations.insert(n));
+                self.check_bounds(*n2 + diff).map(|n| locations.insert(n));
             }
         }
         locations
