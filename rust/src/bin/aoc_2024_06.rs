@@ -12,7 +12,7 @@ enum Direction {
     Left,
 }
 
-fn turn(d: &Direction) -> Direction {
+fn turn(d: Direction) -> Direction {
     match d {
         Direction::Up => Direction::Right,
         Direction::Right => Direction::Down,
@@ -21,7 +21,7 @@ fn turn(d: &Direction) -> Direction {
     }
 }
 
-fn apply((start_row, start_col): (usize, usize), d: &Direction) -> Option<(usize, usize)> {
+fn apply((start_row, start_col): (usize, usize), d: Direction) -> Option<(usize, usize)> {
     match d {
         Direction::Left => start_col.checked_sub(1).map(|col| (start_row, col)),
         Direction::Down => Some((start_row + 1, start_col)),
@@ -53,10 +53,10 @@ fn walk_till_exit(grid: &Grid<bool>, start: (usize, usize)) -> Grid<bool> {
     let mut visited: Grid<bool> = Grid::new(grid.rows(), grid.cols());
     loop {
         visited[position] = true;
-        if let Some(next_position) = apply(position, &direction) {
+        if let Some(next_position) = apply(position, direction) {
             if let Some(next_square) = grid.get(next_position.0, next_position.1) {
                 if *next_square {
-                    direction = turn(&direction);
+                    direction = turn(direction);
                 } else {
                     position = next_position;
                 }
@@ -82,10 +82,10 @@ fn walk_till_loop(grid: &Grid<bool>, extra: (usize, usize), start: (usize, usize
             return true;
         }
         visited.insert((position, direction));
-        if let Some(next_position) = apply(position, &direction) {
+        if let Some(next_position) = apply(position, direction) {
             if let Some(next_square) = grid.get(next_position.0, next_position.1) {
                 if *next_square || next_position == extra {
-                    direction = turn(&direction);
+                    direction = turn(direction);
                 } else {
                     position = next_position;
                 }

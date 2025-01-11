@@ -62,5 +62,5 @@ fn main() {
         .filter(|c| check(c, c.numbers[0], 1, true))
         .map(|c| c.target)
         .sum();
-    print!("{}\n{}\n", part_a, part_b);
+    print!("{part_a}\n{part_b}\n");
 }

@@ -83,7 +83,7 @@ fn check_x_mas(puzzle: &Grid<char>, a: (usize, usize)) -> bool {
     if diagonals.len() < 4 || diagonals[0] == diagonals[2] {
         return false;
     }
-    diagonals.sort();
+    diagonals.sort_unstable();
     diagonals == vec!['M', 'M', 'S', 'S']
 }
 
