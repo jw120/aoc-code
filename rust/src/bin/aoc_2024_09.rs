@@ -5,19 +5,16 @@ use std::io::{stdin, Read};
 struct Chunk {
     id: Option<usize>,
     blocks: usize,
-    index: usize,
 }
 
 fn read_disk() -> Vec<Chunk> {
     let mut v: Vec<Chunk> = Vec::new();
-    let mut index: usize = 0;
     let mut buf = String::new();
     stdin().read_to_string(&mut buf).unwrap();
     for (i, ch) in buf.trim().chars().enumerate() {
         let blocks: usize = ch.to_digit(10).unwrap().try_into().unwrap();
         let id = if i % 2 == 0 { Some(i / 2) } else { None };
-        v.push(Chunk { id, blocks, index });
-        index += blocks;
+        v.push(Chunk { id, blocks });
     }
     v
 }
@@ -63,53 +60,56 @@ fn compact(disk: &[Chunk]) -> usize {
     check_sum
 }
 
-// def find_right_most_fit(
-//     current_chunk: int,
-//     space: int,
-//     disk: list[Chunk],  # , used: list[bool]
-// ) -> tuple[int, int, int] | None:
-//     """Return index, id and blocks of right-most chunk whose size fits."""
-//     for i in range(len(disk) - 1, current_chunk, -1):
-//         # if not used[i]:
-//         i_id = disk[i].id_
-//         if i_id is not None and disk[i].blocks <= space:
-//             return (i, i_id, disk[i].blocks)
-//     return None
-
-fn compact_whole(_disk: &[Chunk]) -> usize {
-    0
+fn find_right_most_fit(
+    current_chunk: usize,
+    space: usize,
+    disk: &[Chunk],
+) -> Option<(usize, usize, usize)> {
+    for i in (current_chunk..disk.len()).rev() {
+        if let Some(i_id) = disk[i].id {
+            if disk[i].blocks <= space {
+                return Some((i, i_id, disk[i].blocks));
+            }
+        }
+    }
+    None
 }
 
-// def compact_whole(disk: list[Chunk]) -> int:
-//     """Compact the disk with whole files and return the checksum."""
-//     current_chunk = 0
-//     current_block = 0
-//     check_sum = 0
+fn compact_whole(disk: &mut [Chunk]) -> usize {
+    let mut current_chunk: usize = 0;
+    let mut current_block: usize = 0;
+    let mut check_sum: usize = 0;
 
-//     while current_chunk < len(disk):
-//         blocks = disk[current_chunk].blocks
-//         match disk[current_chunk].id_:
-//             case None:
-//                 while blocks > 0:
-//                     match find_right_most_fit(current_chunk, blocks, disk):  # , used):
-//                         case None:
-//                             current_block += blocks
-//                             break
-//                         case (r, r_id, r_blocks):
-//                             for _ in range(r_blocks):
-//                                 check_sum += r_id * current_block
-//                                 current_block += 1
-//                                 blocks -= 1
-//                             disk[r].id_ = None  # Mark block as free space
-//             case file_id:
-//                 for _ in range(blocks):
-//                     check_sum += file_id * current_block
-//                     current_block += 1
-//         current_chunk += 1
-//     return check_sum
+    while current_chunk < disk.len() {
+        let mut blocks = disk[current_chunk].blocks;
+        if let Some(file_id) = disk[current_chunk].id {
+            for _ in 0..blocks {
+                check_sum += file_id * current_block;
+                current_block += 1;
+            }
+        } else {
+            while blocks > 0 {
+                if let Some((r, r_id, r_blocks)) = find_right_most_fit(current_chunk, blocks, disk)
+                {
+                    for _ in 0..r_blocks {
+                        check_sum += r_id * current_block;
+                        current_block += 1;
+                        blocks -= 1;
+                    }
+                    disk[r].id = None;
+                } else {
+                    current_block += blocks;
+                    break;
+                }
+            }
+        }
+        current_chunk += 1;
+    }
+    check_sum
+}
 
 fn main() {
-    let disk = read_disk();
+    let mut disk = read_disk();
     println!("{}", compact(&disk));
-    println!("{}", compact_whole(&disk));
+    println!("{}", compact_whole(&mut disk));
 }
