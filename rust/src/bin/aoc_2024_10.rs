@@ -25,67 +25,68 @@ fn read_topo_map() -> (Grid<u32>, HashSet<UCoord>) {
     (h, trail_heads)
 }
 
-// class Topo:
-//     """Topographic map."""
-
-//     def __init__(self, lines: list[str]) -> None:
-//         self.extent = Extent(len(lines[0].strip()), len(lines))
-//         self.h: list[list[int]] = [[int(ch) for ch in line.strip()] for line in lines]
-//         self.trail_heads: set[Coord] = {crd for crd in self.extent.upto() if self.ht(crd) == 0}
-
-//     def ht(self, crd: Coord) -> int:
-//         """Return height at given coordinate."""
-//         return self.h[crd.y][crd.x]
-
-//     def print(self) -> None:
-//         """Print heights for debugging."""
-//         for line in self.h:
-//             for h in line:
-//                 print(h, end="")
-//             print()
-
-fn count_trails(_h: &Grid<u32>, _start: UCoord) -> usize {
-    0
+fn adjacents(c: UCoord, (rows, cols): (usize, usize)) -> Vec<UCoord> {
+    let mut v = Vec::with_capacity(4);
+    if c.row > 0 {
+        v.push(ucoord(c.row - 1, c.col));
+    }
+    if c.col > 0 {
+        v.push(ucoord(c.row, c.col - 1));
+    }
+    if c.row < rows - 1 {
+        v.push(ucoord(c.row + 1, c.col));
+    }
+    if c.col < cols - 1 {
+        v.push(ucoord(c.row, c.col + 1));
+    }
+    v
 }
 
-//     def count_trails(self, start: Coord) -> int:
-//         """Return number of 9-height positions reachable."""
-//         frontier: set[Coord] = {start}
-//         reached: set[Coord] = set()
-//         while frontier:
-//             current = frontier.pop()
-//             current_ht = self.ht(current)
-//             if current_ht == 9:
-//                 reached.add(current)
-//             else:
-//                 for adjacent in set(current.adjacents(self.extent)) - frontier:
-//                     if self.ht(adjacent) == current_ht + 1:
-//                         frontier.add(adjacent)
-//         return len(reached)
+fn count_trails(h: &Grid<u32>, start: UCoord) -> usize {
+    let mut frontier: HashSet<UCoord> = HashSet::new();
+    frontier.insert(start);
+    let mut reached: HashSet<UCoord> = HashSet::new();
+    while !frontier.is_empty() {
+        let current = frontier.iter().next().copied().unwrap();
+        frontier.remove(&current);
+        let current_height = h[(current.row, current.col)];
+        if current_height == 9 {
+            reached.insert(current);
+        } else {
+            for a in adjacents(current, h.size()) {
+                if !frontier.contains(&a) && h[(a.row, a.col)] == current_height + 1 {
+                    frontier.insert(a);
+                }
+            }
+        }
+    }
+    reached.len()
+}
 
-//     def rating(self, start: Coord) -> int:
-//         """Return number of distinct hiking trails from start."""
-//         current: Coord = start
-//         rating: int = 0  # Number of paths found so far
-//         while True:
-//             current_height = self.ht(current)
-//             if current_height == 9:
-//                 return rating + 1  # Found one path
-//             exits = [
-//                 crd for crd in current.adjacents(self.extent) if self.ht(crd) == current_height + 1
-//             ]
-//             if not exits:
-//                 return rating  # Reached a dead-end
-//             rating += sum(self.rating(x) for x in exits[1:])  # Check side-branches
-//             current = exits[0]  # And keep searching
-
-// if __name__ == "__main__":
-//     topo = Topo(stdin.readlines())
-//     print(sum(topo.count_trails(t) for t in topo.trail_heads))
-//     print(sum(topo.rating(t) for t in topo.trail_heads))
+fn rating(h: &Grid<u32>, start: UCoord) -> usize {
+    let mut current: UCoord = start;
+    let mut paths: usize = 0;
+    loop {
+        let current_height = h[(current.row, current.col)];
+        if current_height == 9 {
+            return paths + 1;
+        }
+        let adjs = adjacents(current, h.size());
+        let mut exits = adjs
+            .iter()
+            .filter(|c| h[(c.row, c.col)] == current_height + 1);
+        if let Some(first_exit) = exits.next() {
+            paths += exits.map(|x| rating(h, *x)).sum::<usize>();
+            current = *first_exit;
+        } else {
+            return paths;
+        }
+    }
+}
 
 fn main() {
     let (h, trail_heads) = read_topo_map();
-    let score: usize = trail_heads.iter().map(|t| count_trails(&h, *t)).sum();
-    println!("{score}");
+    let a: usize = trail_heads.iter().map(|t| count_trails(&h, *t)).sum();
+    let b: usize = trail_heads.iter().map(|t| rating(&h, *t)).sum();
+    print!("{a}\n{b}\n");
 }

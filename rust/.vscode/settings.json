@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "adjs",
         "bxes",
         "Deque",
         "devbox",
@@ -9,6 +10,7 @@
         "peekable",
         "rfind",
         "SWNE",
+        "Topo",
         "ucoord",
         "usize"
     ],
