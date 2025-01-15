@@ -7,7 +7,7 @@ fn from_digits(ds: &[u32]) -> u64 {
     let mut acc: u64 = 0;
     let mut place: u64 = 1;
     for d in ds.iter().rev() {
-        acc += (*d as u64) * place;
+        acc += u64::from(*d) * place;
         place *= 10;
     }
     // println!("{:?} -> {}", ds, acc);
@@ -36,11 +36,11 @@ fn blink(x: u64) -> Vec<u64> {
     }
 }
 
-fn blink_line(counts: HashMap<u64, usize>) -> HashMap<u64, usize> {
+fn blink_line(counts: &HashMap<u64, usize>) -> HashMap<u64, usize> {
     let mut new_counts: HashMap<u64, usize> = HashMap::new();
-    for (x, n) in counts.iter() {
+    for (x, n) in counts {
         for y in blink(*x) {
-            *new_counts.entry(y).or_default() += n
+            *new_counts.entry(y).or_default() += n;
         }
     }
     new_counts
@@ -58,8 +58,8 @@ fn main() {
     }
     for i in 0..76 {
         if i == 25 || i == 75 {
-            println!("{}", counts.values().sum::<usize>())
+            println!("{}", counts.values().sum::<usize>());
         }
-        counts = blink_line(counts);
+        counts = blink_line(&counts);
     }
 }
