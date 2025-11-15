@@ -1,6 +1,6 @@
 // Advent of Code, 2023 day 22
 
-use aoc_rust::{stdin_lines, ucoord3, UCoord3};
+use aoc_rust::{UCoord3, stdin_lines, ucoord3};
 use std::{cmp::max, collections::HashSet};
 
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -129,10 +129,10 @@ impl Occupancies {
         brick.for_each(|position| {
             if position.z == 1 {
                 on_floor = true;
-            } else if let Some(b) = self.get(&(position - ucoord3(0, 0, 1))) {
-                if self.bricks[*b] != *brick {
-                    support_set.insert(*b);
-                }
+            } else if let Some(b) = self.get(&(position - ucoord3(0, 0, 1)))
+                && self.bricks[*b] != *brick
+            {
+                support_set.insert(*b);
             }
         });
         (support_set, on_floor)

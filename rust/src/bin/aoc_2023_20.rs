@@ -78,11 +78,7 @@ enum ModuleType {
 type Module = (ModuleType, Vec<String>);
 
 fn _show_pulse(p: bool) -> &'static str {
-    if p {
-        "low"
-    } else {
-        "high"
-    }
+    if p { "low" } else { "high" }
 }
 fn parse_module(s: &str) -> (String, Module) {
     let mut arrow_iter = s.split(" -> ");
@@ -119,7 +115,7 @@ fn read_modules() -> HashMap<String, Module> {
     for (_module_type, module_outputs) in h.values() {
         for output in module_outputs {
             if !h.contains_key(output) {
-                output_modules.push(output.to_string());
+                output_modules.push(output.clone());
             }
         }
     }
@@ -138,10 +134,10 @@ fn run(modules: &HashMap<String, Module>, n: usize) -> usize {
     for (module_name, (module_type, _outputs)) in modules {
         match module_type {
             ModuleType::FlipFlop => {
-                flipflop_states.insert(module_name.to_string(), false);
+                flipflop_states.insert(module_name.clone(), false);
             }
             ModuleType::Conjunction => {
-                conjunction_states.insert(module_name.to_string(), HashMap::new());
+                conjunction_states.insert(module_name.clone(), HashMap::new());
             }
             ModuleType::Broadcaster | ModuleType::Output => {}
         }
@@ -149,11 +145,11 @@ fn run(modules: &HashMap<String, Module>, n: usize) -> usize {
     // println!("Flipflop {:?}", flipflop_states);
     for (module_name, (_module_type, outputs)) in modules {
         for output in outputs {
-            if let Some((connection_type, _connection_outputs)) = modules.get(output) {
-                if *connection_type == ModuleType::Conjunction {
-                    let conjunction_map = conjunction_states.get_mut(output).unwrap();
-                    conjunction_map.insert(module_name.to_string(), true);
-                }
+            if let Some((connection_type, _connection_outputs)) = modules.get(output)
+                && *connection_type == ModuleType::Conjunction
+            {
+                let conjunction_map = conjunction_states.get_mut(output).unwrap();
+                conjunction_map.insert(module_name.clone(), true);
             }
         }
     }
@@ -161,7 +157,7 @@ fn run(modules: &HashMap<String, Module>, n: usize) -> usize {
 
     let mut flipflop_counts: HashMap<String, usize> = HashMap::new();
     for flipflop_name in flipflop_states.keys() {
-        flipflop_counts.insert(flipflop_name.to_string(), 0);
+        flipflop_counts.insert(flipflop_name.clone(), 0);
     }
     let mut flipflop_previous: HashMap<String, bool> = HashMap::new();
 
@@ -202,7 +198,7 @@ fn run(modules: &HashMap<String, Module>, n: usize) -> usize {
             };
             if let Some(p) = output_pulse {
                 for output in outputs {
-                    pulse_queue.push_back((p, destination.clone(), output.to_string()));
+                    pulse_queue.push_back((p, destination.clone(), output.clone()));
                     if p {
                         low_count += 1;
                     } else {
@@ -236,7 +232,7 @@ fn run(modules: &HashMap<String, Module>, n: usize) -> usize {
                     conjunction_name,
                     conjunction_states.get(conjunction_name).unwrap()
                 );
-            };
+            }
         }
 
         button_push += 1;

@@ -1,6 +1,12 @@
-.PHONY: all check run run_2022 run_2023 run_2024
+.PHONY: all build check run run_2022 run_2023 run_2024
 
-all: check run
+all: check build run
+
+build:
+	cargo build --release --bins --quiet
+
+check:
+	cargo check --quiet
 
 run: run_2022 run_2023 run_2024
 
@@ -20,16 +26,11 @@ run_2024: \
 	rust_2024_06 rust_2024_07 rust_2024_08 rust_2024_09 rust_2024_10 \
 	rust_2024_11
 
-check:
-	cargo fmt --quiet
-	cargo clippy --quiet -- -W clippy::pedantic
-	cargo check --quiet
-
 OUT_DIR = out
 
 rust_%: | $(OUT_DIR)
 	@/bin/echo -n "$@: "
 	@cargo build --release --quiet --bin=aoc_$*
-	@time -o $(OUT_DIR)/time_$*.txt -p cargo run --release --quiet --bin=aoc_$* < ../../aoc-data/input/$*.txt > $(OUT_DIR)/rust_$*.txt
+	@/usr/bin/time -o $(OUT_DIR)/time_$*.txt -p cargo run --release --quiet --bin=aoc_$* < ../../aoc-data/input/$*.txt > $(OUT_DIR)/rust_$*.txt
 	@diff $(OUT_DIR)/rust_$*.txt ../../aoc-data/good/$*.txt && /bin/echo -n "OK" && (grep real $(OUT_DIR)/time_$*.txt | sed s/real//)
 

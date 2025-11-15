@@ -28,7 +28,7 @@ fn blink(x: u64) -> Vec<u64> {
     let digits: Vec<u32> = to_digits(x);
     // println!("{} {:?}", x, digits);
     let n: usize = digits.len();
-    if n % 2 == 0 {
+    if n.is_multiple_of(2) {
         // println!("{} {:?} {:?}", n / 2, &digits[..n / 2], &digits[n / 2..]);
         vec![from_digits(&digits[..n / 2]), from_digits(&digits[n / 2..])]
     } else {

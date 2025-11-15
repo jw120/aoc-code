@@ -1,6 +1,6 @@
 // Advent of Code 2024 - Day 9.
 
-use std::io::{stdin, Read};
+use std::io::{Read, stdin};
 
 struct Chunk {
     id: Option<usize>,
@@ -66,10 +66,10 @@ fn find_right_most_fit(
     disk: &[Chunk],
 ) -> Option<(usize, usize, usize)> {
     for i in (current_chunk..disk.len()).rev() {
-        if let Some(i_id) = disk[i].id {
-            if disk[i].blocks <= space {
-                return Some((i, i_id, disk[i].blocks));
-            }
+        if let Some(i_id) = disk[i].id
+            && disk[i].blocks <= space
+        {
+            return Some((i, i_id, disk[i].blocks));
         }
     }
     None

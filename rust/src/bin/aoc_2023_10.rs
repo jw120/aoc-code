@@ -1,7 +1,7 @@
 // Advent of Code, 2023 day 10
 
-use aoc_rust::stdin_lines;
 use aoc_rust::UCoord;
+use aoc_rust::stdin_lines;
 use grid::Grid;
 
 #[derive(Copy, Clone, PartialEq, Default)]
@@ -117,19 +117,17 @@ fn run_loop(grid: &Grid<Pipe>, start: UCoord) -> usize {
     loop {
         found_move = false;
         for direction in [Direction::N, Direction::E, Direction::S, Direction::W] {
-            if previous_direction != Some(direction.reverse()) {
-                if let Some((next_pipe, next_position)) = neighbour(grid, &position, direction) {
-                    if (position == start || pipe.has_exit(direction))
-                        && (next_position == start || next_pipe.has_exit(direction.reverse()))
-                    {
-                        found_move = true;
-                        position = next_position;
-                        pipe = next_pipe;
-                        previous_direction = Some(direction);
-                        move_count += 1;
-                        break;
-                    }
-                }
+            if previous_direction != Some(direction.reverse())
+                && let Some((next_pipe, next_position)) = neighbour(grid, &position, direction)
+                && (position == start || pipe.has_exit(direction))
+                && (next_position == start || next_pipe.has_exit(direction.reverse()))
+            {
+                found_move = true;
+                position = next_position;
+                pipe = next_pipe;
+                previous_direction = Some(direction);
+                move_count += 1;
+                break;
             }
         }
         assert!(found_move);

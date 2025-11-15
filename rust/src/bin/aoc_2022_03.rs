@@ -17,7 +17,7 @@ fn char_score(c: char) -> u32 {
 }
 
 fn backpack_score(s: &str) -> u32 {
-    assert!(s.len() % 2 == 0);
+    assert!(s.len().is_multiple_of(2));
     let half_length = s.len() / 2;
     let left: &HashSet<char> = &s[..half_length].chars().collect();
     let right: &HashSet<char> = &s[half_length..].chars().collect();
@@ -66,7 +66,7 @@ mod tests {
         assert_eq!(char_score('C'), 29);
     }
 
-    #[should_panic]
+    #[should_panic(expected = "XXX")]
     #[test]
     fn test_char_score_invalid() {
         char_score('5');

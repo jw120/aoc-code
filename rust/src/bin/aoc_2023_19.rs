@@ -144,7 +144,7 @@ fn run_part(part: &Part, workflows: &HashMap<String, Workflow>) -> Option<usize>
         match destination.unwrap_or(workflow.default.clone()) {
             Destination::Accept => return Some(part.x + part.m + part.a + part.s),
             Destination::Reject => return None,
-            Destination::Workflow(s) => workflow_name = s.to_string(),
+            Destination::Workflow(s) => workflow_name.clone_from(&s),
         }
     }
 }

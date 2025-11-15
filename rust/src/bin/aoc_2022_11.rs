@@ -1,9 +1,9 @@
 // Advent of Code, 2022 day 11
 
 use itertools::Itertools;
-use once_cell::sync::Lazy;
 use regex::Regex;
 use std::io;
+use std::sync::LazyLock;
 
 #[derive(Clone, Debug)]
 enum Operation {
@@ -55,17 +55,18 @@ struct Monkey {
 
 impl Monkey {
     fn parse(expected_index: usize, mut line_iter: impl Iterator<Item = String>) -> Monkey {
-        static INDEX_RE: Lazy<Regex> = Lazy::new(|| Regex::new(r"^Monkey (\d+):$").unwrap());
-        static ITEMS_RE: Lazy<Regex> =
-            Lazy::new(|| Regex::new(r"^\s+Starting items: (.+)$").unwrap());
-        static OP_RE: Lazy<Regex> =
-            Lazy::new(|| Regex::new(r"^\s+Operation: new = old (.+)$").unwrap());
-        static TRUE_RE: Lazy<Regex> =
-            Lazy::new(|| Regex::new(r"^\s+If true: throw to monkey (\d+)$").unwrap());
-        static FALSE_RE: Lazy<Regex> =
-            Lazy::new(|| Regex::new(r"^\s+If false: throw to monkey (\d+)$").unwrap());
-        static DIVISOR_RE: Lazy<Regex> =
-            Lazy::new(|| Regex::new(r"^\s+Test: divisible by (\d+)$").unwrap());
+        static INDEX_RE: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"^Monkey (\d+):$").unwrap());
+        static ITEMS_RE: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"^\s+Starting items: (.+)$").unwrap());
+        static OP_RE: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"^\s+Operation: new = old (.+)$").unwrap());
+        static TRUE_RE: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"^\s+If true: throw to monkey (\d+)$").unwrap());
+        static FALSE_RE: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"^\s+If false: throw to monkey (\d+)$").unwrap());
+        static DIVISOR_RE: LazyLock<Regex> =
+            LazyLock::new(|| Regex::new(r"^\s+Test: divisible by (\d+)$").unwrap());
 
         let index: usize = extract_num(&INDEX_RE, &line_iter.next().unwrap());
         assert_eq!(expected_index, index);
@@ -105,7 +106,7 @@ impl Monkey {
 }
 
 // Given a regex with one usize capture return the value
-fn extract_num(r: &Lazy<Regex>, line: &str) -> usize {
+fn extract_num(r: &LazyLock<Regex>, line: &str) -> usize {
     r.captures(line)
         .unwrap()
         .get(1)
@@ -128,7 +129,7 @@ fn step(monkeys: &mut [Monkey], steps: usize, mode: Option<usize>) {
                     Some(value) => new_item_raw % value,
                     None => new_item_raw / 3,
                 };
-                let dest: usize = if new_item % monkeys[m].divisor == 0 {
+                let dest: usize = if new_item.is_multiple_of(monkeys[m].divisor) {
                     monkeys[m].dest_true
                 } else {
                     monkeys[m].dest_false

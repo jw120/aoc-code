@@ -1,12 +1,29 @@
 [package]
 name = "aoc-rust"
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 grid = "0.13.0"
 itertools = "0.14.0"
-once_cell = "1.18.0"
-regex = "1.11.1"
+once_cell = "1.21.3"
+regex = "1.12.2"
+#anyhow = "1.0.100"
+#nom = "8.0.0"
+#tracing = "0.1.41"
+#tracing-subscriber = { version = "0.3.20", features = ["env-filter"] }
+
+[dev-dependencies]
+pretty_assertions = "1.4.1"
+#proptest = "1.8.0"
+
+[lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+
+[lints.rust]
+#missing_docs = "warn"
+
+[lints.rustdoc]
+unescaped_backticks = "warn"
+#missing_crate_level_docs = "warn"

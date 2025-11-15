@@ -74,10 +74,10 @@ const DIAGONALS: [(i32, i32); 4] = [(1, 1), (1, -1), (-1, -1), (-1, 1)];
 fn check_x_mas(puzzle: &Grid<char>, a: (usize, usize)) -> bool {
     let mut diagonals: Vec<char> = Vec::new();
     for d in DIAGONALS {
-        if let Some((c_row, c_col)) = apply_delta(a, d, puzzle.size()) {
-            if let Some(c_char) = puzzle.get(c_row, c_col) {
-                diagonals.push(*c_char);
-            }
+        if let Some((c_row, c_col)) = apply_delta(a, d, puzzle.size())
+            && let Some(c_char) = puzzle.get(c_row, c_col)
+        {
+            diagonals.push(*c_char);
         }
     }
     if diagonals.len() < 4 || diagonals[0] == diagonals[2] {

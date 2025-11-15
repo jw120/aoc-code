@@ -78,7 +78,7 @@ impl FileSystem {
                 self.insert(word2, DirItem::Folder(new_dir));
             } else {
                 self.insert(word2, DirItem::File(word1.parse().unwrap()));
-            };
+            }
         }
     }
 

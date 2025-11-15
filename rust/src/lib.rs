@@ -130,16 +130,8 @@ impl UCoord {
 
     #[must_use]
     pub fn manhattan(&self, other: &UCoord) -> usize {
-        let row_diff: usize = if self.row > other.row {
-            self.row - other.row
-        } else {
-            other.row - self.row
-        };
-        let col_diff: usize = if self.col > other.col {
-            self.col - other.col
-        } else {
-            other.col - self.col
-        };
+        let row_diff: usize = self.row.abs_diff(other.row);
+        let col_diff: usize = self.col.abs_diff(other.col);
         row_diff + col_diff
     }
 }
@@ -313,21 +305,9 @@ impl UCoord3 {
 
     #[must_use]
     pub fn manhattan(&self, other: &UCoord3) -> usize {
-        let x_diff: usize = if self.x > other.x {
-            self.x - other.x
-        } else {
-            other.x - self.x
-        };
-        let y_diff: usize = if self.y > other.y {
-            self.y - other.y
-        } else {
-            other.y - self.y
-        };
-        let z_diff: usize = if self.z > other.z {
-            self.z - other.z
-        } else {
-            other.z - self.z
-        };
+        let x_diff: usize = self.x.abs_diff(other.x);
+        let y_diff: usize = self.y.abs_diff(other.y);
+        let z_diff: usize = self.z.abs_diff(other.z);
         x_diff + y_diff + z_diff
     }
 }

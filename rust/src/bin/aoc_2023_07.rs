@@ -7,10 +7,10 @@ use std::collections::HashMap;
 type Card = u8; // 2.14 (11=J, Q=12, K=13, A=14)
 
 fn parse_card(c: char) -> Card {
-    if let Some(d) = c.to_digit(10) {
-        if d >= 2 {
-            return u8::try_from(d).unwrap();
-        }
+    if let Some(d) = c.to_digit(10)
+        && d >= 2
+    {
+        return u8::try_from(d).unwrap();
     }
     match c {
         'T' => 10,

@@ -1,8 +1,5 @@
 # Install notes
 
-* devbox and direnv provide rust
-* Cargo to install
-
 ## TODO for 2024
 
 Remove Coord from pre-2024

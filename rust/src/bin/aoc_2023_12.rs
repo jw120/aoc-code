@@ -39,12 +39,12 @@ where
     F: FnMut(&[bool]),
 {
     let mut xs: Vec<bool> = vec![false; length];
-    gen(&mut xs, n, 0, callback);
+    go_gen(&mut xs, n, 0, callback);
 }
 
 // Helper function for generate_bits
 // Based on style of https://en.wikipedia.org/wiki/Heap%27s_algorithm
-fn gen<F>(xs: &mut [bool], n: usize, k: usize, callback: &mut F)
+fn go_gen<F>(xs: &mut [bool], n: usize, k: usize, callback: &mut F)
 where
     F: FnMut(&[bool]),
 {
@@ -56,9 +56,9 @@ where
         return;
     }
     xs[k] = true;
-    gen(xs, n - 1, k + 1, callback);
+    go_gen(xs, n - 1, k + 1, callback);
     xs[k] = false;
-    gen(xs, n, k + 1, callback);
+    go_gen(xs, n, k + 1, callback);
 }
 
 // Count lengths of contiguous groups

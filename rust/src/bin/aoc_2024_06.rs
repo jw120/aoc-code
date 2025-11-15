@@ -82,15 +82,15 @@ fn walk_till_loop(grid: &Grid<bool>, extra: (usize, usize), start: (usize, usize
             return true;
         }
         visited.insert((position, direction));
-        if let Some(next_position) = apply(position, direction) {
-            if let Some(next_square) = grid.get(next_position.0, next_position.1) {
-                if *next_square || next_position == extra {
-                    direction = turn(direction);
-                } else {
-                    position = next_position;
-                }
-                continue;
+        if let Some(next_position) = apply(position, direction)
+            && let Some(next_square) = grid.get(next_position.0, next_position.1)
+        {
+            if *next_square || next_position == extra {
+                direction = turn(direction);
+            } else {
+                position = next_position;
             }
+            continue;
         }
         return false;
     }
