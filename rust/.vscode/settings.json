@@ -23,5 +23,6 @@
     "rust-analyzer.inlayHints.closureCaptureHints.enable": false,
     "rust-analyzer.inlayHints.closureReturnTypeHints.enable": "never",
     "rust-analyzer.inlayHints.parameterHints.enable": false,
-    "rust-analyzer.inlayHints.typeHints.enable": false
+    "rust-analyzer.inlayHints.typeHints.enable": false,
+    "editor.formatOnSave": true
 }

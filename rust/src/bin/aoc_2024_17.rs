@@ -2,12 +2,13 @@
 
 use std::io;
 
+use itertools::Itertools;
+
 struct Device {
     a: u64,
     b: u64,
     c: u64,
     ip: usize,
-    output: Vec<u8>,
     program: Vec<u8>,
 }
 
@@ -18,48 +19,60 @@ impl Device {
             b,
             c,
             ip: 0,
-            output: Vec::new(),
             program: Vec::from(program),
         }
     }
 
-    fn combo(&self, operand: u8) -> u64 {
+    fn reset(&mut self, a: u64) {
+        self.a = a;
+        self.b = 0;
+        self.c = 0;
+        self.ip = 0;
+    }
+
+    fn combo(&self, operand: u8) -> Option<u64> {
         match operand {
-            0..=3 => u64::from(operand),
-            4 => self.a,
-            5 => self.b,
-            6 => self.c,
-            7 => panic!("Combo operand 7 not expected"),
-            _ => panic!("Invalid 3-bit number for combo operand: {operand}"),
+            0..=3 => Some(u64::from(operand)),
+            4 => Some(self.a),
+            5 => Some(self.b),
+            6 => Some(self.c),
+            _ => None,
         }
     }
 
-    // Read and execute one instruction. Return true if finished
-    fn step(&mut self) -> bool {
-        println!("{}: a={} b={} c={}", self.ip, self.a, self.b, self.c);
-        let Some(opcode) = self.program.get(self.ip) else {
-            return true;
-        };
-        let Some(operand) = self.program.get(self.ip + 1) else {
-            panic!("No operand");
-        };
+    // Run until output or termination
+    fn run_to_output(&mut self) -> Option<u8> {
+        while self.ip < self.program.len() {
+            if let Some(output) = self.step() {
+                return Some(output);
+            }
+        }
+        None
+    }
+
+    // Read and execute one instruction. Return output if any
+    fn step(&mut self) -> Option<u8> {
+        // println!("{}: a={} b={} c={}", self.ip, self.a, self.b, self.c);
+        let opcode = self.program[self.ip];
+        let literal_operand = self.program[self.ip + 1];
+        let combo_operand = self.combo(literal_operand);
         self.ip += 2;
         match opcode {
-            0 => self.a >>= self.combo(*operand),
-            1 => self.b ^= u64::from(*operand),
-            2 => self.b = self.combo(*operand) & 7,
+            0 => self.a >>= combo_operand.unwrap(),
+            1 => self.b ^= u64::from(literal_operand),
+            2 => self.b = combo_operand.unwrap() & 7,
             3 => {
                 if self.a != 0 {
-                    self.ip = usize::from(*operand);
+                    self.ip = usize::from(literal_operand);
                 }
             }
             4 => self.b ^= self.c,
-            5 => self.output.push((self.combo(*operand) & 7) as u8),
-            6 => self.b = self.a >> self.combo(*operand),
-            7 => self.c = self.a >> self.combo(*operand),
+            5 => return Some((combo_operand.unwrap() & 7) as u8),
+            6 => self.b = self.a >> combo_operand.unwrap(),
+            7 => self.c = self.a >> combo_operand.unwrap(),
             _ => panic!("Invalid 3-bit number for opcode: {opcode}"),
         }
-        false
+        None
     }
 
     fn disassemble(&self) {
@@ -84,9 +97,9 @@ impl Device {
                 0 => format!("a <- a >> {combo}"),
                 1 => format!("b <- b ^ {operand}"),
                 2 => format!("b <- {combo} & 7"),
-                3 => format!("  jump {operand} if a != 0"),
+                3 => format!("jump {operand} if a != 0"),
                 4 => "b <- b ^ c".to_string(),
-                5 => format!("  output {combo} & 7"),
+                5 => format!("output {combo} & 7"),
                 6 => format!("b <- a >> {combo}"),
                 7 => format!("c <- a >> {combo}"),
                 _ => panic!("Bad opcode"),
@@ -96,11 +109,38 @@ impl Device {
     }
 }
 
-fn part_a(a: u64, b: u64, c: u64, program: &[u8]) -> String {
-    let mut device = Device::new(a, b, c, program);
-    device.disassemble();
-    while !device.step() {}
-    format!("{:?}", device.output)
+fn part_a(device: &mut Device) -> String {
+    let mut outputs: Vec<u8> = Vec::new();
+    while let Some(output) = device.run_to_output() {
+        outputs.push(output);
+    }
+    outputs.into_iter().join(",")
+}
+
+fn part_b(device: &mut Device) -> u64 {
+    let mut a: u64 = 0;
+    let program = device.program.clone();
+    'outer: loop {
+        if a.is_multiple_of(1_000_000_000) {
+            println!("{a} ");
+        }
+        device.reset(a);
+        for expected in &program {
+            match device.run_to_output() {
+                Some(actual) if actual == *expected => {
+                    // print!("{actual} ");
+                }
+                _wrong => {
+                    // println!("{wrong:?} X");
+                    // println!();
+                    a += 1;
+                    continue 'outer;
+                }
+            }
+        }
+        assert!(device.run_to_output().is_none());
+        return a;
+    }
 }
 
 fn read_reg(s: &str, x: Option<io::Result<String>>) -> u64 {
@@ -130,5 +170,9 @@ fn main() {
     iter.next();
     let program: Vec<u8> = read_prog(iter.next());
 
-    println!("{}", part_a(a, b, c, &program));
+    let mut device = Device::new(a, b, c, &program);
+    device.disassemble();
+
+    println!("{}", part_a(&mut device));
+    println!("{}", part_b(&mut device));
 }
