@@ -50,6 +50,17 @@ impl Device {
         None
     }
 
+    // Run until output or termination
+    fn run_to_end(&mut self) -> Vec<u8> {
+        let mut output: Vec<u8> = Vec::new();
+        while self.ip < self.program.len() {
+            if let Some(o) = self.step() {
+                output.push(o);
+            }
+        }
+        output
+    }
+
     // Read and execute one instruction. Return output if any
     fn step(&mut self) -> Option<u8> {
         // println!("{}: a={} b={} c={}", self.ip, self.a, self.b, self.c);
@@ -109,6 +120,33 @@ impl Device {
     }
 }
 
+fn to_3(mut x: u64) -> Vec<u8> {
+    let mut v: Vec<u8> = Vec::new();
+    while x > 0 {
+        v.push((x & 7) as u8);
+        x >>= 3;
+    }
+    v
+}
+
+// convert from series of 3-bit chunks with least significant first
+fn from_3(xs: &[u8]) -> u64 {
+    let mut z: u64 = 0;
+    for (i, x) in xs.iter().enumerate() {
+        z += u64::from(*x) << (3 * i);
+    }
+    z
+}
+
+// convert from series of 3-bit chunks with most significant first
+fn from_3_rev(xs: &[u8]) -> u64 {
+    let mut z: u64 = 0;
+    for (i, x) in xs.iter().rev().enumerate() {
+        z += u64::from(*x) << (3 * i);
+    }
+    z
+}
+
 fn part_a(device: &mut Device) -> String {
     let mut outputs: Vec<u8> = Vec::new();
     while let Some(output) = device.run_to_output() {
@@ -117,20 +155,33 @@ fn part_a(device: &mut Device) -> String {
     outputs.into_iter().join(",")
 }
 
-fn part_b(device: &mut Device) -> u64 {
-    let mut a: u64 = 0;
+fn part_b(device: &mut Device, start: u64) -> u64 {
+    let mut a: u64 = start;
     let program = device.program.clone();
+    let mut best_match_count: usize = 0;
     'outer: loop {
-        if a.is_multiple_of(1_000_000_000) {
-            println!("{a} ");
-        }
+        // if a.is_multiple_of(1_000_000_000) {
+        //     println!("{a} ");
+        // }
+        // print!("{a} {}", print3(a));
         device.reset(a);
+        let mut match_count: usize = 0;
         for expected in &program {
             match device.run_to_output() {
                 Some(actual) if actual == *expected => {
                     // print!("{actual} ");
+                    match_count += 1;
                 }
                 _wrong => {
+                    if match_count >= best_match_count {
+                        println!(
+                            "{a} {:?} {} {:?}",
+                            to_3(a),
+                            from_3(&to_3(a)),
+                            &program[..match_count]
+                        );
+                        best_match_count = match_count;
+                    }
                     // println!("{wrong:?} X");
                     // println!();
                     a += 1;
@@ -141,6 +192,29 @@ fn part_b(device: &mut Device) -> u64 {
         assert!(device.run_to_output().is_none());
         return a;
     }
+}
+
+fn part_b_rev(device: &mut Device) -> u64 {
+    let program = device.program.clone();
+    let n = program.len();
+    let mut answer: Vec<u8> = vec![0; n];
+    for i in 0..n {
+        println!("solving for 3-bit #i={i}");
+        'inner: for x in 0..=7 {
+            if i == 0 && x == 0 {
+                continue 'inner;
+            }
+            println!("trying {x}");
+            answer[i] = x;
+            device.reset(from_3_rev(&answer));
+            let output = device.run_to_end();
+            assert_eq!(output.len(), n);
+            if output[n - 1 - i..] == program[n - 1 - i..] {
+                break 'inner;
+            }
+        }
+    }
+    from_3_rev(&answer)
 }
 
 fn read_reg(s: &str, x: Option<io::Result<String>>) -> u64 {
@@ -174,5 +248,7 @@ fn main() {
     device.disassemble();
 
     println!("{}", part_a(&mut device));
-    println!("{}", part_b(&mut device));
+    let solution = part_b_rev(&mut device);
+    println!("{solution}");
+    println!("{}", part_b(&mut device, solution));
 }
