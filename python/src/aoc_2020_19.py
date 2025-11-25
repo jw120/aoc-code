@@ -92,7 +92,8 @@ class MessageValidator:
 
     def valid(self, s: str) -> bool:
         """Test validity."""
-        return not self.valid_remains(s, self.rules[0])
+        result = self.valid_remains(s, self.rules[0])
+        return result is not None and not result
 
     def valid_remains(self, s: str, r: Rule) -> str | None:
         """Return the remaining string if the rule matches."""

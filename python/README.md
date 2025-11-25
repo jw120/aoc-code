@@ -25,7 +25,6 @@ Wrap heapq?
 
 ## Tools note
 
-* Look at ty options
 * Check all old code works
 * Avoid ty: ignore for older code
 * Streamline `pyproject.toml`

@@ -26,7 +26,7 @@ completed: list[tuple[int, Iterable[int]]] = [
     (2020, range(1, 26)),
     (2021, [*list(range(1, 16)), 17, *list(range(19, 24)), 25]),
     (2022, range(1, 26)),
-    (2023, [*list(range(1, 10)), 11, *list(range(13, 17))]),
+    (2023, range(1, 4)),
     (2024, range(1, 2)),
 ]
 

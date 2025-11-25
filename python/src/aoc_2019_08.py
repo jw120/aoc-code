@@ -31,7 +31,7 @@ def part_one(i: Image) -> int:
             for col in range(i.cols):
                 p: str = i.pixel(layer, row, col)
                 layer_counts[layer][p] += 1
-    min_layer = min(layer_counts, key=itemgetter(0))
+    min_layer = min(layer_counts, key=itemgetter("0"))
     return min_layer["1"] * min_layer["2"]
 
 

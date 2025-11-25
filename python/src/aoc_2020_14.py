@@ -40,7 +40,7 @@ def parse_command(s: str) -> Command:
 def set_bit(x: int, n: int, *, val: bool) -> int:
     """Return a copy of x with the n'th bit set to val.
 
-    >>> [set_bit(5, 1, True), set_bit(5, 1, False), set_bit(5, 2, True), set_bit(5, 2, False)]
+    >>> [set_bit(5, 1, val=True), set_bit(5, 1, val=False), set_bit(5, 2, val=True), set_bit(5, 2, val=False)]
     [7, 5, 5, 1]
     """
     target_bit: int = 1 << n
