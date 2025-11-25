@@ -124,9 +124,8 @@ class State:
                     )
                     self.mapping[position] = Amphipod(room_size, Kind[char])
                 else:
-                    assert char in "#.\n " and char == template, (
-                        "Bad character: '" + char + template + "'"
-                    )
+                    assert char in "#.\n ", "Bad character: '" + char + template + "'"
+                    assert char == template, "Bad character: '" + char + template + "'"
             if room_size == 4:
                 self.mapping[Position(Kind.A, 1)] = Amphipod(room_size, Kind.D)
                 self.mapping[Position(Kind.B, 1)] = Amphipod(room_size, Kind.C)

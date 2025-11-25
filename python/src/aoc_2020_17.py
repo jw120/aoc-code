@@ -1,7 +1,10 @@
 """Advent of Code 2020 - Day 17."""
 
-from collections.abc import Iterable
 from sys import stdin
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 Coord3 = tuple[int, int, int]
 

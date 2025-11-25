@@ -1,8 +1,11 @@
 """Advent of Code 2022 - Day 10."""
 
-from collections.abc import Iterable
 from doctest import testmod
 from sys import stdin
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 def run(instructions: Iterable[str], sample_cycles: set[int]) -> tuple[int, str]:

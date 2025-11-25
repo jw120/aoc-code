@@ -138,7 +138,7 @@ def shortest(start: str, end: str, n: int, *, numeric: bool) -> str:
             current = key
         if shortest_candidate_route is None or len(candidate_route) < len(shortest_candidate_route):
             shortest_candidate_route = candidate_route
-            shortest_candidate = candidate
+            _shortest_candidate = candidate
     assert shortest_candidate_route is not None
     # print("  candidate", shortest_candidate)
     # print("route", shortest_candidate_route)

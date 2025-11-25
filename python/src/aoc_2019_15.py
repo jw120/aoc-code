@@ -27,7 +27,7 @@ def move(c: Coord, d: CompassDirection) -> Coord:
     assert_never(d)
 
 
-def closest(c: Coord, pts: Iterable[Coord]) -> Coord:
+def closest(c: Coord, pts: Iterable[Coord]) -> Coord:  # ty: ignore[invalid-return-type]
     """Return the closest points (or one of them if more than one)."""
     closest_so_far: tuple[int, Coord] | None = None
     for p in pts:

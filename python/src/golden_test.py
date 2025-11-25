@@ -5,12 +5,15 @@ solution does not exist, then we create the file
 """
 
 import argparse
-from collections.abc import Iterable
 from filecmp import cmp
 from pathlib import Path
 from subprocess import run
 from tempfile import NamedTemporaryFile
 from time import time
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 PYTHON_EXECUTABLE: str = "python"
 SOURCE_FILE_FORMAT: str = "src/aoc_{year}_{day:02}.py"

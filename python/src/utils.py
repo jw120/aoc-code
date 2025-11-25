@@ -1,12 +1,12 @@
 """Utility functions for Advent of Code."""
 
-from collections.abc import Iterable
-from typing import TypeVar
+from typing import TYPE_CHECKING
 
-T = TypeVar("T")
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
-def set_union(xs: Iterable[set[T]]) -> set[T]:
+def set_union[T](xs: Iterable[set[T]]) -> set[T]:
     """Combine sets by union.
 
     Provided as using set.union(*xs) does not type-check.
@@ -20,7 +20,7 @@ def set_union(xs: Iterable[set[T]]) -> set[T]:
     return x.union(*xs)
 
 
-def set_intersection(xs: Iterable[set[T]]) -> set[T]:
+def set_intersection[T](xs: Iterable[set[T]]) -> set[T]:
     """Combine sets by union.
 
     Provided as using set.intersection(*xs) does not type-check.

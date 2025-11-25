@@ -1,8 +1,11 @@
 """Advent of Code 2021 - Day 7."""
 
-from collections.abc import Callable
 from doctest import testmod
 from sys import stdin
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 test_data: list[int] = [16, 1, 2, 0, 4, 2, 7, 1, 2, 14]
 

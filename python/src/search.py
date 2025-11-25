@@ -1,8 +1,10 @@
 """Basic search functions."""
 
 from collections import deque
-from collections.abc import Callable
-from typing import TypeVar
+from typing import TYPE_CHECKING, TypeVar
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 S = TypeVar("S")
 

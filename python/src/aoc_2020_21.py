@@ -81,7 +81,7 @@ def part_two(foods: list[tuple[list[Ingredient], list[Allergen]]]) -> str:
                 matched_ingredients.append((ingredient, allergen))
                 # Remove the matched allergen and ingredient from the dictionary
                 del possible[allergen]
-                for a, _i_set in possible.items():
+                for a in possible:
                     possible[a] -= {ingredient}
                 break
     return ",".join([pair[0] for pair in sorted(matched_ingredients, key=itemgetter(1))])

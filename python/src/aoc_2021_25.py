@@ -50,9 +50,9 @@ class SeaFloor:
     def __init__(self, row_data: list[str]) -> None:
         assert len(row_data) > 0, "No row data to make SeaFloor"
         self._extent = Extent(len(row_data[0]), len(row_data))
-        assert all(
-            len(row) == self._extent.x for row in row_data
-        ), "Rows not equal length when making Seafloor"
+        assert all(len(row) == self._extent.x for row in row_data), (
+            "Rows not equal length when making Seafloor"
+        )
         self._a = np.empty((self._extent.x, self._extent.y), dtype=np.int_)
         self._moved: bool = False
         for y, row in enumerate(row_data):

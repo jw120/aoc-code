@@ -61,7 +61,7 @@ def build(terminal_output: list[str]) -> RootDir:
             case ["$", "cd", name]:
                 node = current_dir.contents[name]
                 if not isinstance(node, NonRootDir):
-                    raise ValueError(f"Can't cd to non-directory {line}")
+                    raise TypeError(f"Can't cd to non-directory {line}")
                 current_dir = node
             case ["$", "ls"]:
                 listing_mode = True

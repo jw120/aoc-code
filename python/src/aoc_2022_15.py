@@ -1,13 +1,15 @@
 """Advent of Code 2022 - Day 15."""
 
-from collections.abc import Iterable
 from doctest import testmod
 from itertools import combinations
 from re import fullmatch
 from sys import stdin
-from typing import Final, LiteralString
+from typing import TYPE_CHECKING, Final, LiteralString
 
 from coord import Coord, manhattan
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 class Zone:
@@ -83,7 +85,8 @@ class Zone:
                     x_plus_y_constraints.add(constraint_value)
                 else:
                     x_minus_y_constraints.add(constraint_value)
-        assert len(x_plus_y_constraints) > 0 and len(x_minus_y_constraints) > 0
+        assert len(x_plus_y_constraints) > 0
+        assert len(x_minus_y_constraints) > 0
         solutions: set[Coord] = set()
         for p_con in x_plus_y_constraints:
             for m_con in x_minus_y_constraints:
@@ -105,7 +108,8 @@ def get_constraint(s1: Coord, s2: Coord, r1: int, r2: int) -> tuple[bool, int]:
     Returns (True, z) for x+y=z and (False, z) for x-y=z.
     """
     # Ignore degenerate cases
-    assert s1.x != s2.x and s1.y != s2.y
+    assert s1.x != s2.x
+    assert s1.y != s2.y
     # Wlg, flip so s1.x is less than s2.x
     if s1.x > s2.x:
         s1, s2 = s2, s1

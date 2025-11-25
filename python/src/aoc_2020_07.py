@@ -98,9 +98,7 @@ def part_two(rules: list[Rule], target: str) -> int:
         return count_inside[bag]
 
     # Read the rules into a Dict
-    has_inside: dict[str, list[tuple[str, int]]] = {}
-    for outer, inners in rules:
-        has_inside[outer] = inners
+    has_inside: dict[str, list[tuple[str, int]]] = dict(rules)
 
     return bags_inside(target)
 

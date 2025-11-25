@@ -1,7 +1,10 @@
 """Advent of Code 2020 - Day 11."""
 
-from collections.abc import Callable, Iterable
 from sys import stdin
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Callable, Iterable
 
 
 class Grid:

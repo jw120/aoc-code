@@ -3,7 +3,6 @@
 from sys import stdin
 from typing import Literal
 
-
 type Gate = tuple[str, Literal["AND", "OR", "XOR"], str, str]
 
 
@@ -31,7 +30,7 @@ def parse(s: str) -> tuple[dict[str, bool], list[Gate]]:
         in1, op, in2, arrow, out = line.strip().split()
         assert op in {"AND", "OR", "XOR"}
         assert arrow == "->"
-        gates.append((in1, op, in2, out))
+        gates.append((in1, op, in2, out))  # ty: ignore[invalid-argument-type]
     return assignments, gates
 
 

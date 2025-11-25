@@ -1,11 +1,14 @@
 """Advent of Code 2023 - Day 3."""
 
-from collections.abc import Iterator
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
+from typing import TYPE_CHECKING
 
 from coord import Coord, Extent
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 @dataclass

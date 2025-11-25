@@ -125,7 +125,7 @@ class Volcano:
         >>> v.solve(26, 2)
         1707
         """
-        stack: deque[WalkState] = deque([])
+        stack: deque[WalkState] = deque()
 
         stack.append(
             WalkState(

@@ -1,14 +1,73 @@
-[tool.poetry]
+[project]
 name = "aoc-code-python"
 version = "0.1.0"
 description = "Python solutions for Advent of Code"
-authors = ["Joe Watson <jw120@users.noreply.github.com>"]
+authors = [{name = "Joe Watson", email="jw120@users.noreply.github.com>"}]
 license = "GPL"
 readme = "README.md"
+requires-python = ">= 3.14"
+dependencies = [
+    "numpy>=2.3.5",
+]
 
 [tool.ruff]
 line-length = 100
-target-version = "py313"
+
+[tool.ruff.lint]
+preview = true
+select = ["ALL"]
+ignore = [
+    #
+    # General
+    #
+    # don't warn about possibly insecure input to subprocess
+    "S404",
+    "S603",
+    # allow magic values
+    "PLR2004",
+    # allow assert and print statements
+    "S101",
+    "T201",
+    # allow weak random numbers
+    "S311",
+    #
+    # Documentation
+    #
+    # don't require Return or Yield sections in documentation strings
+    "DOC201",
+    "DOC402",
+    "DOC501",
+    "DOC502",
+    # allow commented-out code
+    "ERA001",
+    # don't require doc string for magic methods
+    "D105",
+    #
+    # Exceptions
+    #
+    # allow strings and f-strings in exceptions (even though it causes duplication in tracebacks )
+    "EM101",
+    "EM102",
+    # allow long-messages in exceptions
+    "TRY003",
+    #
+    # Formatting
+    #
+    # line-lengths
+    "E501",
+    # don't require docstring for __init__
+    "D107",
+    # don't disallow blank line after function docstring
+    "D202",
+    # one-blank-line-before-class (clashes with D211)
+    "D203",
+    # multi-line-summary-second-line (clashes with D212)
+    "D213",
+    # allow trailing commas
+    "COM812",
+    # don't require copyright notices
+    "CPY001",
+]
 
 [tool.ruff.lint.pylint]
 max-args = 8 # (Default is 5)
@@ -18,75 +77,9 @@ max-nested-blocks = 7 # (Default is 5)
 max-returns = 12 # (Default is 6)
 max-statements = 60 # (Default is 50)
 
-[tool.ruff.lint]
-preview = true
-select = [
-    # pycodestyle
-    "E",
-    "W",
-    # pyflakes
-    "F",
-    # pyupgrade
-    "UP",
-    # flake8-bugbear
-    "B",
-    # flake8-simplify
-    "SIM",
-    # isort
-    "I",
-    # pep8-naming
-    "N",
-    # pydocstyle
-    "D",
-    # flake8-annotations
-    "ANN",
-    # flake8-boolean-trap
-    "FBT",
-    # flake8-builtins
-    "A",
-    # flake8-comprehensions
-    "C4",
-    # flake8-future-annotations
-    "FA",
-    # flake8-logging
-    "LOG",
-    # flake8-pie
-    "PIE",
-    # flake8-quotes
-    "Q",
-    # flake8-return
-    "RET",
-    # flake8-self
-    "SLF",
-    # flake8-type-checking
-    "TCH",
-    # flake8-unused-arguments
-    "ARG",
-    # pylint
-    "PL",
-    # refurb
-    "FURB",
-    # use Path
-    "PTH",
-    # eradicate commented lines
-    "ERA",
-    # Ruff-specific rules
-    "RUF",
-]
-ignore = [
-    # line-lengths
-    "E501",
-    # don't disallow blank line after function docstring
-    "D202",
-    # one-blank-line-before-class (clashes with D211)
-    "D203",
-    # multi-line-summary-second-line (clashes with D212)
-    "D213",
-    # undocumented-public-init, -magic-method (not needed)
-    "D107",
-    "D105",
-    # magic-value-comparison
-    "PLR2004",
-    # whitespace-before-punctuation (clashes with format)
-    "E203",
-]
+[tool.ruff.lint.mccabe]
+max-complexity = 25
+
+[tool.ty.rules]
+division-by-zero = "error"
+unused-ignore-comment = "warn"

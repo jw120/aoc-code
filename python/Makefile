@@ -3,7 +3,7 @@
 
 PYTHON_SRC := src/
 
-all: check run
+all: update check run
 
 run: run_2020 run_2021 run_2022 run_2023
 
@@ -45,22 +45,25 @@ run_2024: \
 	python_2024_16                python_2024_18 python_2024_19 python_2024_20 \
 	               python_2024_22 python_2024_23
 
+update:
+	uv sync --upgrade
+
 check:
-	ruff format $(PYTHON_SRC)
-	ruff check $(PYTHON_SRC)
-	pyright $(PYTHON_SRC)
+	uvx ruff format $(PYTHON_SRC)
+	uvx ruff check $(PYTHON_SRC)
+	uvx ty check $(PYTHON_SRC)
 
 python-test:
-	python src/golden_test.py
+	uv run python src/golden_test.py
 
 python-test-fast:
-	python src/golden_test.py --fast
+	uv run python src/golden_test.py --fast
 
 OUT_DIR = out
 
 python_%: | $(OUT_DIR)
 	@/bin/echo -n "$@: "
-	@python src/aoc_$*.py < ../../aoc-data/input/$*.txt > $(OUT_DIR)/python_$*.txt
+	@uv run python src/aoc_$*.py < ../../aoc-data/input/$*.txt > $(OUT_DIR)/python_$*.txt
 	@diff $(OUT_DIR)/python_$*.txt ../../aoc-data/good/$*.txt && /bin/echo "OK"
 
 

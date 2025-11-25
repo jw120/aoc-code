@@ -37,7 +37,7 @@ class Computer:
         if opcode in {1, 3}:
             operand = operand_code
         else:
-            assert operand_code >= 0 and operand_code < 7, f"Bad combo operand code: {operand_code}"
+            assert 0 <= operand_code < 7, f"Bad combo operand code: {operand_code}"
             if operand_code <= 3:
                 operand = operand_code
             elif operand_code == 4:

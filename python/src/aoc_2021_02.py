@@ -41,7 +41,7 @@ def run2(cs: list[str]) -> int:
     >>> run2(["forward 5", "down 5", "forward 8", "up 3", "down 8", "forward 2"])
     900
     """
-    horiz, depth, _aim = reduce(apply2, [change(c) for c in cs], (0, 0, 0))
+    horiz, depth, _aim = reduce(apply2, [change(c) for c in cs], (0, 0, 0))  # ty: ignore[invalid-argument-type]
     return horiz * depth
 
 

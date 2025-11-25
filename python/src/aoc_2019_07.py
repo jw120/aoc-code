@@ -1,11 +1,13 @@
 """Advent of Code 2019 - Day 7."""
 
-from collections.abc import Iterator
 from doctest import testmod
 from sys import stdin
-from typing import TypeVar
+from typing import TYPE_CHECKING
 
 from int_code import Machine
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 PhaseSettings = list[int]
 
@@ -189,12 +191,13 @@ test_code_5: list[int] = [
 def run_machine(
     code: list[int], phase: int, input_val: int, *, print_instructions: bool = False
 ) -> int:
-    """Rune the machine."""
+    """Run the machine."""
     if print_instructions:
         print(f"Running machine with phase setting {phase} and input {input_val}")
     m: Machine = Machine(code, [phase, input_val])
     m.run(print_instructions=print_instructions)
-    assert len(m.output_vals) == 1
+    if len(m.output_vals) != 1:
+        raise ValueError("Bad number of output_vals")
     output_value = m.output_vals[0]
     if print_instructions:
         print(f"Output {output_value}")
@@ -248,10 +251,7 @@ def run_phase_settings_with_feedback(code: list[int], phase_settings: PhaseSetti
             machine_index = 0
 
 
-X = TypeVar("X")
-
-
-def permutations(xs: list[X]) -> Iterator[list[X]]:
+def permutations[X](xs: list[X]) -> Iterator[list[X]]:
     """Return all permutations of the list.
 
     >>> [p for p in permutations([1,2,3])]

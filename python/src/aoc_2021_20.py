@@ -23,9 +23,9 @@ class Image:
             self.lit_pixels: frozenset[Coord] = frozenset()
         else:
             assert len(lines) > 0, "No input lines for Image creation"
-            assert all(
-                len(line) == len(lines[0]) for line in lines[1:]
-            ), "Non-matching rows for Image creation"
+            assert all(len(line) == len(lines[0]) for line in lines[1:]), (
+                "Non-matching rows for Image creation"
+            )
             self.min_extent = Coord(0, 0)
             self.max_extent = Coord(len(lines), len(lines[0]))
             self.lit_pixels = frozenset(

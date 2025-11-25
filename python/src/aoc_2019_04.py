@@ -1,7 +1,10 @@
 """Advent of Code 2019 - Day 4."""
 
-from collections.abc import Callable
 from sys import stdin
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 def valid_one(a: int, b: int, c: int, d: int, e: int, f: int, low: int, high: int) -> bool:

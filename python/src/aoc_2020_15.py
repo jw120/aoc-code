@@ -1,9 +1,12 @@
 """Advent of Code 2020 - Day 15."""
 
-from collections.abc import Iterator
 from doctest import testmod
 from itertools import islice
 from sys import stdin
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 
 def run1(nums: list[int]) -> Iterator[int]:

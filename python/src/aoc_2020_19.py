@@ -1,10 +1,13 @@
 """Advent of Code 2020 - Day 19."""
 
 import re
-from collections.abc import Iterable
 from dataclasses import dataclass
 from doctest import testmod
 from sys import stdin
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 
 @dataclass(frozen=True)

@@ -1,9 +1,12 @@
 """Advent of Code 2021 - Day 8."""
 
 from collections import Counter
-from collections.abc import Iterator
 from doctest import testmod
 from sys import stdin
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 # spell-checker:disable
 

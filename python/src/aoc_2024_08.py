@@ -43,7 +43,7 @@ class Map:
     def antinodes(self) -> set[Coord]:
         """Return antinode locations."""
         locations: set[Coord] = set()
-        for _frequency, nodes in self.antenna.items():
+        for nodes in self.antenna.values():
             for n1, n2 in combinations(nodes, 2):
                 for a in (n1 - (n2 - n1), n2 + (n2 - n1)):
                     if a.in_bounds(self.extent):
@@ -53,7 +53,7 @@ class Map:
     def antinodes_b(self) -> set[Coord]:
         """Return antinode locations for part b."""
         locations: set[Coord] = set()
-        for _frequency, nodes in self.antenna.items():
+        for nodes in self.antenna.values():
             for n1, n2 in combinations(nodes, 2):
                 d = n2 - n1
                 d //= gcd(abs(d.x), abs(d.y))

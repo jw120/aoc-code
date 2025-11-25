@@ -161,9 +161,9 @@ class Cuboid:
 def merge_adjacents(cs: list[Cuboid]) -> None:
     """Simplify a list of disjoint cuboids by merging adjacent pairs."""
     for c, d in combinations(cs, 2):
-        assert c.disjoint(
-            d
-        ), f"Overlapping cuboids entering merge_adjacents: {c.as_tuple()} {d.as_tuple()}"
+        assert c.disjoint(d), (
+            f"Overlapping cuboids entering merge_adjacents: {c.as_tuple()} {d.as_tuple()}"
+        )
     made_change = True
     while made_change:
         made_change = False
@@ -179,9 +179,9 @@ def merge_adjacents(cs: list[Cuboid]) -> None:
             if made_change:
                 break
     for c, d in combinations(cs, 2):
-        assert c.disjoint(
-            d
-        ), f"Overlapping cuboids leaving merge_adjacents: {c.as_tuple()} {d.as_tuple()}"
+        assert c.disjoint(d), (
+            f"Overlapping cuboids leaving merge_adjacents: {c.as_tuple()} {d.as_tuple()}"
+        )
 
 
 def combine(cs: list[Cuboid], step: tuple[bool, Cuboid]) -> list[Cuboid]:

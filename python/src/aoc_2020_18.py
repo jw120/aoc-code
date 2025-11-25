@@ -41,10 +41,9 @@ def expression1(s: str) -> int:
                 len(stack) >= 3
                 and isinstance(stack[-3], int)
                 and isinstance(stack[-2], str)
-                and stack[-2] in "+*"
                 and isinstance(stack[-1], int)
             ):
-                stack[-3:] = [apply(stack[-2], int(stack[-3]), int(stack[-1]))]
+                stack[-3:] = [apply(stack[-2], int(stack[-3]), int(stack[-1]))]  # ty: ignore[invalid-argument-type]
             # Replace: ( val ) with val
             elif len(stack) >= 3 and stack[-3] == "(" and stack[-1] == ")":
                 stack[-3:] = [stack[-2]]

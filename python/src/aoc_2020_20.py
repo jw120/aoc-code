@@ -1,12 +1,14 @@
 """Advent of Code 2020 - Day 20."""
 
-from collections.abc import Iterable
 from copy import deepcopy
 from doctest import testmod
 from functools import reduce
 from operator import mul
 from sys import stdin
-from typing import NewType, TypeVar
+from typing import TYPE_CHECKING, NewType
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
 
 # Ids for tiles (as assigned in the problem)
 TileId = NewType("TileId", int)
@@ -68,10 +70,7 @@ def flip(e: EdgeValue) -> EdgeValue:
     return EdgeValue(int(format(e, "010b")[::-1], 2))
 
 
-T = TypeVar("T")
-
-
-def len_skip_none(
+def len_skip_none[T](
     xs: list[T | None],  # pyright: ignore [reportInvalidTypeVarUse]
 ) -> int:
     """Length of a list of optionals excluding the Nones.
@@ -82,7 +81,7 @@ def len_skip_none(
     return len([x for x in xs if x is not None])
 
 
-def append_cols(xs: list[list[T]], ys: list[list[T]]) -> list[list[T]]:
+def append_cols[T](xs: list[list[T]], ys: list[list[T]]) -> list[list[T]]:
     """Append columns to a 2-d array.
 
     >>> append_cols([[1, 2],[11, 12], [21, 22]], [[3, 4], [5, 6], [7, 8]])
@@ -97,7 +96,7 @@ def flip_matrix(xs: list[list[bool]]) -> None:
         x.reverse()
 
 
-def rotate_matrix(xs: list[list[T]]) -> list[list[T]]:
+def rotate_matrix[T](xs: list[list[T]]) -> list[list[T]]:
     """Return an matrix that is 90 degrees rotated anti-clockwise.
 
     >>> rotate_matrix([[1, 2, 3], [4, 5, 6], [7, 8, 9]])

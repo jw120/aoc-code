@@ -78,10 +78,11 @@ def run2(valid_values: list[ValidField], your: list[int], tickets: list[list[int
     # For each field see which positions are compatible
     field_fit: list[tuple[str, list[int]]] = []
     for field in valid_values:
-        valid_positions: list[int] = []
-        for position in range(len(tickets[0])):
-            if all(valid_value(field, ticket[position]) for ticket in valid_tickets):
-                valid_positions.append(position)
+        valid_positions: list[int] = [
+            position
+            for position in range(len(tickets[0]))
+            if all(valid_value(field, ticket[position]) for ticket in valid_tickets)
+        ]
 
         field_fit.append((field[0], valid_positions))
     # Allocate fields with only one possible position until all fields are allocated

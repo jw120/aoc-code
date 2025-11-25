@@ -99,5 +99,5 @@ if __name__ == "__main__":
     dots_str, folds_str = stdin.read().split("\n\n")
     input_dots = {read_dot(s) for s in dots_str.splitlines()}
     input_folds = [read_fold(s) for s in folds_str.splitlines()]
-    print(len(apply_folds(input_dots, input_folds[:1])))
-    print_dots(apply_folds(input_dots, input_folds))
+    print(len(apply_folds(input_dots, input_folds[:1])))  # ty: ignore[invalid-argument-type]
+    print_dots(apply_folds(input_dots, input_folds))  # ty: ignore[invalid-argument-type]

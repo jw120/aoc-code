@@ -1,10 +1,13 @@
 """Advent of Code 2024 - Day 18."""
 
-from collections.abc import Callable
 from sys import stdin
+from typing import TYPE_CHECKING
 
 from coord import Coord, Extent
 from search import bfs
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 
 class Memory:

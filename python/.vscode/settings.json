@@ -22,6 +22,7 @@
         "FURB",
         "getkey",
         "heapq",
+        "horiz",
         "humn",
         "isort",
         "lanternfish",
@@ -36,6 +37,7 @@
         "pydocstyle",
         "pyflakes",
         "pylint",
+        "pyproject",
         "pyright",
         "pyupgrade",
         "PZND",
@@ -45,5 +47,6 @@
         "wxyz"
     ],
     "ruff.nativeServer": true,
-    "ruff.configurationPreference": "filesystemFirst"
+    "ruff.configurationPreference": "filesystemFirst",
+    "python.languageServer": "None"
 }

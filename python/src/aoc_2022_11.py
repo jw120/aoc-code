@@ -1,6 +1,5 @@
 """Advent of Code 2022 - Day 11."""
 
-from collections.abc import Callable
 from dataclasses import dataclass
 from doctest import testmod
 from functools import reduce
@@ -8,6 +7,10 @@ from itertools import starmap
 from operator import mul
 from re import fullmatch
 from sys import stdin
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
 
 # ruff: noqa: E731 (allow use of lambdas instead of def)
 
