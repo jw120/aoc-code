@@ -1,5 +1,7 @@
 #lang racket
 
+;; Day 1 - Advent of Code 2018
+
 (define (read-input)
   (let ([lines (for/list ([line (in-lines)]) (string-split line))])
     (values
