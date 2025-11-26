@@ -1,7 +1,7 @@
 #lang racket
 
 ;; Day 5 - Advent of Code 2018
-       
+
 ;;-----------
 ;; Part a
 
@@ -25,7 +25,8 @@
       [(empty? xs) empty]
       [(empty? (rest xs)) xs]
       [else
-       (let ([x (first xs)] [y (first (rest xs))])
+       (let ([x (first xs)]
+             [y (first (rest xs))])
          (if (reactive x y)
              (react-pass-list (rest (rest xs)))
              (cons x (react-pass-list (rest xs)))))]))
@@ -35,10 +36,10 @@
 
 ;; Are the two characters reactive (both letters, same character, opposite case)
 (define (reactive x y)
-  (and
-   (and (char-alphabetic? x) (char-alphabetic? y)
-   (char-ci=? x y)
-   (xor (char-upper-case? x) (char-upper-case? y)))))
+  (and (and (char-alphabetic? x)
+            (char-alphabetic? y)
+            (char-ci=? x y)
+            (xor (char-upper-case? x) (char-upper-case? y)))))
 
 ;;-----------
 ;; Part b
@@ -60,13 +61,11 @@
 
 ;; Remove all instances (case-insensitive) from the string
 (define (remove-letter c s)
-  (list->string
-   (for/list ([x (in-string s)]
-         #:unless (char-ci=? x c)
-         )
-     x)))
- (module+ test
-   (check-equal? (remove-letter #\a "dabAcCaCBAcCcaDA") "dbcCCBcCcD"))
+  (list->string (for/list ([x (in-string s)]
+                           #:unless (char-ci=? x c))
+                  x)))
+(module+ test
+  (check-equal? (remove-letter #\a "dabAcCaCBAcCcaDA") "dbcCCBcCcD"))
 
 ;;-----------
 ;; Main

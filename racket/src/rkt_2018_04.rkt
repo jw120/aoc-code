@@ -24,13 +24,13 @@
 
 ;; Conversion from lines to events
 (define (line->event s)
-  (match (regexp-match (pregexp (string-append
-                                 "^\\[(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d) " ; year month day
-                                 "\\d\\d:(\\d\\d)\\] " ; hour minute (hour is not needed)
-                                 "(\\w+) #?(\\w+)")) s) ; first two words of text
+  (match (regexp-match
+          (pregexp (string-append "^\\[(\\d\\d\\d\\d)-(\\d\\d)-(\\d\\d) " ; year month day
+                                  "\\d\\d:(\\d\\d)\\] " ; hour minute (hour is not needed)
+                                  "(\\w+) #?(\\w+)"))
+          s) ; first two words of text
     [(list _matched y m d min w1 w2)
-     (let
-         ([ day (+ (* 10000 (string->number y)) (* 100 (string->number m))  (string->number d))])
+     (let ([day (+ (* 10000 (string->number y)) (* 100 (string->number m)) (string->number d))])
        (event day (string->number min) w1 w2))]
     [p (error "Parse failed " s p)]))
 (define (event day minute word1 word2)
@@ -49,15 +49,22 @@
 
 ;; Conversion from events to sleeping intervals
 (define (to-intervals events)
-  (struct acc (id asleep intervals)) ; id of current guard; time he fell asleep (or #f); list of complete intervals
-  (acc-intervals
-   (for/fold ([a (acc #f #f '())]) ([e events])
-    (cond
-      [(guard? e) (struct-copy acc a [id (guard-id e)])]
-      [(sleep? e) (struct-copy acc a [asleep (sleep-minute e)])]
-      [(wake? e)  (struct-copy acc a [intervals (cons (interval (acc-id a) (acc-asleep a) (wake-minute e)) (acc-intervals a))])]
-      [else (error "Fail in to-intervals cond" e a)]))))
-       
+  (struct acc
+          (id
+           asleep
+           intervals)) ; id of current guard; time he fell asleep (or #f); list of complete intervals
+  (acc-intervals (for/fold ([a (acc #f #f '())]) ([e events])
+                   (cond
+                     [(guard? e) (struct-copy acc a [id (guard-id e)])]
+                     [(sleep? e) (struct-copy acc a [asleep (sleep-minute e)])]
+                     [(wake? e)
+                      (struct-copy acc
+                                   a
+                                   [intervals
+                                    (cons (interval (acc-id a) (acc-asleep a) (wake-minute e))
+                                          (acc-intervals a))])]
+                     [else (error "Fail in to-intervals cond" e a)]))))
+
 ;;-----------
 ;; Part a
 
@@ -69,17 +76,22 @@
 (define (guard-with-most-time-asleep intervals)
   (define duration-hash
     (for/fold ([h (hash)]) ([i intervals])
-      (hash-update h (interval-id i) (lambda (d) (+ d (- (interval-end i) (interval-start i)))) (lambda () 0))))
+      (hash-update h
+                   (interval-id i)
+                   (lambda (d) (+ d (- (interval-end i) (interval-start i))))
+                   (lambda () 0))))
   (key-of-max-value duration-hash))
 
 (define (minute-asleep-the-most intervals)
-  (define h (make-hash (for/list ([n (in-range 0 60)]) (cons n 0))))
+  (define h
+    (make-hash (for/list ([n (in-range 0 60)])
+                 (cons n 0))))
   (for ([i intervals])
     (for ([x (in-range (interval-start i) (interval-end i))])
       (hash-update! h x (lambda (z) (+ z 1)))))
   (key-of-max-value h))
 
-;; Helper function to return the key which has the highest value in a hash (one of the keys if multiple) 
+;; Helper function to return the key which has the highest value in a hash (one of the keys if multiple)
 (define (key-of-max-value h)
   (define max-value (apply max (hash-values h)))
   (car (first (filter (lambda (p) (eq? (cdr p) max-value)) (hash->list h)))))
@@ -101,7 +113,9 @@
 ;; Main
 
 (module+ main
-  (define input-lines (for/list ([line (in-lines)]) line))
+  (define input-lines
+    (for/list ([line (in-lines)])
+      line))
   (define input-events (map line->event (sort input-lines string<?)))
   (define input-intervals (to-intervals input-events))
   (displayln (part-a input-intervals))

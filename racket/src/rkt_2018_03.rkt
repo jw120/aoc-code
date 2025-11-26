@@ -7,7 +7,7 @@
 
 (struct claim (id x y w h) #:transparent)
 
-(define (line->claim s) 
+(define (line->claim s)
   (match (regexp-match #px"^#(\\w+)\\s+@\\s+(\\d+),(\\d+):\\s+(\\d+)x(\\d+)$" s)
     [(list _ id x y w h)
      (claim id (string->number x) (string->number y) (string->number w) (string->number h))]
@@ -24,9 +24,8 @@
 (define (fold-to-grid claims)
   (foldl add-claim (make-hash) claims))
 (define (add-claim c grid)
-  (for*
-      ([x (in-range (claim-x c) (+ (claim-x c) (claim-w c)))]
-       [y (in-range (claim-y c) (+ (claim-y c) (claim-h c)))])
+  (for* ([x (in-range (claim-x c) (+ (claim-x c) (claim-w c)))]
+         [y (in-range (claim-y c) (+ (claim-y c) (claim-h c)))])
     (hash-update! grid (cons x y) (lambda (n) (+ n 1)) (lambda () 0)))
   grid)
 
@@ -37,13 +36,12 @@
 ;;-----------
 ;; Part b
 
-;; Return the claim that has no squares with overlaps 
+;; Return the claim that has no squares with overlaps
 (define (find-unoverlapped-claim claims grid)
   (define (unoverlapped? c)
-    (for*/and
-      ([x (in-range (claim-x c) (+ (claim-x c) (claim-w c)))]
-       [y (in-range (claim-y c) (+ (claim-y c) (claim-h c)))])
-    (eq? (hash-ref grid (cons x y)) 1)))
+    (for*/and ([x (in-range (claim-x c) (+ (claim-x c) (claim-w c)))]
+               [y (in-range (claim-y c) (+ (claim-y c) (claim-h c)))])
+      (eq? (hash-ref grid (cons x y)) 1)))
   (match (filter unoverlapped? claims)
     [(list single-claim) (claim-id single-claim)]
     [_ (error "Match failed in find-unoverlapped-claim")]))
@@ -52,7 +50,9 @@
 ;; Main
 
 (module+ main
-  (define input-lines (for/list ([line (in-lines)]) line))
+  (define input-lines
+    (for/list ([line (in-lines)])
+      line))
   (define input-claims (map line->claim input-lines))
   (define input-grid (fold-to-grid input-claims))
   (displayln (count-overlaps input-grid))
