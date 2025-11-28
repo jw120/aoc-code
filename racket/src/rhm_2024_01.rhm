@@ -1,0 +1,21 @@
+#lang rhombus
+
+fun part_a(xs, ys):
+    for values(sum = 0):
+        each:
+            x in xs.sort()
+            y in ys.sort()
+        sum + math.abs(x - y)
+
+
+fn part_b(xs, ys):
+    
+
+// (define (part-b x y)
+// (for/sum ([i x]) (* i (count (λ (x) (equal? i x)) y))))
+
+def lines = stdin.lines().to_list().map((_.split()))
+def a = lines.map((_.first.to_int()))
+def b = lines.map((_[1].to_int()))
+
+showln(part_a(a, b))
