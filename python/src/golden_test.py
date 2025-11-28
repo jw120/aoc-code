@@ -24,10 +24,10 @@ ELAPSED_MS_THRESHOLD: int = 500  # Show time taken if reaches this
 completed: list[tuple[int, Iterable[int]]] = [
     (2019, [*list(range(1, 12)), 13, 14, 15]),
     (2020, range(1, 26)),
-    (2021, [*list(range(1, 16)), 17, *list(range(19, 24)), 25]),
+    (2021, list(set(range(1, 26)) - {16, 18, 24})),
     (2022, range(1, 26)),
     (2023, range(1, 4)),
-    (2024, range(1, 2)),
+    (2024, list(set(range(1, 26)) - {21, 24})),
 ]
 
 # With >3s execution time
@@ -51,7 +51,8 @@ slow: set[tuple[int, int]] = {
     (2022, 19),  # minutes
     (2022, 20),  # 20s
     (2022, 23),  # 31s
-    (2022, 24),
+    (2022, 24),  # very slow and fails
+    (2024, 17),
 }
 
 

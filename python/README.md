@@ -1,6 +1,6 @@
 # Python Advent of Code
 
-2025/11 status - all working except 2022/24.
+2025/11 status - all completed problems working except 2022/24 and 2024/17
 
 2020 11: ok (10023 ms)
 2020 15: ok (20687 ms)
@@ -9,6 +9,7 @@
 2020 23: ok (14751 ms)
 2021 15: ok (17856 ms)
 2021 17: ok (21709 ms)
+2021 18 MISSING
 2021 19: ok (139978 ms)
 2021 20: ok (24857 ms)
 2021 22: ok (1717786 ms)
@@ -21,6 +22,12 @@
 2022 20: ok (17404 ms)
 2022 23: ok (20303 ms)
 2022 24: FAIL (63683015 ms)
+2024  6: ok (25924 ms)
+2024 17: NOT TERMINATING (>24 hours)
+2024 20: ok (15180 ms)
+2024 21: MISSING
+2024 22: ok (58007 ms)
+2024 24: MISSING
 
 
 ## 2024 Notes
