@@ -12,6 +12,7 @@
         "proptest",
         "rfind",
         "rustdoc",
+        "signum",
         "SWNE",
         "Topo",
         "ucoord",
