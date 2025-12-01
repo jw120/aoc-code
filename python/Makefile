@@ -45,6 +45,9 @@ run_2024: \
 	python_2024_16                python_2024_18 python_2024_19 python_2024_20 \
 	               python_2024_22 python_2024_23
 
+run_2025: \
+	python_2025_01
+
 update:
 	uv sync --upgrade
 

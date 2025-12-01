@@ -5,7 +5,7 @@
     },
     "python.analysis.typeCheckingMode": "strict",
     "editor.language.brackets": [
-    
+
     ],
     "cSpell.words": [
         "addstr",
@@ -27,6 +27,7 @@
         "isort",
         "lanternfish",
         "lastindex",
+        "mccabe",
         "napms",
         "NESW",
         "numpy",
