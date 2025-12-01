@@ -1,6 +1,6 @@
-// Advent of Code, 2023 day XX
+// Advent of Code, 2025 day XX
 
-use aoc_rust::stdin_lines;
+use std::io;
 
 fn main() {
     let xs: Vec<XX> = stdin_lines().map(|s| parse(s)).collect();

@@ -1,4 +1,4 @@
-// Advent of Code, 2023 day XX
+// Advent of Code, 2025 day 01
 
 use std::io;
 
@@ -14,47 +14,24 @@ fn parse_move(line: &str) -> i32 {
     }
 }
 
-fn run(moves: &[i32]) -> (usize, usize) {
+fn run(moves: &[i32]) -> (i32, i32) {
     let mut position: i32 = START_POSITION;
-    let mut zero_finishes: usize = 0;
-    let mut zero_passes: usize = 0;
-    for mm in moves {
-        let mut m: i32 = *mm;
-        let old_position = position;
-        while m != 0 {
-            if m >= DIAL_SIZE {
-                m -= DIAL_SIZE;
-                zero_passes += 1;
-            } else if m >= 0 {
-                position += m;
-                if position == DIAL_SIZE {
-                    zero_finishes += 1;
-                    position = 0;
-                }
-                if position > DIAL_SIZE {
-                    position -= DIAL_SIZE;
-                    zero_passes += 1;
-                }
-                m = 0;
-            } else if m <= -DIAL_SIZE {
-                m += DIAL_SIZE;
-                zero_passes += 1;
-            } else {
-                position += m;
-                if position == 0 {
-                    zero_finishes += 1;
-                    position = 0;
-                }
-                if position < 0 {
-                    position += DIAL_SIZE;
-                    zero_passes += usize::from(old_position != 0);
-                }
-                m = 0;
-            }
+    let mut zero_finishes: i32 = 0;
+    let mut zero_passes: i32 = 0;
+    for mv in moves {
+        zero_passes += (mv.abs()) / DIAL_SIZE;
+        let m: i32 = (mv.abs() % DIAL_SIZE) * mv.signum();
+        position += m;
+        if position % DIAL_SIZE == 0 {
+            zero_finishes += 1;
+            position = 0;
+        } else if position > DIAL_SIZE {
+            zero_passes += 1;
+            position -= DIAL_SIZE;
+        } else if position < 0 {
+            zero_passes += i32::from(position != m);
+            position += DIAL_SIZE;
         }
-        assert!(position >= 0);
-        assert!(position < DIAL_SIZE);
-        println!("{mm} {position} {zero_finishes} {zero_passes}");
     }
     (zero_finishes, zero_passes + zero_finishes)
 }

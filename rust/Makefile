@@ -1,4 +1,4 @@
-.PHONY: all build check run run_2022 run_2023 run_2024
+.PHONY: all build check run run_2022 run_2023 run_2024 run_2025
 
 all: check build run
 
@@ -19,13 +19,16 @@ run_2023: \
 	rust_2023_01 rust_2023_02 rust_2023_03 rust_2023_04 rust_2023_05 \
 	rust_2023_06 rust_2023_07 rust_2023_08 rust_2023_09              \
 	rust_2023_11              rust_2023_13 rust_2023_14 rust_2023_15 \
-	rust_2023_16 
+	rust_2023_16
 
 run_2024: \
 	rust_2024_01 rust_2024_02 rust_2024_03 rust_2024_04 rust_2024_05 \
 	rust_2024_06 rust_2024_07 rust_2024_08 rust_2024_09 rust_2024_10 \
 	rust_2024_11 \
 	             rust_2024_17
+
+run_2025: \
+	rust_2025_01
 
 OUT_DIR = out
 
