@@ -3,9 +3,12 @@
 use std::io;
 
 fn main() {
-    let xs: Vec<XX> = stdin_lines().map(|s| parse(s)).collect();
+    let moves: Vec<i32> = io::stdin()
+        .lines()
+        .map(|s| parse_move(&s.unwrap()))
+        .collect();
 
-    let part_a: usize = 0;
-
+    let (part_a, part_b) = run(&moves);
     println!("{part_a}");
+    println!("{part_b}");
 }
