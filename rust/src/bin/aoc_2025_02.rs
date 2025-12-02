@@ -10,7 +10,7 @@ fn parse_range(s: &str) -> (u64, u64) {
 
 /// Parse input into ranges
 fn parse_ranges(line: &str) -> Vec<(u64, u64)> {
-    line.split(',').map(parse_range).collect()
+    line.trim().split(',').map(parse_range).collect()
 }
 
 /// Count number of digits in an integer (return 0 for 0)
@@ -37,12 +37,26 @@ fn double_digits(x: u64) -> u64 {
 }
 
 /// Return the intersection of two ranges
-fn intersect((_p, _q): (u64, u64), (_r, _s): (u64, u64)) -> Option<(u64, u64)> {
-    todo!()
+fn intersect((p1, p2): (u64, u64), (q1, q2): (u64, u64)) -> Option<(u64, u64)> {
+    // Ensure first range has lower starting value
+    let (a1, a2, b1, b2) = if p1 <= q1 {
+        (p1, p2, q1, q2)
+    } else {
+        (q1, q2, p1, p2)
+    };
+    assert!(a1 <= a2 && b1 <= b2 && a1 <= b1);
+    if a2 >= b2 {
+        Some((b1, b2)) //  a1 b1 b2 a2
+    } else if a2 >= b1 {
+        Some((b1, a2)) // a1 b1 a2 b2
+    } else {
+        None // a1 a2 b1 b2
+    }
 }
 
 /// Return the sum of the invalid numbers in the given range
 fn sum_invalids((a, b): (u64, u64)) -> u64 {
+    println!("sum_invalids({a},{b})");
     let a_digits = count_digits(a);
     let b_digits = count_digits(b);
     // If range spans different numbers of digits, split it
@@ -59,6 +73,7 @@ fn sum_invalids((a, b): (u64, u64)) -> u64 {
     // of the range a1..=b1 and a2..=b2
     let (a1, a2) = digit_split(a);
     let (b1, b2) = digit_split(b);
+    println!("({a1},{b1}) ({a2},{b2})");
     match intersect((a1, b1), (a2, b2)) {
         None => 0,
         Some((i1, i2)) => (i1..=i2).map(double_digits).sum(),
@@ -121,7 +136,7 @@ mod tests {
         assert_eq!(intersect((1, 3), (4, 5)), None);
         assert_eq!(intersect((6, 8), (4, 5)), None);
         assert_eq!(intersect((1, 8), (4, 5)), Some((4, 5)));
-        assert_eq!(intersect((4, 6), (1, 8)), Some((4, 5)));
+        assert_eq!(intersect((4, 6), (1, 8)), Some((4, 6)));
         assert_eq!(intersect((1, 6), (5, 8)), Some((5, 6)));
         assert_eq!(intersect((5, 9), (2, 7)), Some((5, 7)));
         assert_eq!(intersect((1, 5), (5, 8)), Some((5, 5)));
