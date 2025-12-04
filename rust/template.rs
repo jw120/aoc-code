@@ -8,7 +8,5 @@ fn main() {
         .map(|s| parse_move(&s.unwrap()))
         .collect();
 
-    let (part_a, part_b) = run(&moves);
-    println!("{part_a}");
-    println!("{part_b}");
+    println!("{}", part_a(moves));
 }
