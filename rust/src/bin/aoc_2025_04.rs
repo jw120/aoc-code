@@ -31,13 +31,8 @@ fn _print_grid_accessible(grid: &Grid<bool>) {
     for r in 0..grid.rows() {
         for c in 0..grid.cols() {
             let ch = match neighbours(grid, r, c) {
-                Some(n) => {
-                    if n < 4 {
-                        'x'
-                    } else {
-                        '@'
-                    }
-                }
+                Some(n) if n < 4 => 'x',
+                Some(_) => '@',
                 None => '.',
             };
             print!("{ch}");
@@ -55,18 +50,13 @@ fn neighbours(grid: &Grid<bool>, r: usize, c: usize) -> Option<usize> {
     let c_lo = c.saturating_sub(1);
     let c_hi = cmp::min(c + 2, grid.cols());
     let mut count: usize = 0;
-    // println!("neighbours ({r}, {c})");
     for p in r_lo..r_hi {
         for q in c_lo..c_hi {
-            // print!("({p}, {q})");
             if (p, q) != (r, c) && grid[(p, q)] {
                 count += 1;
-                // print!("X");
             }
-            // println!();
         }
     }
-    // println!("({r},{c}) {count}");
     Some(count)
 }
 
@@ -77,11 +67,40 @@ fn part_a(grid: &Grid<bool>) -> usize {
         .count()
 }
 
+fn part_b(grid: &Grid<bool>) -> usize {
+    let mut current_grid: Grid<bool> = grid.clone();
+    let mut next_grid: Grid<bool> = Grid::new(grid.rows(), grid.cols());
+    let mut count: usize = 0;
+    loop {
+        let mut step_count: usize = 0;
+        for r in 0..current_grid.rows() {
+            for c in 0..current_grid.cols() {
+                next_grid[(r, c)] = match neighbours(&current_grid, r, c) {
+                    Some(n) if n < 4 => {
+                        step_count += 1;
+                        false
+                    }
+                    Some(_) => true,
+                    _ => false,
+                };
+            }
+        }
+        if step_count == 0 {
+            return count;
+        }
+        count += step_count;
+        for r in 0..current_grid.rows() {
+            for c in 0..current_grid.cols() {
+                current_grid[(r, c)] = next_grid[(r, c)];
+            }
+        }
+    }
+}
+
 fn main() {
     let lines: Vec<String> = io::stdin().lines().map(|s| s.unwrap()).collect();
     let grid = read_grid(&lines);
-    // print_grid(&grid);
 
     println!("{}", part_a(&grid));
-    //    print_grid_accessible(&grid);
+    println!("{}", part_b(&grid));
 }
