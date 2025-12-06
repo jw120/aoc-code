@@ -35,6 +35,25 @@ fn part_a(banks: &[Vec<u32>]) -> u32 {
     result
 }
 
+fn part_b(banks: &[Vec<u32>], num_digits: usize) -> u64 {
+    let mut total: u64 = 0;
+    for bank in banks {
+        let mut n: usize = num_digits; // number of digits left to find
+        let mut b: &[u32] = bank; // remaining digits to search
+        let mut result: u64 = 0; // accumulated digits taken
+        while n > 0 {
+            // If we have to take n digits, then we need at least one in
+            // the first N-(n-1) digits.
+            let (i, x) = first_max(&b[..=(b.len() - n)]).unwrap();
+            result = 10 * result + u64::from(x);
+            b = &b[i + 1..];
+            n -= 1;
+        }
+        total += result;
+    }
+    total
+}
+
 fn main() {
     let banks: Vec<Vec<u32>> = io::stdin()
         .lines()
@@ -42,4 +61,5 @@ fn main() {
         .collect();
 
     println!("{}", part_a(&banks));
+    println!("{}", part_b(&banks, 12));
 }
