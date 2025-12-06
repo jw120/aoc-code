@@ -49,40 +49,37 @@ fn part_b(number_strings: &[String], ops_string: &str) -> u64 {
     let mut grand_total: u64 = 0;
     let mut current_problem: Option<u64> = None; // running total for the current problem
     let mut current_op: Option<bool> = None; // the operator for the current problem
-    let mut current_number: Option<u64> = None; // number we are building
     // iterate horizontally across all the rows with a column index
     for i in 0..numbers[0].len() {
+        let mut number: Option<u64> = None; // number we are building for this column
         // iterate vertically over the rows, looking at the number at that column index
         for s in &numbers {
             // if we have a digit, combine it with the current_number
             if let Some(d) = s[i] {
-                current_number = match current_number {
+                number = match number {
                     None => Some(d),
                     Some(t) => Some(10 * t + d),
                 }
             }
         }
-        match (current_number, current_op, current_problem) {
+        match (number, current_op, current_problem) {
             // blank vertical column means we finished this problem
             (None, Some(_), Some(t)) => {
                 grand_total += t;
                 current_problem = None;
                 current_op = None;
-                current_number = None;
             }
             // first number in the problem
             (Some(n), None, None) => {
                 current_problem = Some(n);
                 current_op = ops[i];
                 assert!(current_op.is_some());
-                current_number = None;
             }
             // subsequent number in the problem
             (Some(n), Some(op), Some(t)) => {
                 current_problem = Some(if op { t * n } else { t + n });
-                current_number = None;
             }
-            _ => panic!("Bad state: {current_number:?} {current_op:?} {current_problem:?}"),
+            _ => panic!("Bad state: {number:?} {current_op:?} {current_problem:?}"),
         }
     }
     grand_total + current_problem.unwrap()

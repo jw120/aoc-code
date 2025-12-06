@@ -2,13 +2,13 @@
 
 all: check build run
 
-build:
-	cargo build --release --bins --quiet
-
 check:
 	cargo check --quiet
 
-run: run_2022 run_2023 run_2024
+build:
+	cargo build --release --bins --quiet
+
+run: run_2022 run_2023 run_2024 run_2025
 
 run_2022: \
 	rust_2022_01 rust_2022_02 rust_2022_03 rust_2022_04 rust_2022_05 \
@@ -28,7 +28,8 @@ run_2024: \
 	             rust_2024_17
 
 run_2025: \
-	rust_2025_01
+	rust_2025_01 rust_2025_02              rust_2025_04 rust_2025_05 \
+	rust_2025_06
 
 OUT_DIR = out
 
