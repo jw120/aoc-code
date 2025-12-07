@@ -45,37 +45,3 @@ if __name__ == "__main__":
     part_a, part_b = run(moves)
     print(part_a)
     print(part_b)
-
-
-# fn run(moves: &[i32]) -> (i32, i32) {
-#     let mut position: i32 = START_POSITION;
-#     let mut zero_finishes: i32 = 0;
-#     let mut zero_passes: i32 = 0;
-#     for mv in moves {
-#         zero_passes += (mv.abs()) / DIAL_SIZE;
-#         let m: i32 = (mv.abs() % DIAL_SIZE) * mv.signum();
-#         position += m;
-#         if position % DIAL_SIZE == 0 {
-#             zero_finishes += 1;
-#             position = 0;
-#         } else if position > DIAL_SIZE {
-#             zero_passes += 1;
-#             position -= DIAL_SIZE;
-#         } else if position < 0 {
-#             zero_passes += i32::from(position != m);
-#             position += DIAL_SIZE;
-#         }
-#     }
-#     (zero_finishes, zero_passes + zero_finishes)
-# }
-
-# fn main() {
-#     let moves: Vec<i32> = io::stdin()
-#         .lines()
-#         .map(|s| parse_move(&s.unwrap()))
-#         .collect();
-
-#     let (part_a, part_b) = run(&moves);
-#     println!("{part_a}");
-#     println!("{part_b}");
-# }
