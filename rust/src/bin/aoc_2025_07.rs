@@ -38,8 +38,30 @@ fn part_a(diagram: &[Vec<bool>], start: usize) -> u32 {
     split_count
 }
 
+fn part_b(diagram: &[Vec<bool>], start: usize) -> u64 {
+    let n: usize = diagram[0].len();
+    let mut beams: Vec<u64> = vec![0; n];
+    beams[start] = 1;
+
+    let mut new_beams: Vec<u64> = vec![0; n];
+    for row in &diagram[1..] {
+        for (i, n) in beams.iter().enumerate().filter(|(_, n)| **n > 0) {
+            if row[i] {
+                new_beams[i - 1] += n;
+                new_beams[i + 1] += n;
+            } else {
+                new_beams[i] += n;
+            }
+        }
+        beams.clone_from(&new_beams);
+        new_beams.fill(0);
+    }
+    beams.iter().sum()
+}
+
 fn main() {
     let (diagram, start) = read_input();
 
     println!("{}", part_a(&diagram, start));
+    println!("{}", part_b(&diagram, start));
 }
