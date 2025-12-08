@@ -29,7 +29,7 @@ run_2024: \
 
 run_2025: \
 	rust_2025_01 rust_2025_02 rust_2025_03 rust_2025_04 rust_2025_05 \
-	rust_2025_06
+	rust_2025_06 rust_2025_07 rust_2025_08
 
 OUT_DIR = out
 
