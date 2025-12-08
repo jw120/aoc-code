@@ -28,7 +28,9 @@ impl Point {
     }
 }
 
-fn part_a(junction_boxes: &[Point], connections: usize) -> usize {
+// Run until either given number of connections are made or until all
+// junction boxes in one circuit
+fn run(junction_boxes: &[Point], connections: Option<usize>) -> u64 {
     // Get the distances between each pair of points
     let mut distances: Vec<((usize, usize), u64)> = Vec::new();
     for (i, p) in junction_boxes.iter().enumerate() {
@@ -37,20 +39,19 @@ fn part_a(junction_boxes: &[Point], connections: usize) -> usize {
         }
     }
     distances.sort_by_key(|((_, _), d)| *d);
-    // for ((i, j), d) in &distances[..10] {
-    //     println!("{:?} {:?} {d:?}", junction_boxes[*i], junction_boxes[*j]);
-    // }
 
     // Assign to circuits
     let mut junction_circuits: Vec<Option<usize>> = Vec::with_capacity(junction_boxes.len());
     junction_circuits.resize(junction_boxes.len(), None);
-    let mut next_circuit: usize = 0;
-    for ((i, j), _) in &distances[..connections] {
+    let mut circuit_counts: Vec<usize> = Vec::new();
+    let mut new_count: usize = 0;
+    for (connection_count, ((i, j), _)) in distances.iter().enumerate() {
         match (junction_circuits[*i], junction_circuits[*j]) {
             (None, None) => {
-                junction_circuits[*i] = Some(next_circuit);
-                junction_circuits[*j] = Some(next_circuit);
-                next_circuit += 1;
+                junction_circuits[*i] = Some(circuit_counts.len());
+                junction_circuits[*j] = Some(circuit_counts.len());
+                circuit_counts.push(2);
+                new_count = 2;
             }
             (Some(m), Some(n)) if m == n => {}
             (Some(m), Some(n)) => {
@@ -59,24 +60,40 @@ fn part_a(junction_boxes: &[Point], connections: usize) -> usize {
                         junction_circuits[index] = Some(n);
                     }
                 }
+                circuit_counts[n] += circuit_counts[m];
+                circuit_counts[m] = 0;
+                new_count = circuit_counts[n];
             }
             (Some(m), None) => {
                 junction_circuits[*j] = Some(m);
+                circuit_counts[m] += 1;
+                new_count = circuit_counts[m];
             }
             (None, Some(m)) => {
                 junction_circuits[*i] = Some(m);
+                circuit_counts[m] += 1;
+                new_count = circuit_counts[m];
             }
+        }
+        // Part (a) end condition
+        if let Some(limit) = connections
+            && connection_count + 1 == limit
+        {
+            break;
+        }
+        // Part (b) end condition
+        if new_count == junction_boxes.len() {
+            return junction_boxes[*i].x * junction_boxes[*j].x;
         }
     }
 
-    // Count the number of boxes in each circuit
-    let mut counts: Vec<usize> = vec![0; next_circuit];
-    for circuit in junction_circuits.into_iter().flatten() {
-        counts[circuit] += 1;
-    }
-    counts.sort_unstable();
-
-    counts[counts.len() - 3..].iter().product()
+    circuit_counts.sort_unstable();
+    u64::try_from(
+        circuit_counts[circuit_counts.len() - 3..]
+            .iter()
+            .product::<usize>(),
+    )
+    .unwrap()
 }
 
 fn main() {
@@ -85,7 +102,9 @@ fn main() {
         .map(|s| Point::new(&s.unwrap()))
         .collect();
 
+    // For the example we run part (a) for 10 connections, for real input 1000
     let connections = if junction_boxes.len() == 20 { 10 } else { 1000 };
 
-    println!("{}", part_a(&junction_boxes, connections));
+    println!("{}", run(&junction_boxes, Some(connections)));
+    println!("{}", run(&junction_boxes, None));
 }
