@@ -8,6 +8,7 @@
         "direnv",
         "flipflop",
         "itertools",
+        "joltages",
         "peekable",
         "proptest",
         "rfind",
