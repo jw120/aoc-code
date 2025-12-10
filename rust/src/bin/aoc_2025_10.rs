@@ -1,5 +1,6 @@
 // Advent of Code, 2025 day XX
 
+use std::collections::{HashSet, VecDeque};
 use std::io;
 
 #[derive(Debug)]
@@ -48,8 +49,32 @@ fn parse_line(s: &str) -> Problem {
     }
 }
 
+// BFS for the target
 fn part_a(problems: &[Problem]) -> u32 {
-    todo!();
+    let mut total: u32 = 0;
+    'outer: for problem in problems {
+        let target = &problem.lights;
+        let mut visited: HashSet<Vec<bool>> = HashSet::new();
+        let mut queue: VecDeque<(u32, Vec<bool>)> = VecDeque::new();
+        queue.push_back((0, vec![false; target.len()]));
+        while let Some((n, v)) = queue.pop_front() {
+            if &v == target {
+                total += n;
+                continue 'outer;
+            }
+            for button in &problem.buttons {
+                let mut next = v.clone();
+                for i in button {
+                    next[*i] = !next[*i];
+                }
+                if !visited.contains(&next) {
+                    visited.insert(next.clone());
+                    queue.push_back((n + 1, next));
+                }
+            }
+        }
+    }
+    total
 }
 
 fn main() {
