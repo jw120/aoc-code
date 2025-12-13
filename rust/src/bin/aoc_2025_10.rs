@@ -77,6 +77,35 @@ fn part_a(problems: &[Problem]) -> u32 {
     total
 }
 
+fn part_b(problems: &[Problem]) -> u32 {
+    let mut total: u32 = 0;
+    'outer: for problem in problems {
+        println!("{problem:?}");
+        let target = &problem.joltages;
+        let mut visited: HashSet<Vec<u32>> = HashSet::new();
+        let mut queue: VecDeque<(u32, Vec<u32>)> = VecDeque::new();
+        queue.push_back((0, vec![0; target.len()]));
+        while let Some((n, v)) = queue.pop_front() {
+            // println!("({n},{v:?}) q={} v={}", queue.len(), visited.len());
+            if &v == target {
+                total += n;
+                continue 'outer;
+            }
+            for button in &problem.buttons {
+                let mut next = v.clone();
+                for i in button {
+                    next[*i] += 1;
+                }
+                if next.iter().zip(target).all(|(i, t)| i <= t) && !visited.contains(&next) {
+                    visited.insert(next.clone());
+                    queue.push_back((n + 1, next));
+                }
+            }
+        }
+    }
+    total
+}
+
 fn main() {
     let problems: Vec<Problem> = io::stdin()
         .lines()
@@ -84,4 +113,5 @@ fn main() {
         .collect();
 
     println!("{}", part_a(&problems));
+    println!("{}", part_b(&problems));
 }
