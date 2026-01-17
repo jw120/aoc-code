@@ -52,15 +52,15 @@ update:
 	uv sync --upgrade
 
 check:
-	uvx ruff format $(PYTHON_SRC)
-	uvx ruff check $(PYTHON_SRC)
-	uvx ty check $(PYTHON_SRC)
+	ruff format $(PYTHON_SRC)
+	ruff check $(PYTHON_SRC)
+	ty check $(PYTHON_SRC)
 
 python-test:
-	uv run python src/golden_test.py
+	uv run src/golden_test.py
 
 python-test-fast:
-	uv run python src/golden_test.py --fast
+	uv run src/golden_test.py --fast
 
 OUT_DIR = out
 
