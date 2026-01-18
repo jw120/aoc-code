@@ -44,4 +44,4 @@ if __name__ == "__main__":
     moves: list[int] = [parse_move(s) for s in stdin.readlines()]
     part_a, part_b = run(moves)
     print(part_a)
-      aprint(part_b)
+    print(part_b)
