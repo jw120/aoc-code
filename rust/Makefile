@@ -33,7 +33,8 @@ run_2025: \
 
 OUT_DIR = out
 
-rust_%: | $(OUT_DIR)
+rust_%:
+	@mkdir -p $(OUT_DIR)
 	@/bin/echo -n "$@: "
 	@cargo build --release --quiet --bin=aoc_$*
 	@/usr/bin/time -o $(OUT_DIR)/time_$*.txt -p cargo run --release --quiet --bin=aoc_$* < ../../aoc-data/input/$*.txt > $(OUT_DIR)/rust_$*.txt
